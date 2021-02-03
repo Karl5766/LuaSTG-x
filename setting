@@ -1,0 +1,111 @@
+{
+    "orientation": "portrait",
+    "touchkey": false,
+    "font": "",
+    "windowsize_h": 960,
+    "render_skip": 0,
+    "imgui_visible": false,
+    "bgmvolume": 100,
+    "controller_map": {
+        "keys": {
+            "right": [
+                11
+            ],
+            "left": [
+                13
+            ],
+            "slow": [
+                1
+            ],
+            "down": [
+                1,
+                true
+            ],
+            "up": [
+                1,
+                false
+            ],
+            "special": [
+                3
+            ],
+            "shoot": [
+                5,
+                true
+            ],
+            "spell": [
+                0
+            ]
+        },
+        "keysys": {
+            "repfast": [
+                1,
+                false
+            ],
+            "menu": [
+                2
+            ],
+            "repslow": [
+                1,
+                true
+            ],
+            "snapshot": [
+                7
+            ]
+        }
+    },
+    "resolution": "high",
+    "transparent": false,
+    "keysys": {
+        "repslow": 16,
+        "menu": 6,
+        "repfast": 14,
+        "snapshot": 21,
+        "retry": 141,
+        "toggle_collider": 54
+    },
+    "posteffect": true,
+    "keys": {
+        "right": 27,
+        "left": 26,
+        "slow": 12,
+        "up": 28,
+        "down": 29,
+        "spell": 147,
+        "shoot": 149,
+        "special": 126
+    },
+    "timezone": 8,
+    "windowsize_w": 1708,
+    "resx": 1708,
+    "resy": 960,
+    "vsync": false,
+    "allowsnapshot": true,
+    "xe": {
+        "frame_size": [
+            935,
+            643
+        ],
+        "code_editor_font_scale": 100,
+        "editor_tree_padding": 2,
+        "code_editor_theme": "Light",
+        "debug_sc_current_only": false,
+        "cheat": false,
+        "theme": "Light",
+        "editor_tree_indent": 21,
+        "auto_save": true,
+        "pack_to_engine_path": false
+    },
+    "mod_info": {
+        "isDirectory": true,
+        "name": "coding_test",
+        "fullPath": "C:\/Games\/luastg\/LuaSTG-x\/LuaSTG-x\/mod\/coding_test\/"
+    },
+    "res_ratio": [
+        16,
+        9
+    ],
+    "windowed": true,
+    "username": "User",
+    "sevolume": 100,
+    "mod": "coding_test"
+}

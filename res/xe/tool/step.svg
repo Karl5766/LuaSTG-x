@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg version="1.1" baseProfile="tiny"
+	 xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 200 200"
+	 xml:space="preserve">
+<path fill="#626A73" stroke="#626A73" stroke-width="5" stroke-miterlimit="10" d="M173,19.9c3.9,0,7,3.1,7,7v146.3c0,3.9-3.1,7-7,7
+	l0,0c-3.9,0-7-3.1-7-7l0,0V26.9C166,23,169.2,19.9,173,19.9z"/>
+<path fill="#2288E6" stroke="#2288E6" stroke-width="6" stroke-miterlimit="10" d="M153.3,100c0,3.9-3.1,7-7,7H27
+	c-3.9,0-7-3.2-6.9-7.1c0-3.8,3.1-6.9,6.9-6.9h119.4C150.2,93,153.3,96.1,153.3,100L153.3,100z"/>
+<path fill="#2288E6" stroke="#2288E6" stroke-width="6" stroke-miterlimit="10" d="M151.2,95c2.8,2.8,2.8,7.2,0,9.9l-52.6,52.6
+	c-2.8,2.8-7.2,2.8-9.9,0l0,0c-2.8-2.8-2.8-7.2,0-9.9l0,0l52.6-52.6C144,92.4,148.5,92.4,151.2,95L151.2,95L151.2,95z"/>
+<path fill="#2288E6" stroke="#2288E6" stroke-width="6" stroke-miterlimit="10" d="M151.2,105c-2.8,2.8-7.2,2.8-9.9,0L88.8,52.4
+	c-2.8-2.8-2.8-7.2,0-9.9l0,0c2.8-2.8,7.2-2.8,9.9,0l0,0l52.6,52.6C154,97.8,154,102.2,151.2,105z"/>
+</svg>

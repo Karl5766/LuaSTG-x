@@ -1,0 +1,1 @@
+start LuaSTG-x.exe "LAUNCH_XE=true"
