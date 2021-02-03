@@ -1,6 +1,5 @@
 # LuaSTG-x_BHElib
-This repository contains code from LuaSTG, and code that aims to refactor the THlib & core & Plus 
-parts of the engine. 
+This repository aims to rewrite the THlib & core & Plus parts of the engine. 
 
 The goal of this repo is to make the engine more flexible & easier to use.
 
