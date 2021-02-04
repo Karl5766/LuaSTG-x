@@ -19,7 +19,7 @@ local soundVolume = {
 }
 _G['soundVolume'] = soundVolume
 
-local _PlaySound = lstg.PlaySound
+local _PlaySound = PlaySound
 
 ---
 ---@param name string 音效资源名
@@ -155,7 +155,7 @@ function RenderTTF(ttfname, text, left, right, bottom, top, color, ...)
     _RenderTTF(ttfname, text, left, right, bottom, top, fmt, color, scale)
 end
 
-local _RenderText = lstg.RenderText
+local _RenderText = RenderText
 
 ---
 ---直接渲染文本

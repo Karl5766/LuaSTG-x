@@ -22,6 +22,19 @@ LAYER_ENEMY_BULLET    = -200
 LAYER_ENEMY_BULLET_EF = -100
 LAYER_TOP             = 0
 
+--资源类型(Resource Types)
+
+RES_TEXTURE = 1
+RES_SPRITE = 2
+RES_ANIMATION = 3
+RES_MUSIC = 4
+RES_SOUND = 5
+RES_PARTICAL = 6
+RES_FONT = 7
+RES_FX = 8
+RES_RENDER_TARGET = 9
+--Video = 10
+
 --常量
 
 ---π

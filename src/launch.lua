@@ -85,6 +85,7 @@ if plus.isMobile() then
         SystemLog(table.concat(args, '\t'))
     end
 else
+    -- define print/Print function
     _G['Print'] = function(...)
         local args = { ... }
         local narg = select('#', ...)
@@ -99,9 +100,7 @@ else
 end
 print = Print
 
---if plus.isDesktop() then
 require('imgui.__init__')
---end
 
 local setting_util = require('setting_util')
 local str = Serialize(default_setting)

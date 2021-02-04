@@ -1,25 +1,17 @@
---
+------------------------------------------------------------------------------------
+--- respool.lua
+--- Defines two resource pools "global" and "stage", as well as some funcions for
+--- getting the pool references and checking if resources exist in a pool.
+---
+--- Karl, 2021.2.3, removed some code and added comments
+------------------------------------------------------------------------------------
 
-local ResourceType = {
-    Texture      = 1,
-    Sprite       = 2,
-    Animation    = 3,
-    Music        = 4,
-    SoundEffect  = 5,
-    Particle     = 6,
-    Font         = 7,
-    FX           = 8,
-    RenderTarget = 9,
-    --Video        = 10
-}
+
 local ENUM_RES_TYPE = { tex = 1, img = 2, ani = 3, bgm = 4, snd = 5, psi = 6, fnt = 7, ttf = 7, fx = 8, rt = 9 }
 _G['ENUM_RES_TYPE'] = ENUM_RES_TYPE
 ---@return cc.Map[]
 local function _create_pool()
     local ret = {}
-    --for k, v in pairs(ENUM_RES_TYPE) do
-    --    ret[v] = require('cc.Map')()
-    --end
     for i = 1, 9 do
         ret[i] = require('cc.Map')()
     end
@@ -27,8 +19,10 @@ local function _create_pool()
 end
 local LRES = lstg.ResourceMgr:getInstance()
 
+--- Convert a string representing the resource type to a number.
+--- If the input is already a number, the function will directly return it back.
 ---@return number a number denoting the resource type
-local function _toResType(v)
+local function ResTypeStrToInt(v)
     if type(v) == 'string' then
         return ENUM_RES_TYPE[v]
     elseif type(v) == 'number' then
@@ -56,11 +50,14 @@ local pools = {
 local _global = pools.global
 local _stage = pools.stage
 local _cur
+
+---
+---
 ---@return cc.Map
 local function _getMap(resType)
     local cur_pool = pools[_cur]
     assert(cur_pool, i18n "current resource pool not set")
-    return cur_pool[assert(_toResType(resType), string.format('invalid resuorce type %q', resType))]
+    return cur_pool[assert(ResTypeStrToInt(resType), string.format('invalid resuorce type %q', resType))]
 end
 local _log = false
 
@@ -121,7 +118,9 @@ lstg.SetResourceStatus = SetResourceStatus
 ---
 ---@~chinese 若资源仍在使用之中，使用结束后才会被释放。
 ---
----@~english Clear a resources pool if `resType` and `name` are omitted, otherwise remove a specific resource from a pool. `poolType` can be "global" or "stage".
+---@~english If `resType` and `name` are omitted, clear a resource pool;
+---
+---@~english otherwise remove a specific resource from a pool. `poolType` can be "global" or "stage".
 ---
 ---@~english If a resource is in use, it will not be released until all usages are end.
 ---
@@ -136,7 +135,7 @@ function RemoveResource(poolType, resType, name)
             v:clear()
         end
     else
-        resType = _toResType(resType)
+        resType = ResTypeStrToInt(resType)
         assert(resType,
                "invalid argument #2 for 'RemoveResource'")
         assert(name, "invalid argument #3 for 'RemoveResource'")
@@ -158,7 +157,7 @@ lstg.RemoveResource = RemoveResource
 ---@param resType string 资源类型 tex,img,ani,bgm,snd,psi,fnt,ttf,fx
 ---@param name string 资源名
 function CheckRes(resType, name)
-    resType = _toResType(resType)
+    resType = ResTypeStrToInt(resType)
     assert(resType,
            "invalid argument #1 for 'CheckRes'")
     if pools.global[resType]:at(name) then
@@ -177,13 +176,13 @@ lstg.CheckRes = CheckRes
 ---@param resType string 资源类型: tex,img,ani,bgm,snd,psi,fnt,ttf,fx
 ---@return table,table 包含资源名的table，分别属于全局和关卡资源池
 function EnumRes(resType)
-    return pools.global[_toResType(resType)]:keys(), pools.stage[_toResType(resType)]:keys()
+    return pools.global[ResTypeStrToInt(resType)]:keys(), pools.stage[ResTypeStrToInt(resType)]:keys()
 end
 lstg.EnumRes = EnumRes
 
 ---@~chinese 获取纹理的宽度和高度
 ---
----@~english Returns width and height of a texture resource.
+---@~english Returns width and height of a texture.
 ---
 ---@param name string
 ---@return number,number
@@ -276,7 +275,6 @@ function LoadImage(name, tex_name, x, y, w, h, a, b, colliType)
     map:insert(name, res)
     return res
 end
-lstg.LoadImage = LoadImage
 
 ---@~chinese 设置图像状态，可选一个颜色参数用于设置所有顶点或者给出4个颜色设置所有顶点。
 ---
@@ -323,7 +321,6 @@ function SetImageState(name, blendMode, color1, color2, color3, color4)
         sp:setColor(color1)
     end
 end
-lstg.SetImageState = SetImageState
 
 ---@~chinese 设置图像中心相对于图像左上角的坐标。
 ---
@@ -340,7 +337,6 @@ function SetImageCenter(name, x, y)
     local sz = sp:getSprite():getContentSize()
     sp:getSprite():setAnchorPoint(cc.p(x / sz.width, 1 - y / sz.height))
 end
-lstg.SetImageCenter = SetImageCenter
 
 ---
 --- 复制已载入的图像资源
@@ -402,7 +398,6 @@ function LoadAnimation(name, tex_name, x, y, w, h, nCol, nRow, interval, a, b, c
     map:insert(name, res)
     return res
 end
-lstg.LoadAnimation = LoadAnimation
 
 ---@~chinese 类似于`SetImageState`。
 ---
@@ -423,7 +418,6 @@ function SetAnimationState(name, blendMode, color1, color2, color3, color4)
         ani:setColor(color1)
     end
 end
-lstg.SetAnimationState = SetAnimationState
 
 ---@~chinese 类似于`SetImageCenter`。
 ---
@@ -441,7 +435,6 @@ function SetAnimationCenter(name, x, y)
         s:setAnchorPoint(cc.p(x / sz.width, 1 - y / sz.height))
     end
 end
-lstg.SetAnimationCenter = SetAnimationCenter
 
 local function _LoadRes(type, name, path, loadTask, async, callback)
     local map = _getMap(type)
@@ -498,7 +491,6 @@ end
 function LoadPS(name, path, img_name, a, b, colliType)
     return _LoadPS(name, path, img_name, a, b, colliType, false)
 end
-lstg.LoadPS = LoadPS
 
 function LoadPSAsync(name, path, img_name, a, b, colliType, callback)
     return _LoadPS(name, path, img_name, a, b, colliType, true, callback)
@@ -524,7 +516,6 @@ end
 function LoadFont(name, path)
     return _LoadFont(name, path, false)
 end
-lstg.LoadFont = LoadFont
 
 function LoadFontAsync(name, path, callback)
     return _LoadFont(name, path, true, callback)
@@ -549,7 +540,6 @@ function SetFontState(name, blendMode, color)
         font:setColor(color)
     end
 end
-lstg.SetFontState = SetFontState
 
 local function _LoadTTF(name, path, size, async, callback)
     path = string.path_uniform(path)
@@ -572,7 +562,6 @@ end
 function LoadTTF(name, path, size)
     return _LoadTTF(name, path, size, false)
 end
-lstg.LoadTTF = LoadTTF
 
 function LoadTTFAsync(name, path, size, callback)
     return _LoadTTF(name, path, size, true, callback)
@@ -610,7 +599,6 @@ end
 function LoadSound(name, path)
     return _LoadSound(name, path, false)
 end
-lstg.LoadSound = LoadSound
 
 function LoadSoundAsync(name, path, callback)
     return _LoadSound(name, path, true, callback)
@@ -651,7 +639,6 @@ end
 function LoadMusic(name, path, loop_end, loop_duration)
     return _LoadMusic(name, path, loop_end, loop_duration, false)
 end
-lstg.LoadMusic = LoadMusic
 
 function LoadMusicAsync(name, path, loop_end, loop_duration, callback)
     return _LoadMusic(name, path, loop_end, loop_duration, true, callback)
@@ -693,7 +680,6 @@ function LoadFX(name, fShader, vShader, isString)
     map:insert(name, res)
     return res
 end
-lstg.LoadFX = LoadFX
 
 ---@~chinese 创建一个渲染目标。
 ---
@@ -712,7 +698,6 @@ function CreateRenderTarget(name)
     map:insert(name, res)
     return res
 end
-lstg.CreateRenderTarget = CreateRenderTarget
 
 ---@~chinese 检查渲染目标是否存在。
 ---
@@ -726,7 +711,6 @@ function IsRenderTarget(name)
         return false
     end
 end
-lstg.IsRenderTarget = IsRenderTarget
 
 ------------------------------------------------------------
 -- graph api
@@ -761,7 +745,6 @@ end
 function PushRenderTarget(name)
     assert(FindResRenderTarget(name):push())
 end
-lstg.PushRenderTarget = PushRenderTarget
 
 ---@~chinese 将当前使用的渲染目标出栈。
 ---
@@ -771,7 +754,6 @@ lstg.PushRenderTarget = PushRenderTarget
 function PopRenderTarget(name)
     assert(FindResRenderTarget(name):pop())
 end
-lstg.PopRenderTarget = PopRenderTarget
 
 ---@~chinese 应用后处理并将结果渲染到屏幕。`param`中的值将传递给着色器。
 ---
@@ -798,7 +780,6 @@ function PostEffect(rt, fx_name, blend, param)
     _setResFX(fx_name, param or {})
     assert(FindResRenderTarget(rt):render(fx_name, blend))
 end
-lstg.PostEffect = PostEffect
 
 local _temp_rt = '::temp_rt::'
 
@@ -833,7 +814,6 @@ function PostEffectApply(fx_name, blend, param)
     _temp:pop()
     _temp:render(fx_name, blend)
 end
-lstg.PostEffectApply = PostEffectApply
 
 --- 设置shader中的uniform变量
 ---@param fx string
@@ -854,14 +834,13 @@ lstg.SetImageScale = SetImageScale
 function GetImageScale()
     return GetGlobalImageScale()
 end
-lstg.GetImageScale = GetImageScale
 
 ------------------------------------------------------------
 -- text api
 ------------------------------------------------------------
 
 --TODO: method on ResFont?
-local _RenderText = lstg.RenderText
+local _RenderText = RenderText
 
 ---@~chinese 渲染纹理字体资源。受全局图像缩放系数影响。
 ---
@@ -888,7 +867,6 @@ local _RenderText = lstg.RenderText
 function RenderText(name, text, x, y, scale, align)
     return _RenderText(FindResFont(name), text, x, y, scale, align)
 end
-lstg.RenderText = RenderText
 
 local _RenderTTF = lstg.RenderTTF
 
@@ -912,7 +890,6 @@ local _RenderTTF = lstg.RenderTTF
 function RenderTTF(name, text, left, right, bottom, top, fmt, color, scale)
     return _RenderTTF(FindResFont(name), text, left, right, bottom, top, fmt, color, scale)
 end
-lstg.RenderTTF = RenderTTF
 
 ---
 --- 计算文字渲染后的尺寸
@@ -950,7 +927,6 @@ function SetSEVolume(arg1, arg2)
         FindResSound(arg1):getSource():setVolume(arg2)
     end
 end
-lstg.SetSEVolume = SetSEVolume
 
 local _bgm_factor = 1
 
@@ -973,7 +949,6 @@ function SetBGMVolume(arg1, arg2)
         FindResMusic(arg1):getSource():setVolume(arg2)
     end
 end
-lstg.SetBGMVolume = SetBGMVolume
 
 ---@~chinese 播放音效资源。重复播放会打断之前的播放。
 ---
@@ -985,7 +960,6 @@ lstg.SetBGMVolume = SetBGMVolume
 function PlaySound(name, vol, pan)
     FindResSound(name):play(vol * _se_factor, pan or 0)
 end
-lstg.PlaySound = PlaySound
 
 ---@~chinese 停止播放音效资源。
 ---
@@ -995,7 +969,6 @@ lstg.PlaySound = PlaySound
 function StopSound(name)
     FindResSound(name):stop()
 end
-lstg.StopSound = StopSound
 
 ---@~chinese 暂停播放音效
 ---
@@ -1005,7 +978,6 @@ lstg.StopSound = StopSound
 function PauseSound(name)
     FindResSound(name):pause()
 end
-lstg.PauseSound = PauseSound
 
 ---@~chinese 恢复播放音效
 ---
@@ -1015,7 +987,6 @@ lstg.PauseSound = PauseSound
 function ResumeSound(name)
     FindResSound(name):resume()
 end
-lstg.ResumeSound = ResumeSound
 
 ---@~chinese 获取音效播放状态。返回"paused"/"playing"/"stopped"。
 ---
@@ -1033,7 +1004,6 @@ function GetSoundState(name)
         return 'paused'
     end
 end
-lstg.GetSoundState = GetSoundState
 
 ---@~chinese 播放音乐资源。
 ---
@@ -1051,7 +1021,6 @@ function PlayMusic(name, vol, position)
         res:getSource():setTime(position)
     end
 end
-lstg.PlayMusic = PlayMusic
 
 ---@~chinese 停止播放音乐资源。将复位播放位置。
 ---
@@ -1160,7 +1129,7 @@ function Render4V(name, x1, y1, z1, x2, y2, z2, x3, y3, z3, x4, y4, z4)
 end
 lstg.Render4V = Render4V
 
-local _RenderTexture = lstg.RenderTexture
+local _RenderTexture = RenderTexture
 
 ---@~chinese 渲染纹理资源。
 ---
@@ -1193,7 +1162,6 @@ local _RenderTexture = lstg.RenderTexture
 function RenderTexture(name, blend, vertex1, vertex2, vertex3, vertex4)
     _RenderTexture(FindResTexture(name) or FindResRenderTarget(name), blend, vertex1, vertex2, vertex3, vertex4)
 end
-lstg.RenderTexture = RenderTexture
 
 local _RenderSector = lstg.RenderSector
 
@@ -1306,14 +1274,14 @@ local function _FindResource(name, resType)
     return ret
 end
 
----FindResource
+---get a resource from the resource pool by its name and resource type.
 ---@param name string
 ---@param resType number|string
 ---@return lstg.Resource
 function FindResource(name, resType)
     local ret = name
     if type(name) == 'string' then
-        ret = _FindResource(name, _toResType(resType))
+        ret = _FindResource(name, ResTypeStrToInt(resType))
     end
     return ret
 end
@@ -1376,15 +1344,6 @@ function FindResRenderTarget(name)
     return _FindResource(name, 9)
 end
 
---[[
----FindResVideo
----param name string
----return lstg.ResVideo
---function FindResVideo(name)
---    return FindResource(name, ResourceType.Video)
---end
-]]
-
 ---@param name string
 ---@return cc.Texture2D
 function FindTexture2D(name)
@@ -1404,7 +1363,11 @@ local FindResParticle = FindResParticle
 local FindResFont = FindResFont
 local FindResTexture = FindResTexture
 
---- used by engine
+--- used by engine.
+---
+--- Look for a resource in sprite, animation, particle, font or texture with the given name.
+---@param name string name of the resource
+---@return lstg.Resource
 function FindResForObject(name)
     local res = FindResSprite(name)
     if not res then

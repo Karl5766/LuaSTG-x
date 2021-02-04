@@ -1,52 +1,30 @@
-[INFO] [APP] === Application start at: 01:56:28 ===
+[INFO] [APP] === Application start at: 20:36:38 ===
 [INFO] [APP] Build date: Dec 18 2020
 [INFO] [APP] CPU name: Intel(R) Core(TM) i7-6700HQ CPU @ 2.60GHz
-[INFO] [APP] Memory: 2793MB / 8052MB
+[INFO] [APP] Memory: 2596MB / 8052MB
 [INFO] [APP] OS name: Microsoft Windows 10 家庭版
 [INFO] [APP] Lua VM version: LuaJIT 2.1.0-beta3
 [INFO] [APP] ThreadPool size: 3 (core count: 8)
 [INFO] [AppFrame::applicationDidFinishLaunching] 
-    execute C:/Games/luastg/LuaSTG-x/LuaSTG-x/src/main.lua
+    execute C:/Games/luastg/LuaSTG-x/LuaSTG-x_BHElib/src/main.lua
 [LOG] Backend device: Intel(R) HD Graphics 530
 [LOG] Backend version: 4.5.0 - Build 23.20.16.4973
 [LOG] === Search Path ===
 {
-    "C:/Games/luastg/LuaSTG-x/LuaSTG-x/"
-    "C:/Games/luastg/LuaSTG-x/LuaSTG-x/src/"
-    "C:/Games/luastg/LuaSTG-x/LuaSTG-x/res/"
+    "C:/Games/luastg/LuaSTG-x/LuaSTG-x_BHElib/"
+    "C:/Games/luastg/LuaSTG-x/LuaSTG-x_BHElib/src/"
+    "C:/Games/luastg/LuaSTG-x/LuaSTG-x_BHElib/res/"
 }
 [LOG] start main
 [INFO] [APP] initializing GameObjectPool (32768)
 [INFO] [APP] initialized successfully
 [INFO] [XRenderer::setVsync] set vsync off
 [LOG] change video mode to: (1708, 960), Windowed, VSync Off
-[LOG] 加载 nil 于本地路径 "C:/Games/luastg/LuaSTG-x/LuaSTG-x/data/"
-[LOG] 加载 nil 于本地路径 "C:/Games/luastg/LuaSTG-x/LuaSTG-x/data_assets/"
+[LOG] 加载 nil 于本地路径 "C:/Games/luastg/LuaSTG-x/LuaSTG-x_BHElib/data/"
 [LOG] start app
-[LOG] enum MODs in "C:/Games/luastg/LuaSTG-x/LuaSTG-x/mod/"
+[LOG] enum MODs in "C:/Games/luastg/LuaSTG-x/LuaSTG-x_BHElib/mod/"
+[LOG] 路径 "C:/Games/luastg/LuaSTG-x/LuaSTG-x_BHElib/mod/" 不存在
 [LOG] change video mode to: (1708, 960), Windowed, VSync Off
-[LOG] view params:
-{
-    ["ui_vp"] = "0.0, 1708.0, 0.0, 960.0",
-    ["ui_or"] = "-107.0, 747.0, -0.0, 480.0",
-    ["screen_scale"] = 2,
-    ["world_or"] = "-192.0, 192.0, -224.0, 224.0",
-    ["world_vp"] = "470.0, 1238.0, 32.0, 928.0",
-}
-[LOG] DesignRes = 1708, 960
-[LOG] FrameSize = 1708, 960
-[LOG] Scale     = 1.000, 1.000
-[LOG] ui scale = 2.000, screen.scale = 2.000
-[LOG] 从本地路径加载MOD "coding_test"
-[LOG] enum plugins in "C:/Games/luastg/LuaSTG-x/LuaSTG-x/plugin/"
-[ERRO] [APP] failed to compile [C:/Games/luastg/LuaSTG-x/LuaSTG-x/mod/coding_test/root.lua]:
-[string "core/include.lua"]:19: 找不到脚本: THlib.lua
-[LOG] [string "core/include.lua"]:33: failed to compile [C:/Games/luastg/LuaSTG-x/LuaSTG-x/mod/coding_test/root.lua]:
-[string "core/include.lua"]:19: 找不到脚本: THlib.lua
-stack traceback:
-	[string "core/include.lua"]:33: in function 'Include'
-	[string "core/loading.lua"]:79: in function 'loadMod'
-	[string ".\platform/launcher_ui.lua"]:118: in function <[string ".\platform/launcher_ui.lua"]:114>
 [INFO] [APP] clear GameObjectPool
 [INFO] [APP] clear all resources
 [INFO] [APP] unload all packs

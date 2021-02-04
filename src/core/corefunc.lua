@@ -1,16 +1,9 @@
-local forward = require('forward')
-forward.forward('LoadFont')
-forward.forward('SetResourceStatus')
-
 local profiler = profiler
 local e = lstg.eventDispatcher
 
 function BeforeRender()
     lstg.forceSetViewMode('ui')
-    --TODO: fix this
-    for k, _ in pairs(forward.Fonts) do
-        RenderText(k, ' ', 0, 0)
-    end
+
     e:dispatchEvent('onBeforeRender')
 end
 
@@ -139,12 +132,6 @@ function UserSystemOperation()
         end
     end
 end
-
---local jit = require('jit')
---local ffi = ffi or require('ffi')
---local ptr_t = ffi.typeof('uint32_t*')
---local ObjOnFrame = ObjOnFrame
---local ii = 0
 
 function _DoFrame()
     --SetTitle(setting.mod .. ' | FPS=' .. GetFPS() .. ' | Nobj=' .. GetnObj())

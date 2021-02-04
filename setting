@@ -17,23 +17,23 @@
             "slow": [
                 1
             ],
-            "down": [
-                1,
-                true
-            ],
             "up": [
                 1,
                 false
             ],
-            "special": [
-                3
+            "down": [
+                1,
+                true
+            ],
+            "spell": [
+                0
             ],
             "shoot": [
                 5,
                 true
             ],
-            "spell": [
-                0
+            "special": [
+                3
             ]
         },
         "keysys": {
@@ -68,11 +68,11 @@
         "right": 27,
         "left": 26,
         "slow": 12,
-        "up": 28,
         "down": 29,
-        "spell": 147,
+        "up": 28,
+        "special": 126,
         "shoot": 149,
-        "special": 126
+        "spell": 147
     },
     "timezone": 8,
     "windowsize_w": 1708,
@@ -88,12 +88,12 @@
         "code_editor_font_scale": 100,
         "editor_tree_padding": 2,
         "code_editor_theme": "Light",
-        "debug_sc_current_only": false,
+        "pack_to_engine_path": false,
         "cheat": false,
         "theme": "Light",
         "editor_tree_indent": 21,
         "auto_save": true,
-        "pack_to_engine_path": false
+        "debug_sc_current_only": false
     },
     "mod_info": {
         "isDirectory": true,
