@@ -10,10 +10,8 @@ local launcher_scene
 local lc
 
 local getChildrenWithName = require('cc.children_helper').getChildrenWithName
---local getChildrenGraph = require('cc.children_helper').getChildrenGraph
 local createItem = require('cc.selectable_item').create
 local game_content = require('game.content')
-local game_score = require('game.score')
 
 local _btns = {
     'game',
@@ -114,7 +112,7 @@ local function setList(mode)
         local spells = game_content.enumSpells()
         for i, v in ipairs(spells) do
             local item = createListItem()
-            local score = game_score.getSpellHistory(nil, v.index)
+            local score = {-1, -1}  -- TODO: replace with actual spell history numbers
             local str = string.format('No.%d %s %d/%d', v.index, v.name, score[1], score[2])
             item.index = v.index
             item.info = v
@@ -133,7 +131,6 @@ local function setList(mode)
             local item = createListItem(
                     cc.Label:createWithSystemFont('button', 'Consolas', 24)
             )
-            --local score = game_score.getStageHighscore()
             local str = string.format(
                     'No.%02d %s\n%s %s %s %s %s',
                     v.index, v.user_str, v.date_str, v.time_str, v.player_str, v.rank_str, v.stage_str
@@ -148,21 +145,6 @@ local function setList(mode)
             item.btn:addTouchEventListener(sel_callback)
             _list_scv:addChild(item)
         end
-        --elseif mode == 'replay_stage' then
-        --local replays = game_content.enumReplays()
-        --for i, v in ipairs(replays) do
-        --    local item = createListItem()
-        --    --local score = game_score.getStageHighscore()
-        --    local str = string.format('')
-        --    item.index = v.index
-        --    item.replay = v
-        --    item.lb:setString(str)
-        --    item.callback_sel = function(self)
-        --        game_content.setReplay(self.replay, 1)
-        --    end
-        --    item.btn:addTouchEventListener(sel_callback)
-        --    _list_scv:addChild(item)
-        --end
     else
         error('internal error')
     end

@@ -19,9 +19,6 @@ function M:ctor(init_val, onConfirm, onCancel)
         self:_onCircleTouch(...)
     end)
     self.cir_w = cir_w
-    --cir_w:addClickEventListener(function()
-    --    Print('click')
-    --end)
 
     local cir = cc.Sprite:create(path .. 'hsv_circle.png')
     cir:addTo(cir_w):setScale(0.5):setPosition(cc.p(128, 128))

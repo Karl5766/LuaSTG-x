@@ -50,6 +50,7 @@ local contents = {
     'input',
     'others',
 }
+---Set every item invisible
 local function hideContents()
     if not lc then
         return
@@ -65,7 +66,6 @@ local function unsel_btns()
 end
 
 local getChildrenWithName = require('cc.children_helper').getChildrenWithName
---local getChildrenGraph = require('cc.children_helper').getChildrenGraph
 local createItem = require('cc.selectable_item').create
 
 local function createModItem()
@@ -400,6 +400,7 @@ local function setOthers(lc)
     setting.res_ratio = setting.res_ratio
 end
 
+---Initialize launcher ui at local variables launcher_reader, launcher scene and lc if they are not already initialized.
 local function CreateLauncherUI()
     if launcher_reader then
         return
@@ -414,6 +415,7 @@ local function CreateLauncherUI()
     unsel_btns()
 
     local sel_color = cc.c3b(128, 128, 64)
+    -- When clicking on the first five options
     for _, v in ipairs(contents) do
         local btn = lc['btn_' .. v]
         btn:addClickEventListener(function()
@@ -426,6 +428,7 @@ local function CreateLauncherUI()
         end)
     end
 
+    -- When clicking on the exit option (last option)
     lc.btn_exit:addClickEventListener(function()
         hideContents()
         if GameExit then
@@ -475,56 +478,10 @@ local function CreateLauncherUI()
         imgui.hide()
     end
 
-    --local ui_layer = cc.Layer:create()
-    --ui_layer:setAnchorPoint(0, 0)
-    --launcher_scene:addChild(ui_layer)
-    --require('platform.controller_ui')(ui_layer)
-
-    --[[
-    local sp = video.Player:create('[Touhou 3D] Subterranean Stars.mp4')
-    sp:addTo(launcher_scene)
-    local sz = sp:getContentSize()
-    sp:setPosition(sz.width / 2, sz.height / 2)
-    sp:vplay()
-    ]]
-
-    --lc._warning:setVisible(false)
-
-    --local p = cc.ParticleSystemQuad:create('particle_texture.plist')
-    --if not p then
-    --    error("can't load")
-    --end
-    --p:setPosition(cc.p(800,100))
-    --launcher_scene:addChild(p)
-
-    --local sp = require('qrcode.helper').sprite('https://github.com/Xrysnow/LuaSTG-x', 1)
-    --sp:addTo(launcher_scene):setPosition(800, 500):setScale(20)
-
     launcher_scene.update = function(self, dt)
         for i, v in pairs(scene_tasks) do
             v()
         end
-
-        --local last = controllerHelper.getLast()
-        --local str = 'nil'
-        --if last then
-        --    str = string.format('id: %d, key: %d', last.id, last.key)
-        --end
-        --inf_label:setString(str)
-
-        --if 0 < ts and ts < 0.5 then
-        --    model:setParameterValue(param.EyeLOpen,1,1)
-        --    model:setParameterValue(param.EyeROpen,0,1)
-        --    Print('set param')
-        --end
-        --[[
-        local pminfo = ''
-        for i, v in ipairs(pmname) do
-            local val = model:getParameterValue(v)
-            pminfo = string.format('%s\n%s: %.2f', pminfo, v:sub(6, -1), val)
-        end
-        _lb:setString(pminfo)
-        ]]
     end
     launcher_scene:scheduleUpdateWithPriorityLua(function(dt)
         launcher_scene:update(dt)

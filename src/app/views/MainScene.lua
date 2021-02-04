@@ -9,22 +9,24 @@ end
 local skip_setting
 local skip_selection
 
+---Set skip_setting and skip_selection attributes of main scene object.
+---@param skip_set boolean whether to skip setting
+---@param skip_set boolean whether to skip mod selection
 function MainScene.setSkip(skip_set, skip_sel)
     skip_setting, skip_selection = skip_set, skip_sel
 end
 
+---Start the one of the two launcher ui or start the game,
+---depending on the value of local skip_setting and skip_selection
 function MainScene:onEnter()
     if not skip_setting then
+        -- launcher 1
         local ok, ret = pcall(require, 'main_scene')
         if not ok then
-            if not LAUNCH_XE then
-                require('platform.launcher_ui')()
-                --require('platform.launcher')():showWithScene()
-            else
-                require('xe.main')():showWithScene()
-            end
+            require('platform.launcher_ui')()
         end
     elseif not skip_selection then
+        -- launcher 2
         local scene = require('app.views.GameScene'):create(nil, setting.mod)
         lstg.loadMod()
         if lstg._exlauncher then
@@ -34,6 +36,7 @@ function MainScene:onEnter()
             require('platform.launcher2_ui')()
         end
     else
+        -- in game
         lstg.loadMod()
         local game_content = require('game.content')
         game_content.setRank(1)

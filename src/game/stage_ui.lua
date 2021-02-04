@@ -3,7 +3,7 @@
 ---
 --- Copyright (C) 2018-2020 Xrysnow. All rights reserved.
 ---
-
+ui = ui or {}
 
 function ui.DrawScore()
     SetFontState('score3', '', Color(0xFFADADAD))
@@ -48,9 +48,6 @@ function ui.DrawScore()
     yy = 326
     Render('hint.Cnumber', xx + 80, yy, 0, 0.85, 0.85)
     Render('hint.Cnumber', xx + 80, yy - 48, 0, 0.85, 0.85)
-
-    --RenderText('score','HiScore\nScore\nPlayer\nSpell\nGraze',432,424,0.5,'left')
-    --xx=xx+77
 
     SetFontState('score3', '', Color(0xFFADADAD))
     RenderScore('score3', max(lstg.tmpvar.hiscore or 0, lstg.var.score), 636, 420, 0.43, 'right')

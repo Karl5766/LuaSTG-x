@@ -97,8 +97,8 @@
     },
     "mod_info": {
         "isDirectory": true,
-        "name": "coding_test",
-        "fullPath": "C:\/Games\/luastg\/LuaSTG-x\/LuaSTG-x\/mod\/coding_test\/"
+        "name": "test",
+        "fullPath": "C:\/Games\/luastg\/LuaSTG-x\/LuaSTG-x_BHElib\/mod\/test\/"
     },
     "res_ratio": [
         16,
@@ -107,5 +107,5 @@
     "windowed": true,
     "username": "User",
     "sevolume": 100,
-    "mod": "coding_test"
+    "mod": "test"
 }

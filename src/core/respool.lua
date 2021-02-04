@@ -2,6 +2,7 @@
 --- respool.lua
 --- Defines two resource pools "global" and "stage", as well as some funcions for
 --- getting the pool references and checking if resources exist in a pool.
+--- Defines resource load and use functions.
 ---
 --- Karl, 2021.2.3, removed some code and added comments
 ------------------------------------------------------------------------------------
@@ -1030,7 +1031,6 @@ end
 function StopMusic(name)
     FindResMusic(name):stop()
 end
-lstg.StopMusic = StopMusic
 
 ---@~chinese 暂停播放音乐资源。
 ---
@@ -1040,7 +1040,6 @@ lstg.StopMusic = StopMusic
 function PauseMusic(name)
     FindResMusic(name):pause()
 end
-lstg.PauseMusic = PauseMusic
 
 ---@~chinese 恢复播放音乐资源。
 ---
@@ -1050,7 +1049,6 @@ lstg.PauseMusic = PauseMusic
 function ResumeMusic(name)
     FindResMusic(name):resume()
 end
-lstg.ResumeMusic = ResumeMusic
 
 ---@~chinese 获取音乐资源播放状态。返回"paused"/"playing"/"stopped"。
 ---
@@ -1068,7 +1066,6 @@ function GetMusicState(name)
         return 'paused'
     end
 end
-lstg.GetMusicState = GetMusicState
 
 ------------------------------------------------------------
 -- render api
@@ -1091,7 +1088,6 @@ function Render(name, x, y, rot, hscale, vscale, z)
     local factor = GetImageScale()
     FindResSprite(name):render(x, y, rot or 0, hscale * factor, vscale * factor, z or 0.5)
 end
-lstg.Render = Render
 
 ---@~chinese 在一个矩形范围渲染图像资源。此时z为`0.5`。
 ---
@@ -1105,7 +1101,6 @@ lstg.Render = Render
 function RenderRect(name, left, right, bottom, top)
     FindResSprite(name):renderRect(left, top, right, bottom)
 end
-lstg.RenderRect = RenderRect
 
 ---@~chinese 给出四个顶点渲染图像资源。
 ---
@@ -1127,7 +1122,6 @@ lstg.RenderRect = RenderRect
 function Render4V(name, x1, y1, z1, x2, y2, z2, x3, y3, z3, x4, y4, z4)
     FindResSprite(name):render4v(x1, y1, z1, x2, y2, z2, x3, y3, z3, x4, y4, z4)
 end
-lstg.Render4V = Render4V
 
 local _RenderTexture = RenderTexture
 
@@ -1195,7 +1189,6 @@ function ParticleFire(object)
     end
     pp:setActive(true)
 end
-lstg.ParticleFire = ParticleFire
 
 ---@~chinese 停止绑定在对象上的粒子发射器。
 ---
@@ -1209,7 +1202,6 @@ function ParticleStop(object)
     end
     pp:setActive(false)
 end
-lstg.ParticleStop = ParticleStop
 
 ---@~chinese 返回绑定在对象上的粒子发射器的当前粒子数。
 ---
@@ -1223,7 +1215,6 @@ function ParticleGetn(object)
     end
     return pp:getAliveCount()
 end
-lstg.ParticleGetn = ParticleGetn
 
 ---@~chinese 返回绑定在对象上粒子发射器的发射密度（个/秒）。
 ---
@@ -1243,7 +1234,6 @@ function ParticleGetEmission(object)
     end
     return pp:getEmissionFreq()
 end
-lstg.ParticleGetEmission = ParticleGetEmission
 
 ---@~chinese 设置绑定在对象上粒子发射器的发射密度（个/秒）。
 ---
@@ -1258,7 +1248,6 @@ function ParticleSetEmission(object, count)
     end
     return pp:setEmissionFreq(count)
 end
-lstg.ParticleSetEmission = ParticleSetEmission
 
 ------------------------------------------------------------
 local type = type
