@@ -21,7 +21,7 @@ local _btns = {
     'replay',
 }
 
----Set the color of all buttons
+---Set the color of all buttons to unselected state
 local function unsel_btns()
     for _, v in ipairs(_btns) do
         lc['btn_' .. v]:setColor(cc.c3b(51, 51, 51))
@@ -37,7 +37,6 @@ local contents = {
     practice = { 'dif', 'player', 'stage' },
     spell    = { 'player', 'spell' },
     replay   = { 'replay' },
-    --replay   = { 'replay','replay_stage' },
 }
 local _list_title
 local _list_scv
@@ -76,10 +75,6 @@ local function setList(mode)
             item.btn:addTouchEventListener(sel_callback)
             _list_scv:addChild(item)
         end
-        --SystemLog('--- ranks ---')
-        --SystemLog(stringify(ranks))
-        --SystemLog('--- rank names ---')
-        --SystemLog(stringify(rank_names))
     elseif mode == 'player' then
         local players = game_content.enumPlayers()
         for i, v in ipairs(players) do
@@ -105,12 +100,6 @@ local function setList(mode)
             item.btn:addTouchEventListener(sel_callback)
             _list_scv:addChild(item)
         end
-        --SystemLog('--- stage names ---')
-        --SystemLog(stringify(names))
-        --SystemLog('--- _stage_groups ---')
-        --SystemLog(stringify(game_content.getStageGroups()))
-        --SystemLog('--- stage.groups ---')
-        --SystemLog(stringify(stage.groups))
     elseif mode == 'spell' then
         local spells = game_content.enumSpells()
         for i, v in ipairs(spells) do
@@ -224,7 +213,7 @@ local function CreateLauncher2UI()
         _list_scv = lc.select_scv
         _list_scv:setLayoutType(ccui.LayoutType.VERTICAL)
 
-        local sel_color = cc.c3b(128, 128, 64)  -- button color
+        local sel_color = cc.c3b(128, 128, 64)  -- button color when selected
         for _, option_name in ipairs(_btns) do
             local btn = lc['btn_' .. option_name]
             btn:addClickEventListener(function()

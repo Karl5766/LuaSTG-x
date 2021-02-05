@@ -1,7 +1,7 @@
-[INFO] [APP] === Application start at: 22:48:11 ===
+[INFO] [APP] === Application start at: 01:49:06 ===
 [INFO] [APP] Build date: Dec 18 2020
 [INFO] [APP] CPU name: Intel(R) Core(TM) i7-6700HQ CPU @ 2.60GHz
-[INFO] [APP] Memory: 2165MB / 8052MB
+[INFO] [APP] Memory: 1596MB / 8052MB
 [INFO] [APP] OS name: Microsoft Windows 10 家庭版
 [INFO] [APP] Lua VM version: LuaJIT 2.1.0-beta3
 [INFO] [APP] ThreadPool size: 3 (core count: 8)
@@ -40,11 +40,11 @@
 [LOG] 从本地路径加载MOD "test"
 [LOG] no direcory for plugin
 [LOG] 尝试创建目录 "score/test"
-[LOG] [string ".\game/content.lua"]:6: bad argument #1 to 'ipairs' (table expected, got nil)
+[LOG] [string ".\game/content.lua"]:14: bad argument #1 to 'ipairs' (table expected, got nil)
 stack traceback:
-	[string ".\game/content.lua"]:6: in function 'enumRanks'
-	[string ".\platform/launcher2_ui.lua"]:64: in function 'setList'
-	[string ".\platform/launcher2_ui.lua"]:250: in function <[string ".\platform/launcher2_ui.lua"]:194>
+	[string ".\game/content.lua"]:14: in function 'enumRanks'
+	[string ".\platform/launcher2_ui.lua"]:66: in function 'setList'
+	[string ".\platform/launcher2_ui.lua"]:243: in function <[string ".\platform/launcher2_ui.lua"]:187>
 	[string ".\platform/launcher_ui.lua"]:123: in function <[string ".\platform/launcher_ui.lua"]:114>
 [INFO] [APP] clear GameObjectPool
 [INFO] [APP] clear all resources
