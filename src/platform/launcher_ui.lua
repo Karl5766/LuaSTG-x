@@ -415,6 +415,7 @@ local function CreateLauncherUI()
     unsel_btns()
 
     local sel_color = cc.c3b(128, 128, 64)
+
     -- When clicking on the first five options
     for _, v in ipairs(contents) do
         local btn = lc['btn_' .. v]

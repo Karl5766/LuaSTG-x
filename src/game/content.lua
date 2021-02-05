@@ -1,5 +1,13 @@
+------------------------------------------------------------------------------------------
+---content.lua
+---Provide interfaces for querying lists of player classes, stages, stage groups, replays
+---etc.
+------------------------------------------------------------------------------------------
+
 local M = {}
 
+---Return a list containing all global stage groups under stage.groups except spell practice,
+---and another list for all their names indexed by their difficulty value.
 function M.enumRanks()
     local _rank_names = {}
     local _ranks = {}
@@ -13,6 +21,12 @@ function M.enumRanks()
     return _ranks, _rank_names
 end
 
+
+---Set scoredata.difficulty_select and lstg.group_name to stage group specified
+---by rank parameter.
+---
+---The function looks for the stage group in stage.groups list.
+---@param rank number the difficulty value
 function M.setRank(rank)
     if not stage.groups then
         return false
@@ -30,12 +44,12 @@ function M.setRank(rank)
     return true
 end
 
---
-
+---Return a clone of player_list, which is a list containing all available players classes
 function M.enumPlayers()
     return table.clone(player_list)
 end
 
+---Set player to player_list[index]
 function M.setPlayer(index)
     if not player_list then
         return false
@@ -85,16 +99,22 @@ function M.enumStages(rank)
     return _stage_names, _stage_origin_names
 end
 
+---Get stage.groups[rank];
+---assume rank = scoredata.difficulty_select or 1 if rank is nil.
+---@return stage_group the stage group with the given rank
 function M.getStageGroup(rank)
     local dif = rank or scoredata.difficulty_select or 1
     local t = stage.groups[_stage_groups[dif]]
     return t
 end
 
+---Return stage.groups
 function M.getStageGroups()
     return stage.groups
 end
 
+---Set stage to currentStageGroup[index];
+---Set lstg.practice and lstg.stage_name correspondingly
 function M.setStage(index)
     local dif = scoredata.difficulty_select or 1
     local stage_name = stage.groups[_stage_groups[dif]][index]
@@ -123,8 +143,6 @@ function M.enumSpells()
         for k, v in pairs(_rank_names) do
             _spell_rank_names[k] = v
         end
-        --_spell_ranks      = table.clone(_ranks)
-        --_spell_rank_names = table.clone(_rank_names)
         local _wrong_rank_name
         for idx, sp in ipairs(_sc_table) do
             local rank_name = _editor_class[sp[1]].difficulty
@@ -152,12 +170,6 @@ function M.enumSpells()
         end
         for k, s in pairs(_spells_classified) do
             for _, v in pairs(s) do
-                --table.insert(_spells, {
-                --    index     = v.index,
-                --    name      = v.name,
-                --    rank_name = k,
-                --    rank      = table.keyof(_spell_ranks, k),
-                --})
                 _spells[v.index] = {
                     index     = v.index,
                     name      = v.name,
@@ -221,6 +233,8 @@ function M._getSlotStages(slot)
     end
 end
 
+---Return a list containing all replay slots along with game initial state settings that are
+---necessary to run the replay.
 function M._getReplaySlots()
     local ret = {}
     ext.replay.RefreshReplay()
@@ -324,6 +338,7 @@ function M.setReplay(replay, i_stage)
     return true
 end
 
+---Reset all local lists in content.lua
 function M._reset()
     _stage_groups = {}
     _stages = {}

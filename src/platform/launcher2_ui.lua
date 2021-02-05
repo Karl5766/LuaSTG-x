@@ -13,12 +13,15 @@ local getChildrenWithName = require('cc.children_helper').getChildrenWithName
 local createItem = require('cc.selectable_item').create
 local game_content = require('game.content')
 
+---String representation for all options in the menu
 local _btns = {
     'game',
     'practice',
     'spell',
     'replay',
 }
+
+---Set the color of all buttons
 local function unsel_btns()
     for _, v in ipairs(_btns) do
         lc['btn_' .. v]:setColor(cc.c3b(51, 51, 51))
@@ -191,6 +194,7 @@ end
 
 local scene_tasks = {}
 
+---Setup launcher ui and push the scene to the director
 local function CreateLauncher2UI()
     if not launcher_reader then
         assert(setting)
@@ -198,14 +202,14 @@ local function CreateLauncher2UI()
         launcher_reader:setup()
         launcher_scene = launcher_reader:getSceneGraph()
         launcher_scene:setName('launcher_scene')
-        lc = getChildrenWithName(launcher_scene)
+        lc = getChildrenWithName(launcher_scene)  -- create a reference table for all nodes in launcher scene
         unsel_btns()
 
         local title_data = require('platform.launcher_ui2_data').title
-        for k, v in pairs(lc) do
-            if string.starts_with(k, 'button_') then
-                local name = k:sub(8)
-                local lb = v:getChildren()[2]
+        for node_name, node in pairs(lc) do
+            if string.starts_with(node_name, 'button_') then
+                local name = node_name:sub(8)
+                local lb = node:getChildren()[2]
                 local s = title_data[name]
                 if s and lb then
                     lb:setString(i18n(s))
@@ -220,20 +224,20 @@ local function CreateLauncher2UI()
         _list_scv = lc.select_scv
         _list_scv:setLayoutType(ccui.LayoutType.VERTICAL)
 
-        local sel_color = cc.c3b(128, 128, 64)
-        for _, v in ipairs(_btns) do
-            local btn = lc['btn_' .. v]
+        local sel_color = cc.c3b(128, 128, 64)  -- button color
+        for _, option_name in ipairs(_btns) do
+            local btn = lc['btn_' .. option_name]
             btn:addClickEventListener(function()
                 unsel_btns()
                 btn:setColor(sel_color)
-                current_content = v
-                setList(contents[v][1])
-                if #contents[v] == 1 then
+                current_content = option_name
+                setList(contents[option_name][1])
+                if #contents[option_name] == 1 then
                     setPrevNext('only')
                 else
                     setPrevNext('first')
                 end
-                if v == 'practice' or v == 'spell' then
+                if option_name == 'practice' or option_name == 'spell' then
                     lc.cheat_content:setVisible(true)
                     lc.cheat_tg:setEnabled(true)
                 else
@@ -250,6 +254,7 @@ local function CreateLauncher2UI()
         setList(contents['game'][1])
         setPrevNext('first')
 
+        -- exit button
         lc.btn_exit:addClickEventListener(function()
             --TODO: since clean a mod is not easy, we exit rather than return
             --cc.Director:getInstance():popScene()
@@ -261,7 +266,7 @@ local function CreateLauncher2UI()
             end
         end)
 
-        --cheat
+        -- cheat mode related
         lc.cheat_content:setVisible(false)
         lc.cheat_tg:setEnabled(false)
         lc.cheat_tg:setSelected(cheat or false)

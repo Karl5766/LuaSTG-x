@@ -4,7 +4,7 @@
 --- getting the pool references and checking if resources exist in a pool.
 --- Defines resource load and use functions.
 ---
---- Karl, 2021.2.3, removed some code and added comments
+--- Karl, 2021.2.3, removed some code
 ------------------------------------------------------------------------------------
 
 

@@ -33,7 +33,7 @@ local function save(t, name, value)
     t[name] = value
 end
 
----Recursively return a list of t[node_name] = node of a node and all its children.
+---Recursively return a list under which "node_name = node" for a given node and all its children.
 ---"classname | tostring(node)..num" will be used as node_name if getName() is not implemented
 ---@param node node an object that implements the classname, tostring(), getName() and getChildren() interfaces
 ---@param t table if set, return under the table instead of creating a new one
