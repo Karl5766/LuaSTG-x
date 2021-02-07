@@ -28,17 +28,6 @@ function Scene:onEnter()
         return
     end
     stage.next_stage = stage_menu
-
-    --local e = cc.EventListenerCustom:create('director_after_visit', function()
-    --    profiler.tic('FrameFunc')
-    --    FrameFunc()
-    --    profiler.toc('FrameFunc')
-    --
-    --    profiler.tic('RenderFunc')
-    --    RenderFunc()
-    --    profiler.toc('RenderFunc')
-    --end)
-    --cc.Director:getInstance():getEventDispatcher():addEventListenerWithFixedPriority(e, 1)
 end
 
 function Scene:showWithScene(transition, time, more)

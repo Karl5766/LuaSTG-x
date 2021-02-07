@@ -35,10 +35,6 @@ function make_scoredata_table(t)
     end
 end
 
-function DefineDefaultScoreData(t)
-    scoredata = t
-end
-
 local score_dir = 'score/' .. setting.mod .. '/'
 if plus.os ~= 'windows' then
     score_dir = plus.getWritablePath() .. "score/" .. setting.mod .. '/'

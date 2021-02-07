@@ -20,8 +20,9 @@ local rawget = rawget
 -- merge task from ex
 
 ---新建任务 添加一个执行f的协程
+---@param self table the object to put the task under
 ---@param f function 要执行的函数
-function task:New(f)
+function task.New(self, f)
     if not self.task then
         self.task = {}
         --if not self.task then

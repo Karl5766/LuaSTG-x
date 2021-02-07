@@ -1,32 +1,23 @@
-local core = {
+local _include_list = {
     'core/include.lua',
     'core_x/__init__.lua',
 
-    'core/const.lua',
-    'core/status.lua',
     'core/math.lua',
-    --'core/respool.lua',
     'core/resources.lua',
-    'core/screen.lua',
-    'core/view.lua',
-    'core/class.lua',
-    'core/task.lua',
-    'core/stage.lua',
     'core/input.lua',
-    'core/global.lua',
-    'core/corefunc.lua',
     'core/file.lua',
     'core/loading.lua',
     'core/async.lua',
+    'core/score.lua',
 }
 
-for _, f in ipairs(core) do
+for _, f in ipairs(_include_list) do
     DoFile(f)
 end
 
-FileExist = plus.FileExists
-
-lstg.LoadData()
+lstg.AddDirectoryToDefaultPaths('data')
+lstg.AddDirectoryToDefaultPaths('data_assets')
+lstg.AddDirectoryToDefaultPaths('background')
 
 require('platform.ControllerHelper').init()
 lstg.ResourceMgr:getInstance():clearLocalFileCache()

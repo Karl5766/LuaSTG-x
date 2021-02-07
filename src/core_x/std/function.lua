@@ -12,12 +12,12 @@ std = std or {}
 ---@return fun(...):any
 function std.bind(f, ...)
     local argsSuper = { ... }
-    local n1 = select("#", ...)
+    local n = select("#", ...)
     return function(...)
         local args = { ... }
-        local argsOut = { unpack(argsSuper, 1, n1) }
+        local argsOut = { unpack(argsSuper, 1, n) }
         for i, v in pairs(args) do
-            argsOut[n1 + i] = v
+            argsOut[n + i] = v
         end
         return f(unpack(argsOut, 1, table.maxn(argsOut)))
     end

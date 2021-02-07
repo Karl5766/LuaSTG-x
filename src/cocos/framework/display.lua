@@ -268,6 +268,13 @@ function display.wrapScene(scene, transition, time, more)
     return scene
 end
 
+---Switch the current scene to newScene;
+---If this this the first scene, this function will call director.runWithScene
+---
+---@param newScene cc.Scene the scene to switch to
+---@param transition string a string specifies which transition to use
+---@param time number
+---@param more
 function display.runScene(newScene, transition, time, more)
     if director:getRunningScene() then
         if transition then

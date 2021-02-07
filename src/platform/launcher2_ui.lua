@@ -185,14 +185,32 @@ local scene_tasks = {}
 
 ---Setup launcher ui and push the scene to the director
 local function CreateLauncher2UI()
-    if not launcher_reader then
+    local scene = require("launcher_scene")
+    scene.initScene()
+
+    -- setup for update and push the scene to director
+    scene:scheduleUpdateWithPriorityLua(function(dt)
+        scene:update(dt)
+    end, 0)
+    for name, node in pairs(getChildrenWithName(scene)) do
+        print("node name "..name)
+    end
+    print("!!!!!!!\ncomparing\n!!!!!!!")
+    cc.Director:getInstance():pushScene(scene)
+
+
+    if false and not launcher_reader then
         assert(setting)
         launcher_reader = creator.CreatorReader:createWithFilename('creator/Scene/launcher2.ccreator')
         launcher_reader:setup()
         launcher_scene = launcher_reader:getSceneGraph()
         launcher_scene:setName('launcher_scene')
-        lc = getChildrenWithName(launcher_scene)  -- create a reference table for all nodes in launcher scene
+        lc = getChildrenWithName(launcher_scene)  -- create a reference table for all nodes in launcher scene graph
         unsel_btns()
+
+        for name, node in pairs(lc) do
+            print("node name "..name)
+        end
 
         local title_data = require('platform.launcher_ui2_data').title
         for node_name, node in pairs(lc) do

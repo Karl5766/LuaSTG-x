@@ -7,6 +7,19 @@
 --- Karl, 2021.2.3, removed some code
 ------------------------------------------------------------------------------------
 
+--资源类型(Resource Types)
+
+RES_TEXTURE = 1
+RES_SPRITE = 2
+RES_ANIMATION = 3
+RES_MUSIC = 4
+RES_SOUND = 5
+RES_PARTICAL = 6
+RES_FONT = 7
+RES_FX = 8
+RES_RENDER_TARGET = 9
+--Video = 10
+
 
 local ENUM_RES_TYPE = { tex = 1, img = 2, ani = 3, bgm = 4, snd = 5, psi = 6, fnt = 7, ttf = 7, fx = 8, rt = 9 }
 _G['ENUM_RES_TYPE'] = ENUM_RES_TYPE

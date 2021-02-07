@@ -275,8 +275,7 @@ end, 9, 'GameExit')
 
 e:addListener('onFrameFunc', function()
     if GetKeyState(KEY.CTRL) and GetLastKey() == KEY.R then
-        lstg.included = {}
-        lstg.current_script_path = { '' }
+        IncludeFileReset()
         lstg.eventDispatcher:removeAllListeners()
         for _, v in ipairs(
                 {
@@ -522,7 +521,6 @@ function SetFog(near, far, color)
         end
     end
 end
-lstg.SetFog = SetFog
 
 --
 

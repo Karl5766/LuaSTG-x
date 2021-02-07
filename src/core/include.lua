@@ -1,12 +1,12 @@
 local FU = cc.FileUtils:getInstance()
 ---已包含的脚本
-lstg.included = {}
+local _all_included_files = {}
 
 ---脚本搜索路径
-lstg.current_script_path = { '' }
+local _current_script_path = { '' }
 
 ---
---- 包含（执行）脚本文件
+--- DoFile; but the given file can be reset with IncludeFileReset
 ---@param filename string
 ---@return any 脚本返回值
 function Include(filename)
@@ -20,19 +20,24 @@ function Include(filename)
     end
 
     if string.sub(filename, 1, 1) == '~' then
-        filename = lstg.current_script_path[#lstg.current_script_path] .. string.sub(filename, 2)
+        filename = _current_script_path[#_current_script_path] .. string.sub(filename, 2)
     end
-    if not lstg.included[filename] then
+    if not _all_included_files[filename] then
         local i, j = string.find(filename, '^.+[\\/]+')
         if i then
-            table.insert(lstg.current_script_path, string.sub(filename, i, j))
+            table.insert(_current_script_path, string.sub(filename, i, j))
         else
-            table.insert(lstg.current_script_path, '')
+            table.insert(_current_script_path, '')
         end
-        lstg.included[filename] = true
+        _all_included_files[filename] = true
         local ret = DoFile(filename)
-        lstg.current_script_path[#lstg.current_script_path] = nil
+        _current_script_path[#_current_script_path] = nil
         return ret
     end
 end
 
+---Used for live reset
+function IncludeFileReset()
+    _all_included_files = {}
+    lstg.current_script_path = { '' }
+end

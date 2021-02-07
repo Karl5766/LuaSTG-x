@@ -264,7 +264,6 @@ local function _stop()
     stage.next_stage = nil
     lstg.var = { username = setting.username }
     lstg.tmpvar = {}
-    lstg.paused = false
     lstg.quit_flag = false
     --
     local xe = require('xe.main')
