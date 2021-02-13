@@ -1,3 +1,13 @@
+---------------------------------------------------------------------
+---corefunc.lua
+---desc: Defines core functions, which includes the game update and
+---render functions.
+---modifier:
+---     Karl, 2021.2.12 removed stage scene switching code based on
+---     the value of stage.next_stage and stage.current_stage at the
+---     end of the update function
+---------------------------------------------------------------------
+
 local profiler = profiler
 local e = lstg.eventDispatcher
 
@@ -133,34 +143,17 @@ function UserSystemOperation()
     end
 end
 
-function _DoFrame()
+local function _DoFrame()
     --SetTitle(setting.mod .. ' | FPS=' .. GetFPS() .. ' | Nobj=' .. GetnObj())
     UpdateObjList()
     GetInput()
-    --next_stage顶替current_stage
-    if stage.next_stage then
-
-        -- from ex
-        if lstg.var.ran_seed then
-            ran:Seed(lstg.var.ran_seed)
-        end
-
-        stage.current_stage = stage.next_stage
-        stage.next_stage = nil
-        stage.current_stage.timer = 0
-        stage.current_stage:init()
-    end
-    if stage.current_stage then
-        task.Do(stage.current_stage)
-        if stage.current_stage then
-            stage.current_stage:frame()
-            stage.current_stage.timer = stage.current_stage.timer + 1
-        end
-    end
 
     profiler.tic('ObjFrame')
     ObjFrame()--LPOOL.DoFrame() 执行对象的Frame函数
     profiler.toc('ObjFrame')
+
+    -- update the stage group
+    StageGroup.update(global_stage_group, 1)
 
     profiler.tic('UserSystemOperation')
     UserSystemOperation()  --用于lua层模拟内核级操作
@@ -186,20 +179,9 @@ function _DoFrame()
     AfterFrame()--帧末更新函数
     profiler.toc('AfterFrame')
 
-    --next_stage顶替current_stage
-    if stage.next_stage and stage.current_stage then
-        stage.current_stage:del()
-        task.Clear(stage.current_stage)
-        if stage.preserve_res then
-            stage.preserve_res = nil
-        else
-            RemoveResource 'stage'--清空场景资源池
-            SystemLog(i18n 'clear stage resource pool')
-        end
-        --LPOOL.ResetPool 清空对象池
-        ResetPool()
-        SystemLog(i18n 'clear object pool')
-        --LDEBUG()
+    -- test whether to start the next stage
+    if StageGroup.readyForNextStage(global_stage_group) then
+        StageGroup.goToNextStage(global_stage_group)
     end
 end
 
@@ -221,17 +203,13 @@ function RenderFunc()
     e:dispatchEvent('onRenderFunc')
 end
 e:addListener('onRenderFunc', function()
-    local stage = stage
-    if not stage.current_stage then
-        return
-    end
-    if stage.current_stage.timer and stage.current_stage.timer > 1 and stage.next_stage == nil then
+    if not StageGroup.readyForRender(global_stage_group) then
         BeginScene()
 
         BeforeRender()
 
         --profiler.tic('stagerender')
-        stage.current_stage:render()
+        StageGroup.render(global_stage_group)
         --profiler.toc('stagerender')
 
         profiler.tic('ObjRender')

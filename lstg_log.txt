@@ -1,7 +1,7 @@
-[INFO] [APP] === Application start at: 01:59:53 ===
+[INFO] [APP] === Application start at: 00:53:20 ===
 [INFO] [APP] Build date: Dec 18 2020
 [INFO] [APP] CPU name: Intel(R) Core(TM) i7-6700HQ CPU @ 2.60GHz
-[INFO] [APP] Memory: 2063MB / 8052MB
+[INFO] [APP] Memory: 2484MB / 8052MB
 [INFO] [APP] OS name: Microsoft Windows 10 家庭版
 [INFO] [APP] Lua VM version: LuaJIT 2.1.0-beta3
 [INFO] [APP] ThreadPool size: 3 (core count: 8)
@@ -26,8 +26,9 @@
 [LOG] start app
 [LOG] enum MODs in "C:/Games/luastg/LuaSTG-x/LuaSTG-x_BHElib/mod/"
 [LOG] change video mode to: (1280, 720), Windowed, VSync Off
-[LOG] [string ".\app/views/GameScene.lua"]:86: attempt to index global 'stage' (a nil value)
+[LOG] [string ".\app/views/GameScene.lua"]:86: executing to here
 stack traceback:
+	[string ".\app/views/GameScene.lua"]:86: in main chunk
 	[C]: in function 'require'
 	[string ".\platform/launcher_ui.lua"]:116: in function <[string ".\platform/launcher_ui.lua"]:114>
 [INFO] [APP] clear GameObjectPool
