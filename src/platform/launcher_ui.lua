@@ -116,12 +116,7 @@ local function setMod(lc)
         local scene = require('app.views.GameScene'):create(nil, setting.mod)
         saveSetting()
         lstg.loadMod()
-        if lstg._exlauncher then
-            SystemLog('use external launcher')
-            scene:showWithScene()
-        else
-            require('platform.launcher2_ui')()
-        end
+        require('platform.launcher2_ui')()
     end)
 end
 

@@ -47,6 +47,12 @@ end
 
 --
 
+---add mod directory given in the path "mod/"..setting.mod;
+---look for either directory or .zip file;
+---calls lstg.loadPlugin();
+---run root.lua file;
+---call RegisterClasses(), SetTitle() and
+---set the resource pool to stage afterwards
 function lstg.loadMod()
     local writable_path = plus.getWritablePath()
     local mod_path = string.format('%s/mod/%s', writable_path, setting.mod)

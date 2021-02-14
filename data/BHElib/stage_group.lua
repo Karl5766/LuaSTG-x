@@ -7,7 +7,7 @@
 ---------------------------------------------------------------------------------------------------
 
 ---@class StageGroup
----@comment an instance of this class represents a difficulty; a group of stages.
+---@comment an instance of this class represents a sequence of stages.
 StageGroup = {}
 
 ---@comment an array of all stage groups created by StageGroup.new().
@@ -47,10 +47,18 @@ function StageGroup.appendStage(self, stage)
     table.insert(self.stage_array, stage)
 end
 
+---return a stage of specified index in the stage array
+---@param self StageGroup the stage group to query on
+---@param stage_index number index of the stage in the stage group
+function StageGroup.getStageByIndex(self, stage_index)
+    return self.stage_array[stage_index]
+end
+
 function StageGroup.startGame(self, game_init_params, first_stage)
     StageGroup.setNextStage(self, first_stage)
 end
 
+---@return Stage the currently running stage in the group
 function StageGroup.getCurrentStage(self)
     return self.current_stage
 end
@@ -60,7 +68,6 @@ function StageGroup.update(self, dt)
 end
 
 LoadImageFromFile("test:image", "data_assets/THlib/bullet/Magic1.png")
-
 function StageGroup.render(self)
     self.current_stage:render()
     Render("test:image", 0, 0, 0, 1, 1, 0.5)
@@ -77,7 +84,8 @@ function StageGroup.readyForNextStage(self)
     return self.next_stage ~= nil
 end
 
----set the next stage as the current stage, and start the stage
+---set the next stage as the current stage, and start the stage;
+---called by the game update function
 function StageGroup.goToNextStage(self)
 
     -- make sure the next stage has been set

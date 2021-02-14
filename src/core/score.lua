@@ -41,7 +41,7 @@ if plus.os ~= 'windows' then
 end
 plus.CreateDirectory(score_dir:sub(1, -2))
 
---- save scoredata to file
+---save scoredata to file
 function SaveScoreData()
     local username = setting.username or 'User'
     local dst = score_dir .. username .. '.dat'

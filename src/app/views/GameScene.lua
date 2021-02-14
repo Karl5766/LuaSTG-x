@@ -5,6 +5,11 @@ local director = cc.Director:getInstance()
 local glv = cc.Director:getInstance():getOpenGLView()
 local game_util = require('game.util')
 
+
+local _stage_group_menu = StageGroup.new("main_menu", "MENU", nil)
+local _stage_menu = Stage.new("stage_main_menu", "", nil)
+StageGroup.appendStage(_stage_group_menu, _stage_menu)
+
 function Scene:onCreate()
     lstg.loadSetting()
 
@@ -23,11 +28,12 @@ end
 
 local profiler = profiler
 function Scene:onEnter()
-    --ex.Test('test2.mp4')
-    if stage.next_stage then
-        return
-    end
-    stage.next_stage = stage_menu
+    global_stage_group = _stage_group_menu
+    StageGroup.startGame(_stage_group_menu, StageGroup.getStageByIndex(_stage_group_menu, 1))
+    --if stage.next_stage then
+    --    return
+    --end
+    --stage.next_stage = stage_menu
 end
 
 function Scene:showWithScene(transition, time, more)
@@ -102,7 +108,6 @@ if not stage.next_stage then
         --SystemLog('stage_menu:init')
         local returnToLauncher = function()
             -- return to launcher2
-            --SystemLog('pop scene')
             inited = false
             stage.current_stage = nil
             lstg.practice = nil

@@ -143,6 +143,10 @@ end
 
 ---修改序列的操作
 
+---copy the values in the given table to another table
+---@param t table the table to copy from
+---@param iter function for loop iterator
+---@param dst table the table to copy to
 function std.copy(t, iter, dst)
     for _, v in iter(t) do
         table.insert(dst, v)

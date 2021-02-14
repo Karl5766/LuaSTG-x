@@ -3,9 +3,8 @@
 ---desc: Defines core functions, which includes the game update and
 ---render functions.
 ---modifier:
----     Karl, 2021.2.12 removed stage scene switching code based on
----     the value of stage.next_stage and stage.current_stage at the
----     end of the update function
+---     Karl, 2021.2.12 replaced stage switching and stage group
+---     related code
 ---------------------------------------------------------------------
 
 local profiler = profiler
