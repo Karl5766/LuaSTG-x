@@ -7,7 +7,9 @@ local _include_list = {
 
     'BHElib/class.lua',
     'BHElib/task.lua',
+
     'BHElib/stage.lua',
+    'BHElib/stage_group.lua',
 
     'BHElib/global.lua',  -- defines some in-game global variables
     'BHElib/corefunc.lua',

@@ -142,7 +142,7 @@ function UserSystemOperation()
     end
 end
 
-local function _DoFrame()
+local function _DoSingleFrame()
     --SetTitle(setting.mod .. ' | FPS=' .. GetFPS() .. ' | Nobj=' .. GetnObj())
     UpdateObjList()
     GetInput()
@@ -184,25 +184,52 @@ local function _DoFrame()
     end
 end
 
+---update game state k times, k depending on the value set by
+---setting.render_skip
 function DoFrame()
     local factor = 1
     if setting.render_skip then
         factor = int(setting.render_skip) + 1
     end
     for _ = 1, factor do
-        _DoFrame()
+        _DoSingleFrame()
     end
 end
+
+----------------------------------------------------------------------
+
+local _process_one_task = async.processOneTask
+
+---@~chinese 将被每帧调用以执行帧逻辑。返回`true`时会使游戏退出。
+---
+---@~english Will be invoked every frame to process all frame logic. Game will exit if it returns `true`.
+---
+function FrameFunc()
+    -- priority == 1
+    if GetLastKey() == setting.keysys.snapshot and setting.allowsnapshot then
+        Screenshot()
+    end
+    _process_one_task()
+
+    -- priority == 0
+    e:dispatchEvent('onFrameFunc')  -- in case any event is registered
+    DoFrame()  -- update the game
+
+    -- priority == 9
+    if lstg.quit_flag then
+        GameExit()
+    end
+    return lstg.quit_flag
+end
+
+----------------------------------------------------------------------
 
 ---@~chinese 将被每帧调用以执行渲染指令。
 ---
 ---@~english Will be invoked every frame to process all render instructions.
 ---
 function RenderFunc()
-    e:dispatchEvent('onRenderFunc')
-end
-e:addListener('onRenderFunc', function()
-    if not StageGroup.readyForRender(global_stage_group) then
+    if StageGroup.readyForRender(global_stage_group) then
         BeginScene()
 
         BeforeRender()
@@ -225,49 +252,7 @@ e:addListener('onRenderFunc', function()
         e:dispatchEvent('afterEndScene')
         --profiler.toc('EndScene')
     end
-end, 0)
-
-----------------------------------------------------------------------
-
----@~chinese 将被每帧调用以执行帧逻辑。返回`true`时会使游戏退出。
----
----@~english Will be invoked every frame to process all frame logic. Game will exit if it returns `true`.
----
-function FrameFunc()
-    e:dispatchEvent('onFrameFunc')
-    return lstg.quit_flag
 end
-
-e:addListener('onFrameFunc', function()
-    if GetLastKey() == setting.keysys.snapshot and setting.allowsnapshot then
-        Screenshot()
-    end
-end, -1, 'Screenshot')
-
-e:addListener('onFrameFunc', function()
-    if lstg.quit_flag then
-        GameExit()
-    end
-end, 9, 'GameExit')
-
-e:addListener('onFrameFunc', function()
-    if GetKeyState(KEY.CTRL) and GetLastKey() == KEY.R then
-        IncludeFileReset()
-        lstg.eventDispatcher:removeAllListeners()
-        for _, v in ipairs(
-                {
-                    'RenderFunc',
-                    'FrameFunc',
-                    'all_class',
-                    'class_name',
-                }) do
-            _G[v] = nil
-        end
-        Print('=   FrameReset   =')
-        FrameReset()
-        dofile('main.lua')
-    end
-end, 10, 'FrameReset')
 
 ----------------------------------------------------------------------
 

@@ -159,9 +159,9 @@ if _ARGS and #_ARGS >= 2 then
     assert(loadstring(_ARGS[2]))()
     setting.mod_info = nil
 end
-if start_game then
-    require('app.views.MainScene').setSkip(true, true)
-end
+
+--skip the launchers
+require('app.views.MainScene').setSkip(true, true)
 
 local glv = cc.Director:getInstance():getOpenGLView()
 

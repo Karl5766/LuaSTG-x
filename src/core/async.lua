@@ -163,7 +163,7 @@ end
 
 --
 
-local function process_one_task()
+function async.processOneTask()
     -- wait
     if loader_waiting then
         if loader_waiting.wait_once then
@@ -178,10 +178,6 @@ local function process_one_task()
     tasks:pop_front()
     t[1]()
 end
-
-lstg.eventDispatcher:addListener('onFrameFunc', function()
-    process_one_task()
-end, -1, 'async.process')
 
 _G['async'] = async
 --return async

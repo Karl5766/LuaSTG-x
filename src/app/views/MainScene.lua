@@ -33,10 +33,6 @@ function MainScene:onEnter()
     else
         -- in game
         lstg.loadMod()
-        local game_content = require('game.content')
-        game_content.setRank(1)
-        game_content.setPlayer(1)
-        lstg.practice = nil
         local scene = require('app.views.GameScene'):create(nil, setting.mod)
         scene:showWithScene()
     end

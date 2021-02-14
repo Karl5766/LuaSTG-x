@@ -25,7 +25,7 @@ end
 ---addListener
 ---@param event string
 ---@param handle function
----@param priority number
+---@param priority number priority of execution on event dispatch; lower number is executed first
 ---@param tag string
 function EventDispatcher:addListener(event, handle, priority, tag)
     local group = self._listeners[event]
@@ -133,5 +133,6 @@ function M.test()
     e:dispatchEvent('e1')
 end
 ]]
+
 return M
 

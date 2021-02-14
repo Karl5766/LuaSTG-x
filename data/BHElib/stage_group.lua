@@ -64,12 +64,12 @@ function StageGroup.getCurrentStage(self)
 end
 
 function StageGroup.update(self, dt)
-    Stage.update(current_stage, dt)
+    if self.current_stage then
+        Stage.update(self.current_stage, dt)
+    end
 end
 
-LoadImageFromFile("test:image", "data_assets/THlib/bullet/Magic1.png")
 function StageGroup.render(self)
-    self.current_stage:render()
     Render("test:image", 0, 0, 0, 1, 1, 0.5)
 end
 
@@ -113,5 +113,5 @@ end
 ---return true when the stage group is ready to be rendered
 function StageGroup.readyForRender(self)
     local stage = self.current_stage
-    return stage.timer > 1 and self.next_stage == nil
+    return stage ~= nil and stage.timer > 1 and self.next_stage == nil
 end

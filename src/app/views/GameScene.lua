@@ -6,10 +6,6 @@ local glv = cc.Director:getInstance():getOpenGLView()
 local game_util = require('game.util')
 
 
-local _stage_group_menu = StageGroup.new("main_menu", "MENU", nil)
-local _stage_menu = Stage.new("stage_main_menu", "", nil)
-StageGroup.appendStage(_stage_group_menu, _stage_menu)
-
 function Scene:onCreate()
     lstg.loadSetting()
 
@@ -28,8 +24,7 @@ end
 
 local profiler = profiler
 function Scene:onEnter()
-    global_stage_group = _stage_group_menu
-    StageGroup.startGame(_stage_group_menu, StageGroup.getStageByIndex(_stage_group_menu, 1))
+    StageGroup.startGame(global_stage_group, nil, StageGroup.getStageByIndex(global_stage_group, 1))
     --if stage.next_stage then
     --    return
     --end
@@ -89,7 +84,7 @@ function Scene:update(dt)
     profiler.toc('RenderFunc')
 end
 
-if not stage.next_stage then
+--[[if not stage.next_stage then
     stage_init = stage.New('init', true, true)
     function stage_init:init()
     end
@@ -148,6 +143,6 @@ if not stage.next_stage then
         --RenderText('menu', str, 320, 200, 1)
         --ui.DrawMenuBG()
     end
-end
+end]]
 
 return Scene
