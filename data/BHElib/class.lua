@@ -101,12 +101,6 @@ function RegisterGameClass(v)
         end
     end
     v['.classname'] = _class_name
-
-    --if _class_name then
-    --    Print(string.format('regist class %d (%s)', _class_id[v], _class_name))
-    --else
-    --    Print(string.format('regist class %d', _class_id[v]))
-    --end
 end
 
 function RegisterClasses()

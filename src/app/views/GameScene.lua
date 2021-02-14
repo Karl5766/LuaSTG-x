@@ -24,11 +24,7 @@ end
 
 local profiler = profiler
 function Scene:onEnter()
-    StageGroup.startGame(global_stage_group, nil, StageGroup.getStageByIndex(global_stage_group, 1))
-    --if stage.next_stage then
-    --    return
-    --end
-    --stage.next_stage = stage_menu
+
 end
 
 function Scene:showWithScene(transition, time, more)

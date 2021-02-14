@@ -142,6 +142,7 @@ function UserSystemOperation()
     end
 end
 
+---update game state 1 time
 local function _DoSingleFrame()
     --SetTitle(setting.mod .. ' | FPS=' .. GetFPS() .. ' | Nobj=' .. GetnObj())
     UpdateObjList()
@@ -151,8 +152,9 @@ local function _DoSingleFrame()
     ObjFrame()--LPOOL.DoFrame() 执行对象的Frame函数
     profiler.toc('ObjFrame')
 
-    -- update the stage group
-    StageGroup.update(global_stage_group, 1)
+    -- update current stage group
+    local stage_group = StageGroup.getInstance()
+    stage_group:update(1)
 
     profiler.tic('UserSystemOperation')
     UserSystemOperation()  --用于lua层模拟内核级操作
@@ -179,13 +181,13 @@ local function _DoSingleFrame()
     profiler.toc('AfterFrame')
 
     -- test whether to start the next stage
-    if StageGroup.readyForNextStage(global_stage_group) then
-        StageGroup.goToNextStage(global_stage_group)
+    if stage_group:readyForNextStage() then
+        stage_group:goToNextStage()
     end
 end
 
----update game state k times, k depending on the value set by
----setting.render_skip
+---update game state k times, k depending on the value given by
+---setting.render_skip + 1
 function DoFrame()
     local factor = 1
     if setting.render_skip then
@@ -205,17 +207,17 @@ local _process_one_task = async.processOneTask
 ---@~english Will be invoked every frame to process all frame logic. Game will exit if it returns `true`.
 ---
 function FrameFunc()
-    -- priority == 1
+    -- -1
     if GetLastKey() == setting.keysys.snapshot and setting.allowsnapshot then
         Screenshot()
     end
     _process_one_task()
 
-    -- priority == 0
+    -- 0
     e:dispatchEvent('onFrameFunc')  -- in case any event is registered
     DoFrame()  -- update the game
 
-    -- priority == 9
+    -- 9
     if lstg.quit_flag then
         GameExit()
     end
@@ -229,13 +231,14 @@ end
 ---@~english Will be invoked every frame to process all render instructions.
 ---
 function RenderFunc()
-    if StageGroup.readyForRender(global_stage_group) then
+    local stage_group = StageGroup.getInstance()
+    if stage_group:readyForRender() then
         BeginScene()
 
         BeforeRender()
 
         --profiler.tic('stagerender')
-        StageGroup.render(global_stage_group)
+        stage_group:render()
         --profiler.toc('stagerender')
 
         profiler.tic('ObjRender')

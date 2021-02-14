@@ -13,6 +13,9 @@ Stage = {}
 ---@comment an array of all stages created by Stage.new().
 Stage.all_stages = {}
 
+---metatable for Stage.new
+Stage.mt = { __index = Stage }
+
 ---------------------------------------------------------------------------------------------------
 
 ---create and return a new stage object
@@ -22,6 +25,8 @@ Stage.all_stages = {}
 ---@return Stage a stage object
 function Stage.new(sid, display_name, init)
     local self = {}
+    setmetatable(self, Stage.mt)
+
     self.sid = sid
     self.display_name = display_name
     self.init = init or function(self) end
@@ -37,7 +42,7 @@ end
 ---------------------------------------------------------------------------------------------------
 
 ---Initialize the stage each playthrough
-function Stage.start(self)
+function Stage.enter(self)
     self.timer = 0
     self:init()
 end
