@@ -4,7 +4,6 @@ local _include_list = {
 
     'core/math.lua',
     'core/resources.lua',
-    'core/input.lua',
     'core/file.lua',
     'core/loading.lua',
     'core/async.lua',
