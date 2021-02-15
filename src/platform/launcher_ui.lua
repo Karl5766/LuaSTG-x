@@ -40,7 +40,7 @@ local function enumMods(path)
 end
 
 local function saveSetting()
-    lstg.saveSettingFile()
+    require("setting_util").saveSettingFile()
 end
 
 local contents = {
@@ -112,11 +112,8 @@ local function setMod(lc)
 
     lc.mod_start_btn:setVisible(false)
     lc.mod_start_btn:addClickEventListener(function()
-        -- require here, make it can be override
-        local scene = require('app.views.GameScene'):create(nil, setting.mod)
         saveSetting()
-        lstg.loadMod()
-        require('platform.launcher2_ui')()
+        require('app.views.MainScene'):runSelectionLauncher()
     end)
 end
 

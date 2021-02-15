@@ -1,10 +1,18 @@
+---------------------------------------------------------------------------------------------------
+---BHElib_init.lua
+---author: Karl
+---date: 2021.2.14
+---references: -x/src/core/__init__.lua
+---desc: Includes files that implements the shmup game mechanics of luastg engine
+-------------------------------------------------------------------------------------------------
+
 local _include_list = {
     "BHElib/const.lua",  -- defines some constant values
     "BHElib/status.lua",
 
     "BHElib/input.lua",
 
-    "BHElib/screen.lua",
+    "BHElib/play_field_boundary.lua",
     "BHElib/view.lua",
 
     "BHElib/class.lua",

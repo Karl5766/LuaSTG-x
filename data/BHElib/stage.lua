@@ -8,7 +8,9 @@
 
 ---@class Stage
 ---@comment an instance of this class represents a shmup stage.
-Stage = {}
+Stage = {
+    init = function(self) end
+}
 
 ---@comment an array of all stages created by Stage.new().
 Stage.all_stages = {}
@@ -29,7 +31,7 @@ function Stage.new(sid, display_name, init)
 
     self.sid = sid
     self.display_name = display_name
-    self.init = init or function(self) end
+    self.init = init
 
     return self
 end

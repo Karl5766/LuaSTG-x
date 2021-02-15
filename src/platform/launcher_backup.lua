@@ -179,7 +179,7 @@ function M.enumMods(path)
 end
 
 function M.saveSetting()
-    lstg.saveSettingFile()
+    require("setting_util").saveSettingFile()
 end
 
 return M

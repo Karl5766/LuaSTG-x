@@ -51,6 +51,7 @@ end
 ---look for either directory or .zip file;
 ---calls lstg.loadPlugin();
 ---run root.lua file;
+---call lstg.loadSetting();
 ---call RegisterClasses(), SetTitle() and
 ---set the resource pool to stage afterwards
 function lstg.loadMod()
@@ -78,6 +79,8 @@ function lstg.loadMod()
     lstg.loadPlugins()
 
     Include('root.lua')
+
+    --lstg.loadSetting()
 
     RegisterClasses()
     SetTitle(setting.mod)

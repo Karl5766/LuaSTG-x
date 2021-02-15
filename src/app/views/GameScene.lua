@@ -7,8 +7,6 @@ local game_util = require('game.util')
 
 
 function Scene:onCreate()
-    lstg.loadSetting()
-
     self:scheduleUpdateWithPriorityLua(function(dt)
         self:update(dt)
     end, 0)

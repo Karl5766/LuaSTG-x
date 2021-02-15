@@ -202,6 +202,9 @@ function Reset3D()
     lstg.view3d.fog = { 0, 0, Color(0x00000000) }
 end
 
+---turn the metrics of a view into a string for output
+---@param mode string the view mode to output information about
+---@return string human-readable info of the view
 local function getViewModeInfo(mode)
     local ret = ''
     if mode == '3d' then
@@ -248,4 +251,3 @@ local function getViewModeInfo(mode)
     return ret
 end
 lstg.getViewModeInfo = getViewModeInfo
-

@@ -300,9 +300,7 @@ local function CreateLauncher2UI()
             local n = #c
             assert(current_mode_i <= n)
             if current_mode_i == n then
-                --SystemLog('before start')
-                local scene = require('app.views.GameScene'):create(nil, setting.mod)
-                scene:showWithScene()
+                require('app.views.MainScene'):runGameScene()
                 return
             else
                 lc.prev_content:setVisible(true)

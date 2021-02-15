@@ -34,36 +34,8 @@ for _, ns in ipairs({ cc, ccb, ccui, lstg }) do
     end
 end
 
-function Serialize(o)
-    if type(o) == 'table' then
-        function visitTable(t)
-            local ret = {}
-            if getmetatable(t) and getmetatable(t).data then
-                t = getmetatable(t).data
-            end
-            for k, v in pairs(t) do
-                if type(v) == 'table' then
-                    ret[k] = visitTable(v)
-                else
-                    ret[k] = v
-                end
-            end
-            return ret
-        end
-        o = visitTable(o)
-    end
-    return cjson.encode(o)
-end
-
-function DeSerialize(s)
-    return cjson.decode(s)
-end
-
 --- keycode
 KEY = require('keycode')
-
-default_setting = require('default_setting')
-setting = default_setting
 
 function DoFile(path)
     Print('[load] ' .. path)
@@ -72,7 +44,11 @@ end
 
 DoFile('plus/plus.lua')
 DoFile('stringify.lua')
---require('forward')
+
+setting = require('default_setting')
+setting = SerializeTest(setting)
+require("setting_util").loadSettingFile()
+
 require('api')
 if plus.isMobile() then
     require('jit_test')
@@ -102,59 +78,6 @@ print = Print
 
 require('imgui.__init__')
 
-local setting_util = require('setting_util')
-local str = Serialize(default_setting)
-str = setting_util.format_json(str)
-if not setting_util.compare(DeSerialize(str), default_setting) then
-    error(i18n 'error in parsing setting')
-end
-
-local FU = cc.FileUtils:getInstance()
-local setting_path = plus.getWritablePath() .. 'setting'
-local _setting = {}
-
-function lstg.loadSettingFile()
-    local f = FU:getStringFromFile(setting_path)
-    setting = DeSerialize(Serialize(default_setting))
-    _setting = setting
-    setting = {}
-    setmetatable(setting, {
-        __newindex = function(t, k, v)
-            --rawset(t, k, v)
-            _setting[k] = v
-            if k == 'res_ratio' then
-                local ratio = v[1] / v[2]
-                setting.resx = math.ceil(setting.resy * ratio / 2) * 2
-                --setting.windowsize_w = math.ceil(setting.windowsize_h * ratio / 2) * 2
-            elseif k == 'resy' then
-                local ratio = setting.res_ratio[1] / setting.res_ratio[2]
-                setting.resx = math.ceil(v * ratio / 2) * 2
-                --elseif k == 'windowsize_h' then
-                --    local ratio = setting.res_ratio[1] / setting.res_ratio[2]
-                --    setting.windowsize_w = math.ceil(setting.windowsize_h * ratio / 2) * 2
-            end
-        end,
-        __index    = _setting
-    })
-
-    if f and f ~= '' then
-        local s = DeSerialize(f)
-        for k, v in pairs(s) do
-            setting[k] = v
-        end
-    end
-end
-
-function lstg.saveSettingFile()
-    assert(setting and getmetatable(setting))
-    local t = getmetatable(setting).__index
-    local s = setting_util.format_json(Serialize(t))
-    assert(setting_util.compare(DeSerialize(s), t))
-    FU:writeStringToFile(s, setting_path)
-end
-
-lstg.loadSettingFile()
-
 if _ARGS and #_ARGS >= 2 then
     assert(loadstring(_ARGS[2]))()
     setting.mod_info = nil
@@ -181,9 +104,6 @@ end
 SetSEVolume(setting.sevolume / 100)
 SetBGMVolume(setting.bgmvolume / 100)
 
---require('app.views.MainScene').setSkip(true, true)
---cheat = true
-
 function lstg.loadSetting(change_vm)
     --if change_vm and (not setting.windowed) then
     --    ChangeVideoMode(0,0,false, setting.vsync)
@@ -199,25 +119,6 @@ function lstg.loadSetting(change_vm)
     lstg.calcScreen()
     lstg.loadViewParams()
     _SetBound()
-    local pe = {
-        --"LoadFX",
-        "PushRenderTarget",
-        "PopRenderTarget",
-        "PostEffect",
-        "PostEffectCapture",
-        "PostEffectApply",
-        --"SetShaderUniform",
-    }
-    if setting.posteffect then
-        --for _, v in ipairs(pe) do
-        --    _G[v] = _G[v] or lstg[v]
-        --end
-    else
-        --for _, v in ipairs(pe) do
-        --    _G[v] = function()
-        --    end
-        --end
-    end
 
     local size = glv:getDesignResolutionSize()
     SystemLog(string.format('DesignRes = %d, %d', size.width, size.height))
