@@ -179,5 +179,5 @@ function async.processOneTask()
     t[1]()
 end
 
-_G['async'] = async
+_G.async = async
 --return async

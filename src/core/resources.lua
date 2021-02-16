@@ -17,7 +17,7 @@ local soundVolume = {
     tan00    = 0.28, tan01 = 0.35, tan02 = 0.5,
     timeout  = 0.6, timeout2 = 0.7, water = 0.6,
 }
-_G['soundVolume'] = soundVolume
+_G.soundVolume = soundVolume
 
 local _PlaySound = PlaySound
 
@@ -125,7 +125,7 @@ local ENUM_TTF_FMT = {
 setmetatable(ENUM_TTF_FMT, { __index = function(t, k)
     return 0
 end })
-_G['ENUM_TTF_FMT'] = ENUM_TTF_FMT
+_G.ENUM_TTF_FMT = ENUM_TTF_FMT
 local _RenderTTF = lstg.RenderTTF
 
 ---

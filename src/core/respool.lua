@@ -22,7 +22,7 @@ RES_RENDER_TARGET = 9
 
 
 local ENUM_RES_TYPE = { tex = 1, img = 2, ani = 3, bgm = 4, snd = 5, psi = 6, fnt = 7, ttf = 7, fx = 8, rt = 9 }
-_G['ENUM_RES_TYPE'] = ENUM_RES_TYPE
+_G.ENUM_RES_TYPE = ENUM_RES_TYPE
 ---@return cc.Map[]
 local function _create_pool()
     local ret = {}

@@ -52,7 +52,7 @@ require("setting_util").loadSettingFile()
 require('api')
 if plus.isMobile() then
     require('jit_test')
-    _G['Print'] = function(...)
+    _G.Print = function(...)
         local args = { ... }
         local narg = select('#', ...)
         for i = 1, narg do
@@ -62,7 +62,7 @@ if plus.isMobile() then
     end
 else
     -- define print/Print function
-    _G['Print'] = function(...)
+    _G.Print = function(...)
         local args = { ... }
         local narg = select('#', ...)
         for i = 1, narg do
@@ -117,7 +117,7 @@ function lstg.loadSetting(change_vm)
     SetSEVolume(setting.sevolume / 100)
     SetBGMVolume(setting.bgmvolume / 100)
     lstg.calcScreen()
-    lstg.loadViewParams()
+    LoadViewParams()
     _SetBound()
 
     local size = glv:getDesignResolutionSize()

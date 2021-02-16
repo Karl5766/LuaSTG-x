@@ -10,16 +10,6 @@
 local profiler = profiler
 local e = lstg.eventDispatcher
 
-function BeforeRender()
-    lstg.forceSetViewMode('ui')
-
-    e:dispatchEvent('onBeforeRender')
-end
-
-function AfterRender()
-    e:dispatchEvent('onAfterRender')
-end
-
 local abs = abs
 local cos = cos
 local sin = sin
@@ -235,7 +225,9 @@ function RenderFunc()
     if stage_group:readyForRender() then
         BeginScene()
 
-        BeforeRender()
+        -- before render calls
+        ForceSetViewMode('ui')
+        e:dispatchEvent('onBeforeRender')
 
         --profiler.tic('stagerender')
         stage_group:render()
@@ -245,9 +237,8 @@ function RenderFunc()
         ObjRender()
         profiler.toc('ObjRender')
 
-        --profiler.tic('AfterRender')
-        AfterRender()
-        --profiler.toc('AfterRender')
+        -- after render calls
+        e:dispatchEvent('onAfterRender')
 
         --profiler.tic('EndScene')
         e:dispatchEvent('beforeEndScene')

@@ -5,8 +5,9 @@
 
 plus         = {}
 
-local DoFile = DoFile or lstg.DoFile
-DoFile("plus/Utility.lua")
-DoFile("plus/NativeAPI.lua")
-DoFile("plus/IO.lua")
-DoFile("plus/Replay.lua")
+DoFile("plus/utility.lua")
+
+DoFile("plus/local_directory_interfaces.lua")
+DoFile("plus/platforms.lua")
+
+DoFile("plus/file_stream.lua")

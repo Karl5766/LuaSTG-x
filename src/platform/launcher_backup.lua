@@ -155,7 +155,7 @@ end
 function M.enumMods(path)
     SystemLog(string.format('enum MODs in %q', path))
     local ret = {}
-    local files = plus.EnumFiles(path)
+    local files = GetBriefOfFilesInDirectory(path)
     for i, v in ipairs(files) do
         if v.isDirectory then
             if plus.FileExists(path .. v.name .. '/root.lua') then

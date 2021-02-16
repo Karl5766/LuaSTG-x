@@ -1,5 +1,4 @@
-local classCreater
-classCreater = function(instance, class, ...)
+local function classCreater(instance, class, ...)
     local ctor = rawget(class, "init")
     if ctor then
         ctor(instance, ...)  ---在有构造函数的情况下直接调用
@@ -99,58 +98,19 @@ function plus.TryCatch(t)
     end
 end
 
-local BIT_NUMBERS = {
-    2147483648,
-    1073741824,
-    536870912,
-    268435456,
-    134217728,
-    67108864,
-    33554432,
-    16777216,
-    8388608,
-    4194304,
-    2097152,
-    1048576,
-    524288,
-    262144,
-    131072,
-    65536,
-    32768,
-    16384,
-    8192,
-    4096,
-    2048,
-    1024,
-    512,
-    256,
-    128,
-    64,
-    32,
-    16,
-    8,
-    4,
-    2,
-    1
-}
-
-function plus.BAND(a, b)
-    assert(a >= 0 and a < 4294967296 and b >= 0 and b < 4294967296)
-
-    local ret = 0
-    for i = 1, 32 do
-        local w = BIT_NUMBERS[i]
-        local flag1 = a >= w
-        local flag2 = b >= w
-        if flag1 then
-            a = a - w
-        end
-        if flag2 then
-            b = b - w
-        end
-        if flag1 and flag2 then
-            ret = ret + w
-        end
+---gives an error by a messagebox
+---@param msg string
+---@param title string
+---@param exit boolean true if omitted
+function plus.error(msg, title, exit)
+    msg = msg or ''
+    title = title or ''
+    exit = exit or (exit == nil)
+    local emsg = exit and ', exit' or ''
+    SystemLog(string.format('error: [%s]%s' .. emsg, title, msg))
+    MessageBox(msg, title)
+    if exit then
+        lstg.FrameEnd()
+        os.exit()
     end
-    return ret
 end

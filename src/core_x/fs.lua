@@ -7,7 +7,7 @@ local fu = cc.FileUtils:getInstance()
 function M.listFiles(rootpath, pathes)
     pathes = pathes or {}
     assert(rootpath)
-    local files = plus.EnumFiles(rootpath)
+    local files = GetBriefOfFilesInDirectory(rootpath)
     for i, v in ipairs(files) do
         if not v.isDirectory then
             table.insert(pathes, v.fullPath)

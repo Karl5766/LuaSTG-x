@@ -7,8 +7,8 @@
 
 local FU = cc.FileUtils:getInstance()
 
---- If the directory exists, add directory path to the default paths;
---- otherwise the function will load the zip files with LoadPack() function.
+---If the directory exists, add directory path to the default paths;
+---otherwise the function will load the zip files with LoadPack() function.
 ---@param directory_path string the directory path to add
 function lstg.AddDirectoryToDefaultPaths(directory_path)
     local writable_path = plus.getWritablePath()
@@ -80,7 +80,7 @@ function lstg.loadMod()
 
     Include('root.lua')
 
-    --lstg.loadSetting()
+    lstg.loadSetting()
 
     RegisterClasses()
     SetTitle(setting.mod)
@@ -98,7 +98,7 @@ function lstg.enumPlugins()
     FU:addSearchPath(path)
     SystemLog(string.format('enum plugins in %q', path))
     local ret = {}
-    local files = plus.EnumFiles(path)
+    local files = GetBriefOfFilesInDirectory(path)
     for i, v in ipairs(files) do
         -- skip name start with dot
         if v.name:sub(1, 1) ~= '.' then

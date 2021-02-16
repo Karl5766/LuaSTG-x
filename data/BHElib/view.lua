@@ -1,32 +1,92 @@
-----------------------------------------------------------------------------------
----Defines 3 view modes: "3d", "world", "ui"
-----------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------
+---view.lua
+---date: 2021.2.15
+---desc: Defines 3 view modes: "3d", "world", "ui", and provides interfaces to switch among them
+---modifier:
+---     Karl, 2021.2.14, re-formatted the file and modified some comments
+---------------------------------------------------------------------------------------------------
 
 lstg.view3d = {
-    ---eye position
-    eye  = { 0, 0, -1 },
-    ---at position
-    at   = { 0, 0, 0 },
-    ---up vector
-    up   = { 0, 1, 0 },
-    ---field of view y (rad)
-    fovy = PI_2,
-    ---clipping plane, {near, far}
-    z    = { 0, 2 },
-    ---fog param, {start, end, color}
-    fog  = { 0, 0, Color(0x00000000) }
+    eye  = { 0, 0, -1 },                -- camera position
+    at   = { 0, 0, 0 },                 -- camera target position
+    up   = { 0, 1, 0 },                 -- camera up, used for determining the orientation of the camera
+    fovy = PI_2,                        -- controls size of spherical view field in vertical direction (in radians)
+    z    = { 0, 2 },                    -- clipping plane, {near, far}
+    fog  = { 0, 0, Color(0x00000000) }  -- fog param, {start, end, color}
 }
+
+---重置lstg.view3d的值
+function Reset3D()
+    lstg.view3d.eye = { 0, 0, -1 }
+    lstg.view3d.at = { 0, 0, 0 }
+    lstg.view3d.up = { 0, 1, 0 }
+    lstg.view3d.fovy = PI_2
+    lstg.view3d.z = { 1, 2 }
+    lstg.view3d.fog = { 0, 0, Color(0x00000000) }
+end
+
+---设置lstg.view3d的值
+function Set3D(key, a, b, c)
+    if key == 'fog' then
+        a = tonumber(a or 0)
+        b = tonumber(b or 0)
+        lstg.view3d.fog = { a, b, c }
+        return
+    end
+    a = tonumber(a or 0)
+    b = tonumber(b or 0)
+    c = tonumber(c or 0)
+    if key == 'eye' then
+        lstg.view3d.eye = { a, b, c }
+    elseif key == 'at' then
+        lstg.view3d.at = { a, b, c }
+    elseif key == 'up' then
+        lstg.view3d.up = { a, b, c }
+    elseif key == 'fovy' then
+        lstg.view3d.fovy = a
+    elseif key == 'z' then
+        lstg.view3d.z = { a, b }
+    end
+end
+
+---@param x number x in 3d coordinates
+---@param y number y in 3d coordinates
+---@param z number z in 3d coordinates
+---@return number, number
+function _3DToWorld(x, y, z)
+    local view3d = lstg.view3d
+    local m1 = math.Mat4:createPerspective(
+            view3d.fovy,
+            -(_world.r - _world.l) / (_world.t - _world.b),
+            view3d.z[1], view3d.z[2])
+    local eye = math.Vec3(view3d.eye[1], view3d.eye[2], view3d.eye[3])
+    local target = math.Vec3(view3d.at[1], view3d.at[2], view3d.at[3])
+    local up = math.Vec3(view3d.up[1], view3d.up[2], view3d.up[3])
+    local m2 = math.Mat4:createLookAt(eye, target, up)
+    local m = m1 * m2
+    local v = m:transformVector(x, y, z, 1)
+    local xx, yy, zz, ww = v.x, v.y, v.z, v.w
+    xx = xx / ww
+    yy = yy / ww
+    xx = (xx + 1) * 0.5 * (_world.scrr - _world.scrl)
+    yy = (yy + 1) * 0.5 * (_world.scrt - _world.scrb)
+    return xx + _world.l, yy + _world.b
+end
+
+---------------------------------------------------------------------------------------------------
+
 lstg.scale_3d = 0.007 * screen.scale
 
-local scale
-local ui_vp_l, ui_vp_r, ui_vp_b, ui_vp_t
-local ui_or_l, ui_or_r, ui_or_b, ui_or_t
-local world_vp_l, world_vp_r, world_vp_b, world_vp_t
-local world_or_l, world_or_r, world_or_b, world_or_t
+local scale  -- the value of ui_vp divided by ui_or
+local ui_vp_l, ui_vp_r, ui_vp_b, ui_vp_t  -- rect of the whole window
+local ui_or_l, ui_or_r, ui_or_b, ui_or_t  -- rect of the whole window after divied by scale, for SetOrtho
+local world_vp_l, world_vp_r, world_vp_b, world_vp_t  -- world (play field) projected to the window coordinates
+local world_or_l, world_or_r, world_or_b, world_or_t  -- world (play field) in play field coordinates, for SetOrtho
 local world
 local _world_dirty = true
 
-local function _log()
+---print information about local variables to log file
+local function WriteToLog()
     local fmt = '%.1f, %.1f, %.1f, %.1f'
     local ui_vp = string.format(fmt, ui_vp_l, ui_vp_r, ui_vp_b, ui_vp_t)
     local ui_or = string.format(fmt, ui_or_l, ui_or_r, ui_or_b, ui_or_t)
@@ -40,7 +100,8 @@ local function _log()
     SystemLog('view params:\n' .. stringify(t))
 end
 
-local function loadViewParams()
+---update local variables according to values in global setting and screen tables
+function _G.LoadViewParams()
     local screen = screen
     local setting = setting
 
@@ -68,21 +129,15 @@ local function loadViewParams()
     --local x0,y0=WorldToScreen(0,0)
     --local x1,y1=WorldToScreen(1,1)
     --SystemLog(string.format('WorldToScreen: %f, %f, %f, %f',x0,y0,x1,y1))
-    --_log()
+    WriteToLog()
+
     local check = world_or_l ~= world_or_r
     check = check and world_or_b ~= world_or_t
     if not check then
-        _log()
         error('error in loadViewParams')
     end
-    --assert(world_or_l~=world_or_r)
-    --assert(world_or_b~=world_or_t)
 end
-local function _LoadViewParams()
-    loadViewParams()
-    _log()
-end
-lstg.loadViewParams = _LoadViewParams
+local LoadViewParams = LoadWorldParams
 
 local sqrt = math.sqrt
 local tan = math.tan
@@ -95,16 +150,21 @@ local mt_world = {
         _world_dirty = true
     end
 }
-local function _set_mt()
+
+local function SetWorldMetatable()
     world = lstg.world
-    --lstg.world = {}
     lstg.world = setmetatable({}, mt_world)
 end
-_set_mt()
-loadViewParams()
+SetWorldMetatable()
+
 local _last_world = lstg.world
 
-local function _setViewMode(mode)
+--- 强行设置视角模式，分别对应坐标系
+--- 'world': lstg.world
+--- 'ui': screen
+--- '3d': lstg.view3d
+---@param mode string specifies the mode to set; can be 'world', 'ui', or '3d'
+function ForceSetViewMode(mode)
     lstg.viewmode = mode
     if mode == '3d' then
         local view3d = lstg.view3d
@@ -148,64 +208,29 @@ local function _setViewMode(mode)
         error(i18n 'Invalid arguement for SetViewMode')
     end
 end
-lstg.forceSetViewMode = _setViewMode
 
---- 设置视角模式: 3d world ui
---- 'world': 对应lstrg.world
---- 'ui': 对应screen坐标系
---- '3d': 对应lstg.view3d
----@param mode string
+--- 设置视角模式，分别对应坐标系
+--- 'world': lstg.world
+--- 'ui': screen
+--- '3d': lstg.view3d
+---@param mode string specifies the mode to set; can be 'world', 'ui', or '3d'
 function SetViewMode(mode)
     if lstg.world ~= _last_world then
         _last_world = lstg.world
-        _set_mt()
-        loadViewParams()
+        SetWorldMetatable()
+        LoadViewParams()
     elseif _world_dirty then
-        loadViewParams()
+        LoadViewParams()
     elseif lstg.viewmode == mode then
         return
     end
-    _setViewMode(mode)
-end
-
----设置3D变量
-function Set3D(key, a, b, c)
-    if key == 'fog' then
-        a = tonumber(a or 0)
-        b = tonumber(b or 0)
-        lstg.view3d.fog = { a, b, c }
-        return
-    end
-    a = tonumber(a or 0)
-    b = tonumber(b or 0)
-    c = tonumber(c or 0)
-    if key == 'eye' then
-        lstg.view3d.eye = { a, b, c }
-    elseif key == 'at' then
-        lstg.view3d.at = { a, b, c }
-    elseif key == 'up' then
-        lstg.view3d.up = { a, b, c }
-    elseif key == 'fovy' then
-        lstg.view3d.fovy = a
-    elseif key == 'z' then
-        lstg.view3d.z = { a, b }
-    end
-end
-
----重置3D变量
-function Reset3D()
-    lstg.view3d.eye = { 0, 0, -1 }
-    lstg.view3d.at = { 0, 0, 0 }
-    lstg.view3d.up = { 0, 1, 0 }
-    lstg.view3d.fovy = PI_2
-    lstg.view3d.z = { 1, 2 }
-    lstg.view3d.fog = { 0, 0, Color(0x00000000) }
+    ForceSetViewMode(mode)
 end
 
 ---turn the metrics of a view into a string for output
 ---@param mode string the view mode to output information about
 ---@return string human-readable info of the view
-local function getViewModeInfo(mode)
+function GetViewModeInfo(mode)
     local ret = ''
     if mode == '3d' then
         local view3d = lstg.view3d
@@ -250,4 +275,3 @@ local function getViewModeInfo(mode)
     end
     return ret
 end
-lstg.getViewModeInfo = getViewModeInfo

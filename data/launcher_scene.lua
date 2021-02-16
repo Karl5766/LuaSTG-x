@@ -1,8 +1,8 @@
 -----------------------------------------------------------------------
 ---launcher_scene.lua
----defines the scene graph etc. for mod launcher scene.
----Karl.
----DateTime: 2021/2/5 21:19
+---defines the scene graph etc. for selection launcher scene.
+---author: Karl
+---date: 2021.2.5
 -----------------------------------------------------------------------
 
 ---@class cc.Scene

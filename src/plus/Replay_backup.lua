@@ -36,7 +36,7 @@ plus.ReplayFrameReader  = ReplayFrameReader
 ---@param offset number 录像数据偏移
 ---@param count number 录像帧数量
 function ReplayFrameReader:init(path, offset, count)
-    self._fs = plus.FileStream(path, "rb")
+    self._fs = FileStream(path, "rb")
 
     ---定位到录像数据开始位置
     self._fs:Seek(offset)
@@ -61,12 +61,12 @@ end
 --- 重置
 function ReplayFrameReader:Reset()
     self._read = 0
-    self._fs:Seek(self._offset)
+    self._fs:seek(self._offset)
 end
 
 --- 关闭文件流
 function ReplayFrameReader:Close()
-    self._fs:Close()
+    self._fs:close()
 end
 
 ---------------------------------------------------ReplayFrameWriter
@@ -138,7 +138,7 @@ end
 function ReplayManager.ReadReplayInfo(path)
     --SystemLog('read replay info from '..path)
     local ret = { path = path }
-    local f = plus.FileStream(path, "rb")
+    local f = FileStream(path, "rb")
     local r = plus.BinaryReader(f)
 
     plus.TryCatch {
@@ -218,7 +218,7 @@ end
 ---　}
 ---}
 function ReplayManager.SaveReplayInfo(path, data)
-    local f = plus.FileStream(path, "wb")
+    local f = FileStream(path, "wb")
     local w = plus.BinaryWriter(f)
 
     plus.TryCatch {
@@ -302,7 +302,7 @@ end
 function ReplayManager:Refresh()
     self._slots = {}
 
-    local files = plus.EnumFiles(self._repdir)
+    local files = GetBriefOfFilesInDirectory(self._repdir)
     for _, v in ipairs(files) do
         local _, _, id = string.find(v.name, self._filefmt)
         if v.isDirectory == false and id ~= nil then
