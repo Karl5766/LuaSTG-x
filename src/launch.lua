@@ -117,7 +117,6 @@ function lstg.loadSetting(change_vm)
     SetSEVolume(setting.sevolume / 100)
     SetBGMVolume(setting.bgmvolume / 100)
     lstg.calcScreen()
-    LoadViewParams()
     _SetBound()
 
     local size = glv:getDesignResolutionSize()

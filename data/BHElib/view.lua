@@ -5,6 +5,7 @@
 ---modifier:
 ---     Karl, 2021.2.14, re-formatted the file and modified some comments
 ---------------------------------------------------------------------------------------------------
+---view3d
 
 lstg.view3d = {
     eye  = { 0, 0, -1 },                -- camera position
@@ -73,17 +74,40 @@ function _3DToWorld(x, y, z)
     return xx + _world.l, yy + _world.b
 end
 
----------------------------------------------------------------------------------------------------
-
 lstg.scale_3d = 0.007 * screen.scale
+
+---------------------------------------------------------------------------------------------------
+---set the metatable of global lstg.world
+
+local _world
+local _world_dirty = true
+
+local mt_world = {
+    __index    = function(t, k)
+        return _world[k]
+    end,
+    __newindex = function(t, k, v)
+        _world[k] = v
+        _world_dirty = true
+    end
+}
+
+local function SetWorldMetatable()
+    _world = lstg.world
+    lstg.world = setmetatable({}, mt_world)
+end
+SetWorldMetatable()
+
+local _last_world = lstg.world
+
+---------------------------------------------------------------------------------------------------
+---view parameters
 
 local scale  -- the value of ui_vp divided by ui_or
 local ui_vp_l, ui_vp_r, ui_vp_b, ui_vp_t  -- rect of the whole window
 local ui_or_l, ui_or_r, ui_or_b, ui_or_t  -- rect of the whole window after divied by scale, for SetOrtho
 local world_vp_l, world_vp_r, world_vp_b, world_vp_t  -- world (play field) projected to the window coordinates
 local world_or_l, world_or_r, world_or_b, world_or_t  -- world (play field) in play field coordinates, for SetOrtho
-local world
-local _world_dirty = true
 
 ---print information about local variables to log file
 local function WriteToLog()
@@ -100,8 +124,8 @@ local function WriteToLog()
     SystemLog('view params:\n' .. stringify(t))
 end
 
----update local variables according to values in global setting and screen tables
-function _G.LoadViewParams()
+---initialize/reset local variables according to values in global setting and screen tables
+local function LoadViewParams()
     local screen = screen
     local setting = setting
 
@@ -116,14 +140,14 @@ function _G.LoadViewParams()
     ui_or_b = -screen.dy
     ui_or_t = (setting.resy / scale - screen.dy)
 
-    world_vp_l = (world.scrl + screen.dx) * scale
-    world_vp_r = (world.scrr + screen.dx) * scale
-    world_vp_b = (world.scrb + screen.dy) * scale
-    world_vp_t = (world.scrt + screen.dy) * scale
-    world_or_l = world.l
-    world_or_r = world.r
-    world_or_b = world.b
-    world_or_t = world.t
+    world_vp_l = (_world.scrl + screen.dx) * scale
+    world_vp_r = (_world.scrr + screen.dx) * scale
+    world_vp_b = (_world.scrb + screen.dy) * scale
+    world_vp_t = (_world.scrt + screen.dy) * scale
+    world_or_l = _world.l
+    world_or_r = _world.r
+    world_or_b = _world.b
+    world_or_t = _world.t
 
     _world_dirty = false
     --local x0,y0=WorldToScreen(0,0)
@@ -137,27 +161,12 @@ function _G.LoadViewParams()
         error('error in loadViewParams')
     end
 end
-local LoadViewParams = LoadWorldParams
+LoadViewParams()
+
+---------------------------------------------------------------------------------------------------
 
 local sqrt = math.sqrt
 local tan = math.tan
-local mt_world = {
-    __index    = function(t, k)
-        return world[k]
-    end,
-    __newindex = function(t, k, v)
-        world[k] = v
-        _world_dirty = true
-    end
-}
-
-local function SetWorldMetatable()
-    world = lstg.world
-    lstg.world = setmetatable({}, mt_world)
-end
-SetWorldMetatable()
-
-local _last_world = lstg.world
 
 --- 强行设置视角模式，分别对应坐标系
 --- 'world': lstg.world
@@ -168,7 +177,7 @@ function ForceSetViewMode(mode)
     lstg.viewmode = mode
     if mode == '3d' then
         local view3d = lstg.view3d
-        local world_ = lstg.world
+        local cur_world = lstg.world
         SetViewport(
                 world_vp_l, world_vp_r, world_vp_b, world_vp_t)
         SetPerspective(
@@ -176,7 +185,7 @@ function ForceSetViewMode(mode)
                 view3d.at[1], view3d.at[2], view3d.at[3],
                 view3d.up[1], view3d.up[2], view3d.up[3],
                 view3d.fovy,
-                (world_.r - world_.l) / (world_.t - world_.b),
+                (cur_world.r - cur_world.l) / (cur_world.t - cur_world.b),
                 view3d.z[1], view3d.z[2])
 
         SetFog(view3d.fog[1], view3d.fog[2], view3d.fog[3])
@@ -185,7 +194,7 @@ function ForceSetViewMode(mode)
         SetImageScale(
                 sqrt(dx * dx + dy * dy + dz * dz) * 2
                         * tan(view3d.fovy * 0.5)
-                        / (world_.scrr - world_.scrl))
+                        / (cur_world.scrr - cur_world.scrl))
 
     elseif mode == 'world' then
         SetViewport(
