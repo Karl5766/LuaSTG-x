@@ -15,7 +15,7 @@ function Include(filename)
     filename = string.gsub(filename, '//', '/')
     local f = filename
     filename = FU:fullPathForFilename(f)
-    if not plus.FileExists(filename) then
+    if not IsFileExist(filename) then
         error(string.format('%s: %s', i18n "can't find script", f))
     end
 

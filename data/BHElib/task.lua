@@ -34,8 +34,6 @@ function task.New(self, f)
     return rt
 end
 
---TODO
-
 ---@~chinese 执行（resume）task中的协程
 ---
 ---@~english execute all the tasks under self.task

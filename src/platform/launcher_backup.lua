@@ -158,7 +158,7 @@ function M.enumMods(path)
     local files = GetBriefOfFilesInDirectory(path)
     for i, v in ipairs(files) do
         if v.isDirectory then
-            if plus.FileExists(path .. v.name .. '/root.lua') then
+            if IsFileExist(path .. v.name .. '/root.lua') then
                 table.insert(ret, v)
             end
         else

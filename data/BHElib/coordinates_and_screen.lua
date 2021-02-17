@@ -19,10 +19,8 @@ local _world = {
 ---p(l/r/b/t): 用于player限位
 lstg.world = _world
 
-function _SetBound()
-    SetBound(_world.boundl, _world.boundr, _world.boundb, _world.boundt)
-end
-_SetBound()
+-- set engine out of bound deletion rect area
+SetBound(_world.boundl, _world.boundr, _world.boundb, _world.boundt)
 
 ----------------------------------------------------------------------------------
 

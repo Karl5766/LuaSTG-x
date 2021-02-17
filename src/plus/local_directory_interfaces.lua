@@ -13,7 +13,7 @@ local FU = cc.FileUtils:getInstance()
 ---判断文件是否存在，路径中所有'\\''//'当作'/'处理
 ---@param path string 路径
 ---@return boolean
-function plus.FileExists(path)
+function IsFileExist(path)
     path = string.gsub(path, '\\', '/')
     path = string.gsub(path, '//', '/')
     local ret = FU:isFileExist(path)

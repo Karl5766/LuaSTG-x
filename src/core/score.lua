@@ -54,7 +54,7 @@ end
 
 local username = setting.username or 'User'
 local fpath = score_dir .. username .. '.dat'
-if not plus.FileExists(fpath) then
+if not IsFileExist(fpath) then
     if scoredata == nil then
         scoredata = {}
     end

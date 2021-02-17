@@ -143,7 +143,7 @@ local function _DoSingleFrame()
     profiler.toc('ObjFrame')
 
     -- update current stage group
-    local stage_group = StageGroup.getInstance()
+    local stage_group = StageGroup.getRunningInstance()
     stage_group:update(1)
 
     profiler.tic('UserSystemOperation')
@@ -221,7 +221,7 @@ end
 ---@~english Will be invoked every frame to process all render instructions.
 ---
 function RenderFunc()
-    local stage_group = StageGroup.getInstance()
+    local stage_group = StageGroup.getRunningInstance()
     if stage_group:readyForRender() then
 
         -- begin scene

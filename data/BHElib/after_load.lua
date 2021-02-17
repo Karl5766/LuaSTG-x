@@ -5,7 +5,7 @@ local function loadModules()
     require('game.misc.batch_helper')
     require('game.misc.menu_eff')
     require('game.misc.misc')
-    require('game.stage_ui')
+    require('BHElib.gui.stage_ui')
 end
 loadModules()
 
@@ -54,7 +54,9 @@ local _times = {}
 local _timer = 0
 local sw = lstg.StopWatch()
 
-lstg.eventDispatcher:addListener('ui.DrawFrame', function()
+function ui.DrawFrame()
+    lstg.eventDispatcher:dispatchEvent('ui.DrawFrame')
+
     SetViewMode('ui')
     SetFontState('menu', '', Color(0xFFFFFFFF))
 
@@ -73,6 +75,7 @@ lstg.eventDispatcher:addListener('ui.DrawFrame', function()
     Render('white', r, (t + b) / 2, 0, 2 / ww, (t - b + 1) / hh)
     SetImageState('white', '', color.White)
 
+    -- for performance profiling
     local dt = sw:get() * 1000
     sw:reset()
     local fps = calcFPS(dt)
@@ -94,11 +97,6 @@ lstg.eventDispatcher:addListener('ui.DrawFrame', function()
     str = string.format('obj:%d\n', GetnObj()) .. str
 
     RenderText('menu', str, 630, 0, 0.5, 'right', 'bottom')
-
-end, 1, 'ui.DrawFrame')
-
-function ui.DrawFrame()
-    lstg.eventDispatcher:dispatchEvent('ui.DrawFrame')
 end
 
 XASSETS = {}

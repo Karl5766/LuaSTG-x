@@ -86,18 +86,18 @@ function import(module)
         p = GetFolder(p, true)
         assert(p and p ~= '', 'import: can not find source root of ' .. module)
         local p1 = p .. module .. '.lua'
-        if plus.FileExists(p1) then
+        if IsFileExist(p1) then
             Include(p1)
             return
         end
         local p2 = p .. module .. '/__init__.lua'
-        if plus.FileExists(p2) then
+        if IsFileExist(p2) then
             Include(p2)
             return
         end
         --再查找根目录
         local p3 = './' .. module .. '/__init__.lua'
-        if plus.FileExists(p3) then
+        if IsFileExist(p3) then
             Include(p3)
             return
         end

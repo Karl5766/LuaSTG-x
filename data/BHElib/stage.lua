@@ -52,7 +52,7 @@ end
 function Stage.update(self, dt)
     self.timer = self.timer + dt
 
-    if ran:Float(0, 1) > 0.99 then
+    if ran:Float(0, 1) > 0 then
         local obj = New(Object)
         obj.img = "test:image"
         obj.vx = ran:Float(-4, 4)

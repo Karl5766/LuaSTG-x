@@ -2,7 +2,7 @@
 ---stage_group.lua
 ---author: Karl
 ---date: 2021.2.12
----references: -x/THlib/ext.lua
+---reference: -x/THlib/ext.lua
 ---desc: Defines the StageGroup class. At any given point, globally only one stage group can be
 ---running at a time, entry to another stage group will replace the currently running stage group
 ---with the new one.
@@ -49,7 +49,7 @@ function StageGroup.getAll()
 end
 
 ---@return StageGroup the currently running stage group in the game
-function StageGroup.getInstance()
+function StageGroup.getRunningInstance()
     return _current_stage_group
 end
 
@@ -137,12 +137,11 @@ function StageGroup.goToNextStage(self)
         current_stage:del()
         task.Clear(current_stage)
 
-        --LPOOL.ResetPool 清空对象池
         ResetPool()
         SystemLog(i18n 'clear object pool')
     end
 
-    --next_stage顶替current_stage
+    -- next_stage顶替current_stage
     self.current_stage = next_stage
     self.next_stage = nil
 

@@ -29,7 +29,7 @@ function lstg.AddDirectoryToDefaultPaths(directory_path)
     -- if directory is not found, look for zip files
     if not file_is_found then
         for _, zip_file in ipairs(possible_zip) do
-            if plus.FileExists(zip_file) then
+            if IsFileExist(zip_file) then
                 local zip_path = FU:fullPathForFilename(zip_file)
                 SystemLog(string.format(i18n "load %s from %q", v, zip_path))
                 LoadPack(zip_path)
@@ -66,10 +66,10 @@ function lstg.loadMod()
     end
 
     -- look for /root.lua or .zip
-    if dir and plus.FileExists(mod_path .. '/root.lua') then
+    if dir and IsFileExist(mod_path .. '/root.lua') then
         FU:addSearchPath(mod_path)
         SystemLog(string.format(i18n 'load mod %q from local path', setting.mod))
-    elseif zip and plus.FileExists(mod_path .. '.zip') then
+    elseif zip and IsFileExists(mod_path .. '.zip') then
         SystemLog(string.format(i18n 'load mod %q from zip file', setting.mod))
         LoadPack(path .. '.zip')
     else
@@ -102,7 +102,7 @@ function lstg.enumPlugins()
         -- skip name start with dot
         if v.name:sub(1, 1) ~= '.' then
             if v.isDirectory then
-                if plus.FileExists(path .. v.name .. '/__init__.lua') then
+                if IsFileExist(path .. v.name .. '/__init__.lua') then
                     table.insert(ret, v)
                 end
             else
