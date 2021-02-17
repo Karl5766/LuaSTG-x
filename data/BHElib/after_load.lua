@@ -1,13 +1,20 @@
---
-LoadTexture('logo', 'game/blank.png')
+---------------------------------------------------------------------------------------------------
+---after_load.lua
+---date: 2021.2.17
+---desc:
+---modifier:
+---     Karl, 2021.2.17, moved profiling code up
+---------------------------------------------------------------------------------------------------
 
 local function loadModules()
-    require('game.misc.batch_helper')
-    require('game.misc.menu_eff')
-    require('game.misc.misc')
-    require('BHElib.gui.stage_ui')
+    require('BHElib.ui.menu_task')
+    require('BHElib.ui.arrange_string')
+    require('BHElib.ui.stage_ui')
 end
 loadModules()
+
+---------------------------------------------------------------------------------------------------
+---performance profile
 
 local _dt = {}
 local _fps = 0
@@ -25,9 +32,6 @@ local function calcFPS(dt)
     end
     return _fps
 end
-
-local bg_path = 'game/front/stage_ui.png'
-LoadImageFromFile('stage_bg', bg_path)
 
 local pros = {
     'ObjFrame',
@@ -54,27 +58,7 @@ local _times = {}
 local _timer = 0
 local sw = lstg.StopWatch()
 
-function ui.DrawFrame()
-    lstg.eventDispatcher:dispatchEvent('ui.DrawFrame')
-
-    SetViewMode('ui')
-    SetFontState('menu', '', Color(0xFFFFFFFF))
-
-    _timer = _timer + 1
-
-    Render('stage_bg', 320, 240, 0, 0.5)
-
-    SetImageState('white', '', color.Red)
-    local w = lstg.world
-    local l, r, b, t = w.scrl, w.scrr, w.scrb, w.scrt
-    local sz = FindResSprite('white'):getSprite():getContentSize()
-    local ww, hh = sz.width, sz.height
-    Render('white', (l + r) / 2, t, 0, (r - l + 1) / ww, 2 / hh)
-    Render('white', (l + r) / 2, b, 0, (r - l + 1) / ww, 2 / hh)
-    Render('white', l, (t + b) / 2, 0, 2 / ww, (t - b + 1) / hh)
-    Render('white', r, (t + b) / 2, 0, 2 / ww, (t - b + 1) / hh)
-    SetImageState('white', '', color.White)
-
+local function RenderPerformanceProfile()
     -- for performance profiling
     local dt = sw:get() * 1000
     sw:reset()
@@ -99,7 +83,33 @@ function ui.DrawFrame()
     RenderText('menu', str, 630, 0, 0.5, 'right', 'bottom')
 end
 
-XASSETS = {}
-XASSETS.font = {
-    wqy    = 'font/WenQuanYiMicroHeiMono.ttf',
-}
+---------------------------------------------------------------------------------------------------
+
+function ui.DrawFrame()
+    lstg.eventDispatcher:dispatchEvent('ui.DrawFrame')
+
+    SetViewMode('ui')
+    SetFontState('menu', '', Color(0xFFFFFFFF))
+
+    _timer = _timer + 1
+
+    -- render the hud background
+    Render('stage_bg', 320, 240, 0, 0.5)
+
+    -- render a thin rectangular border
+    SetImageState('white', '', color.Red)
+    local w = lstg.world
+    local l, r, b, t = w.scrl, w.scrr, w.scrb, w.scrt
+
+    local sz = FindResSprite('white'):getSprite():getContentSize()
+    local ww, hh = sz.width, sz.height
+    Render('white', (l + r) / 2, t, 0, (r - l + 1) / ww, 2 / hh)
+    Render('white', (l + r) / 2, b, 0, (r - l + 1) / ww, 2 / hh)
+    Render('white', l, (t + b) / 2, 0, 2 / ww, (t - b + 1) / hh)
+    Render('white', r, (t + b) / 2, 0, 2 / ww, (t - b + 1) / hh)
+    SetImageState('white', '', color.White)
+
+    RenderPerformanceProfile()
+end
+
+---------------------------------------------------------------------------------------------------

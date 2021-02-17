@@ -15,6 +15,8 @@ local _include_list = {
     "BHElib/coordinates_and_screen.lua",
     "BHElib/view.lua",
 
+    "BHElib/global_assets.lua",  -- loads some assets globally
+
     "BHElib/game_object.lua",
     "BHElib/task.lua",
 

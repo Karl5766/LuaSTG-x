@@ -1,7 +1,4 @@
-lstg.quit_flag = false
-
----@type StageGroup
-global_stage_group = nil
+lstg.quit_flag = false  -- checks in game update function, if true then exit the game
 
 ---In-game global variables
 lstg.var = { username = setting.username }
