@@ -119,7 +119,8 @@ function StageGroup.update(self, dt)
 end
 
 function StageGroup.render(self)
-    Render("test:image", 100, 100, 0, 1, 1, 0.5)
+    SetViewMode("ui")
+    Render("test:image", 747, 480, 0, 1, 1, 0.5)
 end
 
 ---set the next stage as the current stage, and enter the stage;

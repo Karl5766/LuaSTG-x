@@ -223,16 +223,18 @@ end
 function RenderFunc()
     local stage_group = StageGroup.getInstance()
     if stage_group:readyForRender() then
+
+        -- begin scene
         BeginScene()
 
         -- before render calls
         ForceSetViewMode('ui')
         e:dispatchEvent('onBeforeRender')
 
-        --profiler.tic('stagerender')
+        -- render calls
         stage_group:render()
-        --profiler.toc('stagerender')
 
+        ForceSetViewMode('world')
         profiler.tic('ObjRender')
         ObjRender()
         profiler.toc('ObjRender')
@@ -240,11 +242,10 @@ function RenderFunc()
         -- after render calls
         e:dispatchEvent('onAfterRender')
 
-        --profiler.tic('EndScene')
+        -- end scene
         e:dispatchEvent('beforeEndScene')
         EndScene()
         e:dispatchEvent('afterEndScene')
-        --profiler.toc('EndScene')
     end
 end
 

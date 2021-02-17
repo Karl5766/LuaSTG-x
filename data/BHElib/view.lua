@@ -168,7 +168,8 @@ LoadViewParams()
 local sqrt = math.sqrt
 local tan = math.tan
 
---- 强行设置视角模式，分别对应坐标系
+--- 强行设置视角模式。
+--- 可选的三个模式分别对应坐标系：
 --- 'world': lstg.world
 --- 'ui': screen
 --- '3d': lstg.view3d

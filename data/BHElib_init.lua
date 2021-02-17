@@ -15,7 +15,7 @@ local _include_list = {
     "BHElib/coordinates_and_screen.lua",
     "BHElib/view.lua",
 
-    "BHElib/class.lua",
+    "BHElib/game_object.lua",
     "BHElib/task.lua",
 
     "BHElib/stage.lua",

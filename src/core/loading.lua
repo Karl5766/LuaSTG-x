@@ -52,7 +52,7 @@ end
 ---calls lstg.loadPlugin();
 ---run root.lua file;
 ---call lstg.loadSetting();
----call RegisterClasses(), SetTitle() and
+---call RegisterGameClasses(), SetTitle() and
 ---set the resource pool to stage afterwards
 function lstg.loadMod()
     local writable_path = plus.getWritablePath()
@@ -82,7 +82,6 @@ function lstg.loadMod()
 
     lstg.loadSetting()
 
-    RegisterClasses()
     SetTitle(setting.mod)
     SetResourceStatus('stage')
 end
