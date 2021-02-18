@@ -11,6 +11,7 @@ GROUP_NONTJT          = 7
 GROUP_ALL             = 16
 GROUP_NUM_OF_GROUP    = 16
 
+
 --层次结构
 
 LAYER_BG              = -700
@@ -21,6 +22,7 @@ LAYER_ITEM            = -300
 LAYER_ENEMY_BULLET    = -200
 LAYER_ENEMY_BULLET_EF = -100
 LAYER_TOP             = 0
+
 
 --常量
 

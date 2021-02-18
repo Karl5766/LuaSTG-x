@@ -116,7 +116,6 @@ function lstg.loadSetting(change_vm)
     SetTitle(setting.mod)
     SetSEVolume(setting.sevolume / 100)
     SetBGMVolume(setting.bgmvolume / 100)
-    CalcScreen()
 
     local size = glv:getDesignResolutionSize()
     SystemLog(string.format('DesignRes = %d, %d', size.width, size.height))

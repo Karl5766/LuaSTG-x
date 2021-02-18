@@ -10,10 +10,9 @@ local _include_list = {
     "BHElib/const.lua",  -- defines some constant values
     "BHElib/status.lua",
 
+    "BHElib/render_mode.lua",
     "BHElib/input.lua",
-
     "BHElib/coordinates_and_screen.lua",
-    "BHElib/view.lua",
 
     "BHElib/global_assets.lua",  -- loads some assets globally
 
@@ -28,6 +27,11 @@ local _include_list = {
     "BHElib/after_load.lua",
 }
 
-for _, file_path in ipairs(_include_list) do
-    DoFile(file_path)
+local function BHElibInit()
+    for _, file_path in ipairs(_include_list) do
+        Include(file_path)
+    end
+
+    --require("BHElib.coordinates_and_screen").initGameCoordinates()
 end
+BHElibInit()

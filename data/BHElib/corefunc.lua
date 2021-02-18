@@ -1,14 +1,14 @@
----------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------
 ---corefunc.lua
----desc: Defines core functions, which includes the game update and
----render functions.
+---desc: Defines core functions, which includes the game update and render functions.
 ---modifier:
 ---     Karl, 2021.2.12 replaced stage switching and stage group
 ---     related code
----------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------
 
 local profiler = profiler
 local e = lstg.eventDispatcher
+local coordinates = require("BHElib.coordinates_and_screen")
 
 local abs = abs
 local cos = cos
@@ -188,7 +188,7 @@ function DoFrame()
     end
 end
 
-----------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------
 
 local _process_one_task = async.processOneTask
 
@@ -214,7 +214,7 @@ function FrameFunc()
     return lstg.quit_flag
 end
 
-----------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------
 
 ---@~chinese 将被每帧调用以执行渲染指令。
 ---
@@ -228,13 +228,13 @@ function RenderFunc()
         BeginScene()
 
         -- before render calls
-        ForceSetViewMode('ui')
+        coordinates.setRenderView("ui")
         e:dispatchEvent('onBeforeRender')
 
         -- render calls
         stage_group:render()
 
-        ForceSetViewMode('world')
+        coordinates.setRenderView("game")
         profiler.tic('ObjRender')
         ObjRender()
         profiler.toc('ObjRender')
@@ -249,7 +249,7 @@ function RenderFunc()
     end
 end
 
-----------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------
 
 ---@~chinese 将在窗口失去焦点时调用。
 ---
@@ -315,7 +315,7 @@ e:addListener('beforeEndScene', function()
     if show_collider then
         DrawCollider()
     end
-    SetViewMode('world')
+    coordinates.setRenderView("game")
 end, 9)
 
 --
@@ -334,168 +334,27 @@ end
 
 --
 
-local shader_path = "src/shader/"
-local internalShaders = {
-    add   = { "Common.vert", "ColorAdd.frag" },
-    addF1 = { "Fog_Liner.vert", "ColorAdd_Fog.frag" },
-    addF2 = { "Fog_Exp1.vert", "ColorAdd_Fog.frag" },
-    addF3 = { "Fog_Exp2.vert", "ColorAdd_Fog.frag" },
-    mul   = { "Common.vert", "ColorMulti.frag" },
-    mulF1 = { "Fog_Liner.vert", "ColorMulti_Fog.frag" },
-    mulF2 = { "Fog_Exp1.vert", "ColorMulti_Fog.frag" },
-    mulF3 = { "Fog_Exp2.vert", "ColorMulti_Fog.frag" },
-}
-
-local _bop = ccb.BlendOperation
-local _bfac = ccb.BlendFactor
-local internalMode = {
-    ['add+add']   = { _bop.ADD, _bfac.SRC_ALPHA, _bfac.ONE },
-    ['add+alpha'] = { _bop.ADD, _bfac.SRC_ALPHA, _bfac.ONE_MINUS_SRC_ALPHA },
-    ['add+sub']   = { _bop.SUBTRACT, _bfac.SRC_ALPHA, _bfac.ONE },
-    ['add+rev']   = { _bop.RESERVE_SUBTRACT, _bfac.SRC_ALPHA, _bfac.ONE },
-
-    ['mul+add']   = { _bop.ADD, _bfac.SRC_ALPHA, _bfac.ONE },
-    ['mul+alpha'] = { _bop.ADD, _bfac.SRC_ALPHA, _bfac.ONE_MINUS_SRC_ALPHA },
-    ['mul+sub']   = { _bop.SUBTRACT, _bfac.SRC_ALPHA, _bfac.ONE },
-    ['mul+rev']   = { _bop.RESERVE_SUBTRACT, _bfac.SRC_ALPHA, _bfac.ONE },
-
-    ['']          = { _bop.ADD, _bfac.SRC_ALPHA, _bfac.ONE_MINUS_SRC_ALPHA },
-}
-for k, v in pairs(internalMode) do
-    local m = k:sub(1, 3)
-    if m == '' then
-        m = 'mul'
-    end
-    local s = internalShaders[m]
-    local p = CreateShaderProgramFromPath(
-            shader_path .. s[1], shader_path .. s[2])
-    assert(p)
-    local rm = lstg.RenderMode:create(k, v[1], v[2], v[3], p)
-    assert(rm, i18n 'failed to create RenderMode')
-    -- backup default RenderMode
-    rm:clone('_' .. k)
-    for i = 1, 3 do
-        local k_fog = ('%sF%d'):format(m, i)
-        local s_fog = internalShaders[k_fog]
-        local p_fog = CreateShaderProgramFromPath(
-                shader_path .. s_fog[1], shader_path .. s_fog[2])
-        local name = ('%s+fog%d'):format(k, i)
-        local rm_fog = lstg.RenderMode:create(name, v[1], v[2], v[3], p_fog)
-        assert(rm_fog, i18n 'failed to create RenderMode')
-    end
-end
-lstg.RenderMode:getByName(''):setAsDefault()
-
-function CreateRenderMode(name, blendEquation, blendFuncSrc, blendFuncDst, shaderName)
-    local shaderProgram
-    if not shaderName then
-        shaderProgram = lstg.RenderMode:getDefault():getProgram()
-    else
-        local res = FindResFX(shaderName)
-        if res then
-            shaderProgram = res:getProgram()
-        end
-    end
-    assert(shaderProgram)
-    if type(blendEquation) == 'string' then
-        blendEquation = _bop[blendEquation:upper()]
-    end
-    if type(blendFuncSrc) == 'string' then
-        blendFuncSrc = _bfac[blendFuncSrc:upper()]
-    end
-    if type(blendFuncDst) == 'string' then
-        blendFuncDst = _bfac[blendFuncDst:upper()]
-    end
-    local ret = lstg.RenderMode:create(
-            name, blendEquation, blendFuncSrc, blendFuncDst, shaderProgram)
-    assert(ret, i18n 'failed to create RenderMode')
-    return ret
-end
-
-local p_light = CreateShaderProgramFromPath(
-        shader_path .. 'NormalTex.vert', shader_path .. 'NormalTex.frag')
-if p_light then
-    local rm = lstg.RenderMode:create(
-            'lstg.light', _bop.ADD, _bfac.SRC_ALPHA, _bfac.ONE_MINUS_SRC_ALPHA, p_light)
-    assert(rm, i18n 'failed to create RenderMode')
-end
-
----@~chinese 设置雾效果。若无参数，将关闭雾效果。否则开启雾效果。
----@~chinese - `near`为`-1`时，使用EXP1算法，`far`作为强度参数。
----@~chinese - `near`为`-2`时，使用EXP2算法，`far`作为强度参数。
----@~chinese - 否则，使用线性算法，`near, far`作为范围参数。
----
----@~english Set fog effect. Will clear fog effect if no parameter if passed, otherwise enable fog effect.
----@~english - If `near` is `-1`, EXP1 algorism will be used and `far` will be density parameter.
----@~english - If `near` is `-2`, EXP2 algorism will be used and `far` will be density parameter.
----@~english - Otherwise, linear algorism will be used and `near, far` will be range parameter.
----
----@param near number
----@param far number
----@param color lstg.Color 可选，默认为`0x00FFFFFF` | optional, default is `0x00FFFFFF`.
-function SetFog(near, far, color)
-    local t = {}
-    local fog_type
-    if not near or near == far then
-        -- no fog
-        for k, _ in pairs(internalMode) do
-            t[k] = '_' .. k
-        end
-    elseif near == -1 then
-        -- exp1
-        fog_type = 2
-        for k, _ in pairs(internalMode) do
-            t[k] = k .. '+fog2'
-        end
-    elseif near == -2 then
-        -- exp2
-        fog_type = 3
-        for k, _ in pairs(internalMode) do
-            t[k] = k .. '+fog3'
-        end
-    else
-        -- linear
-        fog_type = 1
-        for k, _ in pairs(internalMode) do
-            t[k] = k .. '+fog1'
-        end
-    end
-    color = color or Color(0xff000000)
-    for k, v in pairs(t) do
-        local rm = lstg.RenderMode:getByName(k)
-        local rm_fog = lstg.RenderMode:getByName(v)
-        assert(rm, ("%q"):format(k))
-        assert(rm_fog, ("%q"):format(v))
-        rm:setProgram(rm_fog:getProgram())
-        if fog_type then
-            rm:setColor('u_fogColor', color)
-            if fog_type == 1 then
-                rm:setFloat('u_fogStart', near)
-                rm:setFloat('u_fogEnd', far)
-            else
-                rm:setFloat('u_fogDensity', far)
-            end
-        end
-    end
-end
-
---
-
 local _capture = {}
 
 ---
---- x,y,w,h are in ui coords
----@param obj object
----@param x number
----@param y number
----@param w number
----@param h number
+--- x,y,w,h are in "ui" coordinates
+---@param obj Object
+---@param x number x coordinate of left bottom corner
+---@param y number y coordinate of left bottom corner
+---@param w number width of the screen
+---@param h number height of the screen
 function CaptureScreen(obj, x, y, w, h)
-    x = x + screen.dx
-    y = y + screen.dy
-    local scale = screen.scale
-    table.insert(_capture,
-                 { obj, x * scale, y * scale, w * scale, h * scale })
+    ---@type Coordinates
+    local coordinates = require("BHElib.coordinates_and_screen")
+    local ui_origin_x, ui_origin_y = coordinates.getUIOriginInRes()
+    local ui_scale_x, ui_scale_y = coordinates.getUIScale()
+
+    x = x * ui_scale_x + ui_origin_x
+    y = y * ui_scale_y + ui_origin_y
+    w = w * ui_scale_x
+    h = h * ui_scale_y
+
+    table.insert(_capture, { obj, x, y, w, h })
 end
 
 e:addListener('afterEndScene', function()

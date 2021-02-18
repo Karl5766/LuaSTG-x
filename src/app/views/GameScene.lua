@@ -14,10 +14,6 @@ function Scene:onCreate()
     if setting.touchkey and plus.isMobile() then
         self:addTouchKey()
     end
-
-    local scale = glv:getDesignResolutionSize().height / 480
-    SystemLog(string.format(
-            'ui scale = %.3f, screen.scale = %.3f', scale, screen.scale))
 end
 
 local profiler = profiler

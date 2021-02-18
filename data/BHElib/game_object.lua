@@ -8,7 +8,7 @@
 ---     lists and changed to the same naming conventions as the rest of the project
 ---------------------------------------------------------------------------------------------------
 
--- 6 callbacks that game objects have
+-- names of the 6 callbacks that each game object has
 local callbacks = { 'init', 'del', 'frame', 'render', 'colli', 'kill', }
 
 ---@~chinese 定义一个类，基类会给新类复制6个回调函数；新类的is_class属性会被设为true，base属性指向基类，
@@ -74,10 +74,10 @@ Object = {
 Object3d = Class(Object)
 Object3d['.3d'] = true
 
+---------------------------------------------------------------------------------------------------
+
 local _class_num = 0  -- number of classes registered by RegisterGameClass()
 local _class_id = {}  -- a table that maps registered game classes to their unique ids
-
----------------------------------------------------------------------------------------------------
 
 ---@~chinese 把class注册为game class；class的6个回调函数属性如果不是函数则设为默认回调函数
 ---

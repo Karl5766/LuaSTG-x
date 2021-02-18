@@ -1,6 +1,5 @@
 ---------------------------------------------------------------------------------------------------
 ---stage_group.lua
----author: Karl
 ---date: 2021.2.12
 ---reference: -x/THlib/ext.lua
 ---desc: Defines the StageGroup class. At any given point, globally only one stage group can be
@@ -119,7 +118,8 @@ function StageGroup.update(self, dt)
 end
 
 function StageGroup.render(self)
-    SetViewMode("ui")
+    local coordinates = require("BHElib.coordinates_and_screen")
+    coordinates.setRenderView("ui")
     Render("test:image", 747, 480, 0, 1, 1, 0.5)
 end
 
