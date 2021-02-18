@@ -90,7 +90,7 @@ local _class_id = {}  -- a table that maps registered game classes to their uniq
 ---by this function at index 7
 ---
 ---@param class Object the class to register
-local function RegisterGameClass(class)
+function RegisterGameClass(class)
     for i = 1, 6 do
         if type(class[i]) ~= "function" then
             class[i] = class[callbacks[i]]

@@ -49,15 +49,35 @@ function Stage.enter(self)
     self:init()
 end
 
+local TestClass = Class(Object, Object)
+TestClass.frame = task.Do
+
+local _glv = cc.Director:getInstance():getOpenGLView()
+
+function TestClass:init()
+    task.New(self, function()
+        task.Wait(60)
+        --ChangeVideoMode(1600, 900, true, true)
+        _glv:setDesignResolutionSize(
+                1600, 900, cc.ResolutionPolicy.SHOW_ALL)
+    end)
+end
+RegisterGameClass(TestClass)
+
 function Stage.update(self, dt)
     self.timer = self.timer + dt
 
-    for _=1, 9 do
-        if ran:Float(0, 1) > 0 then
-            local obj = New(Object)
-            obj.img = "test:image"
-            obj.vx = ran:Float(-4, 4)
-            obj.vy = ran:Float(-4, 4)
-        end
+    if self.timer > 1.5 and self.timer < 2.5 then
+        local obj = New(TestClass)
+        obj.img = "test:image"
     end
+
+    --for _=1, 9 do
+    --    if ran:Float(0, 1) > 0 then
+    --        local obj = New(Object)
+    --        obj.img = "test:image"
+    --        obj.vx = ran:Float(-4, 4)
+    --        obj.vy = ran:Float(-4, 4)
+    --    end
+    --end
 end

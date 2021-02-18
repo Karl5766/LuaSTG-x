@@ -1,7 +1,7 @@
-[INFO] [APP] === Application start at: 23:09:15 ===
+[INFO] [APP] === Application start at: 00:28:30 ===
 [INFO] [APP] Build date: Dec 18 2020
 [INFO] [APP] CPU name: Intel(R) Core(TM) i7-6700HQ CPU @ 2.60GHz
-[INFO] [APP] Memory: 1893MB / 8052MB
+[INFO] [APP] Memory: 2384MB / 8052MB
 [INFO] [APP] OS name: Microsoft Windows 10 家庭版
 [INFO] [APP] Lua VM version: LuaJIT 2.1.0-beta3
 [INFO] [APP] ThreadPool size: 3 (core count: 8)
@@ -28,7 +28,7 @@
 [LOG] no direcory for plugin
 [LOG] view params:
 {
-    ["ui_vp"] = "0.0, 0.0, 1708.0, 960.0",
+    ["ui_vp"] = "0.0, 1708.0, 0.0, 960.0",
     ["game_vp"] = "470.0, 1238.0, 32.0, 928.0",
     ["ui_ortho"] = "-107.0, 747.0, 0.0, 480.0",
     ["world_ortho"] = "-192.0, 192.0, -224.0, 224.0",
@@ -39,6 +39,7 @@
 [LOG] FrameSize = 1280, 720
 [LOG] Scale     = 0.749, 0.749
 [INFO] create frame buffer, size: (1708, 960)
+[INFO] create frame buffer, size: (1600, 900)
 [INFO] [APP] clear GameObjectPool
 [INFO] [APP] clear all resources
 [INFO] [APP] unload all packs

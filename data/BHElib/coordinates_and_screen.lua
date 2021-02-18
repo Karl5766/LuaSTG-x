@@ -136,38 +136,6 @@ function M._3dToWorld(x, y, z)
     return xx + _playfield_game_l, yy + _playfield_game_b
 end
 
----return the scale of ui coordinates
----@return number, number the scaling factors in x, y direction
-function M.getUIScale()
-    return _ui_x_unit, _ui_y_unit
-end
-
----return the boundary of playfield in "res" coordinates;
-local function GetGameViewport()
-    local game_res_l, game_res_b = GameToRes(_playfield_game_l, _playfield_game_b)
-    local game_res_r, game_res_t = GameToRes(_playfield_game_r, _playfield_game_t)
-    return game_res_l, game_res_r, game_res_b, game_res_t
-end
-
----return the boundary of playfield in "game" coordinates;
-local function GetGameOrtho()
-    return _playfield_game_l, _playfield_game_r, _playfield_game_b, _playfield_game_t
-end
-
----return the boundary of window in "res" coordinates;
-local function GetUIViewport()
-    local resx, resy = GetResolution()
-    return 0, 0, resx, resy
-end
-
----return the boundary of window in "ui" coordinates;
-local function GetUIOrtho()
-    local resx, resy = GetResolution()
-    local window_res_l, window_res_b = ResToUI(0, 0)
-    local window_res_r, window_res_t = ResToUI(resx, resy)
-    return window_res_l, window_res_r, window_res_b, window_res_t
-end
-
 ---------------------------------------------------------------------------------------------------
 ---setters and getters
 
@@ -186,6 +154,42 @@ function M.getUIOriginInRes()
     return _ui_x, _ui_y
 end
 
+---return the scale of ui coordinates
+---@return number, number the scaling factors in x, y direction
+function M.getUIScale()
+    return _ui_x_unit, _ui_y_unit
+end
+
+---return the boundary of playfield in "res" coordinates;
+---@return number, number, number, number l, r, b, t
+local function GetGameViewport()
+    local game_res_l, game_res_b = GameToRes(_playfield_game_l, _playfield_game_b)
+    local game_res_r, game_res_t = GameToRes(_playfield_game_r, _playfield_game_t)
+    return game_res_l, game_res_r, game_res_b, game_res_t
+end
+
+---return the boundary of playfield in "game" coordinates;
+---@return number, number, number, number l, r, b, t
+local function GetGameOrtho()
+    return _playfield_game_l, _playfield_game_r, _playfield_game_b, _playfield_game_t
+end
+
+---return the boundary of window in "res" coordinates;
+---@return number, number, number, number l, r, b, t
+local function GetUIViewport()
+    local resx, resy = GetResolution()
+    return 0, resx, 0, resy
+end
+
+---return the boundary of window in "ui" coordinates;
+---@return number, number, number, number l, r, b, t
+local function GetUIOrtho()
+    local resx, resy = GetResolution()
+    local window_res_l, window_res_b = ResToUI(0, 0)
+    local window_res_r, window_res_t = ResToUI(resx, resy)
+    return window_res_l, window_res_r, window_res_b, window_res_t
+end
+
 ---set play field boundary in "game" coordinates
 ---@param left number x value of the left play field border
 ---@param right number x value of the right play field border
@@ -198,6 +202,11 @@ function M.setPlayFieldBoundary(left, right, bottom, top)
     _playfield_game_t = top
 end
 
+---set out of bound deletion boundary in "game" coordinates
+---@param left number x value of the left bound border
+---@param right number x value of the right bound border
+---@param bottom number y value of the bottom bound border
+---@param top number y value of the top bound border
 function M.setOutOfBoundDeletionBoundary(left, right, bottom, top)
     _bound_game_l = left
     _bound_game_r = right
@@ -207,7 +216,7 @@ function M.setOutOfBoundDeletionBoundary(left, right, bottom, top)
 end
 
 ---重置_view3d的值
-function M.reset3d()
+function M.resetView3d()
     _view3d.eye = { 0, 0, -1 }                  -- camera position
     _view3d.at = { 0, 0, 0 }                    -- camera target position
     _view3d.up = { 0, 1, 0 }                    -- camera up, used for determining the orientation of the camera
@@ -244,7 +253,7 @@ end
 ---
 ---@~chinese 改变模式后，所有对坐标系的改动才会应用在实际渲染上；Render，ObjRender等函数都受此函数影响
 ---
----@~english set the coordinates used by the engine for rendering; the coordinates can be "game", "ui" or "3d";
+---@~english set the coordinate system used by the engine for rendering; the coordinates can be "game", "ui" or "3d";
 ---
 ---@~english only after setting the coordinates, all changes to the coordinates will be applied to actual rendering;
 ---
@@ -457,9 +466,9 @@ function M.initGameCoordinates()
     M.setOutOfBoundDeletionBoundary(-224, 224, -256, 256)
 
     -- setup "3d" coordinates
-    M.reset3d()
+    M.resetView3d()
 
-    -- previous changes are enforced by setting the view mode
+    -- previous changes are enforced by setting the render view
     M.setRenderView("ui")
 
     WriteToLog()
