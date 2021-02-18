@@ -6,12 +6,13 @@
 --------------------------------------------------------------------------
 
 local FU = cc.FileUtils:getInstance()
+local FS = require("file_system")
 
 ---If the directory exists, add directory path to the default paths;
 ---otherwise the function will load the zip files with LoadPack() function.
 ---@param directory_path string the directory path to add
 function lstg.AddDirectoryToDefaultPaths(directory_path)
-    local writable_path = plus.getWritablePath()
+    local writable_path = FS.getWritablePath()
 
     -- look for directories or zip files
     local possible_dir = { directory_path .. '/', writable_path .. directory_path .. '/' }
@@ -29,7 +30,7 @@ function lstg.AddDirectoryToDefaultPaths(directory_path)
     -- if directory is not found, look for zip files
     if not file_is_found then
         for _, zip_file in ipairs(possible_zip) do
-            if IsFileExist(zip_file) then
+            if FS.isFileExist(zip_file) then
                 local zip_path = FU:fullPathForFilename(zip_file)
                 SystemLog(string.format(i18n "load %s from %q", v, zip_path))
                 LoadPack(zip_path)
@@ -55,7 +56,7 @@ end
 ---call RegisterGameClasses(), SetTitle() and
 ---set the resource pool to stage afterwards
 function lstg.loadMod()
-    local writable_path = plus.getWritablePath()
+    local writable_path = FS.getWritablePath()
     local mod_path = string.format('%s/mod/%s', writable_path, setting.mod)
     mod_path = mod_path:gsub('//', '/')  -- replace '//' with '/'
 
@@ -66,10 +67,10 @@ function lstg.loadMod()
     end
 
     -- look for /root.lua or .zip
-    if dir and IsFileExist(mod_path .. '/root.lua') then
+    if dir and FS.isFileExist(mod_path .. '/root.lua') then
         FU:addSearchPath(mod_path)
         SystemLog(string.format(i18n 'load mod %q from local path', setting.mod))
-    elseif zip and IsFileExists(mod_path .. '.zip') then
+    elseif zip and FS.isFileExists(mod_path .. '.zip') then
         SystemLog(string.format(i18n 'load mod %q from zip file', setting.mod))
         LoadPack(path .. '.zip')
     else
@@ -87,7 +88,6 @@ function lstg.loadMod()
 end
 
 function lstg.enumPlugins()
-    --local p = plus.getWritablePath() .. 'plugin/'
     local p = 'plugin/'
     if not FU:isDirectoryExist(p) then
         SystemLog('no direcory for plugin')
@@ -97,12 +97,12 @@ function lstg.enumPlugins()
     FU:addSearchPath(path)
     SystemLog(string.format('enum plugins in %q', path))
     local ret = {}
-    local files = GetBriefOfFilesInDirectory(path)
+    local files = FS.getBriefOfFilesInDirectory(path)
     for i, v in ipairs(files) do
         -- skip name start with dot
         if v.name:sub(1, 1) ~= '.' then
             if v.isDirectory then
-                if IsFileExist(path .. v.name .. '/__init__.lua') then
+                if FS.isFileExist(path .. v.name .. '/__init__.lua') then
                     table.insert(ret, v)
                 end
             else

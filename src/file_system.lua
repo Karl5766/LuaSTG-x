@@ -1,12 +1,15 @@
 ---------------------------------------------------------------------------------------------------
 ---file_system.lua
 ---date: 2021.2.15
----desc: Defines functions for accessing files and directories in local computer, as well as
----     creating directories. Defines x.FileSystem class
+---desc: Defines x.FileSystem class, which provides functions for accessing files and directories
+---     in local computer, as well as other file-related functions
 ---modifier:
 ---     Karl, 2021.2.15, split the file from NativeAPI.lua; merged into fs.lua and renamed result
 ---     as file_system.lua
 ---------------------------------------------------------------------------------------------------
+
+---@class x.FileSystem
+local M = {}
 
 local FU = cc.FileUtils:getInstance()
 plus = plus or {}
@@ -14,7 +17,7 @@ plus = plus or {}
 ---判断文件是否存在，路径中所有'\\''//'当作'/'处理
 ---@param path string 路径
 ---@return boolean
-function IsFileExist(path)
+function M.isFileExist(path)
     path = string.gsub(path, '\\', '/')
     path = string.gsub(path, '//', '/')
     local ret = FU:isFileExist(path)
@@ -23,7 +26,7 @@ end
 
 ---创建目录
 ---@param path string 路径
-function CreateDirectory(path)
+function M.createDirectory(path)
     SystemLog(string.format(i18n 'try to create directory %q', path))
     if FU:isDirectoryExist(path) then
         return
@@ -39,7 +42,7 @@ local _writable_path
 
 ---get a writable directory path in the device
 ---@return string a writable path
-function plus.getWritablePath()
+function M.getWritablePath()
     if _writable_path then
         return _writable_path
     end
@@ -60,7 +63,7 @@ end
 ---   { isDirectory = true, name = "test" } }
 ---@param dir_path string 目录
 ---@return table an array of brief information about each file in a directory
-function GetBriefOfFilesInDirectory(dir_path)
+function M.getBriefOfFilesInDirectory(dir_path)
     dir_path = string.gsub(dir_path, '\\', '/')
     if dir_path:sub(-1) ~= '/' then
         dir_path = dir_path .. '/'
@@ -107,11 +110,11 @@ end
 ---@param dir_pah string path of the directory
 ---@param suffix string suffix of the file to look for
 ---@return table an array of brief information about each file in a directory
-function EnumFilesByType(dir_pah, suffix)
+function M.enumFilesByType(dir_pah, suffix)
     local ret = {}
     suffix = string.lower(suffix)
     local l = -1 - #suffix
-    local files = GetBriefOfFilesInDirectory(dir_pah)
+    local files = M.getBriefOfFilesInDirectory(dir_pah)
     for _, v in ipairs(files) do
         if not v.isDirectory then
             if string.lower(v.name:match(".+%.(%w+)$") or '') == suffix then
@@ -125,20 +128,19 @@ end
 
 ---------------------------------------------------------------------------------------------------
 
----@class x.FileSystem
-local M = {}
-local fu = cc.FileUtils:getInstance()
-
-function M.listFiles(rootpath, pathes)
-    pathes = pathes or {}
+---@param rootpath string the root path to search on
+---@param paths table if specified, the function will append to this table and return it
+---@return table an array of full path of files in the directory
+function M.listFiles(rootpath, paths)
+    paths = paths or {}
     assert(rootpath)
-    local files = GetBriefOfFilesInDirectory(rootpath)
+    local files = M.getBriefOfFilesInDirectory(rootpath)
     for i, v in ipairs(files) do
         if not v.isDirectory then
-            table.insert(pathes, v.fullPath)
+            table.insert(paths, v.fullPath)
         end
     end
-    return pathes
+    return paths
 end
 
 ---getExtension
@@ -182,13 +184,13 @@ end
 ---@return string
 function M.getScriptPath()
     local p = debug.getinfo(2, "S").source
-    p = fu:fullPathForFilename(p)
+    p = FU:fullPathForFilename(p)
     return p
 end
 
 function M.getScriptFolder()
     local p = debug.getinfo(2, "S").source
-    p = fu:fullPathForFilename(p)
+    p = FU:fullPathForFilename(p)
     return M.getFolder(p)
 end
 

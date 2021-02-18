@@ -2,6 +2,7 @@
 local cc = cc
 local dir = cc.Director:getInstance()
 local fu = cc.FileUtils:getInstance()
+local FS = require("file_system")
 local _iniFile = 'imgui.ini'
 local _globalSchedule
 local _canToggle = true
@@ -36,7 +37,7 @@ function imgui.create()
             -- auto save ini
             local io = imgui.getIO()
             if io.WantSaveIniSettings then
-                local path = plus.getWritablePath() .. _iniFile
+                local path = FS.getWritablePath() .. _iniFile
                 fu:writeStringToFile(imgui.saveIniSettingsToMemory(), path)
                 io.WantSaveIniSettings = false
             end

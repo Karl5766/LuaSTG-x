@@ -1,3 +1,5 @@
+local FS = require("file_system")
+
 function new_scoredata_table()
     t = {}
     setmetatable(t, { __newindex = scoredata_mt_newindex, __index = scoredata_mt_index, data = {} })
@@ -37,9 +39,9 @@ end
 
 local score_dir = 'score/' .. setting.mod .. '/'
 if plus.os ~= 'windows' then
-    score_dir = plus.getWritablePath() .. "score/" .. setting.mod .. '/'
+    score_dir = FS.getWritablePath() .. "score/" .. setting.mod .. '/'
 end
-CreateDirectory(score_dir:sub(1, -2))
+FS.createDirectory(score_dir:sub(1, -2))
 
 ---save scoredata to file
 function SaveScoreData()
@@ -54,7 +56,7 @@ end
 
 local username = setting.username or 'User'
 local fpath = score_dir .. username .. '.dat'
-if not IsFileExist(fpath) then
+if not FS.isFileExist(fpath) then
     if scoredata == nil then
         scoredata = {}
     end

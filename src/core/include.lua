@@ -1,4 +1,6 @@
 local FU = cc.FileUtils:getInstance()
+local FS = require("file_system")
+
 ---已包含的脚本
 local _all_included_files = {}
 
@@ -15,7 +17,7 @@ function Include(filename)
     filename = string.gsub(filename, '//', '/')
     local f = filename
     filename = FU:fullPathForFilename(f)
-    if not IsFileExist(filename) then
+    if not FS.isFileExist(filename) then
         error(string.format('%s: %s', i18n "can't find script", f))
     end
 

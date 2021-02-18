@@ -7,6 +7,8 @@
 
 
 local FU = cc.FileUtils:getInstance()
+local FS = require("file_system")
+
 local glv = cc.Director:getInstance():getOpenGLView()
 local launcher_reader
 ---@type cc.Scene
@@ -16,10 +18,10 @@ local lc
 local function enumMods(path)
     SystemLog(string.format('enum MODs in %q', path))
     local ret = {}
-    local files = GetBriefOfFilesInDirectory(path)
+    local files = FS.getBriefOfFilesInDirectory(path)
     for i, v in ipairs(files) do
         if v.isDirectory then
-            if IsFileExist(path .. v.name .. '/root.lua') then
+            if FS.isFileExist(path .. v.name .. '/root.lua') then
                 table.insert(ret, v)
             end
         else
@@ -79,7 +81,7 @@ local scene_tasks = {}
 local function setMod(lc)
     local mod_scv = lc.mod_scv
     mod_scv:setLayoutType(ccui.LayoutType.VERTICAL)
-    for i, v in ipairs(enumMods(plus.getWritablePath() .. 'mod/')) do
+    for i, v in ipairs(enumMods(FS.getWritablePath() .. 'mod/')) do
         local item = createModItem()
         item.mod_name = v.name
         item.mod_info = v

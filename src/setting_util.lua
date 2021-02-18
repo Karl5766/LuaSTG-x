@@ -64,7 +64,9 @@ function M.compare(t1, t2)
 end
 
 local FU = cc.FileUtils:getInstance()
-local _setting_path = plus.getWritablePath() .. 'setting'
+local FS = require("file_system")
+
+local _setting_path = FS.getWritablePath() .. 'setting'
 local _setting = {}
 function M.loadSettingFile()
     local file_content_str = FU:getStringFromFile(_setting_path)

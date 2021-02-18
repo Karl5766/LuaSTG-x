@@ -4,29 +4,19 @@
 --- Copyright (C) 2018-2020 Xrysnow. All rights reserved.
 ---
 
-
-local function ListFiles(rootpath, pathes)
-    pathes = pathes or {}
-    assert(rootpath)
-    local files = GetBriefOfFilesInDirectory(rootpath)
-    for i, v in ipairs(files) do
-        if not v.isDirectory then
-            table.insert(pathes, v.fullPath)
-        end
-    end
-    return pathes
-end
+---@type x.FileSystem
+local FS = require("file_system")
 
 local function GetExtension(str)
     return str:match(".+%.(%w+)$")
 end
 
 local function ListScripts(rootpath)
-    local fs = ListFiles(rootpath)
+    local file_list = FS.listFiles(rootpath)
     local ret = {}
-    for i, v in pairs(fs) do
-        if GetExtension(v) == 'lua' then
-            table.insert(ret, string.sub(v, 1))
+    for i, file_path in pairs(file_list) do
+        if GetExtension(file_path) == 'lua' then
+            table.insert(ret, string.sub(file_path, 1))
         end
     end
     return ret
@@ -86,18 +76,18 @@ function import(module)
         p = GetFolder(p, true)
         assert(p and p ~= '', 'import: can not find source root of ' .. module)
         local p1 = p .. module .. '.lua'
-        if IsFileExist(p1) then
+        if FS.isFileExist(p1) then
             Include(p1)
             return
         end
         local p2 = p .. module .. '/__init__.lua'
-        if IsFileExist(p2) then
+        if FS.isFileExist(p2) then
             Include(p2)
             return
         end
         --再查找根目录
         local p3 = './' .. module .. '/__init__.lua'
-        if IsFileExist(p3) then
+        if FS.isFileExist(p3) then
             Include(p3)
             return
         end
