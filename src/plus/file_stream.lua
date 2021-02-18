@@ -6,7 +6,6 @@
 ---     Karl, 2021.2.14, renamed the file; changed the naming conventions to match
 ---     the other parts of the project; removed some assertion checks.
 -----------------------------------------------------------------------------------
-
 ---@class FileStream
 local FileStream = plus.Class()
 

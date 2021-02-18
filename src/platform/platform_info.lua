@@ -1,40 +1,59 @@
 ---------------------------------------------------------------------------------------------------
----platforms.lua
+---platform_info.lua
 ---date: 2021.2.15
 ---desc: Defines some platform and language related stuffs
 ---modifier:
 ---     Karl, 2021.2.15, some small changes in formatting and renaming; renamed the file from
 ---     NativeAPI.lua to platforms.lua, and split some code to a new file named
 ---     local_directory_interfaces.lua
+---     Karl, 2021.2.18, moved functions and variables from plus namespace into a class
 ---------------------------------------------------------------------------------------------------
 
-function plus.isMobile()
-    return plus.is_mobile
+---@class PlatformInfo
+---@brief manages platform information about the device
+local M = {}
+
+local _is_mobile
+local _os_name
+local _native_info
+local _platform
+local _language
+
+---return if the current platform is a mobile
+function M.isMobile()
+    return _is_mobile
 end
 
-function plus.isDesktop()
-    return not plus.is_mobile
+---return if the current platform is not a mobile
+function M.isDesktop()
+    return not _is_mobile
+end
+
+---return the name of the operating system
+function M.getOSName()
+    return _os_name
+end
+
+---return the platform name
+function M.getPlatform()
+    return _platform
 end
 
 ---------------------------------------------------------------------------------------------------
 
 local function Setup()
     local osname = lstg.GetPlatform()
-    plus.os = osname
-    plus.is_mobile = osname == 'android' or osname == 'ios'
+    _os_name = osname
+    _is_mobile = osname == 'android' or osname == 'ios'
     if osname == 'android' then
         local native = require('platform.android.native')
         local info = native.getNativeInfo()
-        plus.native_info = info
+        _native_info = info
         local inf = '\n=== Native Info ===\n'
         for k, v in pairs(info) do
             inf = inf .. string.format('%s = %s\n', k, tostring(v))
         end
         SystemLog(inf)
-    end
-    local newWritablePath = require('platform.util').changeWritablePath()
-    if newWritablePath then
-        _writable_path = newWritablePath
     end
 end
 Setup()
@@ -64,7 +83,7 @@ local _languages = {
     'belarusian',
 }
 
-local _platform = {
+local _platforms = {
     'Windows',
     'Linux',
     'macOS',
@@ -79,16 +98,16 @@ local _platform = {
     'WP8',
 }
 
-local function WriteAppInfoToLog()
+local function InitAppInfo()
     local info = {}
     local app = cc.Application:getInstance()
-    info.platform = _platform[app:getTargetPlatform() + 1] or 'unknown'
+    info.platform = _platforms[app:getTargetPlatform() + 1] or 'unknown'
     info.version = app:getVersion()
     info.language_code = app:getCurrentLanguageCode()
     info.language = _languages[app:getCurrentLanguage() + 1] or 'unknown'
-    plus.language = info.language
-    plus.platform = info.platform
+    _language = info.language
+    _platform = info.platform
 end
-WriteAppInfoToLog()
+InitAppInfo()
 
----------------------------------------------------------------------------------------------------
+return M

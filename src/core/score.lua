@@ -1,5 +1,6 @@
 local FS = require("file_system")
-
+---@type PlatformInfo
+local _platform_info = assert(require("platform.platform_info"))
 function new_scoredata_table()
     t = {}
     setmetatable(t, { __newindex = scoredata_mt_newindex, __index = scoredata_mt_index, data = {} })
@@ -38,7 +39,7 @@ function make_scoredata_table(t)
 end
 
 local score_dir = 'score/' .. setting.mod .. '/'
-if plus.os ~= 'windows' then
+if _platform_info.getOSName() ~= 'windows' then
     score_dir = FS.getWritablePath() .. "score/" .. setting.mod .. '/'
 end
 FS.createDirectory(score_dir:sub(1, -2))

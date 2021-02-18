@@ -4,7 +4,5 @@
 ---by CHU
 
 plus         = plus or {}
-
 DoFile("plus/utility.lua")
-DoFile("plus/platforms.lua")
 DoFile("plus/file_stream.lua")

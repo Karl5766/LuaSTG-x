@@ -121,6 +121,9 @@ function StageGroup.render(self)
     local coordinates = require("BHElib.coordinates_and_screen")
     coordinates.setRenderView("ui")
     Render("test:image", 30, 30, 0, 1, 1, 0.5)
+    if self.current_stage then
+        Stage.render(self.current_stage)
+    end
 end
 
 ---set the next stage as the current stage, and enter the stage;

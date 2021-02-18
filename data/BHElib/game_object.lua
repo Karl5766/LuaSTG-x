@@ -22,6 +22,8 @@ local callbacks = { 'init', 'del', 'frame', 'render', 'colli', 'kill', }
 ---
 ---@~english additionally, the new class will inherit all non-numerical attributes from attribute_base
 ---
+---@~english the newly defined object class can be used in New() after it is registered as game class
+---
 ------@param callback_base Object 新类继承此类的6个默认回调函数
 -----@param define table 新类继承此表除默认回调函数外的所有等非数值属性
 -----@return Object 新定义的类

@@ -12,7 +12,8 @@
 local M = {}
 
 local FU = cc.FileUtils:getInstance()
-plus = plus or {}
+---@type PlatformInfo
+local _platform_info = require("platform.platform_info")
 
 ---判断文件是否存在，路径中所有'\\''//'当作'/'处理
 ---@param path string 路径
@@ -47,12 +48,20 @@ function M.getWritablePath()
         return _writable_path
     end
     local wp = FU:getWritablePath()
-    if plus.isDesktop() and wp == './' then
+    if _platform_info.isDesktop() and wp == './' then
         return FU:fullPathForFilename(wp):sub(1, -3)
     else
         return wp
     end
 end
+
+local function Setup()
+    local newWritablePath = require('platform.util').changeWritablePath()
+    if newWritablePath then
+        _writable_path = newWritablePath
+    end
+end
+Setup()
 
 -------------------------------------------------------------------------------------------------
 ---directory traverse

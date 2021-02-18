@@ -139,7 +139,6 @@ local obj_mt = {
         elseif _attr_bool[k] then
             ret = sym.getFeildBoolean(k)
         else
-            --error('')
             ret = sym.getFeildNumber(k)
         end
         --Print('index got '..tostring(ret))

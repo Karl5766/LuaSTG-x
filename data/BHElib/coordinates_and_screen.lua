@@ -16,6 +16,8 @@ local M = {}
 -- the origin (0, 0) of "res" is at bottom left of the screen. Its units of x and y axis are in pixels
 
 ---"game": coordinates of the gameplay area
+---this is a duplicated item, should be updated together
+local _game_ui_x, _game_ui_y, _game_ui_x_unit, _game_ui_y_unit                      -- expressed in "ui" coordinates
 local _game_x, _game_y, _game_x_unit, _game_y_unit                                  -- expressed in "res" coordinates
 ---"ui": coordinates of the hud
 local _ui_x, _ui_y, _ui_x_unit, _ui_y_unit                                          -- expressed in "res" coordinates
@@ -54,6 +56,7 @@ function M.gameToUI(x, y)
     y = (y - _ui_y) / _ui_y_unit
     return x, y
 end
+local GameToUI = M.gameToUI
 
 ---convert a point in "ui" coordinates to a point in "game" coordinates
 ---@param x number x coordinate in "ui"
@@ -149,6 +152,17 @@ function M.getResolution()
 end
 GetResolution = M.getResolution
 
+---modify the resolution of the screen by setting the design resolution of GLView
+---update "game" and "ui" coordinates since the they depend on the resolution
+---@param res_width number screen resolution width
+---@param res_height number screen resolution height
+function M.setResolution(res_width, res_height)
+    _glv:setDesignResolutionSize(res_width, res_height, cc.ResolutionPolicy.SHOW_ALL)
+
+    M.setUICoordinatesByResolution(res_width, res_height)
+    M.setGameCoordinatesInUI(_game_ui_x, _game_ui_y, _game_ui_x_unit, _game_ui_y_unit)
+end
+
 ---@return number, number the origin of "ui" coordinates expressed in "res" coordinates
 function M.getUIOriginInRes()
     return _ui_x, _ui_y
@@ -160,12 +174,29 @@ function M.getUIScale()
     return _ui_x_unit, _ui_y_unit
 end
 
----return the boundary of playfield in "res" coordinates;
 ---@return number, number, number, number l, r, b, t
-local function GetGameViewport()
+function M.getPlayfieldBoundaryInGame()
+    return _playfield_game_l, _playfield_game_r, _playfield_game_b, _playfield_game_t
+end
+
+---@return number, number, number, number l, r, b, t
+function M.getPlayfieldBoundaryInUI()
+    local game_ui_l, game_ui_b = GameToUI(_playfield_game_l, _playfield_game_b)
+    local game_ui_r, game_ui_t = GameToUI(_playfield_game_r, _playfield_game_t)
+    return game_ui_l, game_ui_r, game_ui_b, game_ui_t
+end
+
+---@return number, number, number, number l, r, b, t
+function M.getPlayfieldBoundaryInRes()
     local game_res_l, game_res_b = GameToRes(_playfield_game_l, _playfield_game_b)
     local game_res_r, game_res_t = GameToRes(_playfield_game_r, _playfield_game_t)
     return game_res_l, game_res_r, game_res_b, game_res_t
+end
+
+---return the boundary of playfield in "res" coordinates;
+---@return number, number, number, number l, r, b, t
+local function GetGameViewport()
+    return M.getPlayfieldBoundaryInRes()
 end
 
 ---return the boundary of playfield in "game" coordinates;
@@ -385,25 +416,25 @@ SetFog = M.setFog
 
 ---setup "ui" coordinates by the given resolution;
 ---this function will fit the 4:3 hud maximally to the given resolution size
----@param resx number screen resolution width
----@param resy number screen resolution height
-function M.setUICoordinatesByResolution(resx, resy)
+---@param res_width number screen resolution width
+---@param res_height number screen resolution height
+function M.setUICoordinatesByResolution(res_width, res_height)
 
     -- 4:3 hud (not precisely the display area) expressed in units of the "ui" coordinate
     local hud_ui_width, hud_ui_height = 640, 480
 
     -- calculate the offset and scale that can maximally fit the 4:3 hud into the screen
     local scale
-    if resx / hud_ui_width > resy / hud_ui_height then
+    if res_width / hud_ui_width > res_height / hud_ui_height then
         -- 高度受限，适应高度
-        scale = resy / hud_ui_height
-        _ui_x = 0.5 * (resx - scale * hud_ui_width)  -- center hud in the x direction
+        scale = res_height / hud_ui_height
+        _ui_x = 0.5 * (res_width - scale * hud_ui_width)  -- center hud in the x direction
         _ui_y = 0.0
     else
         -- 宽度受限，适应宽度
-        scale = resx / hud_ui_width
+        scale = res_width / hud_ui_width
         _ui_x = 0.0
-        _ui_y = 0.5 * (resy - scale * hud_ui_height)  -- center hud in the y direction
+        _ui_y = 0.5 * (res_height - scale * hud_ui_height)  -- center hud in the y direction
     end
 
     -- assign the scale
@@ -417,6 +448,13 @@ end
 ---@param x_unit number scale in x direction expressed in "ui" coordinates
 ---@param y_unit number scale in y direction expressed in "ui" coordinates
 function M.setGameCoordinatesInUI(x, y, x_unit, y_unit)
+    -- record the origin in "ui" in case the resolution needs to be changed
+    _game_ui_x = x
+    _game_ui_y = y
+    _game_ui_x_unit = x_unit
+    _game_ui_y_unit = y_unit
+
+    -- calculate origin and scale in "res" coordinates
     _game_x = _ui_x + x * _ui_x_unit
     _game_y = _ui_y + y * _ui_y_unit
     _game_x_unit = _ui_x_unit * x_unit
@@ -455,8 +493,8 @@ end
 ---the design resolution of GLView should be set when is function is called
 function M.initGameCoordinates()
     -- setup "ui" coordinates
-    local screen_width, screen_height = M.getResolution()
-    M.setUICoordinatesByResolution(screen_width, screen_height)
+    local res_width, res_height = M.getResolution()
+    M.setUICoordinatesByResolution(res_width, res_height)
 
     -- setup "game" coordinates
     local playfield_center_ui_x, playfield_center_ui_y = 320, 240  -- in "ui" cooridinates

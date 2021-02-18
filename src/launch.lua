@@ -42,7 +42,7 @@ function DoFile(path)
     return lstg.DoFile(path)
 end
 
-lstg.fs = require('file_system')
+local _platform_info = require("platform.platform_info")
 DoFile('plus/plus.lua')
 DoFile('stringify.lua')
 
@@ -51,7 +51,7 @@ setting = SerializeTest(setting)
 require("setting_util").loadSettingFile()
 
 require('api')
-if plus.isMobile() then
+if _platform_info.isMobile() then
     require('jit_test')
     _G.Print = function(...)
         local args = { ... }

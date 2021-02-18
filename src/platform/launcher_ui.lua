@@ -460,8 +460,10 @@ local function CreateLauncherUI()
 
     setOthers(lc)
 
-    local inf = 'LuaSTG-x Technical Preview'
-    if plus.platform ~= 'unknown' then
+    local inf = "LuaSTG-x Technical Preview"
+    ---@type PlatformInfo
+    local platform_info = require("platform.platform_info")
+    if platform_info.getPlatform() ~= "unknown" then
         inf = string.format('%s for %s', inf, plus.platform)
     end
     ---@type cc.Label
@@ -469,7 +471,7 @@ local function CreateLauncherUI()
     inf_label:setString(inf)
 
     require('imgui.lstg.util').load(launcher_scene)
-    if imgui and plus.is_mobile then
+    if imgui and plus.isMobile() then
         imgui.hide()
     end
 
