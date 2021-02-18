@@ -10,7 +10,6 @@ local _include_list = {
     "BHElib.const",  -- defines some constant values
     "BHElib.status",
 
-    "BHElib.render_mode",
     "BHElib.screen_capture",
     "BHElib.input",
     "BHElib.coordinates_and_screen",

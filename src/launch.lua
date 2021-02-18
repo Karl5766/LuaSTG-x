@@ -42,6 +42,7 @@ function DoFile(path)
     return lstg.DoFile(path)
 end
 
+lstg.fs = require('file_system')
 DoFile('plus/plus.lua')
 DoFile('stringify.lua')
 

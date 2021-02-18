@@ -1,14 +1,15 @@
 ---------------------------------------------------------------------------------------------------
----platform_and_language.lua
+---file_system.lua
 ---date: 2021.2.15
 ---desc: Defines functions for accessing files and directories in local computer, as well as
----     creating directories.
+---     creating directories. Defines x.FileSystem class
 ---modifier:
----     Karl, 2021.2.15, split the file from NativeAPI.lua
+---     Karl, 2021.2.15, split the file from NativeAPI.lua; merged into fs.lua and renamed result
+---     as file_system.lua
 ---------------------------------------------------------------------------------------------------
 
 local FU = cc.FileUtils:getInstance()
-
+plus = plus or {}
 
 ---判断文件是否存在，路径中所有'\\''//'当作'/'处理
 ---@param path string 路径
@@ -20,10 +21,9 @@ function IsFileExist(path)
     return ret
 end
 
-
 ---创建目录
 ---@param path string 路径
-function plus.CreateDirectory(path)
+function CreateDirectory(path)
     SystemLog(string.format(i18n 'try to create directory %q', path))
     if FU:isDirectoryExist(path) then
         return
@@ -124,3 +124,72 @@ function EnumFilesByType(dir_pah, suffix)
 end
 
 ---------------------------------------------------------------------------------------------------
+
+---@class x.FileSystem
+local M = {}
+local fu = cc.FileUtils:getInstance()
+
+function M.listFiles(rootpath, pathes)
+    pathes = pathes or {}
+    assert(rootpath)
+    local files = GetBriefOfFilesInDirectory(rootpath)
+    for i, v in ipairs(files) do
+        if not v.isDirectory then
+            table.insert(pathes, v.fullPath)
+        end
+    end
+    return pathes
+end
+
+---getExtension
+---@param str string
+---@return string
+function M.getExtension(str)
+    return str:match(".+%.(%w+)$")
+end
+
+function M.listScripts(rootpath)
+    local fs = M.listFiles(rootpath)
+    local ret = {}
+    for i, v in pairs(fs) do
+        local ext = M.getExtension(v)
+        if ext == 'lua' or ext == 'luac' then
+            table.insert(ret, string.sub(v, 1))
+        end
+    end
+    return ret
+end
+
+---getFolder
+---@param filePath string
+---@return string
+function M.getFolder(filePath)
+    local p1 = string.match(filePath, "^(.*)\\")
+    local p2 = string.match(filePath, "^(.*)/")
+    local ret
+    if p1 and p2 then
+        ret = (#p1 > #p2) and p1 or p2
+    else
+        ret = p1 or p2
+    end
+    if ret and ret:sub(-1) ~= '/' then
+        ret = ret .. '/'
+    end
+    return ret
+end
+
+---getScriptPath
+---@return string
+function M.getScriptPath()
+    local p = debug.getinfo(2, "S").source
+    p = fu:fullPathForFilename(p)
+    return p
+end
+
+function M.getScriptFolder()
+    local p = debug.getinfo(2, "S").source
+    p = fu:fullPathForFilename(p)
+    return M.getFolder(p)
+end
+
+return M

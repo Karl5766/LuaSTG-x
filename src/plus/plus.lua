@@ -3,11 +3,8 @@
 ---所有功能函数暴露在全局plus表中
 ---by CHU
 
-plus         = {}
+plus         = plus or {}
 
 DoFile("plus/utility.lua")
-
-DoFile("plus/local_directory_interfaces.lua")
 DoFile("plus/platforms.lua")
-
 DoFile("plus/file_stream.lua")

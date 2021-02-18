@@ -1,8 +1,26 @@
 ---------------------------------------------------------------------------------------------------
----corefunc.lua
+---render_mode.lua
 ---desc: Defines render modes for game objects
 ---modifier:
----     Karl, 2021.2.17 split from corefunc.lua
+---     Karl, 2021.2.17 split from corefunc.lua; and merged into core_x/RenderMode.lua, renamed
+---     the new file as render_mode.lua
+---------------------------------------------------------------------------------------------------
+
+---@type lstg.RenderMode
+local RenderMode = lstg.RenderMode
+
+local _default
+
+function RenderMode:setAsDefault()
+    _default = self:getName()
+    return self
+end
+
+---@return lstg.RenderMode
+function RenderMode:getDefault()
+    return RenderMode:getByName(_default)
+end
+
 ---------------------------------------------------------------------------------------------------
 ---defines internal modes
 
@@ -24,6 +42,7 @@ INTERNAL_MODE = {
 }
 
 ---------------------------------------------------------------------------------------------------
+---init
 
 local shader_path = "src/shader/"
 local internalShaders = {

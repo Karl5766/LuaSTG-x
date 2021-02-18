@@ -39,7 +39,7 @@ local score_dir = 'score/' .. setting.mod .. '/'
 if plus.os ~= 'windows' then
     score_dir = plus.getWritablePath() .. "score/" .. setting.mod .. '/'
 end
-plus.CreateDirectory(score_dir:sub(1, -2))
+CreateDirectory(score_dir:sub(1, -2))
 
 ---save scoredata to file
 function SaveScoreData()

@@ -12,6 +12,5 @@ end
 require('math.__init__')
 
 lstg.eventDispatcher = require('core_x.EventDispatcher').create()
-lstg.fs = require('core_x.fs')
 
 require('core_x.symbol')
