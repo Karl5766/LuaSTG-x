@@ -240,15 +240,19 @@ function M.set3D(key, a, b, c)
     end
 end
 
---- 强行设置视角模式。
---- 可选的三个模式分别对应坐标系：
---- 'world': lstg.world
---- 'ui': screen
---- '3d': lstg.view3d
----@param mode string specifies the mode to set; can be "game", "ui" or "3d"
-function M.setRenderView(mode)
-    lstg.viewmode = mode
-    if mode == "3d" then
+---@~chinese 切换渲染使用的坐标系。可选的三个坐标系为"game", "ui"或"3d"；
+---
+---@~chinese 改变模式后，所有对坐标系的改动才会应用在实际渲染上；Render，ObjRender等函数都受此函数影响
+---
+---@~english set the coordinates used by the engine for rendering; the coordinates can be "game", "ui" or "3d";
+---
+---@~english only after setting the coordinates, all changes to the coordinates will be applied to actual rendering;
+---
+---@~english functions like Render or ObjRender are affected by this function
+---aram mode string specifies the mode to set; can be "game", "ui" or "3d"
+function M.setRenderView(coordinates_name)
+    lstg.viewmode = coordinates_name
+    if coordinates_name == "3d" then
         local fovy = _view3d.fovy
         local vec_z = _view3d.z
         local pos_eye = _view3d.eye
@@ -279,7 +283,7 @@ function M.setRenderView(mode)
                         * tan(fovy * 0.5)
                         / (playfield_width / _game_x_unit * _ui_x_unit))
 
-    elseif mode == "game" then
+    elseif coordinates_name == "game" then
 
         -- set viewport and ortho to the size of the play field
         local l, r, b, t = GetGameViewport()
@@ -291,7 +295,7 @@ function M.setRenderView(mode)
         --SetImageScale((world.r-world.l)/(world.scrr-world.scrl))--usually it is 1
         SetImageScale(1)
 
-    elseif mode == "ui" then
+    elseif coordinates_name == "ui" then
 
         -- set viewport and ortho to the size of the window
         local l, r, b, t = GetUIViewport()
@@ -303,7 +307,7 @@ function M.setRenderView(mode)
         SetImageScale(1)
 
     else
-        error(i18n 'Invalid arguement for SetViewMode')
+        error(i18n 'Invalid arguement for setRenderView')
     end
 end
 
@@ -520,5 +524,4 @@ function M.getViewModeInfo(mode)
     return ret
 end
 
-M.initGameCoordinates()
 return M

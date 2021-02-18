@@ -19,6 +19,8 @@ local rawget = rawget
 
 local ot = ObjTable()
 
+---------------------------------------------------------------------------------------------------
+
 function UserSystemOperation()
     --assistance of Polar coordinate system
     local polar--, radius, angle, delta, omiga, center
@@ -86,54 +88,12 @@ function UserSystemOperation()
             end
         end
     end
-    --rebounder
-    if not rebounder then
-        return
-    end
-    if not ReboundPause and rebounder.size ~= 0 then
-        for _, obj in ObjList(GROUP_ENEMY_BULLET) do
-            if IsValid(obj) and obj.colli and (obj.vx ~= 0 or obj.vy ~= 0) then
-                local accel, ax, ay = obj.acceleration, 0, 0
-                if accel then
-                    ax, ay = accel.ax, accel.ay
-                end
-                local result = { rebounding.ReboundCheck(obj.x, obj.y, obj.vx, obj.vy, ax, ay) }
-                if result[1] then
-                    obj.x, obj.y, obj.vx, obj.vy = unpack(result, 1, 4)
-                    if accel then
-                        accel.ax, accel.ay = result[5], result[6]
-                    end
-                    for i = 7, #result do
-                        local self = rebounder.list[result[i]]
-                        self.class.colli(self, obj)
-                    end
-                end
-            end
-        end
-        for _, obj in ObjList(GROUP_INDES) do
-            if IsValid(obj) and obj.colli and (obj.vx ~= 0 or obj.vy ~= 0) then
-                local accel, ax, ay = obj.acceleration, 0, 0
-                if accel then
-                    ax, ay = accel.ax, accel.ay
-                end
-                local result = { rebounding.ReboundCheck(obj.x, obj.y, obj.vx, obj.vy, ax, ay) }
-                if result[1] then
-                    obj.x, obj.y, obj.vx, obj.vy = unpack(result, 1, 4)
-                    if accel then
-                        accel.ax, accel.ay = result[5], result[6]
-                    end
-                    for i = 7, #result do
-                        local self = rebounder.list[result[i]]
-                        self.class.colli(self, obj)
-                    end
-                end
-            end
-        end
-    end
 end
 
+---------------------------------------------------------------------------------------------------
+
 ---update game state 1 time
-local function _DoSingleFrame()
+local function _DoOneFrame()
     --SetTitle(setting.mod .. ' | FPS=' .. GetFPS() .. ' | Nobj=' .. GetnObj())
     UpdateObjList()
     GetInput()
@@ -178,13 +138,13 @@ end
 
 ---update game state k times, k depending on the value given by
 ---setting.render_skip + 1
-function DoFrame()
+function DoFrames()
     local factor = 1
     if setting.render_skip then
         factor = int(setting.render_skip) + 1
     end
     for _ = 1, factor do
-        _DoSingleFrame()
+        _DoOneFrame()
     end
 end
 
@@ -205,7 +165,7 @@ function FrameFunc()
 
     -- 0
     e:dispatchEvent('onFrameFunc')  -- in case any event is registered
-    DoFrame()  -- update the game
+    DoFrames()  -- update the game
 
     -- 9
     if lstg.quit_flag then
@@ -246,10 +206,13 @@ function RenderFunc()
         e:dispatchEvent('beforeEndScene')
         EndScene()
         e:dispatchEvent('afterEndScene')
+
+        ProcessCapturedScreens()
     end
 end
 
 ---------------------------------------------------------------------------------------------------
+---misc
 
 ---@~chinese 将在窗口失去焦点时调用。
 ---
@@ -294,8 +257,6 @@ function GameExit()
     end
 end
 
---
-
 function DrawCollider()
     local x, y = 0, 0
     DrawGroupCollider(GROUP_ENEMY_BULLET, Color(150, 163, 73, 164), x, y)
@@ -318,60 +279,8 @@ e:addListener('beforeEndScene', function()
     coordinates.setRenderView("game")
 end, 9)
 
---
-
----
-function Screenshot()
-    local time = os.date("%Y-%m-%d-%H-%M-%S")
-    local path = 'snapshot/' .. time .. '.png'
-    lstg.Snapshot(path)
-    SystemLog(string.format('%s %q', i18n('save screenshot to'), path))
-end
-
 function BentLaserData()
     return lstg.GameObjectBentLaser:create()
 end
 
---
-
-local _capture = {}
-
----
---- x,y,w,h are in "ui" coordinates
----@param obj Object
----@param x number x coordinate of left bottom corner
----@param y number y coordinate of left bottom corner
----@param w number width of the screen
----@param h number height of the screen
-function CaptureScreen(obj, x, y, w, h)
-    ---@type Coordinates
-    local coordinates = require("BHElib.coordinates_and_screen")
-    local ui_origin_x, ui_origin_y = coordinates.getUIOriginInRes()
-    local ui_scale_x, ui_scale_y = coordinates.getUIScale()
-
-    x = x * ui_scale_x + ui_origin_x
-    y = y * ui_scale_y + ui_origin_y
-    w = w * ui_scale_x
-    h = h * ui_scale_y
-
-    table.insert(_capture, { obj, x, y, w, h })
-end
-
-e:addListener('afterEndScene', function()
-    if #_capture > 0 then
-        ---@type cc.RenderTexture
-        local fb = CopyFrameBuffer()
-        local sp = fb:getSprite()
-        local sz = sp:getTextureRect()
-        local hh = sz.height
-        for _, v in ipairs(_capture) do
-            local obj, x, y, w, h = unpack(v)
-            local newsp = cc.Sprite:createWithTexture(
-                    sp:getTexture(), cc.rect(x, hh - y - h, w, h), false)
-            local r = lstg.ResSprite:createWithSprite(
-                    string.format('::CAP:: %s', tostring(obj)), newsp, 0, 0, 0)
-            obj.img = r
-        end
-        _capture = {}
-    end
-end, 1, 'CaptureScreen')
+---------------------------------------------------------------------------------------------------

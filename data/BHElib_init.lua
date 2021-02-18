@@ -7,31 +7,32 @@
 -------------------------------------------------------------------------------------------------
 
 local _include_list = {
-    "BHElib/const.lua",  -- defines some constant values
-    "BHElib/status.lua",
+    "BHElib.const",  -- defines some constant values
+    "BHElib.status",
 
-    "BHElib/render_mode.lua",
-    "BHElib/input.lua",
-    "BHElib/coordinates_and_screen.lua",
+    "BHElib.render_mode",
+    "BHElib.screen_capture",
+    "BHElib.input",
+    "BHElib.coordinates_and_screen",
 
-    "BHElib/global_assets.lua",  -- loads some assets globally
+    "BHElib.global_assets",  -- loads some assets globally
 
-    "BHElib/game_object.lua",
-    "BHElib/task.lua",
+    "BHElib.game_object",
+    "BHElib.task",
 
-    "BHElib/stage.lua",
-    "BHElib/stage_group.lua",
+    "BHElib.stage",
+    "BHElib.stage_group",
 
-    "BHElib/global.lua",  -- defines some in-game global variables
-    "BHElib/corefunc.lua",
-    "BHElib/after_load.lua",
+    "BHElib.global",  -- defines some in-game global variables
+    "BHElib.corefunc",
+    "BHElib.after_load",
 }
 
 local function BHElibInit()
     for _, file_path in ipairs(_include_list) do
-        Include(file_path)
+        require(file_path)
     end
 
-    --require("BHElib.coordinates_and_screen").initGameCoordinates()
+    require("BHElib.coordinates_and_screen").initGameCoordinates()  -- setup the render coordinates
 end
 BHElibInit()
