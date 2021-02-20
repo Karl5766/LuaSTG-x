@@ -72,12 +72,12 @@ local function RenderPerformanceProfile(font_display)
         str = string.format('%s%s %.2f\n', str, v, _times[i])
     end
 
-    RenderText(font_display, str, 630, 50, 0.25, 'right', 'bottom')
+    RenderText(font_display, str, 630, 50, 0.5, 'right', 'bottom')
     --]]
     str = string.format('%.1f fps', fps)
     str = string.format('obj:%d\n', GetnObj()) .. str
 
-    RenderText(font_display, str, 630, 0, 0.5, 'right', 'bottom')
+    RenderText(font_display, str, 630, 0, 1, 'right', 'bottom')
 end
 
 ---------------------------------------------------------------------------------------------------

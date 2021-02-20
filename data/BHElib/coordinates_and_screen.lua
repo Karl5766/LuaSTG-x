@@ -168,8 +168,14 @@ function M.getUIOriginInRes()
     return _ui_x, _ui_y
 end
 
----return the scale of ui coordinates
----@return number, number the scaling factors in x, y direction
+---return the scale of game coordinates in respect to the resolution
+---@return number, number the scaling factors in x, y direction (in pixel)
+function M.getGameScale()
+    return _game_x_unit, _game_y_unit
+end
+
+---return the scale of ui coordinates in respect to the resolution
+---@return number, number the scaling factors in x, y direction (in pixel)
 function M.getUIScale()
     return _ui_x_unit, _ui_y_unit
 end
@@ -243,7 +249,7 @@ function M.setOutOfBoundDeletionBoundary(left, right, bottom, top)
     _bound_game_r = right
     _bound_game_b = bottom
     _bound_game_t = top
-    SetBound(left, right, bottom, top)
+    SetBound(left, right, bottom, top)  -- call engine api
 end
 
 ---重置_view3d的值
@@ -327,6 +333,7 @@ function M.setRenderView(coordinates_name)
 
         -- set viewport and ortho to the size of the play field
         local l, r, b, t = GetGameViewport()
+        -- set display region on screen ("viewport")
         SetViewport(l, r, b, t)  -- in "res"
         l, r, b, t = GetGameOrtho()
         SetOrtho(l, r, b, t)  -- in "game"

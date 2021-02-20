@@ -9,8 +9,8 @@
 task = {}
 
 local task = task
-task.stack = {}
-task.co = {}
+local _object_stack = {}  -- corresponding objects of the tasks
+local _task_stack = {}  -- current task stack; similar to function call stack
 
 local max = math.max
 local int = math.floor
@@ -22,9 +22,12 @@ local pairs = pairs
 local status = coroutine.status
 local rawget = rawget
 
----新建任务 添加一个执行f的协程
----@param self table the object to put the task under
+---@~chinese 新建task，添加一个执行f的协程
+---
+---@~english create a new task, return its coroutine
+---@param self Object the object to put the task under
 ---@param f function 要执行的函数
+---@return thread the lua coroutine created for the new task
 function task.New(self, f)
     if not self.task then
         self.task = {}
@@ -34,56 +37,74 @@ function task.New(self, f)
     return rt
 end
 
----@~chinese 执行（resume）task中的协程
+---@~chinese 执行（resume）task中的协程；清除已执行完的task
 ---
 ---@~english execute all the tasks under self.task
----
 ---@param self Object tasks under this object will be executed
 function task.Do(self)
-    local tsk = rawget(self, 'task')
-    if tsk then
-        for _, co in pairs(tsk) do
-            if status(co) ~= 'dead' then
-                insert(task.stack, self)
-                insert(task.co, co)
+    local task_list = rawget(self, 'task')  -- get self.task
+    if task_list then
+        local j = 0
 
-                local _, errmsg = resume(co)
+        -- loop through every task under self.task table
+        for i = 1, #task_list do
+            local cur_task = task_list[i]
+            if status(cur_task) ~= 'dead' then
+                -- push into the stack before executing the task
+                insert(_object_stack, self)
+                insert(_task_stack, cur_task)
+
+                -- run the task
+                local _, errmsg = resume(cur_task)
                 if errmsg then
                     error(errmsg)
                 end
 
-                task.stack[#task.stack] = nil
-                task.co[#task.co] = nil
+                -- pop from the stack after executing the task
+                _object_stack[#_object_stack] = nil
+                _task_stack[#_task_stack] = nil
+
+                task_list[i] = nil
+                j = j + 1
+                task_list[j] = cur_task
+            else
+                task_list[i] = nil
             end
         end
     end
 end
 
----清空self.tasks
+---@~chinese 清空self.tasks
+---
+---@~english clear all tasks in self.tasks
+---@param self Object clear tasks of this object
 function task.Clear(self)
     self.task = nil
 end
 
----清空self.tasks除当前执行的task之外所有tasks;
----@param self Object the object to clear tasks of
+---@~chinese 清空self.tasks中除当前执行的task之外所有tasks; 如不包含当前task则清空所有task
+---
+---@~english clear every task in self.tasks except the currently running task
+---@param self Object clear tasks of this object
 function task.ClearExcept(self)
     local flag = false
-    local co = task.co[#task.co]
+    local cur_task = _task_stack[#_task_stack]
     for i = 1, #self.task do
-        if self.task[i] == co then
+        if self.task[i] == cur_task then
             flag = true
             break
         end
     end
     self.task = nil
     if flag then
-        self.task = {}
-        self.task[1] = co
+        self.task = { cur_task }
     end
 end
 
----延时t帧（挂起协程t次）,t省略则为1
----@param t number
+---@~chinese 等待t帧（挂起协程t次）
+---
+---@~english wait t frames (call coroutine.yield() t times)
+---@param t number the time to wait in frames, wait 1 frame if t is nil
 function task.Wait(t)
     t = t or 1
     t = max(1, int(t))
@@ -92,8 +113,10 @@ function task.Wait(t)
     end
 end
 
----延时至timer达到t（挂起协程）
----@param t number
+---@~chinese 等待到timer达到t（挂起协程）
+---
+---@~english wait until the value of self.timer is as large as t
+---@param t number the end value of self.timer
 function task.Until(t)
     t = int(t)
     while task.GetSelf().timer < t do
@@ -101,12 +124,10 @@ function task.Until(t)
     end
 end
 
----获取当前任务（协程）对应的对象
+---@~chinese 获取当前task（协程）对应的对象
+---
+---@~english get the object of the currently executing task
+---@return Object the object this task is executing under
 function task.GetSelf()
-    local c = task.stack[#task.stack]
-    if c.taskself then
-        return c.taskself
-    else
-        return c
-    end
+    return _object_stack[#_object_stack]
 end
