@@ -53,6 +53,7 @@ local TestClass = Class(Object, Object)
 TestClass.frame = task.Do
 
 local _glv = cc.Director:getInstance():getOpenGLView()
+local _scr_metrics = require("setting.screen_metrics")
 
 function TestClass:init()
     local scr = require("BHElib.coordinates_and_screen")

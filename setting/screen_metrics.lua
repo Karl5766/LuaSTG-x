@@ -125,7 +125,7 @@ function M.setWindowed(is_windowed)
     local w = lstg.WindowHelperDesktop:getInstance()
     if is_windowed then
         w:setSize(cc.size(_windowsize_w, _windowsize_h))
-        w:moveToCenter()  -- TOBEDEBUGGED
+        w:moveToCenter()
     else
         w:setFullscreen()
     end

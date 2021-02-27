@@ -1,13 +1,12 @@
-[INFO] [APP] === Application start at: 17:57:02 ===
+[INFO] [APP] === Application start at: 19:33:12 ===
 [INFO] [APP] Build date: Dec 18 2020
 [INFO] [APP] CPU name: Intel(R) Core(TM) i7-6700HQ CPU @ 2.60GHz
-[INFO] [APP] Memory: 2076MB / 8052MB
+[INFO] [APP] Memory: 2020MB / 8052MB
 [INFO] [APP] OS name: Microsoft Windows 10 家庭版
 [INFO] [APP] Lua VM version: LuaJIT 2.1.0-beta3
 [INFO] [APP] ThreadPool size: 3 (core count: 8)
 [INFO] [AppFrame::applicationDidFinishLaunching] 
     execute C:/Games/luastg/LuaSTG-x/LuaSTG-x_BHElib/src/main.lua
-[LOG] ERROR: setting file does not exist.
 [LOG] Backend device: Intel(R) HD Graphics 530
 [LOG] Backend version: 4.5.0 - Build 23.20.16.4973
 [INFO] [XRenderer::setVsync] set vsync off

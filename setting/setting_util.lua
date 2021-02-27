@@ -42,33 +42,6 @@ function M.format_json(str)
     return ret
 end
 
-local function isval(s)
-    return s == 'boolean' or s == 'number' or s == 'string'
-end
-
-function M.compare(t1, t2)
-    for k, v in pairs(t1) do
-        local v2 = t2[k]
-        if v2 == nil then
-            return false
-        end
-        local ty = type(v)
-        if ty ~= type(v2) then
-            return false
-        end
-        if isval(ty) then
-            if v ~= v2 then
-                return false
-            end
-        elseif ty == 'table' then
-            return M.compare(v, v2)  -- TOBEDEBUGGED
-        else
-            return false
-        end
-    end
-    return true
-end
-
 local FU = cc.FileUtils:getInstance()
 local FS = require("file_system")
 
@@ -79,14 +52,11 @@ function M.loadSettingFile()
     setting = {}
     local file_content_str = FU:getStringFromFile(_setting_path)
 
-    if file_content_str and file_content_str ~= '' then
+    if not (file_content_str and file_content_str ~= '') then
         lstg.SystemLog("ERROR: setting file does not exist.")
     end
 
-    local s = cjson.decode(file_content_str)
-    for k, v in pairs(s) do
-        setting[k] = v
-    end
+    setting = cjson.decode(file_content_str)
 end
 
 ---save global setting table to the setting file
@@ -102,13 +72,76 @@ end
 ---@return any a copy of o
 function M.encodeTest(o)
     local str = cjson.encode(o)
-    str = setting_util.format_json(str)
+    str = M.format_json(str)
     local result = cjson.decode(str)
 
-    if not setting_util.compare(result, o) then
+    if not M.tableDeepEqual(result, o) then
         error(i18n 'error in parsing setting')
     end
     return result
 end
+
+---------------------------------------------------------------------------------------------------
+
+local function IsVal(s)
+    return s == 'boolean' or s == 'number' or s == 'string'
+end
+
+---deep table equality test;
+---
+---input tables can only contain "boolean", "number", "string" or "table" type values
+---@param t1 table input table 1
+---@param t2 table input table 2
+---@return boolean if t1 == t2
+function M.tableDeepEqual(t1, t2)
+    -- test if every value in t1 is the same in t2
+    for k1, v1 in pairs(t1) do
+        local v2 = t2[k1]
+        if v2 == nil then
+            return false
+        end
+        local type1 = type(v1)
+        if type1 ~= type(v2) then
+            return false
+        end
+        if IsVal(type1) then  -- both are value type, but with differnet values
+            if v1 ~= v2 then
+                return false
+            end
+        elseif type1 == "table" then
+            -- both are table, recursively compare them
+            if not M.tableDeepEqual(v1, v2) then
+                return false
+            end
+        else  -- not value types nor table type, v1 is of illegal type, raise an error
+            error("ERROR: Tables to compare contain illegal value type!")
+        end
+    end
+
+    -- t2 may still include keys that t1 does not have;
+    -- test if both tables have the same keys
+    for k, _ in pairs(t2) do
+        if t1[k] == nil then
+            return false
+        end
+    end
+
+    -- if every test passes, t1 == t2
+    return true
+end
+
+local function TableDeepEqualUnitTest()  -- for debug
+    --expected: fffttft
+    lstg.SystemLog(tostring(M.tableDeepEqual({1, 2}, {1})))
+    lstg.SystemLog(tostring(M.tableDeepEqual({1}, {1, 2})))
+    lstg.SystemLog(tostring(M.tableDeepEqual({7, "sk"}, {6, "sk"})))
+
+    lstg.SystemLog(tostring(M.tableDeepEqual({3, 2}, {3, 2})))
+    lstg.SystemLog(tostring(M.tableDeepEqual({"ecl", 5}, {"ecl", 5})))
+
+    lstg.SystemLog(tostring(M.tableDeepEqual({1, 2, {7}}, {1, 2, {7}, 5})))
+    lstg.SystemLog(tostring(M.tableDeepEqual({1, 2, {7}, 5}, {1, 2, {7}, 5})))
+end
+
 
 return M
