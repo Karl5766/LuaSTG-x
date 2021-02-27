@@ -98,7 +98,7 @@ local function setMod(lc)
                         end
                     end
                     setting.mod = item.mod_name
-                    setting.mod_info = item.mod_info
+                    --setting.mod_info = item.mod_info
                     --SystemLog('set setting.mod to ' .. setting.mod)
                 end
                 --item:setSelected(not item.is_selected)

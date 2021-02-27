@@ -61,10 +61,6 @@ function lstg.loadMod()
     mod_path = mod_path:gsub('//', '/')  -- replace '//' with '/'
 
     local dir, zip = true, true  -- whether or not try to load directory and zip
-    if setting.mod_info then
-        dir = setting.mod_info.isDirectory
-        zip = not dir
-    end
 
     -- look for /root.lua or .zip
     if dir and FS.isFileExist(mod_path .. '/root.lua') then

@@ -43,16 +43,10 @@ function DoFile(path)
 end
 
 local _platform_info = require("platform.platform_info")
-DoFile('plus/plus.lua')
-DoFile('stringify.lua')
-
-setting = require('default_setting')
-setting = SerializeTest(setting)
-require("setting_util").loadSettingFile()
-
 require('api')
 if _platform_info.isMobile() then
     require('jit_test')
+    -- define Print function
     _G.Print = function(...)
         local args = { ... }
         local narg = select('#', ...)
@@ -62,7 +56,7 @@ if _platform_info.isMobile() then
         SystemLog(table.concat(args, '\t'))
     end
 else
-    -- define print/Print function
+    -- define Print function
     _G.Print = function(...)
         local args = { ... }
         local narg = select('#', ...)
@@ -77,11 +71,21 @@ else
 end
 print = Print
 
+for k, v in pairs(lstg) do
+    print(k)
+end
+
+DoFile('plus/plus.lua')
+DoFile('stringify.lua')
+
+setting = require('default_setting')
+setting = SerializeTest(setting)
+require("setting_util").loadSettingFile()
+
 require('imgui.__init__')
 
 if _ARGS and #_ARGS >= 2 then
     assert(loadstring(_ARGS[2]))()
-    setting.mod_info = nil
 end
 
 --skip the launchers
@@ -102,15 +106,8 @@ if setting.render_skip == 1 then
 else
     SetFPS(60)
 end
-SetSEVolume(setting.sevolume / 100)
-SetBGMVolume(setting.bgmvolume / 100)
 
-function lstg.loadSetting(change_vm)
-    --if change_vm and (not setting.windowed) then
-    --    ChangeVideoMode(0,0,false, setting.vsync)
-    --else
-    --    SetVsync(setting.vsync)
-    --end
+function lstg.loadSetting()
     SetVsync(setting.vsync)
     glv:setDesignResolutionSize(
             setting.resx, setting.resy, cc.ResolutionPolicy.SHOW_ALL)

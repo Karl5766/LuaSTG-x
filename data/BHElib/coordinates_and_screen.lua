@@ -48,12 +48,8 @@ local SetFog
 ---@param y number y coordinate in "game"
 ---@return number, number x, y coordinates in "ui"
 function M.gameToUI(x, y)
-    -- first convert x, y to "res" coordinates
-    x = x * _game_x_unit + _game_x
-    y = y * _game_y_unit + _game_y
-    -- and then convert to "ui" coordinates
-    x = (x - _ui_x) / _ui_x_unit
-    y = (y - _ui_y) / _ui_y_unit
+    x = x * _game_ui_x_unit + _game_ui_x
+    y = y * _game_ui_y_unit + _game_ui_y
     return x, y
 end
 local GameToUI = M.gameToUI
@@ -63,12 +59,8 @@ local GameToUI = M.gameToUI
 ---@param y number y coordinate in "ui"
 ---@return number, number x, y coordinates in "game"
 function M.uiToGame(x, y)
-    -- first convert x, y to "res" coordinates
-    x = x * _ui_x_unit + _ui_x
-    y = y * _ui_y_unit + _ui_y
-    -- and then convert to "game" coordinates
-    x = (x - _game_x) / _game_x_unit
-    y = (y - _game_y) / _game_y_unit
+    x = (x - _game_ui_x) / _game_ui_x_unit
+    y = (y - _game_ui_y) / _game_ui_y_unit
     return x, y
 end
 
