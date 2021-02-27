@@ -206,16 +206,16 @@ end
 ---return the boundary of window in "res" coordinates;
 ---@return number, number, number, number l, r, b, t
 local function GetUIViewport()
-    local resx, resy = GetResolution()
-    return 0, resx, 0, resy
+    local w, h = GetResolution()
+    return 0, w, 0, h
 end
 
 ---return the boundary of window in "ui" coordinates;
 ---@return number, number, number, number l, r, b, t
 local function GetUIOrtho()
-    local resx, resy = GetResolution()
+    local w, h = GetResolution()
     local window_res_l, window_res_b = ResToUI(0, 0)
-    local window_res_r, window_res_t = ResToUI(resx, resy)
+    local window_res_r, window_res_t = ResToUI(w, h)
     return window_res_l, window_res_r, window_res_b, window_res_t
 end
 

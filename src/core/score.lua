@@ -1,11 +1,40 @@
 local FS = require("file_system")
 ---@type PlatformInfo
 local _platform_info = assert(require("platform.platform_info"))
+
+---turn object into string
+local function Serialize(o)
+    if type(o) == 'table' then
+        function visitTable(t)
+            local ret = {}
+            if getmetatable(t) and getmetatable(t).data then
+                t = getmetatable(t).data
+            end
+            for k, v in pairs(t) do
+                if type(v) == 'table' then
+                    ret[k] = visitTable(v)
+                else
+                    ret[k] = v
+                end
+            end
+            return ret
+        end
+        o = visitTable(o)
+    end
+    return cjson.encode(o)
+end
+
+---turn string encoded by Serialize() back to table
+local function Deserialize(s)
+    return cjson.decode(s)
+end
+
 function new_scoredata_table()
     t = {}
     setmetatable(t, { __newindex = scoredata_mt_newindex, __index = scoredata_mt_index, data = {} })
     return t
 end
+
 function scoredata_mt_newindex(t, k, v)
     if type(k) ~= 'string' and type(k) ~= 'number' then
         error('Invalid key type \'' .. type(k) .. '\'')
@@ -20,9 +49,11 @@ function scoredata_mt_newindex(t, k, v)
     -- save instantly
     SaveScoreData()
 end
+
 function scoredata_mt_index(t, k)
     return getmetatable(t).data[k]
 end
+
 function make_scoredata_table(t)
     if type(t) ~= 'table' then
         error('t must be a table')
@@ -82,6 +113,6 @@ else
         Print('invalid score data')
         data = [[{"_":0}]]
     end
-    scoredata = DeSerialize(data)
+    scoredata = Deserialize(data)
 end
 make_scoredata_table(scoredata)

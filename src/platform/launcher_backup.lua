@@ -179,7 +179,7 @@ function M.enumMods(path)
 end
 
 function M.saveSetting()
-    require("setting_util").saveSettingFile()
+    require("setting.setting_util").saveSettingFile()
 end
 
 return M

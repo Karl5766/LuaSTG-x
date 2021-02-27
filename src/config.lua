@@ -26,24 +26,17 @@ local M = {}
 require('cocos.cocos2d.json')
 local json = cjson or json
 
-local f = cc.FileUtils:getInstance():getStringFromFile('setting')
-local ok, ret
-if #f > 0 then
-    ok, ret = pcall(json.decode, f)
-end
-if not ok or not ret then
-    ok, ret = pcall(require, 'default_setting')
-    if not ok or not ret then
-        lstg.SystemLog(tostring(ret))
-    end
-end
+local function init()
+    require("setting.setting_util").loadSettingFile()
 
---- setting used for initialization
----@type lstg.setting
-M.setting = ret
+    --- setting used for initialization
+    ---@type lstg.setting
+    M.setting = setting
 
-M.setting.resizable = true
---M.setting.transparent = true
+    M.setting.resizable = true
+    --M.setting.transparent = true
+end
+init()
 
 if lstg.glfw and M.setting.transparent then
     local g = require('platform.glfw')
@@ -57,35 +50,21 @@ local director = cc.Director:getInstance()
 local view = director:getOpenGLView()
 local title = 'LuaSTG-x'
 
-local function rect(_x, _y, _width, _height)
+local function create_rect(_x, _y, _width, _height)
     return { x = _x, y = _y, width = _width, height = _height }
 end
 if not view then
     local setting = M.setting
-    local width = 960
-    local height = 640
-    if CC_DESIGN_RESOLUTION then
-        if CC_DESIGN_RESOLUTION.width then
-            width = CC_DESIGN_RESOLUTION.width
-        end
-        if CC_DESIGN_RESOLUTION.height then
-            height = CC_DESIGN_RESOLUTION.height
-        end
-    end
-    if setting then
-        local w = setting.windowsize_w or width
-        local h = setting.windowsize_h or height
-        if setting.windowed then
-            if setting.resizable and lstg.glfw then
-                view = cc.GLViewImpl:createWithRect(title, rect(0, 0, w, h), 1, true)
-            else
-                view = cc.GLViewImpl:createWithRect(title, rect(0, 0, w, h))
-            end
+    local w = setting.windowsize_w
+    local h = setting.windowsize_h
+    if setting.windowed then
+        if setting.resizable and lstg.glfw then
+            view = cc.GLViewImpl:createWithRect(title, create_rect(0, 0, w, h), 1, true)
         else
-            view = cc.GLViewImpl:createWithFullScreen(title)
+            view = cc.GLViewImpl:createWithRect(title, create_rect(0, 0, w, h))
         end
     else
-        view = cc.GLViewImpl:createWithRect(title, rect(0, 0, width, height))
+        view = cc.GLViewImpl:createWithFullScreen(title)
     end
     director:setOpenGLView(view)
     if cc.Configuration then

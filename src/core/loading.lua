@@ -48,6 +48,8 @@ end
 
 --
 
+local _setting_util = require("setting.setting_util")
+
 ---add mod directory given in the path "mod/"..setting.mod;
 ---look for either directory or .zip file;
 ---calls lstg.loadPlugin();
@@ -77,7 +79,7 @@ function lstg.loadMod()
 
     Include('root.lua')
 
-    lstg.loadSetting()
+    _setting_util.updateScreenSoundFromSetting()
 
     SetTitle(setting.mod)
     SetResourceStatus('stage')

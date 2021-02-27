@@ -71,16 +71,8 @@ else
 end
 print = Print
 
-for k, v in pairs(lstg) do
-    print(k)
-end
-
-DoFile('plus/plus.lua')
-DoFile('stringify.lua')
-
-setting = require('default_setting')
-setting = SerializeTest(setting)
-require("setting_util").loadSettingFile()
+DoFile("plus/plus.lua")
+DoFile("stringify.lua")
 
 require('imgui.__init__')
 
@@ -90,8 +82,6 @@ end
 
 --skip the launchers
 require('app.views.MainScene').setSkip(true, true)
-
-local glv = cc.Director:getInstance():getOpenGLView()
 
 SetSplash(true)
 SetTitle('LuaSTG-x')
@@ -105,23 +95,6 @@ if setting.render_skip == 1 then
     SetFPS(30)
 else
     SetFPS(60)
-end
-
-function lstg.loadSetting()
-    SetVsync(setting.vsync)
-    glv:setDesignResolutionSize(
-            setting.resx, setting.resy, cc.ResolutionPolicy.SHOW_ALL)
-    SetTitle(setting.mod)
-    SetSEVolume(setting.sevolume / 100)
-    SetBGMVolume(setting.bgmvolume / 100)
-
-    local size = glv:getDesignResolutionSize()
-    SystemLog(string.format('DesignRes = %d, %d', size.width, size.height))
-    size = glv:getFrameSize()
-    SystemLog(string.format('FrameSize = %d, %d', size.width, size.height))
-    SystemLog(string.format('Scale     = %.3f, %.3f', glv:getScaleX(), glv:getScaleY()))
-    --SystemLog('setting = \n' .. stringify(_setting))
-    --SystemLog('screen = \n' .. stringify(screen))
 end
 
 --SetResLoadInfo(true)

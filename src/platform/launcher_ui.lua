@@ -42,7 +42,7 @@ local function enumMods(path)
 end
 
 local function saveSetting()
-    require("setting_util").saveSettingFile()
+    require("setting.setting_util").saveSettingFile()
 end
 
 local contents = {

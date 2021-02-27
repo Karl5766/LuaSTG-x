@@ -5,9 +5,8 @@
 ---
 --- modifier:
 ---     Karl, 2021.2.14 put serialize functions from launch.lua into this file
+---     Karl, 2021.2.27 put serialize functions to setting_util.lua
 ---
-
-
 
 --from https://gist.github.com/Deco/3985043
 
@@ -59,7 +58,9 @@ _stringify = function(stack, this, spacing_h, spacing_v, space_n, parsed)
     end
 end
 
---- 序列化为字符串
+---@~chinese 序列化为字符串
+---
+---@~english serialize to string
 function stringify(this, docol, spacing_h, spacing_v, preindent)
     local stack = {}
     _stringify(
@@ -70,47 +71,4 @@ function stringify(this, docol, spacing_h, spacing_v, preindent)
             {}
     )
     return table.concat(stack)
-end
-
----turn object into string
-function Serialize(o)
-    if type(o) == 'table' then
-        function visitTable(t)
-            local ret = {}
-            if getmetatable(t) and getmetatable(t).data then
-                t = getmetatable(t).data
-            end
-            for k, v in pairs(t) do
-                if type(v) == 'table' then
-                    ret[k] = visitTable(v)
-                else
-                    ret[k] = v
-                end
-            end
-            return ret
-        end
-        o = visitTable(o)
-    end
-    return cjson.encode(o)
-end
-
----turn string encoded by Serialize() back to table
-function DeSerialize(s)
-    return cjson.decode(s)
-end
-
-local setting_util = require('setting_util')
-
----check if Serialize(format_json(Deserialize(o))) is the same as o;
----if so, the result copy of o is returned
----@param o any the object to test
-function SerializeTest(o)
-    local str = Serialize(o)
-    str = setting_util.format_json(str)
-    local result = DeSerialize(str)
-
-    if not setting_util.compare(result, o) then
-        error(i18n 'error in parsing setting')
-    end
-    return result
 end

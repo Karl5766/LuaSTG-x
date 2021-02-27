@@ -1,5 +1,9 @@
+---reference:
+---     cjson manual, https://www.kyne.com.au/~mark/software/lua-cjson-manual.html
+
 local M = {}
 
+---format the string representation of setting table
 function M.format_json(str)
     local ret = ''
     local indent = '    '
@@ -55,7 +59,7 @@ function M.compare(t1, t2)
                 return false
             end
         elseif ty == 'table' then
-            return M.compare(v, v2)
+            return M.compare(v, v2)  -- TOBEDEBUGGED
         else
             return false
         end
@@ -66,40 +70,59 @@ end
 local FU = cc.FileUtils:getInstance()
 local FS = require("file_system")
 
-local _setting_path = FS.getWritablePath() .. 'setting'
-local _setting = {}
+local _setting_path = FS.getWritablePath() .. 'setting/setting'  -- setting file is at the main directory
+
+---load global setting table from the setting file
 function M.loadSettingFile()
     local file_content_str = FU:getStringFromFile(_setting_path)
-    _setting = DeSerialize(Serialize(setting))
     setting = {}
-    setmetatable(setting, {
-        __newindex = function(t, k, v)
-            _setting[k] = v
-            if k == 'res_ratio' then
-                local ratio = v[1] / v[2]
-                setting.resx = math.ceil(setting.resy * ratio / 2) * 2
-            elseif k == 'resy' then
-                local ratio = setting.res_ratio[1] / setting.res_ratio[2]
-                setting.resx = math.ceil(v * ratio / 2) * 2
-            end
-        end,
-        __index    = _setting
-    })
 
     if file_content_str and file_content_str ~= '' then
-        local s = DeSerialize(file_content_str)
+        local s = cjson.decode(file_content_str)
         for k, v in pairs(s) do
             setting[k] = v
         end
     end
 end
 
+---save global setting table to the setting file
 function M.saveSettingFile()
-    assert(setting and getmetatable(setting))
-    local t = getmetatable(setting).__index
-    local s = M.format_json(Serialize(t))
-    assert(M.compare(DeSerialize(s), t))
+    local t = setting
+    local s = SerializeTest(t)
     FU:writeStringToFile(s, _setting_path)
+end
+
+---update the screen and sound settings according to the values set in global setting table
+function M.updateScreenSoundFromSetting()
+    local _glv = cc.Director:getInstance():getOpenGLView()
+    SetVsync(setting.vsync)
+    _glv:setDesignResolutionSize(
+            setting.resx, setting.resy, cc.ResolutionPolicy.SHOW_ALL)
+    SetTitle(setting.mod)
+    SetSEVolume(setting.sevolume / 100)
+    SetBGMVolume(setting.bgmvolume / 100)
+
+    local size = _glv:getDesignResolutionSize()
+    SystemLog(string.format('DesignRes = %d, %d', size.width, size.height))
+    size = _glv:getFrameSize()
+    SystemLog(string.format('FrameSize = %d, %d', size.width, size.height))
+    SystemLog(string.format('Scale     = %.3f, %.3f', _glv:getScaleX(), _glv:getScaleY()))
+    --SystemLog('setting = \n' .. stringify(_setting))
+    --SystemLog('screen = \n' .. stringify(screen))
+end
+
+---check if decode(format_json(encode(o))) is the same as o;
+---if so, the result copy of o is returned
+---@param o any the object to test
+function SerializeTest(o)
+    local str = cjson.encode(o)
+    str = setting_util.format_json(str)
+    local result = cjson.decode(str)
+
+    if not setting_util.compare(result, o) then
+        error(i18n 'error in parsing setting')
+    end
+    return result
 end
 
 return M
