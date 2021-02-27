@@ -94,7 +94,6 @@ end
 
 ---update game state 1 time
 local function _DoOneFrame()
-    --SetTitle(setting.mod .. ' | FPS=' .. GetFPS() .. ' | Nobj=' .. GetnObj())
     UpdateObjList()
     GetInput()
 

@@ -187,64 +187,9 @@ end
 ---@param new_title string new title to be set as the window title
 function M.setWindowTitle(new_title)
     _title = new_title
-    SetTitle(new_title)
-end
 
----------------------------------------------------------------------------------------------------
-
----@~chinese 改变视频选项。若成功返回true，否则返回false
----
----@~english Change video parameters. Returns `true` if success, otherwise returns `false` and restore last parameters.
----
----@param width number
----@param height number
----@param windowed boolean
----@param vsync boolean
-function ChangeVideoMode(width, height, windowed, vsync)
     local w = lstg.WindowHelperDesktop:getInstance()
-    if w then
-        if windowed then
-            w:setSize(cc.size(width, height))
-        else
-            w:setFullscreen()
-            --cc.Director:getInstance():getOpenGLView():setFrameSize(width, height)
-        end
-        w:setVsync(vsync)
-        SystemLog(string.format(
-                'change video mode to: (%d, %d), %s, %s',
-                width, height,
-                windowed and 'Windowed' or 'FullScreen',
-                vsync and 'VSync On' or 'VSync Off'))
-        w:moveToCenter()
-        return true
-    else
-        return false
-    end
-end
-
----@~chinese 设置是否显示光标，默认显示
----
----@~english Set if the mouse cursor is displayed in game window. Default is `true`.
----
----@param b boolean
-function SetSplash(b)
-    local w = lstg.WindowHelperDesktop:getInstance()
-    if w then
-        w:setCursorVisible(b)
-    end
-end
-
----@~chinese 设置窗口标题。默认为"LuaSTG-x"。
----
----@~english Set the caption of window. Default is `"LuaSTG-x"`.
----
----@param title string
-function SetTitle(title)
-    local w = lstg.WindowHelperDesktop:getInstance()
-    if w then
-        w:setTitle(title)
-        --Print('set title to '..title)
-    end
+    w:setTitle(new_title)
 end
 
 return M

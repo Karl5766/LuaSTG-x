@@ -49,7 +49,7 @@ end
 local function InitGLView()
     local director = cc.Director:getInstance()
     local _glv = director:getOpenGLView()
-    local title = 'LuaSTG-x'  -- initial title, can be modified by SetTitle()
+    local title = 'LuaSTG-x'  -- initial title, can be modified by setTitle()
 
     local function create_rect(_x, _y, _width, _height)
         return { x = _x, y = _y, width = _width, height = _height }
