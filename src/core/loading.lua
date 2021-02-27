@@ -79,9 +79,12 @@ function lstg.loadMod()
 
     Include('root.lua')
 
-    _setting_util.updateScreenSoundFromSetting()
+    ---update the screen and sound settings according to the values set in global setting table
+    local _scr_metrics = require("setting.screen_metrics")
+    _scr_metrics.setWindowTitle(setting.mod)
+    SetSEVolume(setting.sevolume / 100)
+    SetBGMVolume(setting.bgmvolume / 100)
 
-    SetTitle(setting.mod)
     SetResourceStatus('stage')
 end
 

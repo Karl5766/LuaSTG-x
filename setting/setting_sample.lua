@@ -1,4 +1,10 @@
---
+--------------------------------------------------------------------------
+---setting_sample.lua
+---desc: A sample of what setting.ini may look like
+---modifier:
+---     Karl, 2021.2.27 adds a file header, and removed some entries
+--------------------------------------------------------------------------
+
 local KEY = require('keycode')
 ---@class lstg.setting
 local M = {
@@ -34,7 +40,6 @@ local M = {
     -- note: key codes in [keys] and [keysys] should be mutex
 
     posteffect     = true,
-    res_ratio      = { 16, 9 },
     -- desktop
     windowsize_w   = 1708,
     windowsize_h   = 960,

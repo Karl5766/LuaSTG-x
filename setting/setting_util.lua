@@ -4,6 +4,8 @@
 local M = {}
 
 ---format the string representation of setting table
+---@param str string string to be formatted
+---@return string formatted string
 function M.format_json(str)
     local ret = ''
     local indent = '    '
@@ -70,51 +72,35 @@ end
 local FU = cc.FileUtils:getInstance()
 local FS = require("file_system")
 
-local _setting_path = FS.getWritablePath() .. 'setting/setting'  -- setting file is at the main directory
+local _setting_path = FS.getWritablePath() .. 'setting/setting.ini'  -- setting file is at the main directory
 
 ---load global setting table from the setting file
 function M.loadSettingFile()
-    local file_content_str = FU:getStringFromFile(_setting_path)
     setting = {}
+    local file_content_str = FU:getStringFromFile(_setting_path)
 
     if file_content_str and file_content_str ~= '' then
-        local s = cjson.decode(file_content_str)
-        for k, v in pairs(s) do
-            setting[k] = v
-        end
+        lstg.SystemLog("ERROR: setting file does not exist.")
+    end
+
+    local s = cjson.decode(file_content_str)
+    for k, v in pairs(s) do
+        setting[k] = v
     end
 end
 
 ---save global setting table to the setting file
 function M.saveSettingFile()
     local t = setting
-    local s = SerializeTest(t)
+    local s = M.encodeTest(t)
     FU:writeStringToFile(s, _setting_path)
 end
 
----update the screen and sound settings according to the values set in global setting table
-function M.updateScreenSoundFromSetting()
-    local _glv = cc.Director:getInstance():getOpenGLView()
-    SetVsync(setting.vsync)
-    _glv:setDesignResolutionSize(
-            setting.resx, setting.resy, cc.ResolutionPolicy.SHOW_ALL)
-    SetTitle(setting.mod)
-    SetSEVolume(setting.sevolume / 100)
-    SetBGMVolume(setting.bgmvolume / 100)
-
-    local size = _glv:getDesignResolutionSize()
-    SystemLog(string.format('DesignRes = %d, %d', size.width, size.height))
-    size = _glv:getFrameSize()
-    SystemLog(string.format('FrameSize = %d, %d', size.width, size.height))
-    SystemLog(string.format('Scale     = %.3f, %.3f', _glv:getScaleX(), _glv:getScaleY()))
-    --SystemLog('setting = \n' .. stringify(_setting))
-    --SystemLog('screen = \n' .. stringify(screen))
-end
-
 ---check if decode(format_json(encode(o))) is the same as o;
----if so, the result copy of o is returned
+---if so, the result copy of o is returned; if not, an error will be thrown
 ---@param o any the object to test
-function SerializeTest(o)
+---@return any a copy of o
+function M.encodeTest(o)
     local str = cjson.encode(o)
     str = setting_util.format_json(str)
     local result = cjson.decode(str)

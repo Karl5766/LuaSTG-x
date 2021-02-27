@@ -26,19 +26,19 @@ local M = {}
 require('cocos.cocos2d.json')
 local json = cjson or json
 
-local function init()
+---@type ScreenMetrics
+local _scr_metrics
+local function InitSetting()
     require("setting.setting_util").loadSettingFile()
-
-    --- setting used for initialization
-    ---@type lstg.setting
-    M.setting = setting
-
-    M.setting.resizable = true
-    --M.setting.transparent = true
+    _scr_metrics = require("setting.screen_metrics")
+    _scr_metrics.init(setting)
 end
-init()
+InitSetting()
 
-if lstg.glfw and M.setting.transparent then
+local _resizable = true
+local _transparent = false
+
+if lstg.glfw and _transparent then
     local g = require('platform.glfw')
     -- Init() is necessary for following functions
     g.Init()
@@ -46,34 +46,45 @@ if lstg.glfw and M.setting.transparent then
     cc.Director:getInstance():setClearColor({ r = 0, g = 0, b = 0, a = 0 })
 end
 
-local director = cc.Director:getInstance()
-local view = director:getOpenGLView()
-local title = 'LuaSTG-x'
+local function InitGLView()
+    local director = cc.Director:getInstance()
+    local _glv = director:getOpenGLView()
+    local title = 'LuaSTG-x'  -- initial title, can be modified by SetTitle()
 
-local function create_rect(_x, _y, _width, _height)
-    return { x = _x, y = _y, width = _width, height = _height }
-end
-if not view then
-    local setting = M.setting
-    local w = setting.windowsize_w
-    local h = setting.windowsize_h
-    if setting.windowed then
-        if setting.resizable and lstg.glfw then
-            view = cc.GLViewImpl:createWithRect(title, create_rect(0, 0, w, h), 1, true)
+    local function create_rect(_x, _y, _width, _height)
+        return { x = _x, y = _y, width = _width, height = _height }
+    end
+    if not _glv then
+        -- init _glv instance
+        local w, h = _scr_metrics.getScreenSize()
+        if _scr_metrics.getWindowed() then
+            if _resizable and lstg.glfw then
+                _glv = cc.GLViewImpl:createWithRect(title, create_rect(0, 0, w, h), 1, true)
+            else
+                _glv = cc.GLViewImpl:createWithRect(title, create_rect(0, 0, w, h))
+            end
         else
-            view = cc.GLViewImpl:createWithRect(title, create_rect(0, 0, w, h))
+            _glv = cc.GLViewImpl:createWithFullScreen(title)
         end
-    else
-        view = cc.GLViewImpl:createWithFullScreen(title)
+        director:setOpenGLView(_glv)
+        if cc.Configuration then
+            local cfg = cc.Configuration:getInstance()
+            local backend_device = cfg:getValue('renderer', 'N/A')
+            local backend_version = cfg:getValue('version', 'N/A')
+            lstg.SystemLog(('Backend device: %s'):format(backend_device))
+            lstg.SystemLog(('Backend version: %s'):format(backend_version))
+        end
     end
-    director:setOpenGLView(view)
-    if cc.Configuration then
-        local cfg = cc.Configuration:getInstance()
-        local backend_device = cfg:getValue('renderer', 'N/A')
-        local backend_version = cfg:getValue('version', 'N/A')
-        lstg.SystemLog(('Backend device: %s'):format(backend_device))
-        lstg.SystemLog(('Backend version: %s'):format(backend_version))
+
+    _scr_metrics.setVsync(_scr_metrics.getVsync())  -- init set vsync after making sure glv is created
+    _scr_metrics.setSplash(_scr_metrics.getSplash())  -- show cursor
+
+    if setting.render_skip == 1 then
+        lstg.SetFPS(30)
+    else
+        lstg.SetFPS(60)
     end
 end
+InitGLView()
 
 return M

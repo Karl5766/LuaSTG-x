@@ -135,12 +135,12 @@ end
 ---setters and getters
 
 local _glv = cc.Director:getInstance():getOpenGLView()
+local _scr_metrics = require("setting.screen_metrics")
 
 ---return the current resolution of the screen
 ---@return number, number current resolution width, height
 function M.getResolution()
-    local res = _glv:getDesignResolutionSize()
-    return res.width, res.height
+    return _scr_metrics.getScreenResolution()
 end
 GetResolution = M.getResolution
 
@@ -149,10 +149,18 @@ GetResolution = M.getResolution
 ---@param res_width number screen resolution width
 ---@param res_height number screen resolution height
 function M.setResolution(res_width, res_height)
-    _glv:setDesignResolutionSize(res_width, res_height, cc.ResolutionPolicy.SHOW_ALL)
+    _scr_metrics.setScreenResolution(res_width, res_height, _glv)
 
     M.setUICoordinatesByResolution(res_width, res_height)
     M.setGameCoordinatesInUI(_game_ui_x, _game_ui_y, _game_ui_x_unit, _game_ui_y_unit)
+end
+
+---save the screen resolution to setting table, so it will be written to disk on
+---the termination of the application.
+---@param res_width number resolution width, setting to be saved
+---@param res_height number resolution height, setting to be saved
+function M.rememberResolution(res_width, res_height)
+    _scr_metrics.rememberScreenResolution(res_width, res_height)
 end
 
 ---@return number, number the origin of "ui" coordinates expressed in "res" coordinates

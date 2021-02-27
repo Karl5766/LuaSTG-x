@@ -43,7 +43,6 @@ function DoFile(path)
 end
 
 local _platform_info = require("platform.platform_info")
-require('api')
 if _platform_info.isMobile() then
     require('jit_test')
     -- define Print function
@@ -82,20 +81,6 @@ end
 
 --skip the launchers
 require('app.views.MainScene').setSkip(true, true)
-
-SetSplash(true)
-SetTitle('LuaSTG-x')
-ChangeVideoMode(
-        setting.windowsize_w,
-        setting.windowsize_h,
-        setting.windowed,
-        setting.vsync
-)
-if setting.render_skip == 1 then
-    SetFPS(30)
-else
-    SetFPS(60)
-end
 
 --SetResLoadInfo(true)
 --require("jit.opt").start("sizemcode=1024", "maxmcode=1024")
