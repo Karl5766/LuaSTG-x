@@ -77,12 +77,14 @@ function Stage.update(self, dt)
         obj.img = "test:image"
     end
 
-    for _=1, 9 do
-        if ran:Float(0, 1) > 0 then
-            local obj = New(Object)
-            obj.img = "test:image"
-            obj.vx = ran:Float(-4, 4)
-            obj.vy = ran:Float(-4, 4)
+    if GetKeyState(setting.keys.up) then
+        for _=1, 9 do
+            if ran:Float(0, 1) > 0 then
+                local obj = New(Object)
+                obj.img = "test:image"
+                obj.vx = ran:Float(-4, 4)
+                obj.vy = ran:Float(-4, 4)
+            end
         end
     end
 end

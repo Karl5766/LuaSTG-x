@@ -1,8 +1,17 @@
+---------------------------------------------------------------------------------------------------
+---ControllerHelper.lua
+---desc: Provides basic apis for checking the key states of controllers
+---modifier:
+---     Karl, 2021.3.3,
+---------------------------------------------------------------------------------------------------
+
+
 local M = {}
 --require('cocos.controller.ControllerConstants')
 --local _KEY = cc.ControllerKey
 
 -- key and axis may have same code
+---status lists status_list[controller][controller_keycode]
 local status_button = {}
 local status_axis = {}
 local status_axis_pos = {}
@@ -12,90 +21,87 @@ function M.getInnerStatus()
 end
 
 local mapping = { button = {}, axis = { pos = {}, neg = {} } }
+---maps a particular keyboard keycode to its status list and its index in the list
 local mapping_inv = {}
 
 --
 
----@param c cc.Controller
-local function onConnect(c)
-    local name = c:getDeviceName()
-    local id = c:getDeviceId()
+---initialize the info about the given controller on connect
+---@param controller cc.Controller
+local function onConnect(controller)
+    local name = controller:getDeviceName()
+    local id = controller:getDeviceId()
     Print(string.format('controller connected: name: %q, id: %d', name, id))
-    status_button[c] = {}
-    status_axis[c] = {}
-    status_axis_pos[c] = {}
-    status_axis_neg[c] = {}
-    --local keys = {}
-    --for i = 0, 15 do
-    --    keys[i] = false
-    --end
-    --mapping[c] = {}
-    --if plus.os == 'android' then
-    --    -- receive back key
-    --    c:receiveExternalKeyEvent(4, true)
-    --    -- receive menu key
-    --    c:receiveExternalKeyEvent(82, true)
-    --end
+    status_button[controller] = {}
+    status_axis[controller] = {}
+    status_axis_pos[controller] = {}
+    status_axis_neg[controller] = {}
 end
 
 ---@param c cc.Controller
-local function onDisonnect(c)
-    local name = c:getDeviceName()
-    local id = c:getDeviceId()
+local function onDisconnect(controller)
+    local name = controller:getDeviceName()
+    local id = controller:getDeviceId()
     Print(string.format('controller disconnected: name: %q, id: %d', name, id))
-    status_button[c] = nil
-    status_axis[c] = nil
-    status_axis_pos[c] = nil
-    status_axis_neg[c] = nil
+    status_button[controller] = nil
+    status_axis[controller] = nil
+    status_axis_pos[controller] = nil
+    status_axis_neg[controller] = nil
     --mapping[c] = nil
 end
 
-local function _check(c)
-    if not status_button[c] then
-        onConnect(c)
+---if c is not connected, connect c
+local function CheckAndConnect(controller)
+    if not status_button[controller] then
+        onConnect(controller)
     end
 end
 
 local _last
 
-local function _is_last(id, keyCode, is_axis, is_pos)
+---@param id any device id number
+---@param keycode number keycode of the key
+---@param is_axis boolean is controller axis
+---@param is_pos boolean
+local function _is_last(id, keycode, is_axis, is_pos)
     if _last then
-        return _last.id == id and _last.key == keyCode and _last.is_axis == is_axis and _last.is_pos == is_pos
+        return _last.id == id and _last.key == keycode and _last.is_axis == is_axis and _last.is_pos == is_pos
     end
 end
 
----@param c cc.Controller
----@param keyCode cc.Controller
----@param value cc.Controller
----@param isPressed cc.Controller
----@param isAnalog cc.Controller
-local function onKeyDown(c, keyCode, value, isPressed, isAnalog)
-    if keyCode >= 1000 then
-        keyCode = keyCode - 1000
+---@param controlle cc.Controller
+---@param keycode number
+---@param value any
+---@param isPressed boolean
+---@param isAnalog boolean
+local function onKeyDown(controller, keycode, value, isPressed, isAnalog)
+    if keycode >= 1000 then
+        keycode = keycode - 1000
     end
-    _check(c)
-    status_button[c][keyCode] = true
+    CheckAndConnect(controller)
+    status_button[controller][keycode] = true
     --local code = -1
     --for k, v in pairs(mapping_inv) do
-    --    if v.key == keyCode and not v.is_axis then
+    --    if v.key == keycode and not v.is_axis then
     --        code = k
     --        break
     --    end
     --end
-    --Print(string.format('[CTR] %d down: %02d => %d', c:getDeviceId(), keyCode, code))
+    --Print(string.format('[CTR] %d down: %02d => %d', c:getDeviceId(), keycode, code))
     _last = {
-        id  = c:getDeviceId(),
-        key = keyCode,
+        id  = controller:getDeviceId(),
+        key = keycode,
     }
 end
-local function onKeyUp(c, keyCode, value, isPressed, isAnalog)
-    if keyCode >= 1000 then
-        keyCode = keyCode - 1000
+
+local function onKeyUp(c, keycode, value, isPressed, isAnalog)
+    if keycode >= 1000 then
+        keycode = keycode - 1000
     end
-    --Print(string.format('[CTR] %d   up: %02d', c:getDeviceId(), keyCode))
-    _check(c)
-    status_button[c][keyCode] = false
-    if _is_last(c:getDeviceId(), keyCode, nil, nil) then
+    --Print(string.format('[CTR] %d   up: %02d', c:getDeviceId(), keycode))
+    CheckAndConnect(c)
+    status_button[c][keycode] = false
+    if _is_last(c:getDeviceId(), keycode, nil, nil) then
         _last = nil
     end
 end
@@ -106,53 +112,53 @@ local _axis_t = {
     { { nil, false }, nil, { false, nil }, },
     { { true, false }, { true, nil }, nil, },
 }
-local function _set_axis(c, keyCode, posVal, negVal)
+local function _set_axis(c, keycode, posVal, negVal)
     if posVal ~= nil then
-        status_axis_pos[c][keyCode] = posVal
+        status_axis_pos[c][keycode] = posVal
         if posVal then
             _last = {
                 id      = c:getDeviceId(),
-                key     = keyCode,
+                key     = keycode,
                 is_axis = true,
                 is_pos  = true,
             }
         else
-            if _is_last(c:getDeviceId(), keyCode, true, true) then
+            if _is_last(c:getDeviceId(), keycode, true, true) then
                 _last = nil
             end
         end
     end
     if negVal ~= nil then
-        status_axis_neg[c][keyCode] = negVal
+        status_axis_neg[c][keycode] = negVal
         if negVal then
             _last = {
                 id      = c:getDeviceId(),
-                key     = keyCode,
+                key     = keycode,
                 is_axis = true,
                 is_pos  = false,
             }
         else
-            if _is_last(c:getDeviceId(), keyCode, true, false) then
+            if _is_last(c:getDeviceId(), keycode, true, false) then
                 _last = nil
             end
         end
     end
 end
 
-local function onAxisEvent(c, keyCode, value, isPressed, isAnalog)
-    if keyCode >= 1000 then
-        keyCode = keyCode - 1000
+local function onAxisEvent(c, keycode, value, isPressed, isAnalog)
+    if keycode >= 1000 then
+        keycode = keycode - 1000
     end
-    _check(c)
-    local last = status_axis[c][keyCode]
+    CheckAndConnect(c)
+    local last = status_axis[c][keycode]
     if not last then
-        status_axis[c][keyCode] = value
+        status_axis[c][keycode] = value
         last = value
     end
     --if math.abs(last - value) < 0.1 then
     --    return
     --end
-    status_axis[c][keyCode] = value
+    status_axis[c][keycode] = value
     local i1, i2
     if value < -_threshold then
         i1 = 1
@@ -170,8 +176,8 @@ local function onAxisEvent(c, keyCode, value, isPressed, isAnalog)
     end
     local val = _axis_t[i1][i2]
     if val then
-        _set_axis(c, keyCode, val[1], val[2])
-        --Print('set_axis', keyCode, string.format('%.3f', last), string.format('%.3f', value), val[1], val[2])
+        _set_axis(c, keycode, val[1], val[2])
+        --Print('set_axis', keycode, string.format('%.3f', last), string.format('%.3f', value), val[1], val[2])
     end
 end
 
@@ -180,7 +186,7 @@ function M.init()
         onConnect(v)
     end
     SetOnControllerConnect(onConnect)
-    SetOnControllerDisconnect(onDisonnect)
+    SetOnControllerDisconnect(onDisconnect)
     SetOnControllerKeyDown(onKeyDown)
     SetOnControllerKeyUp(onKeyUp)
     SetOnControllerAxisEvent(onAxisEvent)
@@ -195,27 +201,29 @@ function M.init()
         _last = nil
     end, 100, 'controller.last.clear')
 
-    M.loadFromSetting()
+    M.loadFromSetting(setting.controller_map.keys, setting.controller_map.keysys)
 end
 
-function M.getStatus(code)
-    local m = mapping_inv[code]
+---@param keycode number the keycode of the key to be checked
+---@return boolean true if any controller presses this key at the moment
+function M.getStatus(keycode)
+    local m = mapping_inv[keycode]
     if not m then
         return
     end
-    local target
+    local target_status
     if m.is_axis then
         if m.is_pos then
-            target = status_axis_pos
+            target_status = status_axis_pos
         else
-            target = status_axis_neg
+            target_status = status_axis_neg
         end
     else
-        target = status_button
+        target_status = status_button
     end
     --Print(m.key, m.is_axis, m.is_pos)
-    for k, v in pairs(target) do
-        return v[m.key]
+    for _, controller in pairs(target_status) do
+        return controller[m.key]
     end
 end
 
@@ -223,6 +231,7 @@ function M.getLast()
     return _last
 end
 
+---@return number the corresponding keycode of the last key; if no key is found, return 0
 function M.getLastKey()
     local ret
     if _last then
@@ -240,50 +249,50 @@ function M.getLastKey()
     return ret or 0
 end
 
-function M.loadFromSetting()
-    if setting.controller_map then
-        local keys = setting.controller_map.keys or {}
-        local keysys = setting.controller_map.keysys or {}
-        mapping = { button = {}, axis = { pos = {}, neg = {} } }
-        for k, v in pairs(keys) do
-            local ik = setting.keys[k]
-            local keyCode = v[1] or -1
-            mapping_inv[ik] = { key = keyCode }
-            if #v > 1 then
-                mapping_inv[ik].is_axis = true
-                if v[2] then
-                    mapping.axis.pos[keyCode] = ik
-                    mapping_inv[ik].is_pos = true
-                else
-                    mapping.axis.neg[keyCode] = ik
-                    mapping_inv[ik].is_pos = false
-                end
+---initialize mapping and mapping_inv tables
+---@param game_keys table a map from every in-game key names (E.g. "slow") to its controller setting keycode
+---@param system_keys table a map from every system key names to its controller setting keycode
+function M.loadFromSetting(game_keys, system_keys, keyboard_game_keys, keyboard_system_keys)
+    mapping = { button = {}, axis = { pos = {}, neg = {} } }
+    for key_function_name, controller_keycode in pairs(game_keys) do
+        local keyboard_keycode = setting.keys[key_function_name]
+        local keycode = controller_keycode[1] or -1
+        mapping_inv[keyboard_keycode] = { key = keycode }
+        if #controller_keycode > 1 then
+            mapping_inv[keyboard_keycode].is_axis = true
+            if controller_keycode[2] then
+                mapping.axis.pos[keycode] = keyboard_keycode
+                mapping_inv[keyboard_keycode].is_pos = true
             else
-                mapping.button[keyCode] = ik
+                mapping.axis.neg[keycode] = keyboard_keycode
+                mapping_inv[keyboard_keycode].is_pos = false
             end
+        else
+            mapping.button[keycode] = keyboard_keycode
         end
-        for k, v in pairs(keysys) do
-            local ik = setting.keysys[k]
-            local keyCode = v[1] or -1
-            mapping_inv[ik] = { key = keyCode }
-            if #v > 1 then
-                mapping_inv[ik].is_axis = true
-                if v[2] then
-                    mapping.axis.pos[keyCode] = ik
-                    mapping_inv[ik].is_pos = true
-                else
-                    mapping.axis.neg[keyCode] = ik
-                    mapping_inv[ik].is_pos = false
-                end
-            else
-                mapping.button[keyCode] = ik
-            end
-        end
-        --Print(stringify(mapping))
-        --Print(stringify(mapping_inv))
     end
+    for k, v in pairs(system_keys) do
+        local keyboard_keycode = setting.keysys[k]
+        local keycode = v[1] or -1
+        mapping_inv[keyboard_keycode] = { key = keycode }
+        if #v > 1 then
+            mapping_inv[keyboard_keycode].is_axis = true
+            if v[2] then
+                mapping.axis.pos[keycode] = keyboard_keycode
+                mapping_inv[keyboard_keycode].is_pos = true
+            else
+                mapping.axis.neg[keycode] = keyboard_keycode
+                mapping_inv[keyboard_keycode].is_pos = false
+            end
+        else
+            mapping.button[keycode] = keyboard_keycode
+        end
+    end
+    --Print(stringify(mapping))
+    --Print(stringify(mapping_inv))
 end
 
+---for controller setting menu
 function M.convertSetting()
     local ret = {}
     if setting.controller_map then
@@ -300,9 +309,6 @@ function M.convertSetting()
 end
 
 function M.setMapping(name, key, is_axis, is_pos)
-    if not setting.controller_map then
-        setting.controller_map = table.clone(default_setting.controller_map)
-    end
     local k1 = setting.controller_map.keys[name]
     local k2 = setting.controller_map.keysys[name]
     local s = is_axis and { key, is_pos } or { key }

@@ -12,9 +12,9 @@ local ch = require('platform.ControllerHelper')
 ---
 ---@~english Check if key corresponding to `code` is pressed.
 ---@~english > See `keycode.lua`.
----
-function GetKeyState(code)
-    return _GetKeyState(code) or ch.getStatus(code)
+---@param keycode number the keycode of the key to be checked
+function GetKeyState(keycode)
+    return _GetKeyState(keycode) or ch.getStatus(keycode)
 end
 
 ---@~chinese 返回最后一次输入的按键的按键代码。

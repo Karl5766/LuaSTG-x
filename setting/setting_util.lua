@@ -57,19 +57,20 @@ function M.loadSettingFile()
     end
 
     setting = cjson.decode(file_content_str)
+
+    M.saveSettingFile()
 end
 
 ---save global setting table to the setting file
 function M.saveSettingFile()
-    local t = setting
-    local s = M.encodeTest(t)
-    FU:writeStringToFile(s, _setting_path)
+    local str = M.encodeTest(setting)
+    FU:writeStringToFile(str, _setting_path)
 end
 
 ---check if decode(format_json(encode(o))) is the same as o;
 ---if so, the result copy of o is returned; if not, an error will be thrown
 ---@param o any the object to test
----@return any a copy of o
+---@return string, any an encoded formatted string copy and an decoded copy of os
 function M.encodeTest(o)
     local str = cjson.encode(o)
     str = M.format_json(str)
@@ -78,7 +79,7 @@ function M.encodeTest(o)
     if not M.tableDeepEqual(result, o) then
         error(i18n 'error in parsing setting')
     end
-    return result
+    return str, result
 end
 
 ---------------------------------------------------------------------------------------------------

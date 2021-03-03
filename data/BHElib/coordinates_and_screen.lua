@@ -421,8 +421,8 @@ SetFog = M.setFog
 ---------------------------------------------------------------------------------------------------
 ---for updating and modifying the boundary
 
----setup "ui" coordinates by the given resolution;
----this function will fit the 4:3 hud maximally to the given resolution size
+---setup "ui" coordinates by the given resolution size;
+---this function will fit the 640*480 4:3 hud maximally to the given resolution size
 ---@param res_width number screen resolution width
 ---@param res_height number screen resolution height
 function M.setUICoordinatesByResolution(res_width, res_height)

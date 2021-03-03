@@ -9,8 +9,8 @@
 ---@class ScreenMetrics
 local M = {}
 
----the setting table serves as default init values
-local _default_setting
+-- local _default_setting  --the setting table that serves as default init values
+local _setting_screen  -- a table under the setting table that stores screen information
 
 ---screen resolution in pixels
 local _resx, _resy
@@ -36,14 +36,15 @@ local _windowed, _vsync
 ---this function should only be called on application startup
 ---@param default_setting table the default setting table
 function M.init(default_setting)
-    _default_setting = default_setting
-    _resx = default_setting.resx
-    _resy = default_setting.resy
-    _windowsize_w = default_setting.windowsize_w
-    _windowsize_h = default_setting.windowsize_h
+    _setting_screen = default_setting.screen
 
-    _windowed = default_setting.windowed
-    _vsync = default_setting.vsync
+    _resx = _setting_screen.resx
+    _resy = _setting_screen.resy
+    _windowsize_w = _setting_screen.windowsize_w
+    _windowsize_h = _setting_screen.windowsize_h
+
+    _windowed = _setting_screen.windowed
+    _vsync = _setting_screen.vsync
     _splash = true  -- default to true since there is no corresponding entry in setting file
 end
 
@@ -75,8 +76,8 @@ end
 ---@param res_width number resolution width, setting to be saved
 ---@param res_height number resolution height, setting to be saved
 function M.rememberScreenResolution(res_width, res_height)
-    _default_setting.resx = res_width
-    _default_setting.resy = res_height
+    _setting_screen.resx = res_width
+    _setting_screen.resy = res_height
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -105,8 +106,8 @@ end
 ---@param screen_width number screen width, setting to be saved
 ---@param screen_height number screen height, setting to be saved
 function M.rememberScreenSize(screen_width, screen_height)
-    _default_setting.resx = screen_width
-    _default_setting.resy = screen_height
+    _setting_screen.resx = screen_width
+    _setting_screen.resy = screen_height
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -134,7 +135,7 @@ end
 ---save the windowed setting to setting table, so it will be written to disk on
 ---the termination of the application.
 function M.rememberWindowed(is_windowed)
-    _default_setting.windowed = is_windowed
+    _setting_screen.windowed = is_windowed
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -153,7 +154,7 @@ end
 ---save the vsync setting to setting table, so it will be written to disk on
 ---the termination of the application.
 function M.rememberVsync(is_vsync)
-    _default_setting.vsync = is_vsync
+    _setting_screen.vsync = is_vsync
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -165,7 +166,7 @@ end
 
 ---@~chinese 设置是否显示光标，默认显示
 ---
----@~english Set if the mouse cursor is displayed in game window. Default is `true`.
+---@~english set if the mouse cursor is displayed in game window. Default is `true`.
 ---
 ---@param is_splash boolean if true, the cursor will not be hidden when inside the game window
 function M.setSplash(is_splash)
