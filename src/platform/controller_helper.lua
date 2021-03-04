@@ -24,6 +24,9 @@ local status_axis_positive = {}
 ---changed as status_axis table change; is set to true when the axis is less than -threshold; is set to false otherwise
 local status_axis_negative = {}
 
+---waiting queue
+local newly_registered_controllers = {}
+
 local mapping = { button = {}, axis = { pos = {}, neg = {} } }
 ---maps a particular keyboard keycode to its status list and its index in the list
 local mapping_inv = {}
@@ -40,6 +43,7 @@ local function onConnect(controller)
     status_axis[controller] = {}
     status_axis_positive[controller] = {}
     status_axis_negative[controller] = {}
+    newly_registered_controllers[controller] = true
 end
 
 ---print a disconnection message and set corresponding status lists' controller sections to nil
@@ -247,102 +251,12 @@ function M.getKeyState(controller, key, axis_direction)
     end
 end
 
----TOBEMOVED
----@param key_function_name number the in-game function of the key
----@return boolean true if any controller presses this key at the moment
-function M.getStatus(key_function_name)
-    local m = mapping_inv[key_function_name]
-    if not m then
-        return
-    end
-    local target_status
-    if m.is_axis then
-        if m.is_pos then
-            target_status = status_axis_positive
-        else
-            target_status = status_axis_negative
-        end
-    else
-        target_status = status_button
-    end
-    --Print(m.key, m.is_axis, m.is_pos)
-    for controller, controller_state in pairs(target_status) do
-        return controller_state[m.key]
-    end
-end
-
----TOBEMOVED
----initialize mapping and mapping_inv tables
----@param game_keys table a map from every in-game key names (E.g. "slow") to its controller setting keycode
----@param system_keys table a map from every system key names to its controller setting keycode
-function M.initFromSetting(game_keys, system_keys, keyboard_game_keys, keyboard_system_keys)
-    mapping = { button = {}, axis = { pos = {}, neg = {} } }
-    for key_function_name, controller_keycode in pairs(game_keys) do
-        local keyboard_keycode = setting.keys[key_function_name]
-        local keycode = controller_keycode[1] or -1
-        mapping_inv[keyboard_keycode] = { key = keycode }
-        if #controller_keycode > 1 then
-            mapping_inv[keyboard_keycode].is_axis = true
-            if controller_keycode[2] then
-                mapping.axis.pos[keycode] = keyboard_keycode
-                mapping_inv[keyboard_keycode].is_pos = true
-            else
-                mapping.axis.neg[keycode] = keyboard_keycode
-                mapping_inv[keyboard_keycode].is_pos = false
-            end
-        else
-            mapping.button[keycode] = keyboard_keycode
-        end
-    end
-    for k, v in pairs(system_keys) do
-        local keyboard_keycode = setting.keysys[k]
-        local keycode = v[1] or -1
-        mapping_inv[keyboard_keycode] = { key = keycode }
-        if #v > 1 then
-            mapping_inv[keyboard_keycode].is_axis = true
-            if v[2] then
-                mapping.axis.pos[keycode] = keyboard_keycode
-                mapping_inv[keyboard_keycode].is_pos = true
-            else
-                mapping.axis.neg[keycode] = keyboard_keycode
-                mapping_inv[keyboard_keycode].is_pos = false
-            end
-        else
-            mapping.button[keycode] = keyboard_keycode
-        end
-    end
-    --Print(stringify(mapping))
-    --Print(stringify(mapping_inv))
-end
-
----TOBEMOVED
----set key function name - controller keycode mapping
----remember them as well
----@param name string key function name
-function M.setMapping(name, key, is_axis, is_pos)
-    local k1 = setting.controller_map.keys[name]
-    local k2 = setting.controller_map.keysys[name]
-    local s = is_axis and { key, is_pos } or { key }
-    local ik
-    if k1 then
-        setting.controller_map.keys[name] = s
-        ik = setting.keys[name]
-    elseif k2 then
-        setting.controller_map.keysys[name] = s
-        ik = setting.keysys[name]
-    end
-    mapping_inv[ik] = { key = key }
-    if is_axis then
-        mapping_inv[ik].is_axis = true
-        if is_pos then
-            mapping.axis.pos[key] = ik
-            mapping_inv[ik].is_pos = true
-        else
-            mapping.axis.neg[key] = ik
-            mapping_inv[ik].is_pos = false
-        end
-    else
-        mapping.button[key] = ik
+---pop and return a recently connected controller in the waiting queue
+---@return cc.Controller
+function M.popNewlyConnectedController()
+    for controller, _ in pairs(newly_registered_controllers)
+        newly_registered_controllers[controller] = nil
+        return controller
     end
 end
 
