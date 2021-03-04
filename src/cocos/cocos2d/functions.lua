@@ -282,6 +282,63 @@ function class(classname, ...)
     return cls
 end
 
+---create a lua class of the given name; zero or more super classes may be specified
+---objects of the new class will have [".classname"] set as the given classname.
+---
+---the inherited constructor .__create can be overwritten;
+---then use the new(...) method to create objects, where new(...) call __create(...) automatically.
+---@param classname string name of the new class to be created
+---@param ... parameters specifies an optional list of super classes; super classes must be of type table
+function LuaClass(classname, ...)
+    return class(classname, ...)
+end
+
+-- LuaClass can be equivalently written as follows, as it assumes only pure lua classes are involved
+--function LuaClass(classname, ...)
+--    local cls = { __cname = classname }
+--
+--    local supers = { ... }
+--    for _, super in ipairs(supers) do
+--        -- super is pure lua class
+--        cls.__supers = cls.__supers or {}
+--        cls.__supers[#cls.__supers + 1] = super
+--        if not cls.super then
+--            -- set first super pure lua class as class.super
+--            cls.super = super
+--        end
+--    end
+--
+--    cls.__index = cls
+--
+--    local __call = function(...)
+--        local instance = cls.__create(...)
+--
+--        setmetatableindex(instance, cls)
+--        instance.class = cls
+--        instance['.classname'] = classname
+--
+--        return instance
+--    end
+--
+--    if not cls.__supers or #cls.__supers == 1 then
+--        setmetatable(cls, { __index = cls.super, __call = __call })
+--    else
+--        setmetatable(cls, {
+--            __index = function(_, key)
+--                local supers = cls.__supers
+--                for i = 1, #supers do
+--                    local super = supers[i]
+--                    if super[key] then
+--                        return super[key]
+--                    end
+--                end
+--            end,
+--            __call  = __call })
+--    end
+--
+--    return cls
+--end
+
 function getclassname(obj)
     local t = type(obj)
     if t ~= "table" and t ~= "userdata" then

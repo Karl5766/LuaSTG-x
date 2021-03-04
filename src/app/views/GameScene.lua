@@ -1,4 +1,4 @@
----@class GameScene:cc.Node
+---@class SceneManager:cc.Node
 local Scene = class("GameScene", cc.load("mvc").ViewBase)
 
 local director = cc.Director:getInstance()
@@ -21,6 +21,8 @@ function Scene:onEnter()
 
 end
 
+---@param transition string specifies one of few types of transitions available
+---@param time
 function Scene:showWithScene(transition, time, more)
     --SystemLog('[GameScene] showWithScene')
     self:setVisible(true)

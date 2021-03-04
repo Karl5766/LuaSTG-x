@@ -1,6 +1,8 @@
 ---@class MainScene:ViewBase
 local MainScene = class("MainScene", cc.load("mvc").ViewBase)
 
+local director = cc.Director:getInstance()
+
 for _, v in ipairs({ 'FocusLoseFunc', 'FocusGainFunc' }) do
     _G[v] = _G[v] or function()
     end
@@ -13,8 +15,8 @@ local _is_mod_loaded = false
 ---call lstg.loadMod only if it has not been called by this method
 local function _safe_load_mod()
     if not _is_mod_loaded then
-        lstg.loadMod()
         _is_mod_loaded = true
+        return lstg.loadMod()
     end
 end
 
@@ -55,9 +57,16 @@ end
 ---run/switch to the game scene
 function MainScene:runGameScene()
     -- in game
-    _safe_load_mod()
-    local scene = require('app.views.GameScene'):create(nil, setting.mod)
-    scene:showWithScene()
+    local scene = _safe_load_mod()
+
+    --local scene = require('app.views.GameScene'):create(nil, setting.mod)
+    --scene:showWithScene()
+
+    if director:getRunningScene() then
+        director:pushScene(scene)
+    else
+        director:runWithScene(scene)
+    end
 end
 
 return MainScene

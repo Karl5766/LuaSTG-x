@@ -9,7 +9,6 @@
 local profiler = profiler
 local e = lstg.eventDispatcher
 local coordinates = require("BHElib.coordinates_and_screen")
-local input = require("BHElib.input.input_and_replay")
 
 local abs = abs
 local cos = cos
@@ -92,126 +91,6 @@ function UserSystemOperation()
 end
 
 ---------------------------------------------------------------------------------------------------
-
----update game state 1 time
-local function _DoOneFrame()
-    UpdateObjList()
-    GetInput()
-
-    profiler.tic('ObjFrame')
-    ObjFrame()--LPOOL.DoFrame() 执行对象的Frame函数
-    profiler.toc('ObjFrame')
-
-    -- update current stage group
-    local stage_group = StageGroup.getRunningInstance()
-    stage_group:update(1)
-
-    profiler.tic('UserSystemOperation')
-    UserSystemOperation()  --用于lua层模拟内核级操作
-    profiler.toc('UserSystemOperation')
-
-    BoundCheck()--执行边界检查
-
-    profiler.tic('CollisionCheck')
-    --碰撞检查
-    CollisionCheck(GROUP_PLAYER, GROUP_ENEMY_BULLET)
-    CollisionCheck(GROUP_PLAYER, GROUP_ENEMY)
-    CollisionCheck(GROUP_PLAYER, GROUP_INDES)
-    CollisionCheck(GROUP_ENEMY, GROUP_PLAYER_BULLET)
-    CollisionCheck(GROUP_NONTJT, GROUP_PLAYER_BULLET)
-    CollisionCheck(GROUP_ITEM, GROUP_PLAYER)
-    profiler.toc('CollisionCheck')
-
-    profiler.tic('UpdateXY')
-    UpdateXY()--更新对象的XY坐标偏移量
-    profiler.toc('UpdateXY')
-
-    profiler.tic('AfterFrame')
-    AfterFrame()--帧末更新函数
-    profiler.toc('AfterFrame')
-
-    -- test whether to start the next stage
-    if stage_group:readyForNextStage() then
-        stage_group:goToNextStage()
-    end
-end
-
----update game state k times, k depending on the value given by
----setting.render_skip + 1
-function DoFrames()
-    local factor = 1
-    if setting.render_skip then
-        factor = int(setting.render_skip) + 1
-    end
-    for _ = 1, factor do
-        _DoOneFrame()
-    end
-end
-
----------------------------------------------------------------------------------------------------
-
-local _process_one_task = async.processOneTask
-
----@~chinese 将被每帧调用以执行帧逻辑。返回`true`时会使游戏退出。
----
----@~english Will be invoked every frame to process all frame logic. Game will exit if it returns `true`.
----
-function FrameFunc()
-    -- -1
-    if input.isAnyDeviceKeyDown("snapshot") and setting.allowsnapshot then
-        Screenshot()
-    end
-    _process_one_task()
-
-    -- 0
-    e:dispatchEvent('onFrameFunc')  -- in case any event is registered
-    DoFrames()  -- update the game
-
-    -- 9
-    if lstg.quit_flag then
-        GameExit()
-    end
-    return lstg.quit_flag
-end
-
----------------------------------------------------------------------------------------------------
-
----@~chinese 将被每帧调用以执行渲染指令。
----
----@~english Will be invoked every frame to process all render instructions.
----
-function RenderFunc()
-    local stage_group = StageGroup.getRunningInstance()
-    if stage_group:readyForRender() then
-
-        -- begin scene
-        BeginScene()
-
-        -- before render calls
-        coordinates.setRenderView("ui")
-        e:dispatchEvent('onBeforeRender')
-
-        -- render calls
-        stage_group:render()
-
-        coordinates.setRenderView("game")
-        profiler.tic('ObjRender')
-        ObjRender()
-        profiler.toc('ObjRender')
-
-        -- after render calls
-        e:dispatchEvent('onAfterRender')
-
-        -- end scene
-        e:dispatchEvent('beforeEndScene')
-        EndScene()
-        e:dispatchEvent('afterEndScene')
-
-        ProcessCapturedScreens()
-    end
-end
-
----------------------------------------------------------------------------------------------------
 ---misc
 
 ---@~chinese 将在窗口失去焦点时调用。
@@ -250,7 +129,9 @@ function GameExit()
     print('FrameEnd')
     lstg.FrameEnd()
     print('FrameEnd finish')
-    if plus and plus.isMobile() then
+
+    local platform_info = require("platform.platform_info")
+    if platform_info.isMobile() then
         Director:endToLua()
     else
         os.exit()

@@ -77,7 +77,7 @@ function lstg.loadMod()
     SetResourceStatus('global')
     lstg.loadPlugins()
 
-    Include('root.lua')
+    local scene = require('root')
 
     ---update the screen and sound settings according to the values set in global setting table
     local _scr_metrics = require("setting.screen_metrics")
@@ -86,6 +86,7 @@ function lstg.loadMod()
     SetBGMVolume(setting.bgmvolume / 100)
 
     SetResourceStatus('stage')
+    return scene
 end
 
 function lstg.enumPlugins()

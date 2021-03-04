@@ -6,7 +6,7 @@
 ---desc: Defines the Stage class.
 ---------------------------------------------------------------------------------------------------
 
----@class Stage
+---@class StageBackup
 ---@comment an instance of this class represents a shmup stage.
 Stage = {
     init = function(self) end
@@ -75,7 +75,7 @@ function Stage.update(self, dt)
 
     if self.timer > 1.5 and self.timer < 2.5 then
         local obj = New(TestClass)
-        obj.img = "test:image"
+        obj.img = "image:test"
     end
 
     input.refreshDevices(2)
@@ -83,7 +83,7 @@ function Stage.update(self, dt)
         for _=1, 9 do
             if ran:Float(0, 1) > 0 then
                 local obj = New(Object)
-                obj.img = "test:image"
+                obj.img = "image:test"
                 obj.vx = ran:Float(-4, 4)
                 obj.vy = ran:Float(-4, 4)
             end

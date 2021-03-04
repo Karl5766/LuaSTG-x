@@ -23,9 +23,6 @@ local _include_list = {
     "BHElib.game_object",
     "BHElib.task",
 
-    "BHElib.stage",
-    "BHElib.stage_group",
-
     "BHElib.global",  -- defines some in-game global variables
     "BHElib.corefunc",
     "BHElib.after_load",
@@ -38,5 +35,9 @@ local function BHElibInit()
 
     require("BHElib.coordinates_and_screen").initGameCoordinates()  -- setup the coordinates
     require("BHElib.input.input_and_replay").init()  -- initialize player input
+
+    local stage = require("BHElib.scenes.game_stage_sample")()
+    return stage:createScene()
 end
-BHElibInit()
+
+return BHElibInit()

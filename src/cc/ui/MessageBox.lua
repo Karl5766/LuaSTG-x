@@ -1,6 +1,8 @@
 ---@class ui.MessageBox:cc.Node
 local M = class('ui.MessageBox', cc.Node)
 
+local platform_info = require("platform.platform_info")
+
 function M:ctor(title, msg, param)
     param = param or {}
 
@@ -11,7 +13,7 @@ function M:ctor(title, msg, param)
     local helper = require('cc.ui.helper')
     local size_min = param.minSize
     local size_max = param.maxSize
-    if plus.isDesktop() then
+    if platform_info.isDesktop() then
         size_min = size_min or cc.size(200 - 24, 40)
         size_max = size_max or cc.size(600 - 24, 300)
     else
@@ -93,7 +95,7 @@ function M:ctor(title, msg, param)
     dr:setLineWidth(1)
     dr:drawRect(cc.p(0, 0), cc.p(la_sz.width, la_sz.height), cc.convertColor(clr, '4f'))
 
-    if plus.isMobile() then
+    if platform_info.isMobile() then
         local scale = sz.height / 720
         scale = scale * 1.5
         la:setScale(scale)
