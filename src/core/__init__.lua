@@ -18,5 +18,5 @@ lstg.AddDirectoryToDefaultPaths('data')
 lstg.AddDirectoryToDefaultPaths('data_assets')
 lstg.AddDirectoryToDefaultPaths('background')
 
-require('platform.ControllerHelper').init()
+require('platform.controller_helper').init()
 lstg.ResourceMgr:getInstance():clearLocalFileCache()

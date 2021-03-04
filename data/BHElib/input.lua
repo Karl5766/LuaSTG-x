@@ -5,7 +5,7 @@ KeyStatePre = {}
 
 local _GetKeyState = lstg.GetKeyState
 local _GetLastKey = lstg.GetLastKey
-local ch = require('platform.ControllerHelper')
+local ch = require('platform.controller_helper')
 
 ---@~chinese 给出按键代码检测是否按下。
 ---@~chinese > 请查阅`keycode.lua`。
@@ -14,7 +14,7 @@ local ch = require('platform.ControllerHelper')
 ---@~english > See `keycode.lua`.
 ---@param keycode number the keycode of the key to be checked
 function GetKeyState(keycode)
-    return _GetKeyState(keycode) or ch.getStatus(keycode)
+    return _GetKeyState(keycode) --or ch.getStatus(keycode)
 end
 
 ---@~chinese 返回最后一次输入的按键的按键代码。
@@ -25,7 +25,7 @@ end
 function GetLastKey()
     local ret = _GetLastKey()
     if ret == 0 then
-        return ch.getLastKey()
+        --return ch.getLastKey()
     else
         return ret
     end
