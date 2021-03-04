@@ -5,7 +5,6 @@
 ---     Karl, 2021.3.3, cleanup of the code
 ---------------------------------------------------------------------------------------------------
 
-
 local M = {}
 --require('cocos.controller.ControllerConstants')
 --local _KEY = cc.ControllerKey
@@ -24,13 +23,6 @@ local status_axis_positive = {}
 ---changed as status_axis table change; is set to true when the axis is less than -threshold; is set to false otherwise
 local status_axis_negative = {}
 
----waiting queue
-local newly_registered_controllers = {}
-
-local mapping = { button = {}, axis = { pos = {}, neg = {} } }
----maps a particular keyboard keycode to its status list and its index in the list
-local mapping_inv = {}
-
 ---------------------------------------------------------------------------------------------------
 
 ---print a connection message and initialize status lists about the newly connected controller
@@ -43,7 +35,11 @@ local function onConnect(controller)
     status_axis[controller] = {}
     status_axis_positive[controller] = {}
     status_axis_negative[controller] = {}
-    newly_registered_controllers[controller] = true
+    local event_param = {
+        device_type = "controller",
+        device = controller,
+    }
+    lstg.eventDispatcher:dispatchEvent('onInputDeviceConnect', event_param)
 end
 
 ---print a disconnection message and set corresponding status lists' controller sections to nil
@@ -56,6 +52,11 @@ local function onDisconnect(controller)
     status_axis[controller] = nil
     status_axis_positive[controller] = nil
     status_axis_negative[controller] = nil
+    local event_param = {
+        device_type = "controller",
+        device = controller,
+    }
+    lstg.eventDispatcher:dispatchEvent('onInputDeviceDisconnect', event_param)
 end
 
 ---return if a controller has been connected to the game
@@ -214,8 +215,8 @@ end
 ---------------------------------------------------------------------------------------------------
 
 function M.init()
-    for _, v in ipairs(GetAllControllers()) do
-        onConnect(v)
+    for _, controller in ipairs(GetAllControllers()) do
+        onConnect(controller)
     end
     SetOnControllerConnect(onConnect)
     SetOnControllerDisconnect(onDisconnect)
@@ -232,8 +233,22 @@ function M.init()
     lstg.eventDispatcher:addListener('onFocusLose', function()
         _last = nil
     end, 100, 'controller.last.clear')
+end
 
-    M.initFromSetting(setting.controller_map.keys, setting.controller_map.keysys)
+---return information about all the connected controllers
+---@return table an array of controller info, each controller info is of following form:
+---{device_type = "controller", device = controller}
+function M.getAllControllerInfo()
+    local result = {}
+    local controllers = GetAllControllers()
+    for _, controller in ipairs(controllers) do
+        local info = {
+            device_type = "controller",
+            device = controller
+        }
+        table.insert(result, info)
+    end
+    return result
 end
 
 ---test if a controller key is pressed
@@ -248,15 +263,6 @@ function M.getKeyState(controller, key, axis_direction)
         return status_axis_positive[controller][key]
     else
         return status_axis_negative[controller][key]
-    end
-end
-
----pop and return a recently connected controller in the waiting queue
----@return cc.Controller
-function M.popNewlyConnectedController()
-    for controller, _ in pairs(newly_registered_controllers)
-        newly_registered_controllers[controller] = nil
-        return controller
     end
 end
 

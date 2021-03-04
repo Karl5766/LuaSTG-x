@@ -144,7 +144,7 @@ function M.getResolution()
 end
 GetResolution = M.getResolution
 
----modify the resolution of the screen by setting the design resolution of GLView
+---modify screen resolution by setting the design resolution of GLView
 ---update "game" and "ui" coordinates since the they depend on the resolution
 ---@param res_width number screen resolution width
 ---@param res_height number screen resolution height

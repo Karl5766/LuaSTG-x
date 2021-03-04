@@ -57,8 +57,6 @@ function M.loadSettingFile()
     end
 
     setting = cjson.decode(file_content_str)
-
-    M.saveSettingFile()
 end
 
 ---save global setting table to the setting file

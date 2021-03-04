@@ -54,8 +54,7 @@ TestClass.frame = task.Do
 
 local _glv = cc.Director:getInstance():getOpenGLView()
 local _scr_metrics = require("setting.screen_metrics")
-local _controller = require("platform.controller_helper")
-local controller
+local input = require("BHElib.input.input_and_replay")
 
 function TestClass:init()
     local scr = require("BHElib.coordinates_and_screen")
@@ -79,10 +78,8 @@ function Stage.update(self, dt)
         obj.img = "test:image"
     end
 
-    if not controller then
-        controller = GetAllControllers()[1]
-    end
-    if controller and _controller.getKeyState(controller, 1, false) then
+    input.refreshDevices(2)
+    if input.isAnyDeviceKeyDown("down") then
         for _=1, 9 do
             if ran:Float(0, 1) > 0 then
                 local obj = New(Object)

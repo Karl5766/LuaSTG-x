@@ -10,8 +10,12 @@ local _include_list = {
     "BHElib.const",  -- defines some constant values
     "BHElib.status",
 
+    -- input
+    "BHElib.input.input",
+    "BHElib.input.mouse_input",
+    "BHElib.input.input_and_replay",
+
     "BHElib.screen_capture",
-    "BHElib.input",
     "BHElib.coordinates_and_screen",
 
     "BHElib.global_assets",  -- loads some assets globally
@@ -32,6 +36,7 @@ local function BHElibInit()
         require(file_path)
     end
 
-    require("BHElib.coordinates_and_screen").initGameCoordinates()  -- setup the render coordinates
+    require("BHElib.coordinates_and_screen").initGameCoordinates()  -- setup the coordinates
+    require("BHElib.input.input_and_replay").init()  -- initialize player input
 end
 BHElibInit()

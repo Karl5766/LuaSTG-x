@@ -9,6 +9,7 @@
 local profiler = profiler
 local e = lstg.eventDispatcher
 local coordinates = require("BHElib.coordinates_and_screen")
+local input = require("BHElib.input.input_and_replay")
 
 local abs = abs
 local cos = cos
@@ -157,7 +158,7 @@ local _process_one_task = async.processOneTask
 ---
 function FrameFunc()
     -- -1
-    if GetLastKey() == setting.keysys.snapshot and setting.allowsnapshot then
+    if input.isAnyDeviceKeyDown("snapshot") and setting.allowsnapshot then
         Screenshot()
     end
     _process_one_task()
