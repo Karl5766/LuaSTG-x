@@ -94,6 +94,30 @@ function M.getActiveDeviceList()
     return _devices
 end
 
+---@param device_label DeviceLabel the device to activate
+local function ActivateDevice(device_label)
+    Print(string.format("A %s device is activated.", device_label.device_type))
+    lstg.eventDispatcher:dispatchEvent('onInputDeviceActivate', device_label.device_type)
+end
+
+---@param device_label DeviceLabel the device to push to active device list
+local function PushDevice(device_label)
+    _devices[#_devices + 1] = device_label
+    ActivateDevice(device_label)
+end
+
+---@param device_label DeviceLabel the device to deactivate
+local function DeactivateDevice(device_label)
+    Print(string.format("A %s device is deactivated.", device_label.device_type))
+    lstg.eventDispatcher:dispatchEvent('onInputDeviceDeactivate', device_label.device_type)
+end
+
+---@param device_label DeviceLabel the device to push to device wait queue
+local function PushWaitList(device_label)
+    _device_wait_queue[#_device_wait_queue + 1] = device_label
+    DeactivateDevice(device_label)
+end
+
 ---set the maximum number of connected devices;
 ---overpopulated devices will be popped back to waiting queue;
 ---otherwise if there is any empty room, devices in the waiting queue will be set to active
@@ -102,27 +126,17 @@ function M.refreshDevices(max_device_count)
     local device_count = #_devices
     if device_count < max_device_count then
         -- move device from wait queue to active list
-        local wait_device_count = #_device_wait_queue
-        while wait_device_count > 0 and device_count < max_device_count do
-            device_count = device_count + 1
-            local device_label = _device_wait_queue[1]
-            _devices[device_count] = device_label
+        while #_device_wait_queue > 0 and device_count < max_device_count do
+            PushDevice(_device_wait_queue[1])
             table.remove(_device_wait_queue, 1)
-            wait_device_count = wait_device_count - 1
-            Print(string.format("A %s device is activated.", device_label.device_type))
-            lstg.eventDispatcher:dispatchEvent('onInputDeviceActivate', device_label.device_type)
+            device_count = device_count + 1
         end
     else
         -- move device from active list back to wait queue
-        local wait_device_count = #_device_wait_queue
         while device_count > max_device_count do
-            wait_device_count = wait_device_count + 1
-            local device_label = _devices[device_count]
-            _device_wait_queue[wait_device_count] = device_label
-            _devices[device_count] = nil
+            PushWaitList(_devices[device_count])
+            table.remove(_devices, device_count)
             device_count = device_count - 1
-            Print(string.format("A %s device is deactivated.", device_label.device_type))
-            lstg.eventDispatcher:dispatchEvent('onInputDeviceDeactivate', device_label.device_type)
         end
     end
 end
@@ -188,6 +202,7 @@ local function InputDeviceInit()
         for i, label in ipairs(_devices) do
             if IsSameDevice(label, device_label) then
                 table.remove(_devices, i)
+                DeactivateDevice(device_label)
                 return
             end
         end
