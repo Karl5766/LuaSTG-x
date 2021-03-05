@@ -49,9 +49,9 @@ end
 
 ---run/switch to the selection launcher (launcher2_ui)
 function MainScene:runSelectionLauncher()
-    local scene = require('app.views.GameScene'):create(nil, setting.mod)
-    _safe_load_mod()
-    require('platform.launcher2_ui')()
+    --local scene = require('app.views.GameScene'):create(nil, setting.mod)
+    --_safe_load_mod()
+    --require('platform.launcher2_ui')()
 end
 
 ---run/switch to the game scene
