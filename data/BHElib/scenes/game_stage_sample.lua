@@ -6,35 +6,28 @@
 
 local Stage = require("BHElib.scenes.stage")
 
----@class SampleStage
+---@class SampleStage:Stage
 local SampleStage = LuaClass("scenes.SampleStage", Stage)
-Stage.addStageClass(SampleStage)
+Stage.registerStage(SampleStage)
 
-function SampleStage:getSceneType()
-    return "scene"
+---------------------------------------------------------------------------------------------------
+---override/virtual
+
+function SampleStage.__create(game_init_state)
+    local self = Stage.__create(game_init_state)
+    return self
 end
+
 function SampleStage:getDisplayName()
     return "sample stage"
 end
+
 function SampleStage:getSid()
     return "sample_stage"
 end
 
-function SampleStage:createScene()
-    local scene = display.newScene(self:getSid())
-    scene:scheduleUpdateWithPriorityLua(function(dt)
-        self:frameFunc(dt)
-
-        self:renderFunc()
-    end, 0)
-    return scene
-end
-
 function SampleStage:cleanup()
 end
-
----------------------------------------------------------------------------------------------------
----testing
 
 local input = require("BHElib.input.input_and_replay")
 
@@ -59,6 +52,12 @@ function SampleStage:update(dt)
     if self.timer > 1.5 and self.timer < 2.5 then
         local obj = New(TestClass)
         obj.img = "image:test"
+    end
+
+    if self.timer > 240.5 and self.timer < 241.5 then
+        local Menu = require("BHElib.scenes.menu")
+        local SceneTransition = require("BHElib.scenes.scene_transition")
+        SceneTransition.transitionTo(self, Menu())
     end
 
     input.refreshDevices(2)

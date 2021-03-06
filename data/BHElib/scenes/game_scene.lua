@@ -12,17 +12,41 @@ local GameScene = LuaClass("scenes.GameScene")
 ---------------------------------------------------------------------------------------------------
 ---virtual methods
 
----create a scene for replacing the currently running scene;
----the new scene should be scheduled for update before returning the scene
----@return cc.Scene Created new cocos scene
----virtual GameScene:createScene(...)
-
----cleanup before exiting the scene
----virtual GameScene:cleanup()
+---for game scene transition;
+---cleanup before exiting the scene; overwritten in case anything is changed during the scene of
+---subclasses
+---virtual Stage:cleanup()
 
 ---virtual GameScene:getSceneType()
 
 ---------------------------------------------------------------------------------------------------
+
+---GameScene object constructor
+---@return GameScene a GameScene object
+function GameScene.__create()
+    return {}
+end
+
+local SceneTransition = require("BHElib.scenes.scene_transition")
+
+---create a scene for replacing the currently running scene;
+---the new scene should be scheduled for update before returning the scene;
+---
+---the idea is to reuse frameFunc and renderFunc for all game scenes, but allow update and render
+---methods to be defined in the sub-classes
+---@return cc.Scene a new cocos scene
+function GameScene:createScene()
+    local scene = display.newScene(self:getSceneType())
+
+    -- schedule update so this function is executed every frame after the scene is pushed to
+    -- cc director
+    scene:scheduleUpdateWithPriorityLua(function(dt)
+        self:frameFunc(dt)
+
+        self:renderFunc()
+    end, 0)
+    return scene
+end
 
 ---add touch key to the given scene
 ---@param scene cc.Scene the scene to add touch screen onto
@@ -36,13 +60,13 @@ end
 local profiler = profiler
 
 ---for cocos scheduler;
----can be overwrite in subclasses
+---can be overwritten in subclasses
 ---@param dt number time step (currently not very useful)
 function GameScene:update(dt)
 end
 
 ---for cocos scheduler;
----can be overwrite in subclasses
+---can be overwritten in subclasses
 ---@param dt number time step (currently not very useful)
 function GameScene:render()
 end
@@ -85,6 +109,13 @@ function GameScene:doOneFrame()
     profiler.tic('AfterFrame')
     AfterFrame()--帧末更新函数
     profiler.toc('AfterFrame')
+
+    -- it is possible that after transition is set, some new objects are created before the update completes
+    -- so wait until the end of loop to replace the current scene with the next scene
+    -- also for some reason the game crashes if ResetPool is put after ObjRender in the current frame
+    if SceneTransition.isNextScenePrepared() then
+        SceneTransition.execute()
+    end
 end
 
 ---update game state k times, k depending on the value given by
@@ -140,6 +171,7 @@ function GameScene:renderFunc()
     -- begin scene
     profiler.tic('RenderFunc')
 
+    -- all render should be done between BeginScene and EndScene
     BeginScene()
 
     -- before render calls

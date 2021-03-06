@@ -9,7 +9,7 @@
 
 local GameScene = require("BHElib.scenes.game_scene")  -- superclass
 
----@class Stage
+---@class Stage:GameScene
 ---@comment an instance of this class represents a shmup stage.
 local Stage = LuaClass("scenes.Stage", GameScene)
 
@@ -19,15 +19,10 @@ local _all_stages = {}
 ---------------------------------------------------------------------------------------------------
 ---virtual methods
 
----create a scene for replacing the currently running scene;
----the new scene should be scheduled for update before returning the scene
----@return cc.Scene Created new cocos scene on the entry of the game scene
----virtual Stage:createScene(...)
-
----cleanup before exiting the scene
+---for game scene transition;
+---cleanup before exiting the scene; overwritten in case anything is changed during the scene of
+---subclasses
 ---virtual Stage:cleanup()
-
----virtual Stage:getSceneType()
 
 ---return the stage id
 ---@return string unique string that identifies the stage
@@ -39,13 +34,12 @@ local _all_stages = {}
 ---class method
 
 ---create and return a new stage instance, representing an actual playthrough
----@param sid string a string that should be unique to each stage
----@param display_name string for displaying the name of the stage
+---@param game_init_state table specifies the initial state of the next scene
 ---@return Stage a stage object
-function Stage.__create(game_init_params)
-    local self = {}
+function Stage.__create(game_init_state)
+    local self = GameScene.__create()
 
-    self.game_init_params = game_init_params
+    self.game_init_state = game_init_state
     self.timer = 0
 
     return self
@@ -56,8 +50,13 @@ function Stage.getAll()
     return _all_stages
 end
 
-function Stage.addStageClass(stage)
+---register the stage for menu selection
+function Stage.registerStage(stage)
     table.insert(_all_stages, stage)
+end
+
+function Stage.getSceneType()
+    return "stage"
 end
 
 ---------------------------------------------------------------------------------------------------

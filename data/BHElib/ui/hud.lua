@@ -89,7 +89,7 @@ function M.draw(img_background, background_scale, font_profile_text, img_border)
     _timer = _timer + 1
 
     -- render the hud background
-    Render(img_background, 320, 240, 0, background_scale, background_scale)
+    M.drawHudBackground(img_background, background_scale)
 
     -- render a thin rectangular border
     SetImageState(img_border, '', color.Red)
@@ -104,6 +104,10 @@ function M.draw(img_background, background_scale, font_profile_text, img_border)
     SetImageState(img_border, '', color.White)
 
     RenderPerformanceProfile(font_profile_text)
+end
+
+function M.drawHudBackground(img_background, background_scale)
+    Render(img_background, 320, 240, 0, background_scale, background_scale)
 end
 
 return M

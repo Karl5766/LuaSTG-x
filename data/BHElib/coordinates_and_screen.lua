@@ -33,6 +33,9 @@ local _playfield_game_l, _playfield_game_r, _playfield_game_b, _playfield_game_t
 -- out of bound deletion
 local _bound_game_l, _bound_game_r, _bound_game_b, _bound_game_t                    -- expressed in "game" coordinates
 
+-- 4:3 hud (not precisely the display area) expressed in units of the "ui" coordinate
+local _hud_ui_width, _hud_ui_height = 640, 480
+
 ---------------------------------------------------------------------------------------------------
 ---cache functions
 
@@ -151,7 +154,7 @@ GetResolution = M.getResolution
 function M.setResolution(res_width, res_height)
     _scr_metrics.setScreenResolution(res_width, res_height, _glv)
 
-    M.setUICoordinatesByResolution(res_width, res_height)
+    M.setUICoordinatesByResolution(_hud_ui_width, _hud_ui_height, res_width, res_height)
     M.setGameCoordinatesInUI(_game_ui_x, _game_ui_y, _game_ui_x_unit, _game_ui_y_unit)
 end
 
@@ -423,25 +426,25 @@ SetFog = M.setFog
 
 ---setup "ui" coordinates by the given resolution size;
 ---this function will fit the 640*480 4:3 hud maximally to the given resolution size
+---@param hud_ui_width number width of the hud in "ui" coordinates
+---@param hud_ui_height number height of the hud in "ui" coordinates
 ---@param res_width number screen resolution width
 ---@param res_height number screen resolution height
-function M.setUICoordinatesByResolution(res_width, res_height)
-
-    -- 4:3 hud (not precisely the display area) expressed in units of the "ui" coordinate
-    local hud_ui_width, hud_ui_height = 640, 480
-
+function M.setUICoordinatesByResolution(hud_ui_width, hud_ui_height, res_width, res_height)
     -- calculate the offset and scale that can maximally fit the 4:3 hud into the screen
+    _hud_ui_width = hud_ui_width
+    _hud_ui_height = hud_ui_height
     local scale
-    if res_width / hud_ui_width > res_height / hud_ui_height then
+    if res_width / _hud_ui_width > res_height / _hud_ui_height then
         -- 高度受限，适应高度
-        scale = res_height / hud_ui_height
-        _ui_x = 0.5 * (res_width - scale * hud_ui_width)  -- center hud in the x direction
+        scale = res_height / _hud_ui_height
+        _ui_x = 0.5 * (res_width - scale * _hud_ui_width)  -- center hud in the x direction
         _ui_y = 0.0
     else
         -- 宽度受限，适应宽度
-        scale = res_width / hud_ui_width
+        scale = res_width / _hud_ui_width
         _ui_x = 0.0
-        _ui_y = 0.5 * (res_height - scale * hud_ui_height)  -- center hud in the y direction
+        _ui_y = 0.5 * (res_height - scale * _hud_ui_height)  -- center hud in the y direction
     end
 
     -- assign the scale
@@ -499,9 +502,11 @@ end
 ---initialize coordinate systems;
 ---the design resolution of GLView should be set when is function is called
 function M.initGameCoordinates()
+    -- the "game" coordinates depends on "ui", "3d" depends on "game", so the order of setup is important
+
     -- setup "ui" coordinates
     local res_width, res_height = M.getResolution()
-    M.setUICoordinatesByResolution(res_width, res_height)
+    M.setUICoordinatesByResolution(640, 480, res_width, res_height)
 
     -- setup "game" coordinates
     local playfield_center_ui_x, playfield_center_ui_y = 320, 240  -- in "ui" cooridinates
