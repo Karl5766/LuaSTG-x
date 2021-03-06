@@ -48,7 +48,8 @@ end
 RegisterGameClass(TestClass)
 
 function SampleStage:update(dt)
-    self.timer = self.timer + dt
+    Stage.update(self, dt)
+
     if self.timer > 1.5 and self.timer < 2.5 then
         local obj = New(TestClass)
         obj.img = "image:test"

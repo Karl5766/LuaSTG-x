@@ -6,8 +6,8 @@
 function RawDel(o)
     if o then
         o.status = "del"
-        if o._servants then
-            _del_servants(o)
+        if o._child_array then
+            _del_child_array(o)
         end
     end
 end
@@ -20,8 +20,8 @@ end
 function RawKill(o)
     if o then
         o.status = "kill"
-        if o._servants then
-            _kill_servants(o)
+        if o._child_array then
+            _kill_child_array(o)
         end
     end
 end
@@ -39,8 +39,8 @@ do
     local old = lstg.Kill
     function Kill(o)
         if o then
-            if o._servants then
-                _kill_servants(o)
+            if o._child_array then
+                _kill_child_array(o)
             end
             old(o)
         end
@@ -52,8 +52,8 @@ do
     local old = lstg.Del
     function Del(o)
         if o then
-            if o._servants then
-                _del_servants(o)
+            if o._child_array then
+                _del_child_array(o)
             end
             old(o)
         end

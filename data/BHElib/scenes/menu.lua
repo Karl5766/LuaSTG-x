@@ -30,6 +30,8 @@ end
 
 local input = require("BHElib.input.input_and_replay")
 function Menu:update(dt)
+    GameScene.update(self, dt)
+
     self.count = self.count + 1
     if self.count > 180 then
         local Stage = require("BHElib.scenes.game_stage_sample")

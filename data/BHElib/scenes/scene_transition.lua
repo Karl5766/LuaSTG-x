@@ -6,7 +6,8 @@
 
 local M = {}
 
-local _transtition_flag
+---set to true on the frame the next scene starts
+local _transition_flag
 local _scene_from
 local _scene_to
 
@@ -16,20 +17,9 @@ local _scene_to
 ---@param scene_from GameScene
 ---@param scene_to GameScene
 function M.transitionTo(scene_from, scene_to)
-    _transtition_flag = true
     _scene_from = scene_from
     _scene_to = scene_to
-end
 
-function M.isNextScenePrepared()
-    return _transtition_flag
-end
-
----------------------------------------------------------------------------------------------------
----general transition
-
----should be called at the end of the game frame loop
-function M.execute()
     assert(_scene_from, "ERROR: scene transition, current scene not set!")
     assert(_scene_to, "ERROR: scene transition, next scene not set!")
 
@@ -42,11 +32,33 @@ function M.execute()
     elseif type_from == "menu" and type_to == "stage" then
         M.menuToStage(_scene_from, _scene_to)
     end
+end
 
-    _transtition_flag = false
+---return if transitionTo has been called in this frame
+---@return boolean true if next scene is ready to replace the current scene
+function M.isNextScenePrepared()
+    return _transition_flag
+end
+
+---------------------------------------------------------------------------------------------------
+---swap frame
+
+local director = cc.Director:getInstance()
+
+---should be called at the end of the game frame loop
+function M.goToNextScene()
+    ResetPool() -- clear all game objects
+
+    -- start the next stage
+    local cocos_scene = _scene_to:createScene()
+    director:replaceScene(cocos_scene)
+
+    _transition_flag = false
     _scene_from = nil
     _scene_to = nil
 end
+
+
 
 ---------------------------------------------------------------------------------------------------
 ---go to the next stage
@@ -56,11 +68,7 @@ local director = cc.Director:getInstance()
 ---@param scene_from GameScene
 ---@param scene_to GameScene
 function M.stageToStage(scene_from, scene_to)
-    ResetPool() -- clear all game objects
-
-    -- start the next stage
-    local cocos_scene = scene_to:createScene()
-    director:replaceScene(cocos_scene)
+    _transition_flag = true
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -69,11 +77,10 @@ end
 ---@param scene_from GameScene
 ---@param scene_to GameScene
 function M.stageToMenu(scene_from, scene_to)
-    ResetPool() -- clear all game objects
-
-    -- start the next stage
-    local cocos_scene = scene_to:createScene()
-    director:replaceScene(cocos_scene)
+    task.New(scene_from, function()
+        task.Wait(600)
+        _transition_flag = true
+    end)
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -82,9 +89,7 @@ end
 ---@param scene_from GameScene
 ---@param scene_to GameScene
 function M.menuToStage(scene_from, scene_to)
-    -- start the next stage
-    local cocos_scene = scene_to:createScene()
-    director:replaceScene(cocos_scene)
+    _transition_flag = true
 end
 
 return M

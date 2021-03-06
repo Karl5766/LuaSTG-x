@@ -63,6 +63,7 @@ local profiler = profiler
 ---can be overwritten in subclasses
 ---@param dt number time step (currently not very useful)
 function GameScene:update(dt)
+    task.PropagateDo(self)
 end
 
 ---for cocos scheduler;
@@ -83,7 +84,7 @@ function GameScene:doOneFrame()
     ObjFrame()--LPOOL.DoFrame() 执行对象的Frame函数
     profiler.toc('ObjFrame')
 
-    -- update current stage
+    -- update current scene
     self:update(1)
 
     profiler.tic('UserSystemOperation')
@@ -112,9 +113,9 @@ function GameScene:doOneFrame()
 
     -- it is possible that after transition is set, some new objects are created before the update completes
     -- so wait until the end of loop to replace the current scene with the next scene
-    -- also for some reason the game crashes if ResetPool is put after ObjRender in the current frame
+    -- also for some reasons the game crashes if ResetPool is put *after* ObjRender in the current frame
     if SceneTransition.isNextScenePrepared() then
-        SceneTransition.execute()
+        SceneTransition.goToNextScene()
     end
 end
 

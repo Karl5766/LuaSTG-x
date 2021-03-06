@@ -1,7 +1,7 @@
-[INFO] [APP] === Application start at: 01:23:02 ===
+[INFO] [APP] === Application start at: 13:54:33 ===
 [INFO] [APP] Build date: Dec 18 2020
 [INFO] [APP] CPU name: Intel(R) Core(TM) i7-6700HQ CPU @ 2.60GHz
-[INFO] [APP] Memory: 2598MB / 8052MB
+[INFO] [APP] Memory: 2482MB / 8052MB
 [INFO] [APP] OS name: Microsoft Windows 10 家庭版
 [INFO] [APP] Lua VM version: LuaJIT 2.1.0-beta3
 [INFO] [APP] ThreadPool size: 3 (core count: 8)

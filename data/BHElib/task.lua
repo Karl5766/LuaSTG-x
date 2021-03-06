@@ -55,7 +55,7 @@ function task.Do(self)
                 insert(_task_stack, cur_task)
 
                 -- run the task
-                local _, errmsg = resume(cur_task)
+                local success, errmsg = resume(cur_task)
                 if errmsg then
                     error(errmsg)
                 end
@@ -73,6 +73,21 @@ function task.Do(self)
         end
     end
 end
+local TaskDo = task.Do
+
+---TOBEDEBUGGED
+---do the object's tasks, and then do its servants' tasks
+---@param self table the table that contains task and _child_array tables
+function task.PropagateDo(self)
+    TaskDo(self)
+    local servants = self._child_array
+    if servants then
+        for i = 1, #servants do
+            TaskDo(servants[i])
+        end
+    end
+end
+
 
 ---@~chinese 清空self.tasks
 ---
