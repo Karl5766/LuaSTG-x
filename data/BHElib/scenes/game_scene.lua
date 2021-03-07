@@ -36,7 +36,7 @@ local SceneTransition = require("BHElib.scenes.scene_transition")
 ---methods to be defined in the sub-classes
 ---@return cc.Scene a new cocos scene
 function GameScene:createScene()
-    local scene = display.newScene(self:getSceneType())
+    local scene = display.newScene("Scene")
 
     -- schedule update so this function is executed every frame after the scene is pushed to
     -- cc director

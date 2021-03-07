@@ -55,8 +55,8 @@ function SampleStage:update(dt)
         obj.img = "image:test"
     end
 
-    if self.timer > 240.5 and self.timer < 241.5 then
-        local Menu = require("BHElib.scenes.menu")
+    if self.timer > 60.5 and self.timer < 61.5 then
+        local Menu = require("BHElib.scenes.menu_scene")
         local SceneTransition = require("BHElib.scenes.scene_transition")
         SceneTransition.transitionTo(self, Menu())
     end

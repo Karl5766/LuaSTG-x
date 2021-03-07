@@ -58,8 +58,6 @@ function M.goToNextScene()
     _scene_to = nil
 end
 
-
-
 ---------------------------------------------------------------------------------------------------
 ---go to the next stage
 
@@ -78,7 +76,7 @@ end
 ---@param scene_to GameScene
 function M.stageToMenu(scene_from, scene_to)
     task.New(scene_from, function()
-        task.Wait(600)
+        task.Wait(60)
         _transition_flag = true
     end)
 end

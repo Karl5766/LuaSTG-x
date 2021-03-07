@@ -8,7 +8,6 @@
 ---------------------------------------------------------------------------------------------------
 
 local function loadModules()
-    require('BHElib.ui.menu_task')
     require('BHElib.ui.arrange_string')
 end
 loadModules()

@@ -35,7 +35,7 @@ local function InitSetting()
 end
 InitSetting()
 
-local _resizable = true
+local _resizable = false
 local _transparent = false
 
 if lstg.glfw and _transparent then

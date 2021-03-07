@@ -51,18 +51,3 @@ function ArrangeParagraph(font, str, width)
     end
     return table.concat(p, '\n')
 end
---[[
----展开参数
----Example: ParamsDeploy(self,params,{a=1})
----@param tgt object @目标
----@param src table @参数
----@param dft table @默认值
-function ParamsDeploy(tgt, src, dft)
-    for k, v in pairs(dft) do
-        tgt[k] = v
-    end
-    for k, v in pairs(src) do
-        tgt[k] = v
-    end
-end
---]]

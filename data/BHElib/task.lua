@@ -78,15 +78,16 @@ local TaskDo = task.Do
 ---TOBEDEBUGGED
 ---do the object's tasks, and then do its servants' tasks
 ---@param self table the table that contains task and _child_array tables
-function task.PropagateDo(self)
+local function PropagateDo(self)
     TaskDo(self)
     local servants = self._child_array
     if servants then
         for i = 1, #servants do
-            TaskDo(servants[i])
+            PropagateDo(servants[i])
         end
     end
 end
+task.PropagateDo = PropagateDo
 
 
 ---@~chinese 清空self.tasks

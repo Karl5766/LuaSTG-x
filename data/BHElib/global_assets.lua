@@ -9,6 +9,7 @@
 --}
 
 assert(LoadFont("font:hud_default","THlib\\enemy\\bonus2.fnt"))
+assert(LoadTTF("font:menu", "averia/Averia-Regular.ttf", 30))
 
 LoadImageFromFile("image:menu_hud_background", "THlib\\UI\\menu_bg.png")
 
