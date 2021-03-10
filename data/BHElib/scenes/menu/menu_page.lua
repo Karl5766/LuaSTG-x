@@ -67,6 +67,7 @@ function MenuPage:init(title_text, option_callback, init_select_index)
     self.moveOption = MenuPage.moveOption
 end
 
+---freeze or unfreeze user input
 ---@param accept_input boolean if true, freeze user input; if false, unfreeze user input
 function MenuPage:setAcceptInput(accept_input)
     self.locked = not accept_input
@@ -80,6 +81,8 @@ function MenuPage:playMoveOptionSound()
     -- PlaySound("sound:ok00", 0.3)
 end
 
+---move the selected option index by the given difference
+---@param index_diff number index difference between the new index and the current index
 function MenuPage:moveOption(index_diff)
     local new_index = self.select_index + index_diff
 
@@ -95,8 +98,8 @@ RegisterGameClass(MenuPage)
 
 -------------------------------------------------------------------------------------------------
 
----@class THlib.simple_menu:Object
-SimpleTextMenuPage = Class(MenuPage, MenuPage)
+---@class SimpleTextMenuPage:MenuPage
+SimpleTextMenuPage = Class(Object)
 
 ---@param title string display title
 ---@param num_options number number of options in the menu
@@ -118,6 +121,7 @@ function SimpleTextMenuPage:init(title_text, option_content, init_select_index)
     self.processUserInput = SimpleTextMenuPage.processUserInput
 end
 
+---test for and process user input on the menu
 function SimpleTextMenuPage:processUserInput()
     -- moving through options
     local index_diff = 0
@@ -152,6 +156,7 @@ function SimpleTextMenuPage:frame()
 end
 
 local _menu_painter = require("BHElib.ui.menu_painter")
+---draw the menu page
 function SimpleTextMenuPage:render()
     _menu_painter.drawTextMenuPage(
             _menu_const.font_size,

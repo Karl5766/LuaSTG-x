@@ -27,7 +27,7 @@ local _device_wait_queue
 ---@param device_label1 DeviceLabel
 ---@param device_label2 DeviceLabel
 ---@return boolean true if two labels are the same
-local function IsSameDevice(device_label1, device_label2)
+function M.isSameDevice(device_label1, device_label2)
     return device_label1.device_type == device_label2.device_type and device_label1.device == device_label2.device
 end
 
@@ -82,7 +82,7 @@ end
 ---recommend checking if device is active before accessing the device input
 function M.isDeviceActive(device_label)
     for i = 1, #_devices do
-        if IsSameDevice(_devices[i], device_label) then
+        if M.isSameDevice(_devices[i], device_label) then
             return true
         end
     end
@@ -90,6 +90,7 @@ function M.isDeviceActive(device_label)
 end
 
 ---return the list of active devices
+---@return table an array of current active devices
 function M.getActiveDeviceList()
     return _devices
 end
@@ -200,14 +201,14 @@ local function InputDeviceInit()
     lstg.eventDispatcher:addListener("onInputDeviceDisconnect", function(device_label)
         -- find device and remove it
         for i, label in ipairs(_devices) do
-            if IsSameDevice(label, device_label) then
+            if M.isSameDevice(label, device_label) then
                 table.remove(_devices, i)
                 DeactivateDevice(device_label)
                 return
             end
         end
         for i, label in ipairs(_device_wait_queue) do
-            if IsSameDevice(label, device_label) then
+            if M.isSameDevice(label, device_label) then
                 table.remove(_device_wait_queue, i)
                 return
             end
