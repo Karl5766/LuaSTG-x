@@ -4,7 +4,7 @@
 --- DateTime: 2021/3/4 17:08
 ---
 
-local Stage = require("BHElib.scenes.stage")
+local Stage = require("BHElib.scenes.stage.stage")
 
 ---@class SampleStage:Stage
 local SampleStage = LuaClass("scenes.SampleStage", Stage)
@@ -13,8 +13,8 @@ Stage.registerStageClass(SampleStage)
 ---------------------------------------------------------------------------------------------------
 ---override/virtual
 
-function SampleStage.__create(game_init_state)
-    local self = Stage.__create(game_init_state)
+function SampleStage.__create(...)
+    local self = Stage.__create(...)
     return self
 end
 
@@ -56,7 +56,7 @@ function SampleStage:update(dt)
     end
 
     if self.timer > 60.5 and self.timer < 61.5 then
-        local Menu = require("BHElib.scenes.menu_scene")
+        local Menu = require("BHElib.scenes.menu.menu_scene")
         local SceneTransition = require("BHElib.scenes.scene_transition")
         SceneTransition.transitionTo(self, Menu())
     end

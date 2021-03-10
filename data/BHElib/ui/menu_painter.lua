@@ -42,9 +42,8 @@ end
 ---@param color lstg.Color
 ---@param x number
 ---@param y number
-function M.drawTextTitle(text, font_name, font_size, font_align, color, x, y)
-    SetFontState(font_name, '', color)
-    RenderText(font_name, text, x, y, font_size, unpack(font_align))
+function M.drawTextTitle(text, font_name, font_align, color, x, y)
+    RenderTTF(font_name, text, x, x, y, y, color, unpack(font_align))
 end
 
 ---@param text_font_name string name of the font for displaying both the title and the options
@@ -55,8 +54,7 @@ end
 ---@param option_selected_color_blink2 table {r, g, b}
 ---@param select_index number index of the selected option, starting from 1
 ---@param font_align table an array of strings that specifies the alignment options E.g. {"center", "vcenter"}
-function M.drawTextMenuPage(text_font_size,
-                            text_font_name,
+function M.drawTextMenuPage(text_font_name,
                             title_text,
                             title_color,
                             option_text_array,
@@ -79,7 +77,6 @@ function M.drawTextMenuPage(text_font_size,
     M.drawTextTitle(
             title_text,
             text_font_name,
-            text_font_size,
             font_align,
             Color(transparency * 255, unpack(title_color)),
             center_x,
@@ -104,8 +101,17 @@ function M.drawTextMenuPage(text_font_size,
         end
 
         -- display the text
-        SetFontState(text_font_name, '', Color(transparency * 255, unpack(color)))
-        RenderText(text_font_name, option_text, option_x, option_y, text_font_size, unpack(font_align))
+        local finalColor = Color(transparency * 255, unpack(color))
+        RenderTTF(
+                text_font_name,
+                option_text,
+                option_x,
+                option_x,
+                option_y,
+                option_y,
+                finalColor,
+                unpack(font_align)
+        )
     end
 end
 

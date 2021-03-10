@@ -41,6 +41,12 @@ function MenuTask.fadeOut(menu, time)
     end)
 end
 
+---implements simple menu transition;
+---create tasks under both the menu transition from and to to control their fade in/out
+---@param menu_from any menu to transition from; if nil, menu_to is the first menu
+---@param menu_to any menu to transition to; if nil, no menu will come in
+---@param time number total transition time
+---@return any menu_to, the menu transitioned to
 function MenuTask.transitionTo(menu_from, menu_to, time)
     if menu_from then
         MenuTask.fadeOut(menu_from, time)

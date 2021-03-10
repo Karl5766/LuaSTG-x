@@ -45,12 +45,15 @@ function GameScene:createScene()
 
         self:renderFunc()
     end, 0)
+
+    self.cocos_scene = scene
+
     return scene
 end
 
----add touch key to the given scene
----@param scene cc.Scene the scene to add touch screen onto
-function GameScene:addTouchKeyToScene(scene)
+---add touch key to the current scene
+function GameScene:addTouchKeyToScene()
+    local scene = self.cocos_scene
     local ui_layer = cc.Layer:create()
     ui_layer:setAnchorPoint(0, 0)
     scene:addChild(ui_layer)

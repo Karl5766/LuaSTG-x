@@ -126,9 +126,9 @@ setmetatable(ENUM_TTF_FMT, { __index = function(t, k)
     return 0
 end })
 _G.ENUM_TTF_FMT = ENUM_TTF_FMT
-local _RenderTTF = lstg.RenderTTF
+local _RawRenderTTF = RawRenderTTF
 
----
+
 --- 渲染TTF
 ---@param ttfname string 字体资源名
 ---@param text string 文本
@@ -152,7 +152,7 @@ function RenderTTF(ttfname, text, left, right, bottom, top, color, ...)
     for i = i0, #arg do
         fmt = fmt + ENUM_TTF_FMT[arg[i]]
     end
-    _RenderTTF(ttfname, text, left, right, bottom, top, fmt, color, scale)
+    _RawRenderTTF(ttfname, text, left, right, bottom, top, fmt, color, scale)
 end
 
 local _RenderText = RenderText

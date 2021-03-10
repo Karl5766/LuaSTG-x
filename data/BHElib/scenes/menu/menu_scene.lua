@@ -7,6 +7,8 @@
 local GameScene = require("BHElib.scenes.game_scene")
 
 require("BHElib.scenes.menu.menu_page")
+local _scene_transition = require("BHElib.scenes.scene_transition")
+local _menu_transition = require("BHElib.scenes.menu.menu_task")
 
 ---@class Menu:GameScene
 local Menu = LuaClass("scenes.Menu", GameScene)
@@ -15,19 +17,22 @@ local Menu = LuaClass("scenes.Menu", GameScene)
 ---override/virtual
 
 ---create and return a new Menu instance
+---@param current_task table specifies a task that the menu should carry out; format {string, table}
 ---@return Menu a menu object
-function Menu.__create()
+function Menu.__create(task_spec)
     local self = GameScene.__create()
+
+    self.task_spec = task_spec
 
     return self
 end
-
-local _menu_transition = require("BHElib.scenes.menu.menu_task")
 
 ---create a menu scene
 ---@return cc.Scene a new cocos scene
 function Menu:createScene()
     -- initialize by first creating all menu pages
+
+    -- for more complex menu, consider further moving the code of declaring object classes to another file
 
     local main_menu_content = {
         {"Start Game", function()
@@ -37,9 +42,8 @@ function Menu:createScene()
                 task.Wait(30)
 
                 -- start stage
-                local Stage = require("BHElib.scenes.game_stage_sample")
-                local SceneTransition = require("BHElib.scenes.scene_transition")
-                SceneTransition.transitionTo(self, Stage())
+                local stage = self:constructStage()
+                _scene_transition.transitionTo(self, stage)
             end)
         end},
     }
@@ -47,6 +51,28 @@ function Menu:createScene()
     self.cur_menu = _menu_transition.transitionTo(nil, main_menu, 30)
 
     return GameScene.createScene(self)
+end
+
+---construct the next stage
+---@return Stage an object of Stage class
+function Menu.constructStage(self)
+    -- for all stages
+    local SceneGroupInitState = require("BHElib.scenes.stage.scene_group_init_state")
+    local next_group_init_state = SceneGroupInitState()
+
+    -- for first stage
+    local GameSceneInitState = require("BHElib.scenes.stage.game_scene_init_state")
+    local next_init_state = GameSceneInitState()
+
+    -- mutable states
+    local GlobalSceneState = require("BHElib.scenes.stage.global_scene_state")
+    local is_replay = false
+    local next_global_state = GlobalSceneState(is_replay)
+
+    local StageClass = require("BHElib.scenes.stage.game_stage_sample")
+    local stage = StageClass(next_group_init_state, next_init_state, next_global_state)
+
+    return stage
 end
 
 function Menu:getSceneType()
@@ -59,7 +85,7 @@ end
 local input = require("BHElib.input.input_and_replay")
 function Menu:update(dt)
     GameScene.update(self, dt)
-
+    
     input.refreshDevices(2)
 end
 

@@ -882,7 +882,7 @@ function RenderText(name, text, x, y, scale, align)
     return _RenderText(FindResFont(name), text, x, y, scale, align)
 end
 
-local _RenderTTF = lstg.RenderTTF
+local _BuiltInRenderTTF = lstg.RenderTTF
 
 ---@~chinese 渲染TTF字体。受全局图像缩放系数影响。
 ---
@@ -901,8 +901,8 @@ local _RenderTTF = lstg.RenderTTF
 ---@param fmt number
 ---@param color lstg.Color
 ---@param scale number
-function RenderTTF(name, text, left, right, bottom, top, fmt, color, scale)
-    return _RenderTTF(FindResFont(name), text, left, right, bottom, top, fmt, color, scale)
+function RawRenderTTF(name, text, left, right, bottom, top, fmt, color, scale)
+    return _BuiltInRenderTTF(FindResFont(name), text, left, right, bottom, top, fmt, color, scale)
 end
 
 ---

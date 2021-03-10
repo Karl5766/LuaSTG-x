@@ -36,8 +36,9 @@ local function BHElibInit()
     require("BHElib.coordinates_and_screen").initGameCoordinates()  -- setup the coordinates
     require("BHElib.input.input_and_replay").init()  -- initialize player input
 
-    local stage = require("BHElib.scenes.game_stage_sample")()
-    return stage:createScene()
+    local MenuClass = require("BHElib.scenes.menu.menu_scene")
+    local menu = MenuClass({"no_task"})
+    return menu:createScene()
 end
 
 return BHElibInit()

@@ -159,7 +159,6 @@ local _menu_painter = require("BHElib.ui.menu_painter")
 ---draw the menu page
 function SimpleTextMenuPage:render()
     _menu_painter.drawTextMenuPage(
-            _menu_const.font_size,
             "font:menu",
             self.title_text,
             _menu_const.title_color,
@@ -177,7 +176,7 @@ function SimpleTextMenuPage:render()
             self.shake_timer,
             _menu_const.shake_range,
             _menu_const.shake_speed,
-            {"center", "vcenter"}
+            {"center"}  -- see resources.lua
     )
 end
 
