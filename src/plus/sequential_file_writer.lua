@@ -10,7 +10,7 @@
 -------------------------------------------------------------------------------------------------
 
 ---@class SequentialFileWriter
-local SequentialFileWriter = LuaClass()
+local SequentialFileWriter = LuaClass("SequentialFileWriter")
 
 function SequentialFileWriter.__create(stream)
     assert(type(stream) == "table", "invalid argument type.")
@@ -141,18 +141,32 @@ function SequentialFileWriter:writeFloat(f)
     end
 end
 
+local strlen = string.len
+
 ---@brief 写入一个字符串
 ---@param str string 字符串
 ---@param is_null_terminate boolean 是否以\0结尾
 function SequentialFileWriter:writeString(str, is_null_terminate)
     if is_null_terminate then
-        local len = string.len(str)
+        local len = strlen(str)
         if len == 0 or string.byte(str, len) ~= 0 then
             str = str .. "\0"
         end
     end
-    if string.len(s) ~= 0 then
-        self.stream:writeBytes(s)
+    if string.len(str) ~= 0 then
+        self.stream:writeBytes(str)
+    end
+end
+
+---@~chinese 写入一个长度任意的字符串
+---
+---@~english write a variable length string to the file stream
+---@param str string the string to write
+function SequentialFileWriter:writeVarLengthString(str)
+    local string_length = strlen(str)
+    self:writeUInt(string_length)
+    if string.len(str) ~= 0 then
+        self.stream:writeBytes(str)
     end
 end
 
@@ -167,11 +181,7 @@ function SequentialFileWriter:writeFieldsOfTable(t, floatFields, stringFields)
     end
     for i = 1, #stringFields do
         local field = stringFields[i]
-        local str = t[field]
-        -- write the length of the string, followed by the string itself
-        local str_length = string.len(str)
-        self:writeUInt(str_length)
-        self:writeString(str)
+        self:writeVarLengthString(t[field])
     end
 end
 

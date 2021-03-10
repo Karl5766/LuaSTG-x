@@ -6,6 +6,9 @@
 
 local InitState = LuaClass("scenes.InitState")
 
+---create and return a default init state
 function InitState.__create()
-    return {}
+    local self = {}
+    self.random_seed = 0
+
 end

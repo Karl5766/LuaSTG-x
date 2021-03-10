@@ -10,7 +10,7 @@
 -------------------------------------------------------------------------------------------------
 
 ---@class SequentialFileReader
-local SequentialFileReader = LuaClass()
+local SequentialFileReader = LuaClass("SequentialFileReader")
 
 function SequentialFileReader.__create(stream)
     assert(type(stream) == "table", "invalid argument type.")
@@ -119,6 +119,15 @@ function SequentialFileReader:readString(len)
     return self.stream:readBytes(len)
 end
 
+---@~chinese 读取一个长度任意的字符串
+---
+---@~english read a string saved by SequentialReplayWriter:saveVarLengthString
+---@return string the string read
+function SequentialFileReader:readVarLengthString()
+    local string_length = self:readUInt()
+    return self.stream:readBytes(string_length)
+end
+
 ---read the fields saved by SequentialFileWriter:writeFieldsOfTable back into the give table
 ---@param t table the table to write to
 ---@param floatFields table an array of strings specifying the names of the fields to read as float
@@ -131,9 +140,7 @@ function SequentialFileReader:readFieldsOfTable(t, floatFields, stringFields)
     end
     for i = 1, #stringFields do
         local field = stringFields[i]
-        -- write the length of the string, followed by the string itself
-        local str_length = self:readUInt()
-        t[field] = self:readString(str_length)
+        t[field] = self:readVarLengthString()
     end
 end
 

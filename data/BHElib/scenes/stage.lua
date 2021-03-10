@@ -50,11 +50,23 @@ function Stage.getAll()
     return _all_stages
 end
 
----register the stage for menu selection
-function Stage.registerStage(stage)
+---register the stage for look up
+---@param stage Stage a class derived from Stage to register
+function Stage.registerStageClass(stage)
     table.insert(_all_stages, stage)
 end
 
+---@param id string the id to look for
+---@return Stage a class derived from Stage with the given id
+function Stage.findStageClassById(id)
+    for i = 1, #_all_stages do
+        if _all_stages[i]:getSid() == id then
+            return _all_stages[i]
+        end
+    end
+end
+
+---@return string scene type
 function Stage.getSceneType()
     return "stage"
 end

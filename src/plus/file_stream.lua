@@ -7,7 +7,7 @@
 ---     the other parts of the project; removed some assertion checks.
 -------------------------------------------------------------------------------------------------
 ---@class FileStream
-local FileStream = LuaClass()
+local FileStream = LuaClass("FileStream")
 
 ---@~chinese 初始化文件流
 ---
