@@ -61,7 +61,6 @@ function SampleStage:update(dt)
         SceneTransition.transitionTo(self, Menu())
     end
 
-    input.refreshDevices(2)
     if input.isAnyDeviceKeyDown("down") then
         for _=1, 9 do
             if ran:Float(0, 1) > 0 then

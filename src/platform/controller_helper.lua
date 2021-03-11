@@ -236,9 +236,8 @@ function M.init()
 end
 
 ---return information about all the connected controllers
----@return table an array of controller info, each controller info is of following form:
----{device_type = "controller", device = controller}
-function M.getAllControllerInfo()
+---@return table an array of controller device labels; see input_and_replay.lua
+function M.getAllControllerLabels()
     local result = {}
     local controllers = GetAllControllers()
     for _, controller in ipairs(controllers) do

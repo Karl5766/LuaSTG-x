@@ -85,8 +85,6 @@ end
 local input = require("BHElib.input.input_and_replay")
 function Menu:update(dt)
     GameScene.update(self, dt)
-    
-    input.refreshDevices(2)
 end
 
 local hud_painter = require("BHElib.ui.hud")
