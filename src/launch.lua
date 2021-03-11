@@ -70,7 +70,6 @@ else
 end
 print = Print
 
-DoFile("plus/plus.lua")
 DoFile("stringify.lua")
 
 require('imgui.__init__')

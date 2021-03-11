@@ -16,7 +16,7 @@ local FileStream = LuaClass("FileStream")
 ---@param mode string 打开模式
 function FileStream.__create(path, mode)
     local self = {}
-    self.file = assert(io.open_u8(path, mode))
+    self.file = assert(io.open_u8(path, mode))  -- TOBEDEBUGGED
     return self
 end
 
