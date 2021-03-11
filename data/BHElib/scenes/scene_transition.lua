@@ -47,7 +47,7 @@ local director = cc.Director:getInstance()
 
 ---should be called at the end of the game frame loop
 function M.goToNextScene()
-    ResetPool() -- clear all game objects
+    _scene_from:cleanup()
 
     -- start the next stage
     local cocos_scene = _scene_to:createScene()

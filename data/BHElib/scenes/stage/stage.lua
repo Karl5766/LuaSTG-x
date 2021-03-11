@@ -116,6 +116,7 @@ end
 ---cleanup before exiting the scene; overwritten in case anything is changed during the scene of
 ---subclasses
 function Stage:cleanup()
+    GameScene.cleanup(self)
     if self:isReplay() then
         self.replay_file_reader:close()
     else

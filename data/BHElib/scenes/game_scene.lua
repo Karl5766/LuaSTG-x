@@ -12,11 +12,6 @@ local GameScene = LuaClass("scenes.GameScene")
 ---------------------------------------------------------------------------------------------------
 ---virtual methods
 
----for game scene transition;
----cleanup before exiting the scene; overwritten in case anything is changed during the scene of
----subclasses
----virtual Stage:cleanup()
-
 ---virtual GameScene:getSceneType()
 
 ---------------------------------------------------------------------------------------------------
@@ -49,6 +44,15 @@ function GameScene:createScene()
     self.cocos_scene = scene
 
     return scene
+end
+
+---for game scene transition;
+---cleanup before exiting the scene; overwritten in case anything is changed during the scene of
+---subclasses
+function GameScene:cleanup()
+    -- it seems that at the end of both menu and stages,
+    -- we need to clean all objects, so put it here for now
+    ResetPool() -- clear all game objects
 end
 
 ---add touch key to the current scene
