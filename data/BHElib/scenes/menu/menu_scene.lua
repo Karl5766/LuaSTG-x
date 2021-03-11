@@ -41,6 +41,19 @@ function Menu:createScene()
                 _menu_transition.transitionTo(self.cur_menu, nil, 30)
                 task.Wait(30)
 
+                self.is_replay = false
+                -- start stage
+                local stage = self:constructStage()
+                _scene_transition.transitionTo(self, stage)
+            end)
+        end},
+        {"Start Replay", function()
+            task.New(self, function()
+                -- fade out menu page
+                _menu_transition.transitionTo(self.cur_menu, nil, 30)
+                task.Wait(30)
+
+                self.is_replay = true
                 -- start stage
                 local stage = self:constructStage()
                 _scene_transition.transitionTo(self, stage)
@@ -66,7 +79,7 @@ function Menu.constructStage(self)
 
     -- mutable states
     local GlobalSceneState = require("BHElib.scenes.stage.global_scene_state")
-    local is_replay = false
+    local is_replay = self.is_replay
     local next_global_state = GlobalSceneState(is_replay)
 
     local StageClass = require("BHElib.scenes.stage.game_stage_sample")

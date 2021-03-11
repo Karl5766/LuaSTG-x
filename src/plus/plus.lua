@@ -5,4 +5,3 @@
 
 plus         = plus or {}
 DoFile("plus/utility.lua")
-DoFile("plus/file_stream.lua")

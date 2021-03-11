@@ -99,6 +99,7 @@ function M.getDeviceCount()
     for _, _ in pairs(_devices) do
         n = n + 1
     end
+    return n
 end
 
 ---get a device's label by its id
@@ -163,13 +164,13 @@ end
 ---get raw input from the given device
 ---@param device_index number device index in the device table
 ---@param function_key_name string name of the function key
----@return boolean
+---@return boolean if the key is down; guaranteed not nil
 function M.isDeviceKeyDown(device_index, function_key_name)
     local device_label = _devices[device_index]
     if device_label.device_type == "keyboard" then
-        return key_mapping.isKeyboardKeyDown(function_key_name)
+        return key_mapping.isKeyboardKeyDown(function_key_name) == true
     elseif device_label.device_type == "controller" then
-        return key_mapping.isControllerKeyDown(device_label.device, function_key_name)
+        return key_mapping.isControllerKeyDown(device_label.device, function_key_name) == true
     else
         error("ERROR: Unknown device type!")
     end
@@ -276,13 +277,14 @@ function M.updateRecordedInputInReplayMode(replay_file_reader)
     for _ = 1, device_count do
         -- load recorded input for this device
         local device_id = replay_file_reader:readUInt()
-        local recorded_device_state = _recorded_device_states[device_id]
+        local recorded_device_state = {}
 
         local bit_array = replay_file_reader:readBitArray()
         for i = 1, #GAME_KEYS do
             local function_key_name = GAME_KEYS[i]
             recorded_device_state[function_key_name] = bit_array[i]
         end
+        _recorded_device_states[device_id] = recorded_device_state
     end
 end
 
@@ -304,7 +306,7 @@ function M.updateRecordedInputInNonReplayMode(replay_file_writer)
         for i = 1, #GAME_KEYS do
             local function_key_name = GAME_KEYS[i]
             local is_down = M.isDeviceKeyDown(id, function_key_name)
-            device_state[id] = is_down
+            device_state[function_key_name] = is_down
             device_state_in_bit_array[i] = is_down
         end
         _recorded_device_states[id] = device_state

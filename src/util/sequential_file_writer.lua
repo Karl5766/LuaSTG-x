@@ -12,6 +12,7 @@
 ---@class SequentialFileWriter
 local SequentialFileWriter = LuaClass("SequentialFileWriter")
 
+---@param stream FileStream input file stream
 function SequentialFileWriter.__create(stream)
     assert(type(stream) == "table", "invalid argument type.")
     local self = {}
@@ -43,28 +44,9 @@ function SequentialFileWriter:writeByte(b)
     self.stream:writeByte(b)
 end
 
----@brief 以小端序写入一个16位带符号整数
----@param s number 要写入的整数
-function SequentialFileWriter:writeShort(s)
-    assert(type(s) == "number" and s >= -32768 and s <= 32767, "invalid argument.")
-    if s < 0 then
-        s = (0xFFFF + s) + 1
-    end
-    local b1, b2 = s % 0x100, math.floor(s / 0x100)
-    self.stream:writeByte(b1)
-    self.stream:writeByte(b2)
-end
-
----@brief 以小端序写入一个16位无符号整数
----@param s number 要写入的整数
-function SequentialFileWriter:writeUShort(s)
-    assert(type(s) == "number" and s >= 0 and s <= 65535, "invalid argument.")
-    local b1, b2 = s % 0x100, math.floor(s / 0x100)
-    self.stream:writeByte(b1)
-    self.stream:writeByte(b2)
-end
-
----@brief 以小端序写入一个32位带符号整数
+---@~chinese 以小端序写入一个32位带符号整数
+---
+---@~english write 32bit signed integer in little endian order
 ---@param i number 要写入的整数
 function SequentialFileWriter:writeInt(i)
     assert(type(i) == "number" and i >= -2147483648 and i <= 2147483647, "invalid argument.")
@@ -80,6 +62,8 @@ function SequentialFileWriter:writeInt(i)
 end
 
 ---@brief 以小端序写入一个32位无符号整数
+---
+---write 32bit unsigned integer in little endian order
 ---@param i number 要写入的整数
 function SequentialFileWriter:writeUInt(i)
     assert(type(i) == "number" and i >= 0 and i <= 0xFFFFFFFF, "invalid argument.")
@@ -91,7 +75,9 @@ function SequentialFileWriter:writeUInt(i)
     stream:writeByte(b4)
 end
 
----@brief 以小端序写入一个32位浮点数
+---@~chinese 以小端序写入一个32位浮点数
+---
+---@~english write 32bit float in little endian order
 ---@param f number 要写入的浮点数
 function SequentialFileWriter:writeFloat(f)
     local stream = self.stream

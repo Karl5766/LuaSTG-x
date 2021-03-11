@@ -59,7 +59,7 @@ function GetMousePosition()
     return x, y
 end
 
-lstg.eventDispatcher:addListener('onGetInput', function()
+lstg.eventDispatcher:addListener("onUserInputUpdate", function()
     for i = 1, 5 do
         MouseStatePre[i] = MouseState[i]
     end

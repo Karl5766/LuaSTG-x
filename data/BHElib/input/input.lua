@@ -21,11 +21,6 @@ function GetLastKey()
     end
 end
 
----获取输入并保存
-function GetInput()
-    lstg.eventDispatcher:dispatchEvent('onGetInput')
-end
-
 ---key是否被按下
 ---@param key string
 ---@return boolean

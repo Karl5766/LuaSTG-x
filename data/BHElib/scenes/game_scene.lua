@@ -63,16 +63,21 @@ end
 local profiler = profiler
 
 ---for cocos scheduler;
----can be overwritten in subclasses
+---can be overridden in subclasses
 ---@param dt number time step (currently not very useful)
 function GameScene:update(dt)
     task.PropagateDo(self)
 end
 
 ---for cocos scheduler;
----can be overwritten in subclasses
+---can be overridden in subclasses
 ---@param dt number time step (currently not very useful)
 function GameScene:render()
+end
+
+---dispatch "onUserInputUpdate" event; overridden in Stage class for replay input update
+function GameScene:updateUserInput()
+    lstg.eventDispatcher:dispatchEvent("onUserInputUpdate")
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -81,7 +86,7 @@ end
 ---update game state 1 time
 function GameScene:doOneFrame()
     UpdateObjList()
-    GetInput()
+    self:updateUserInput()
 
     profiler.tic('ObjFrame')
     ObjFrame()--LPOOL.DoFrame() 执行对象的Frame函数

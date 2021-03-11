@@ -27,6 +27,7 @@ function SampleStage:getSid()
 end
 
 function SampleStage:cleanup()
+    Stage.cleanup(self)
 end
 
 local input = require("BHElib.input.input_and_replay")
@@ -61,7 +62,7 @@ function SampleStage:update(dt)
         SceneTransition.transitionTo(self, Menu())
     end
 
-    if input.isAnyDeviceKeyDown("down") then
+    if input.isAnyRecordedKeyDown("down") then
         for _=1, 9 do
             if ran:Float(0, 1) > 0 then
                 local obj = New(Object)

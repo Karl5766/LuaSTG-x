@@ -12,6 +12,7 @@
 ---@class SequentialFileReader
 local SequentialFileReader = LuaClass("SequentialFileReader")
 
+---@param stream FileStream input file stream
 function SequentialFileReader.__create(stream)
     assert(type(stream) == "table", "invalid argument type.")
     local self = {}
@@ -19,7 +20,7 @@ function SequentialFileReader.__create(stream)
     return self
 end
 
----@brief 关闭上行流
+---@brief 关闭流
 function SequentialFileReader:close()
     self.stream:close()
 end
@@ -169,6 +170,7 @@ function SequentialFileReader:readBitArray()
             end
         end
     end
+    return bit_array
 end
 
 return SequentialFileReader

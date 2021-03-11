@@ -17,12 +17,12 @@ local Stage = LuaClass("scenes.Stage", GameScene)
 local _all_stages = {}
 
 ---------------------------------------------------------------------------------------------------
----virtual methods
 
----for game scene transition;
----cleanup before exiting the scene; overwritten in case anything is changed during the scene of
----subclasses
----virtual Stage:cleanup()
+local _input = require("BHElib.input.input_and_replay")
+local FS = require("file_system")
+
+---------------------------------------------------------------------------------------------------
+---virtual methods
 
 ---return the stage id
 ---@return string unique string that identifies the stage
@@ -81,7 +81,7 @@ end
 ---instance method
 
 ---@return cc.Scene a new cocos scene
-function Stage.createScene(self)
+function Stage:createScene()
     ---@type GameSceneInitState
     local scene_init_state = self.scene_init_state
 
@@ -93,14 +93,39 @@ function Stage.createScene(self)
 
     ---TOBEADDED: initialize the player
 
-
+    _input.resetRecording(self:isReplay())
+    if self:isReplay() then
+        local FileStream = require("util.file_stream")
+        local file_stream = FileStream("replay/current.rep", "rb")
+        local SequentialFileReader = require("util.sequential_file_reader")
+        self.replay_file_reader = SequentialFileReader(file_stream)
+    else
+        if not FS.isFileExist("replay") then
+            FS.createDirectory("replay/")
+        end
+        local FileStream = require("util.file_stream")
+        local file_stream = FileStream("replay/current.rep", "wb")
+        local SequentialFileWriter = require("util.sequential_file_writer")
+        self.replay_file_writer = SequentialFileWriter(file_stream)
+    end
 
     return GameScene.createScene(self)
 end
 
+---for game scene transition;
+---cleanup before exiting the scene; overwritten in case anything is changed during the scene of
+---subclasses
+function Stage:cleanup()
+    if self:isReplay() then
+        self.replay_file_reader:close()
+    else
+        self.replay_file_writer:close()
+    end
+end
+
 ---construct the initialization parameters for the next scene
 ---@return GameSceneInitState, SceneGroupInitState, table init parameters for Stage.__create
-function Stage.constructNextSceneInitState(self)
+function Stage:constructNextSceneInitState()
     local GameSceneInitState = require("BHElib.scenes.stage.game_scene_init_state")
     local cur_init_state = self.scene_init_state
     local next_init_state = GameSceneInitState()
@@ -115,7 +140,8 @@ function Stage.constructNextSceneInitState(self)
     return self.scene_group_init_state, next_init_state, self.global_state
 end
 
-function Stage.isInReplay(self)
+---@return boolean if the state is entered in replay mode
+function Stage:isReplay()
     return self.global_state.is_replay
 end
 
@@ -146,5 +172,17 @@ function Stage.render(self)
             "image:white"
     )
 end
+
+---update recorded device input for replay
+function Stage:updateUserInput()
+    GameScene.updateUserInput(self)
+
+    if self:isReplay() then
+        _input.updateRecordedInputInReplayMode(self.replay_file_reader)
+    else
+        _input.updateRecordedInputInNonReplayMode(self.replay_file_writer)
+    end
+end
+
 
 return Stage
