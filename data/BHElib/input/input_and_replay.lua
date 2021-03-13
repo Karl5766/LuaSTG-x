@@ -77,7 +77,7 @@ local SYSTEM_KEYS = {
     "snapshot",  -- take a snapshot
     "retry",  -- shortcut for start over a game in pause menu
 
-    "toggle_collider",
+    "toggle_collider",  -- display object collider
     "repslow",  -- decelerate replay speed
     "repfast",  -- accelerate replay speed
 }
@@ -99,6 +99,15 @@ end
 function M.getDeviceCount()
     local n = 0
     for _, _ in pairs(_device_states) do
+        n = n + 1
+    end
+    return n
+end
+
+---@return number number of devices
+function M.getRecordedDeviceCount()
+    local n = 0
+    for _, _ in pairs(_recorded_device_states) do
         n = n + 1
     end
     return n
@@ -133,8 +142,8 @@ function M.isDeviceActive(device_id)
     return _device_states[device_id] ~= nil
 end
 
----return if the device is in the active device table;
----recommend checking if device is active before accessing the device input
+---return if the device is in the recorded device table;
+---recommend checking before accessing the device input
 function M.isDeviceRecorded(device_id)
     return _recorded_device_states[device_id] ~= nil
 end
@@ -322,10 +331,10 @@ end
 ---@param sequential_writer SequentialFileWriter stream for write to replay file
 local function WriteRecordedInputToStream(sequential_writer)
     -- device input
-    local device_count = M.getDeviceCount()
+    local device_count = M.getRecordedDeviceCount()
     sequential_writer:writeUInt(device_count)
 
-    for device_id, device_state in pairs(_device_states) do
+    for device_id, device_state in pairs(_recorded_device_states) do
         -- compress input to bits
         local device_state_in_bit_array = {}
         for i = 1, #GAME_KEYS do
@@ -356,7 +365,6 @@ local function ReadRecordedInputFromStream(sequential_reader)
         -- load recorded input for this device
         local device_id = sequential_reader:readUInt()
         local recorded_device_state = {}
-
         local bit_array = sequential_reader:readBitArray()
         for i = 1, #GAME_KEYS do
             local function_key_name = GAME_KEYS[i]

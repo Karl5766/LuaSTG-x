@@ -154,12 +154,12 @@ local min = min  -- cache the function
 ---@return table an array of bits (boolean true/false) read from the file
 function SequentialFileReader:readBitArray()
     -- read the length of bit array
-    local n = self:readUInt(n)
+    local n = self:readUInt()
     local bit_array = {} -- result array
 
     -- read every byte as 8 bits
     for i = 1, n, 8 do
-        local byte = self:readByte(byte)
+        local byte = self:readByte()
         for j = 1, min(8, n - i + 1) do
             local split_num = _to_num[j]
             if byte >= split_num then

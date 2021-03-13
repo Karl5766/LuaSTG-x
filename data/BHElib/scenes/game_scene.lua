@@ -156,17 +156,14 @@ local _process_one_task = async.processOneTask
 ---
 function GameScene:frameFunc()
     profiler.tic('FrameFunc')
-    -- -1
     if _raw_input.isAnyDeviceKeyDown("snapshot") and setting.allowsnapshot then
         Screenshot()
     end
     _process_one_task()
 
-    -- 0
     e:dispatchEvent('onFrameFunc')  -- in case any event is registered
     self:doFrames()  -- update the game
 
-    -- 9
     if lstg.quit_flag then
         GameExit()
     end

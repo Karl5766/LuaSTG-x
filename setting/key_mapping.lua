@@ -109,7 +109,11 @@ _IsKeyboardKeyDown = M.isKeyboardKeyDown
 ---@return boolean if the corresponding controller key is down
 function M.isControllerKeyDown(controller, function_key_name)
     local controller_keycode = _controller_keymap[function_key_name]
-    return controller_helper.getKeyState(controller, controller_keycode[1], controller_keycode[2])
+    if controller_keycode == nil then
+        return false
+    else
+        return controller_helper.getKeyState(controller, controller_keycode[1], controller_keycode[2])
+    end
 end
 _IsControllerKeyDown = M.isControllerKeyDown
 
