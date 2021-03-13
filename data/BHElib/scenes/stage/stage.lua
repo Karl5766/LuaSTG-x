@@ -188,14 +188,14 @@ function Stage:updateUserInput()
     if self:isReplay() then
         _input.updateRecordedInputInReplayMode(self.replay_file_reader, self.replay_file_writer)
 
-        if _input.isAnyDeviceKeyDown("up")
-                or _input.isAnyDeviceKeyDown("down")
-                or _input.isAnyDeviceKeyDown("left")
-                or _input.isAnyDeviceKeyDown("right") then
-
-            self.global_state.is_replay = false
-            _input.changeToNonReplayMode(self.replay_file_reader)
-        end
+        --if _input.isAnyDeviceKeyDown("up")
+        --        or _input.isAnyDeviceKeyDown("down")
+        --        or _input.isAnyDeviceKeyDown("left")
+        --        or _input.isAnyDeviceKeyDown("right") then
+        --
+        --    self.global_state.is_replay = false
+        --    _input.changeToNonReplayMode(self.replay_file_reader)
+        --end
     else
         _input.updateRecordedInputInNonReplayMode(self.replay_file_writer)
     end

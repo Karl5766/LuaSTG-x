@@ -106,6 +106,92 @@ function M.draw(img_background, background_scale, font_profile_text, img_border)
     RenderPerformanceProfile(font_profile_text)
 end
 
+local _input = require("BHElib.input.input_and_replay")
+local _coordinates = require("BHElib.coordinates_and_screen")
+
+function M.drawKeys()
+    scr.setRenderView("ui")
+
+    local distance = 50
+    local offsets = {
+        {0, 0},
+        {distance, 0},
+        {distance * 2, 0},
+        {distance, distance},
+    }
+    local function_keys = {
+        "left",
+        "down",
+        "right",
+        "up",
+    }
+    local normal_pos = {500, 100}
+    local replay_pos = {500, 240}
+    local text_color = Color(255, 60, 60, 60)
+    local comment_color = Color(255, 255, 255, 255)
+
+    for i = 1, 4 do
+        -- draw keys at the position
+        local offset = offsets[i]
+        local key_name = function_keys[i]
+        local x, y = offset[1] + normal_pos[1], offset[2] + normal_pos[2]
+        if _input.isAnyDeviceKeyDown(key_name) then
+            Render("image:button_pressed", x, y, 0, 1, 1, 0.5)
+        else
+            Render("image:button_normal", x, y, 0, 1, 1, 0.5)
+        end
+        local text_y = y + 14
+        RenderTTF("font:menu", key_name, x, x, text_y, text_y, text_color, "center")
+    end
+    do
+        local x, text_y = normal_pos[1] + distance, normal_pos[2] - distance * 0.5
+        RenderTTF("font:menu", "device input", x, x, text_y, text_y, comment_color, "center")
+    end
+
+    for i = 1, 4 do
+        -- draw keys at the position
+        local offset = offsets[i]
+        local key_name = function_keys[i]
+        local x, y = offset[1] + replay_pos[1], offset[2] + replay_pos[2]
+        if _input.isAnyRecordedKeyDown(key_name) then
+            Render("image:button_pressed", x, y, 0, 1, 1, 0.5)
+        else
+            Render("image:button_normal", x, y, 0, 1, 1, 0.5)
+        end
+        local color = Color(255, 60, 60, 60)
+        local text_y = y + 14
+        RenderTTF("font:menu", key_name, x, x, text_y, text_y, text_color, "center")
+    end
+    do
+        local x, text_y = replay_pos[1] + distance, replay_pos[2] - distance * 0.5
+        RenderTTF("font:menu", "recorded input", x, x, text_y, text_y, comment_color, "center")
+    end
+
+    --mouse text
+    do
+        local x, y = _input.getMousePosition()
+        local offx, offy = _coordinates.getUIOriginInRes()
+        local sx, sy = _coordinates.getUIScale()
+        x, y = x - offx / sx, y - offy / sy
+        if _input.isMousePressed() then
+            RenderTTF("font:menu", "mouse pressed", x, x, y, y, comment_color, "left")
+        else
+            RenderTTF("font:menu", "mouse", x, x, y, y, comment_color, "left")
+        end
+    end
+    do
+        local x, y = _input.getRecordedMousePosition()
+        local offx, offy = _coordinates.getUIOriginInRes()
+        local sx, sy = _coordinates.getUIScale()
+        x, y = x - offx / sx, y - offy / sy - 20
+        if _input.isRecordedMousePressed() then
+            RenderTTF("font:menu", "mouse pressed (recorded)", x, x, y, y, comment_color, "left")
+        else
+            RenderTTF("font:menu", "mouse (recorded)", x, x, y, y, comment_color, "left")
+        end
+    end
+end
+
 function M.drawHudBackground(img_background, background_scale)
     Render(img_background, 320, 240, 0, background_scale, background_scale)
 end

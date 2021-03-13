@@ -25,9 +25,9 @@ function SampleStage:createScene()
     scene:addChild(canvas)
 
     local exit_button = ccui.Button:create(
-            "data_assets/THlib/item/item.png",
-            "data_assets/THlib/player/rumia/fog.png",
-            "data_assets/THlib/player/rumia/fog.png", 0)
+            "creator/image/default_btn_normal.png",
+            "creator/image/default_btn_pressed.png",
+            "creator/image/default_btn_pressed.png", 0)
     exit_button:setScale9Enabled(true)
     exit_button:setContentSize(cc.size(340, 300))
     exit_button:setSwallowTouches(true)
@@ -45,7 +45,7 @@ function SampleStage:createScene()
         print(arg)
     end)
     exit_button:setName("button_exit2")
-    exit_button:setPosition(cc.p(0, 0))
+    exit_button:setPosition(cc.p(500, 200))
 
     --exit_button:setTouchEnabled(true)
     exit_button:setEnabled(true)
@@ -89,28 +89,34 @@ RegisterGameClass(TestClass)
 function SampleStage:update(dt)
     Stage.update(self, dt)
 
-    if self.timer > 1.5 and self.timer < 2.5 then
-        local obj = New(TestClass)
-        obj.img = "image:test"
-    end
+    --if self.timer > 1.5 and self.timer < 2.5 then
+    --    local obj = New(TestClass)
+    --    obj.img = "image:test"
+    --end
 
-    if self.timer > 60.5 and self.timer < 61.5 then
+    if self.timer > 600.5 and self.timer < 601.5 then
         local Menu = require("BHElib.scenes.menu.menu_scene")
         local SceneTransition = require("BHElib.scenes.scene_transition")
         SceneTransition.transitionTo(self, Menu())
     end
 
     --if _input.isMouseButtonJustChanged(true, true) then
-    if _input.isAnyRecordedKeyDown("down") then
-        for _=1, 9 do
-            if ran:Float(0, 1) > 0 then
-                local obj = New(Object)
-                obj.img = "image:test"
-                obj.vx = ran:Float(-4, 4)
-                obj.vy = ran:Float(-4, 4)
-            end
-        end
-    end
+    --if _input.isAnyRecordedKeyDown("down") then
+    --    for _=1, 9 do
+    --        if ran:Float(0, 1) > 0 then
+    --            local obj = New(Object)
+    --            obj.img = "image:test"
+    --            obj.vx = ran:Float(-4, 4)
+    --            obj.vy = ran:Float(-4, 4)
+    --        end
+    --    end
+    --end
+end
+
+local _hud_painter = require("BHElib.ui.hud")
+function SampleStage:render()
+    Stage.render(self)
+    _hud_painter.drawKeys()
 end
 
 
