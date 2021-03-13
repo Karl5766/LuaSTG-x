@@ -9,8 +9,8 @@
 ---     Implementation of this file uses snapshot; all input states in a frame are updated together
 ---     in one function call
 ---     One more note, in order to avoid problems of device input and recorded devices input differ,
----     the implementation records current device input as well as read in recording from replay
----     file, so some apis of setting/key_mapping.lua are re-written here
+---     the implementation some apis of setting/key_mapping.lua are re-written here (with the same
+---     function name)
 ---------------------------------------------------------------------------------------------------
 
 ---@class InputDeviceManager
@@ -392,7 +392,7 @@ end
 ---@param sequential_writer SequentialFileWriter stream for write to replay file
 function M.updateRecordedInputInNonReplayMode(sequential_writer)
     assert(not _is_replay_mode)
-    
+
     _prev_recorded_device_states = _recorded_device_states
     _prev_recorded_mouse_states = _recorded_mouse_states
 
