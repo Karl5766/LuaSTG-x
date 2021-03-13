@@ -70,20 +70,21 @@ end
 ---@return Stage an object of Stage class
 function Menu.constructStage(self)
     -- for all stages
-    local SceneGroupInitState = require("BHElib.scenes.stage.scene_group_init_state")
+    local is_replay = self.is_replay
+    local SceneGroupInitState = require("BHElib.scenes.stage.state_of_group_init")
     local next_group_init_state = SceneGroupInitState()
+    next_group_init_state.is_replay = is_replay
+    next_group_init_state.replay_path_for_write = "replay/current.rep"
+    if is_replay then
+        next_group_init_state.replay_path_for_read = "replay/read.rep"
+    end
 
     -- for first stage
-    local GameSceneInitState = require("BHElib.scenes.stage.game_scene_init_state")
+    local GameSceneInitState = require("BHElib.scenes.stage.state_of_stage_init")
     local next_init_state = GameSceneInitState()
 
-    -- mutable states
-    local GlobalSceneState = require("BHElib.scenes.stage.global_scene_state")
-    local is_replay = self.is_replay
-    local next_global_state = GlobalSceneState(is_replay)
-
     local StageClass = require("BHElib.scenes.stage.game_stage_sample")
-    local stage = StageClass(next_group_init_state, next_init_state, next_global_state)
+    local stage = StageClass(next_group_init_state, next_init_state)
 
     return stage
 end

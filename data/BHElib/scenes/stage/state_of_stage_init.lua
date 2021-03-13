@@ -1,5 +1,5 @@
 -------------------------------------------------------------------------------------------------
----game_scene_init_state.lua
+---state_of_stage_init.lua
 ---author: Karl
 ---date: 2021.3.10
 ---desc: Defines the GameSceneInitState object, which is created and used for initialization of
@@ -22,7 +22,7 @@ function InitState.__create()
         num_life = 1,
         num_bomb = 1,
     }
-    self.init_score = 0  -- be careful about the integer precision limit of double: ~4 * 10^15
+    self.init_score = 0
 
     return self
 end

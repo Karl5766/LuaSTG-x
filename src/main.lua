@@ -66,7 +66,7 @@ end
 ---@param message string error message
 ---@return string error message
 __G__TRACKBACK__ = function(message)
-    message = debug.traceback(message, 3)
+    message = tostring(debug.traceback(message, 3))  -- error() can give error message of non-string types
 
     local DebugUtil = require("util.debug_util")
     DebugUtil.error(message, "Error")

@@ -20,6 +20,7 @@ local _all_stages = {}
 
 local _input = require("BHElib.input.input_and_replay")
 local FS = require("file_system")
+local _GlobalState = require("BHElib.scenes.stage.state_of_global")
 
 ---------------------------------------------------------------------------------------------------
 ---virtual methods
@@ -34,19 +35,18 @@ local FS = require("file_system")
 ---class method
 
 ---create and return a new stage instance, representing an actual play-through;
----the init state parameters will be treated as immutable
----@param scene_init_state GameSceneInitState specifies the initial state of the scene
----@param scene_group_init_state table a table containing the global state of the play-through
----@param global_state table used to pass information among stages in a play-through
+---the init state parameters should not be modified by the Stage object
+---@param stage_init_state GameSceneInitState specifies the initial state of the stage
+---@param group_init_state table a table containing the global initial state of the play-through
 ---@return Stage a stage object
-function Stage.__create(scene_group_init_state, scene_init_state, global_state)
+function Stage.__create(group_init_state, stage_init_state)
     local self = GameScene.__create()
 
     self.timer = 0
 
-    self.scene_group_init_state = scene_group_init_state
-    self.scene_init_state = scene_init_state
-    self.global_state = global_state
+    self.group_init_state = group_init_state
+    self.stage_init_state = stage_init_state
+    self.global_state = _GlobalState(group_init_state.is_replay)
 
     return self
 end
@@ -83,31 +83,33 @@ end
 ---@return cc.Scene a new cocos scene
 function Stage:createScene()
     ---@type GameSceneInitState
-    local scene_init_state = self.scene_init_state
+    local stage_init_state = self.stage_init_state
+    local group_init_state = self.group_init_state
 
     -- set random seed
-    ran:Seed(scene_init_state.random_seed)
+    ran:Seed(stage_init_state.random_seed)
 
     -- init score
-    self.score = scene_init_state.init_score
+    self.score = stage_init_state.init_score
 
     ---TOBEADDED: initialize the player
 
     _input.resetRecording(self:isReplay())
+
     if self:isReplay() then
         local FileStream = require("util.file_stream")
-        local file_stream = FileStream("replay/current.rep", "rb")
+        local file_stream = FileStream(group_init_state.replay_path_for_read, "rb")
         local SequentialFileReader = require("util.sequential_file_reader")
         self.replay_file_reader = SequentialFileReader(file_stream)
-    else
-        if not FS.isFileExist("replay") then
-            FS.createDirectory("replay/")
-        end
-        local FileStream = require("util.file_stream")
-        local file_stream = FileStream("replay/current.rep", "wb")
-        local SequentialFileWriter = require("util.sequential_file_writer")
-        self.replay_file_writer = SequentialFileWriter(file_stream)
     end
+
+    if not FS.isFileExist("replay") then
+        FS.createDirectory("replay/")
+    end
+    local FileStream = require("util.file_stream")
+    local file_stream = FileStream(group_init_state.replay_path_for_write, "wb")
+    local SequentialFileWriter = require("util.sequential_file_writer")
+    self.replay_file_writer = SequentialFileWriter(file_stream)
 
     return GameScene.createScene(self)
 end
@@ -119,6 +121,7 @@ function Stage:cleanup()
     GameScene.cleanup(self)
     if self:isReplay() then
         self.replay_file_reader:close()
+        self.replay_file_writer:close()
     else
         self.replay_file_writer:close()
     end
@@ -127,8 +130,8 @@ end
 ---construct the initialization parameters for the next scene
 ---@return GameSceneInitState, SceneGroupInitState, table init parameters for Stage.__create
 function Stage:constructNextSceneInitState()
-    local GameSceneInitState = require("BHElib.scenes.stage.game_scene_init_state")
-    local cur_init_state = self.scene_init_state
+    local GameSceneInitState = require("BHElib.scenes.stage.state_of_stage_init")
+    local cur_init_state = self.stage_init_state
     local next_init_state = GameSceneInitState()
 
     next_init_state.random_seed = cur_init_state.random_seed
@@ -136,9 +139,10 @@ function Stage:constructNextSceneInitState()
     ---TOBEADDED: initialize player info as well
 
     -- update global state
-    self.global_state:advanceScene(cur_init_state)
+    self.global_state:completeCurrentScene(cur_init_state)
+    self.global_state:advanceScene()
 
-    return self.scene_group_init_state, next_init_state, self.global_state
+    return self.group_init_state, next_init_state
 end
 
 ---@return boolean if the state is entered in replay mode
@@ -174,12 +178,24 @@ function Stage.render(self)
     )
 end
 
+---called in frameFunc()
 ---update recorded device input for replay
 function Stage:updateUserInput()
+    -- update _prev and _cur of non-recorded input
     GameScene.updateUserInput(self)
 
+    -- update _prev and _cur of recorded input
     if self:isReplay() then
-        _input.updateRecordedInputInReplayMode(self.replay_file_reader)
+        _input.updateRecordedInputInReplayMode(self.replay_file_reader, self.replay_file_writer)
+
+        if _input.isAnyDeviceKeyDown("up")
+                or _input.isAnyDeviceKeyDown("down")
+                or _input.isAnyDeviceKeyDown("left")
+                or _input.isAnyDeviceKeyDown("right") then
+
+            self.global_state.is_replay = false
+            _input.changeToNonReplayMode(self.replay_file_reader)
+        end
     else
         _input.updateRecordedInputInNonReplayMode(self.replay_file_writer)
     end

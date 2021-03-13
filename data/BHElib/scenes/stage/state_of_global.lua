@@ -1,5 +1,5 @@
 -------------------------------------------------------------------------------------------------
----global_scene_state.lua
+---state_of_global.lua
 ---author: Karl
 ---date: 2021.3.10
 ---desc: Defines the GlobalSceneState object, which is for passing information among stages in
@@ -32,7 +32,7 @@ function GlobalState:completeCurrentScene(current_scene_init_state)
 end
 
 ---update the state as going to the next scene
-function GlobalState:advanceScene(current_scene_init_state)
+function GlobalState:advanceScene()
     self.current_scene_num = self.current_scene_num + 1
 end
 

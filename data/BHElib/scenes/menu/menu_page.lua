@@ -31,7 +31,7 @@ local _menu_const = {
     rep_line_height     = 20,
 }
 
-local _input = require("BHElib.input.input_and_replay")
+local _input = require("setting.key_mapping")
 
 -------------------------------------------------------------------------------------------------
 ---cache functions

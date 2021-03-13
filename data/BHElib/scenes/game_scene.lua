@@ -9,6 +9,9 @@
 ---@class GameScene
 local GameScene = LuaClass("scenes.GameScene")
 
+local _raw_input = require("setting.key_mapping")
+local _input = require("BHElib.input.input_and_replay")
+
 ---------------------------------------------------------------------------------------------------
 ---virtual methods
 
@@ -81,6 +84,7 @@ end
 
 ---dispatch "onUserInputUpdate" event; overridden in Stage class for replay input update
 function GameScene:updateUserInput()
+    _input.updateInputSnapshot()  -- only update non-replay input
     lstg.eventDispatcher:dispatchEvent("onUserInputUpdate")
 end
 
@@ -144,7 +148,6 @@ function GameScene:doFrames()
 end
 
 local e = lstg.eventDispatcher
-local _input = require("BHElib.input.input_and_replay")
 local _process_one_task = async.processOneTask
 
 ---@~chinese 将被每帧调用以执行帧逻辑。返回`true`时会使游戏退出。
@@ -154,7 +157,7 @@ local _process_one_task = async.processOneTask
 function GameScene:frameFunc()
     profiler.tic('FrameFunc')
     -- -1
-    if _input.isAnyDeviceKeyDown("snapshot") and setting.allowsnapshot then
+    if _raw_input.isAnyDeviceKeyDown("snapshot") and setting.allowsnapshot then
         Screenshot()
     end
     _process_one_task()
