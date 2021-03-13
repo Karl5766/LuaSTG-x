@@ -100,12 +100,7 @@ function SampleStage:update(dt)
         SceneTransition.transitionTo(self, Menu())
     end
 
-    if self.timer % 5 == 0 then
-        local x, y = _input.getRecordedMousePosition()
-        print("mouse pos "..tostring(x).." "..tostring(y))
-    end
-
-    if _input.isAnyRecordedKeyDown("down") then
+    if _input.isMouseButtonJustChanged(true, true) then
         for _=1, 9 do
             if ran:Float(0, 1) > 0 then
                 local obj = New(Object)

@@ -31,6 +31,8 @@ local _recorded_device_states
 local _prev_recorded_device_states
 
 ---mouse input include floating point position, process them separately
+---mouse states is an array of five elements; first three are boolean for three mouse buttons
+---last two are mouse position x, y
 local _mouse_states
 local _prev_mouse_states
 local _recorded_mouse_states
@@ -44,6 +46,10 @@ local _is_replay_mode
 ---cache variables and functions
 
 local pairs = pairs
+local _IsDeviceKeyDown
+local _IsAnyDeviceKeyDown
+local _IsRecordedKeyDown
+local _IsAnyRecordedKeyDown
 
 ---------------------------------------------------------------------------------------------------
 ---categorize function keys into game keys and system keys
@@ -140,6 +146,7 @@ end
 function M.isDeviceKeyDown(device_index, function_key_name)
     return _device_states[device_index][function_key_name]
 end
+_IsDeviceKeyDown = M.isDeviceKeyDown
 
 ---get recorded input from the given device
 ---@param device_index number device index in the device table
@@ -148,6 +155,7 @@ end
 function M.isRecordedKeyDown(device_index, function_key_name)
     return _recorded_device_states[device_index][function_key_name]
 end
+_IsRecordedKeyDown = M.isRecordedKeyDown
 
 ---return if there exists a device among recorded devices, and on that device, the given key is pressed
 ---@param function_key_name string name of the function key; can be game key or system key
@@ -160,6 +168,7 @@ function M.isAnyDeviceKeyDown(function_key_name)
     end
     return false
 end
+_IsAnyDeviceKeyDown = M.isAnyDeviceKeyDow
 
 ---return if there exists a device among recorded devices, and on that device, the given key is pressed
 ---@param function_key_name string name of the function key; can only be a game key
@@ -172,6 +181,7 @@ function M.isAnyRecordedKeyDown(function_key_name)
     end
     return false
 end
+_IsAnyRecordedKeyDown = M.isAnyRecordedKeyDown
 
 function M.getMousePosition()
     return _mouse_states[4], _mouse_states[5]
@@ -187,6 +197,67 @@ end
 
 function M.isRecordedMousePressed()
     return _recorded_mouse_states[1]
+end
+
+---------------------------------------------------------------------------------------------------
+---key just down and key just released
+---these ones are parametrized to avoid too much code duplication
+
+---@param device_id number device id number
+---@param function_key_name string name of the function key
+---@param is_recorded boolean if true, return device input; if false return recorded input
+---@param is_down boolean if true, return if the key is just pressed; otherwise return if the key is just released
+function M.isDeviceKeyJustChanged(device_id, function_key_name, is_recorded, is_down)
+    local states = _device_states
+    local prev_states = _prev_device_states
+    if is_recorded then
+        states = _recorded_device_states
+        prev_states = _prev_recorded_device_states
+    end
+    local prev_device_state = prev_states[device_id]
+    local key_is_down_this_frame = states[device_id][function_key_name]
+    local key_is_down_on_last_frame = prev_device_state ~= nil and prev_device_state[function_key_name]
+
+    if is_down then
+        return key_is_down_this_frame and not key_is_down_on_last_frame
+    else
+        return not key_is_down_this_frame and key_is_down_on_last_frame
+    end
+end
+
+---@param function_key_name string name of the function key
+---@param is_recorded boolean if true, return device input; if false return recorded input
+---@param is_down boolean if true, return if the key is just pressed; otherwise return if the key is just released
+function M.isAnyDeviceKeyJustChanged(function_key_name, is_recorded, is_down)
+    local states = _device_states
+    if is_recorded then
+        states = _recorded_device_states
+    end
+    for device_id, _ in pairs(states) do
+        if M.isDeviceKeyJustChanged(device_id, function_key_name, is_recorded, is_down) then
+            return true
+        end
+    end
+    return false
+end
+
+---return if the mouse is just pressed/released
+---@param is_recorded boolean if true, return device input; if false return recorded input
+---@param is_down boolean if true, return if the button is just pressed; otherwise return if the key is just released
+function M.isMouseButtonJustChanged(is_recorded, is_down)
+    local states = _mouse_states
+    local prev_states = _prev_mouse_states
+    if is_recorded then
+        states = _recorded_mouse_states
+        prev_states = _prev_recorded_mouse_states
+    end
+
+    local mouse_is_pressed_on_last_frame = prev_states ~= nil and prev_states[1]
+    if is_down then
+        return states[1] and not mouse_is_pressed_on_last_frame
+    else
+        return not states[1] and mouse_is_pressed_on_last_frame
+    end
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -301,7 +372,7 @@ local function ReadRecordedInputFromStream(sequential_reader)
     _recorded_mouse_states = {b1, b2, b3, x, y}  -- overwrite the mouse states
 end
 
----update the replay input from replay file;
+---update the recorded replay input from replay file;
 ---check if the replay input has ended before calling the function;
 ---@param sequential_reader SequentialFileReader stream for read from replay file
 ---@param sequential_writer SequentialFileWriter stream for write to replay file
@@ -309,8 +380,10 @@ function M.updateRecordedInputInReplayMode(sequential_reader, sequential_writer)
     assert(_is_replay_mode)
 
     -- device input
+    -- update recorded input; update _prev form current input
     _prev_recorded_device_states = _recorded_device_states
-    _prev_mouse_states = _recorded_mouse_states
+    _prev_recorded_mouse_states = _recorded_mouse_states
+
     ReadRecordedInputFromStream(sequential_reader)
     WriteRecordedInputToStream(sequential_writer)
 end
@@ -319,9 +392,9 @@ end
 ---@param sequential_writer SequentialFileWriter stream for write to replay file
 function M.updateRecordedInputInNonReplayMode(sequential_writer)
     assert(not _is_replay_mode)
-
+    
     _prev_recorded_device_states = _recorded_device_states
-    _prev_mouse_states = _recorded_mouse_states
+    _prev_recorded_mouse_states = _recorded_mouse_states
 
     -- not in replay, just use normal input
     _recorded_device_states = _device_states
