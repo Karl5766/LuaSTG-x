@@ -64,7 +64,6 @@ function MenuPage:init(title_text, option_callback, init_select_index)
     self.setAcceptInput = MenuPage.setAcceptInput
     self.playSelectSound = MenuPage.playSelectSound
     self.playMoveOptionSound = MenuPage.playMoveOptionSound
-    self.moveOption = MenuPage.moveOption
 end
 
 ---freeze or unfreeze user input
@@ -81,25 +80,12 @@ function MenuPage:playMoveOptionSound()
     -- PlaySound("sound:ok00", 0.3)
 end
 
----move the selected option index by the given difference
----@param index_diff number index difference between the new index and the current index
-function MenuPage:moveOption(index_diff)
-    local new_index = self.select_index + index_diff
-
-    -- handles boundary condition, warp the index
-    self.select_index = (new_index - 1) % self.num_options + 1
-
-    self:playMoveOptionSound()
-
-    self.shake_timer = _menu_const.shake_time
-end
-
 RegisterGameClass(MenuPage)
 
 -------------------------------------------------------------------------------------------------
 
 ---@class SimpleTextMenuPage:MenuPage
-SimpleTextMenuPage = Class(Object)
+SimpleTextMenuPage = Class(MenuPage)
 
 ---@param title string display title
 ---@param num_options number number of options in the menu
@@ -119,6 +105,20 @@ function SimpleTextMenuPage:init(title_text, option_content, init_select_index)
 
     -- manually inherit methods
     self.processUserInput = SimpleTextMenuPage.processUserInput
+    self.moveOption = SimpleTextMenuPage.moveOption
+end
+
+---move the position of the selected option index by the given difference
+---@param index_diff number index difference between the new index and the current index
+function SimpleTextMenuPage:moveOption(index_diff)
+    local new_index = self.select_index + index_diff
+
+    -- handles boundary condition, warp the index
+    self.select_index = (new_index - 1) % self.num_options + 1
+
+    self:playMoveOptionSound()
+
+    self.shake_timer = _menu_const.shake_time
 end
 
 ---test for and process user input on the menu

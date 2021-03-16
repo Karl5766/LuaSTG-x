@@ -24,14 +24,14 @@ function GlobalState.__create(is_replay)
     return self
 end
 
----remember the current stage init state and update the current stage num
+---remember the current stage init state and complete scene
 ---@param current_scene_init_state GameSceneInitState the init state to remember
 function GlobalState:completeCurrentScene(current_scene_init_state)
     table.insert(self.scene_init_state_history_array, current_scene_init_state)
     self.completed_scene = self.completed_scene + 1
 end
 
----update the state as going to the next scene
+---update the current stage num
 function GlobalState:advanceScene()
     self.current_scene_num = self.current_scene_num + 1
 end

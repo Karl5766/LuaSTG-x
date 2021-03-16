@@ -8,7 +8,7 @@ local GameScene = require("BHElib.scenes.game_scene")
 
 require("BHElib.scenes.menu.menu_page")
 local _scene_transition = require("BHElib.scenes.scene_transition")
-local _menu_transition = require("BHElib.scenes.menu.menu_task")
+local _menu_transition = require("BHElib.scenes.menu.menu_page_transition")
 
 ---@class Menu:GameScene
 local Menu = LuaClass("scenes.Menu", GameScene)

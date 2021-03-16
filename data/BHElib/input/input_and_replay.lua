@@ -38,7 +38,7 @@ local _prev_mouse_states
 local _recorded_mouse_states
 local _prev_recorded_mouse_states
 
----if the input device manager is in replay mode;
+---indicates if the input device manager is in replay mode;
 ---this will influence the update of recorded device tables
 local _is_replay_mode
 
@@ -192,18 +192,22 @@ function M.isAnyRecordedKeyDown(function_key_name)
 end
 _IsAnyRecordedKeyDown = M.isAnyRecordedKeyDown
 
+---@return number, number x, y position of the mouse
 function M.getMousePosition()
     return _mouse_states[4], _mouse_states[5]
 end
 
+---@return number, number recorded x, y position of the mouse
 function M.getRecordedMousePosition()
     return _recorded_mouse_states[4], _recorded_mouse_states[5]
 end
 
+---@return boolean if the mouse is pressed
 function M.isMousePressed()
     return _mouse_states[1]
 end
 
+---@return boolean if the recorded mouse is pressed
 function M.isRecordedMousePressed()
     return _recorded_mouse_states[1]
 end
@@ -273,24 +277,24 @@ end
 ---recorded input reset and update
 
 ---reset the recorded key state table at the start of a play-through;
----there should not be replay input access between this function and the first updateRecordedInput call
+---immediately update fill input tables with zeros twice; this is to allow input to be accessible at any time
 ---@param is_replay_mode boolean whether the input is going to be processed in replay mode
 function M.resetRecording(is_replay_mode)
     _is_replay_mode = is_replay_mode
 
-    -- set to nil, as there is not supposed to be accesses to replay input before the first update
-    _recorded_device_states = nil
+    -- zero re-initialize all the variables
+    _recorded_device_states = {}
 
     -- same for other tables
-    _device_states = nil
-    _prev_device_states = nil
-    _prev_recorded_device_states = nil
+    _device_states = {}
+    _prev_device_states = {}
+    _prev_recorded_device_states = {}
 
     -- mouse
-    _mouse_states = nil
-    _prev_mouse_states = nil
-    _recorded_mouse_states = nil
-    _prev_recorded_mouse_states = nil
+    _mouse_states = {false, false, false, 0, 0}  -- be careful about mouse behaviour
+    _prev_mouse_states = _mouse_states
+    _recorded_mouse_states = _mouse_states
+    _prev_recorded_mouse_states = _mouse_states
 end
 
 ---record raw device input in the current frame to _device_states and _mouse_states;
@@ -424,6 +428,7 @@ end
 ---this function should only be called on application startup
 function M.init()
     _raw_input.init()
+    M.resetRecording(false)  -- input is available after this function call
 end
 
 
