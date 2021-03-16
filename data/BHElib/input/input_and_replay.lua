@@ -415,11 +415,10 @@ function M.updateRecordedInputInNonReplayMode(sequential_writer)
     WriteRecordedInputToStream(sequential_writer)
 end
 
----set replay mode to false and close the given replay file read stream
----@param sequential_reader SequentialFileReader stream for read from replay file
-function M.changeToNonReplayMode(sequential_reader)
+---set replay mode to false; now on update of recorded input, normal input will be used instead of
+---input read from replay file
+function M.changeToNonReplayMode()
     _is_replay_mode = false
-    sequential_reader:close()
 end
 
 ---------------------------------------------------------------------------------------------------

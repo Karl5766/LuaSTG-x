@@ -1,11 +1,11 @@
--------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------
 ---state_of_stage_init.lua
 ---author: Karl
 ---date: 2021.3.10
 ---desc: Defines the GameSceneInitState object, which is created and used for initialization of
 ---     the initial state of a level.
 ---modifier:
--------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------
 
 ---@class GameSceneInitState
 local InitState = LuaClass("scenes.GameSceneInitState")

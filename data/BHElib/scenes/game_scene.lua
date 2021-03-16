@@ -39,9 +39,9 @@ function GameScene:createScene()
     -- schedule update so this function is executed every frame after the scene is pushed to
     -- cc director
     scene:scheduleUpdateWithPriorityLua(function(dt)
-        self:frameFunc(dt)
+        self:updateBetweenRender(dt)
 
-        self:renderFunc()
+        self:gameRender()
     end, 0)
 
     self.cocos_scene = scene
@@ -91,8 +91,10 @@ end
 ---------------------------------------------------------------------------------------------------
 ---frame update
 
----update game state 1 time
-function GameScene:doOneFrame()
+---update objects and call the scene update() function;
+---advance the time by 1 frame
+---can be re-written in sub-classes
+function GameScene:frameUpdate(dt)
     UpdateObjList()
     self:updateUserInput()
 
@@ -135,18 +137,6 @@ function GameScene:doOneFrame()
     end
 end
 
----update game state k times, k depending on the value given by
----setting.render_skip + 1
-function GameScene:doFrames()
-    local factor = 1
-    if setting.render_skip then
-        factor = int(setting.render_skip) + 1
-    end
-    for _ = 1, factor do
-        self:doOneFrame()
-    end
-end
-
 local e = lstg.eventDispatcher
 local _process_one_task = async.processOneTask
 
@@ -154,21 +144,29 @@ local _process_one_task = async.processOneTask
 ---
 ---@~english Will be invoked every frame to process all frame logic. Game will exit if it returns `true`.
 ---
-function GameScene:frameFunc()
+function GameScene:updateBetweenRender(dt)
     profiler.tic('FrameFunc')
     if _raw_input.isAnyDeviceKeyDown("snapshot") and setting.allowsnapshot then
         Screenshot()
     end
-    _process_one_task()
+    _process_one_task()  -- async load of resources etc.
 
     e:dispatchEvent('onFrameFunc')  -- in case any event is registered
-    self:doFrames()  -- update the game
+
+    -- update game state k times, k depending on the value given by
+    -- setting.render_skip + 1
+    local factor = 1
+    if setting.render_skip then
+        factor = int(setting.render_skip) + 1
+    end
+    for _ = 1, factor do  -- currently multiple updates do not wait at all
+        self:frameUpdate(dt)
+    end
 
     if lstg.quit_flag then
         GameExit()
     end
     profiler.toc('FrameFunc')
-    return lstg.quit_flag
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -180,7 +178,7 @@ local coordinates = require("BHElib.coordinates_and_screen")
 ---
 ---@~english Will be invoked every frame to process all render instructions.
 ---
-function GameScene:renderFunc()
+function GameScene:gameRender()
     -- begin scene
     profiler.tic('RenderFunc')
 

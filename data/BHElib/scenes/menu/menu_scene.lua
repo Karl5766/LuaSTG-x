@@ -101,7 +101,7 @@ function Menu:update(dt)
     GameScene.update(self, dt)
 end
 
-local hud_painter = require("BHElib.ui.hud")
+local hud_painter = require("BHElib.ui.hud_painter")
 function Menu.render(self)
     GameScene.render(self)
     hud_painter.drawHudBackground(

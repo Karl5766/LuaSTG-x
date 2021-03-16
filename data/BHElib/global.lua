@@ -7,6 +7,3 @@ lstg.quit_flag = false  -- checks in game update function, if true then exit the
 ---assumptions: one and only one player; created by createScene() of the game scene, must exist throughout the scene;
 ---deleted by goToNextStage();
 player = nil
-
-lstg.var = { username = setting.username }
-lstg.tmpvar = {}

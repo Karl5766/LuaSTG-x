@@ -1,6 +1,5 @@
 ---------------------------------------------------------------------------------------------------
 ---debug_util.lua
----author: CHU
 ---desc: Declares a few functions for debug
 ---modifier:
 ---     Karl, 2021.3.11, split the code from plus/ to util/ and renamed the file; renamed a few

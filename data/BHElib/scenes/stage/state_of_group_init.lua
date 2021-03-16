@@ -1,11 +1,11 @@
--------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------
 ---state_of_group_init.lua
 ---author: Karl
 ---date: 2021.3.10
 ---desc: Defines the SceneGroupInitState object, which is created and used for initialization of
 ---     the initial state of an entire play-through, which may contain several levels.
 ---modifier:
--------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------
 
 ---@class SceneGroupInitState
 local InitState = LuaClass("scenes.SceneGroupInitState")

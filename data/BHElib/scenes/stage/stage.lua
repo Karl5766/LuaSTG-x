@@ -48,6 +48,8 @@ function Stage.__create(group_init_state, stage_init_state)
     self.stage_init_state = stage_init_state
     self.global_state = _GlobalState(group_init_state.is_replay)
 
+    self.is_paused = false  -- for pause menu
+
     return self
 end
 
@@ -151,7 +153,7 @@ function Stage:isReplay()
 end
 
 ---ends the play-through and go back to menu
-function Stage.completeSceneGroup(self)
+function Stage:completeSceneGroup()
     local Menu = require("BHElib.scenes.menu.menu_scene")
     local SceneTransition = require("BHElib.scenes.scene_transition")
 
@@ -160,17 +162,33 @@ function Stage.completeSceneGroup(self)
     SceneTransition.transitionTo(self, Menu(task_spec))
 end
 
+---override base class method for pause menu
+function Stage:frameUpdate(dt)
+    if _input.isAnyDeviceKeyJustChanged("escape", false, true) then
+        self.is_paused = not self.is_paused
+    end
+
+    if self.is_paused then
+        -- menu mode
+
+        -- only update device input, ignore recorded input
+        GameScene.updateUserInput(self)
+    else
+        GameScene.frameUpdate(self, dt)  -- non-menu mode
+    end
+end
+
 ---update the stage itself
-function Stage.update(self, dt)
+function Stage:update(dt)
     GameScene.update(self, dt)
     self.timer = self.timer + dt
 end
 
-local hud_painter = require("BHElib.ui.hud")
+local _hud_painter = require("BHElib.ui.hud_painter")
 ---render stage hud
-function Stage.render(self)
+function Stage:render()
     GameScene.render(self)
-    hud_painter.draw(
+    _hud_painter.draw(
             "image:menu_hud_background",
             1.3,
             "font:hud_default",
@@ -194,7 +212,8 @@ function Stage:updateUserInput()
         --        or _input.isAnyDeviceKeyDown("right") then
         --
         --    self.global_state.is_replay = false
-        --    _input.changeToNonReplayMode(self.replay_file_reader)
+        --    _input.changeToNonReplayMode()
+        --    self.replay_file_reader:close()
         --end
     else
         _input.updateRecordedInputInNonReplayMode(self.replay_file_writer)

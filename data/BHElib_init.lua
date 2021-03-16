@@ -4,7 +4,7 @@
 ---date: 2021.2.14
 ---references: -x/src/core/__init__.lua
 ---desc: Includes files that implements the shmup game mechanics of luastg engine
--------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------
 
 local _include_list = {
     "BHElib.const",  -- defines some constant values
