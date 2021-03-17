@@ -29,25 +29,25 @@ local _include_list = {
 local function BHElibInit()
 
     -- zip replay test
-    --local FU = cc.FileUtils:getInstance()
-    ----local zip_path = FU:getFullPathForFileName("replay/read.zip")
-    --local zip_path = "replay/read"
-    --local zip = lstg.ZipArchive:create(zip_path)
-    --if not zip then
-    --    error(('failed to create zip file %q'):format(zip_path))
-    --end
-    --if not zip:open(lstg.ZipArchive.OpenMode.NEW) then
-    --    zip:unlink()
-    --    error(('failed to open zip file %q'):format(zip_path))
-    --end
-    --local entries = {{"read.rep", "replay/read.rep"}}
-    --for i, v in ipairs(entries) do
-    --    if not zip:addFile(v[1], v[2]) then
-    --        zip:unlink()
-    --        error(('failed add entry %q to zip file'):format(v[1]))
-    --    end
-    --end
-    --zip:close()
+    local FU = cc.FileUtils:getInstance()
+    --local zip_path = FU:getFullPathForFileName("replay/read.zip")
+    local zip_path = "replay/read"
+    local zip = lstg.ZipArchive:create(zip_path)
+    if not zip then
+        error(('failed to create zip file %q'):format(zip_path))
+    end
+    if not zip:open(lstg.ZipArchive.OpenMode.NEW) then
+        zip:unlink()
+        error(('failed to open zip file %q'):format(zip_path))
+    end
+    local entries = {{"read.rep", "replay/read.rep"}}
+    for i, v in ipairs(entries) do
+        if not zip:addFile(v[1], v[2]) then
+            zip:unlink()
+            error(('failed add entry %q to zip file'):format(v[1]))
+        end
+    end
+    zip:close()
 
     for _, file_path in ipairs(_include_list) do
         require(file_path)

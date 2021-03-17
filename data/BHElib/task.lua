@@ -12,15 +12,32 @@ local task = task
 local _object_stack = {}  -- corresponding objects of the tasks
 local _task_stack = {}  -- current task stack; similar to function call stack
 
+---------------------------------------------------------------------------------------------------
+---cache variables and functions
+
 local max = math.max
 local int = math.floor
 local yield = coroutine.yield
 local resume = coroutine.resume
 local insert = table.insert
-local ipairs = ipairs
-local pairs = pairs
 local status = coroutine.status
 local rawget = rawget
+
+---------------------------------------------------------------------------------------------------
+
+---@~chinese 设置亲子关系；
+---
+---@~english set parent-child relation
+---@param self table table to be set as parent
+---@param child table table to be set as child
+function task.SetChild(self, child)
+    local children = self._child_array
+    if not children then
+        self._child_array = {child}
+    else
+        insert(children, child)
+    end
+end
 
 ---@~chinese 新建task，添加一个执行f的协程
 ---
@@ -76,14 +93,16 @@ end
 local TaskDo = task.Do
 
 ---TOBEDEBUGGED
----do the object's tasks, and then do its servants' tasks
+---@~chinese 执行对象的task，然后一一执行它所有孩子的task
+---
+---@~english do tasks under self, and then do its children's tasks
 ---@param self table the table that contains task and _child_array tables
 local function PropagateDo(self)
     TaskDo(self)
-    local servants = self._child_array
-    if servants then
-        for i = 1, #servants do
-            PropagateDo(servants[i])
+    local children = self._child_array
+    if children then
+        for i = 1, #children do
+            PropagateDo(children[i])
         end
     end
 end

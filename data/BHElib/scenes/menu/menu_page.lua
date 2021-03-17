@@ -42,7 +42,7 @@ local _insert = table.insert
 ---base object class
 
 ---@class MenuPage:Object
-MenuPage = Class(Object)
+MenuPage = MakePrefab(Object)
 
 ---@param title_text string display title
 ---@param option_callback table an array of selection callbacks for each option
@@ -80,12 +80,12 @@ function MenuPage:playMoveOptionSound()
     -- PlaySound("sound:ok00", 0.3)
 end
 
-RegisterGameClass(MenuPage)
+RegisterPrefab(MenuPage)
 
 -------------------------------------------------------------------------------------------------
 
 ---@class SimpleTextMenuPage:MenuPage
-SimpleTextMenuPage = Class(MenuPage)
+SimpleTextMenuPage = MakePrefab(MenuPage)
 
 ---@param title string display title
 ---@param num_options number number of options in the menu
@@ -180,4 +180,4 @@ function SimpleTextMenuPage:render()
     )
 end
 
-RegisterGameClass(SimpleTextMenuPage)
+RegisterPrefab(SimpleTextMenuPage)

@@ -55,7 +55,7 @@ local _setting_util = require("setting.setting_util")
 ---calls lstg.loadPlugin();
 ---run root.lua file;
 ---call lstg.loadSetting();
----call RegisterGameClasses(), SetTitle() and
+---call SetTitle() and
 ---set the resource pool to stage afterwards
 function lstg.loadMod()
     local writable_path = FS.getWritablePath()

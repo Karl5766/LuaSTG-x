@@ -70,7 +70,7 @@ end
 
 local _input = require("BHElib.input.input_and_replay")
 
-local TestClass = Class(Object)
+local TestClass = MakePrefab(Object)
 TestClass.frame = task.Do
 function TestClass:init()
     local scr = require("BHElib.coordinates_and_screen")
@@ -84,7 +84,7 @@ function TestClass:init()
         end
     end)
 end
-RegisterGameClass(TestClass)
+RegisterPrefab(TestClass)
 
 function SampleStage:update(dt)
     Stage.update(self, dt)
