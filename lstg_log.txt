@@ -1,7 +1,7 @@
-[INFO] [APP] === Application start at: 01:49:04 ===
+[INFO] [APP] === Application start at: 01:51:14 ===
 [INFO] [APP] Build date: Dec 18 2020
 [INFO] [APP] CPU name: Intel(R) Core(TM) i7-6700HQ CPU @ 2.60GHz
-[INFO] [APP] Memory: 2445MB / 8052MB
+[INFO] [APP] Memory: 2276MB / 8052MB
 [INFO] [APP] OS name: Microsoft Windows 10 家庭版
 [INFO] [APP] Lua VM version: LuaJIT 2.1.0-beta3
 [INFO] [APP] ThreadPool size: 3 (core count: 8)
@@ -35,6 +35,7 @@
 }
 [LOG] by default, ui scale = 2.000 should be the same as screen.scale = 2.000
 [INFO] create frame buffer, size: (1708, 960)
+[LOG] 尝试创建目录 "replay/"
 [INFO] [APP] clear GameObjectPool
 [INFO] [APP] clear all resources
 [INFO] [APP] unload all packs

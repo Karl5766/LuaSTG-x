@@ -7,3 +7,9 @@
 
 # ignore executables
 *.exe
+
+# ignore replay change
+/replay/
+
+# ignore lstg_log change
+lstg_log.txt
