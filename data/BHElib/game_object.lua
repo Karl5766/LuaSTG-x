@@ -125,6 +125,21 @@ Object = {
 Object3d = MakePrefab(Object)
 Object3d['.3d'] = true
 
+local SetRenderView = require("BHElib.coordinates_and_screen").setRenderView
+Renderer = MakePrefab(Object)
+function Renderer:init(layer, master, coordinates_name)
+    self.group = GROUP_GHOST
+    self.layer = layer
+    self.master = master
+    self.coordinates_name = coordinates_name
+end
+function Renderer:render()
+    local master = self.master
+    SetRenderView(self.coordinates_name)
+    master:render()
+    SetRenderView("game")  -- game objects are supposed to be rendered in "game"
+end
+
 ---------------------------------------------------------------------------------------------------
 
 local _prefab_num = 0  -- number of prefabs registered by RegisterGameClass()
@@ -164,21 +179,13 @@ function RegisterPrefab(prefab)
     end
 
     RegisterClass(prefab)
-
-    local prefab_name
-    for key, value in pairs(_G) do
-        if value == prefab then
-            prefab_name = key
-            break
-        end
-    end
-    prefab['.classname'] = prefab_name
 end
 
 ---register base object classes, so that the engine recognizes them
 local function Init()
     RegisterPrefab(Object)
     RegisterPrefab(Object3d)
+    RegisterPrefab(Renderer)
 end
 Init()
 

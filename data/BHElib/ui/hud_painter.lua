@@ -110,8 +110,6 @@ local _input = require("BHElib.input.input_and_replay")
 local _coordinates = require("BHElib.coordinates_and_screen")
 
 function M.drawKeys()
-    scr.setRenderView("ui")
-
     local distance = 50
     local offsets = {
         {0, 0},
@@ -136,9 +134,9 @@ function M.drawKeys()
         local key_name = function_keys[i]
         local x, y = offset[1] + normal_pos[1], offset[2] + normal_pos[2]
         if _input.isAnyDeviceKeyDown(key_name) then
-            Render("image:button_pressed", x, y, 0, 1, 1, 0.5)
+            Render("image:button_pressed", x, y, 0, 1, 1)
         else
-            Render("image:button_normal", x, y, 0, 1, 1, 0.5)
+            Render("image:button_normal", x, y, 0, 1, 1)
         end
         local text_y = y + 14
         RenderTTF("font:menu", key_name, x, x, text_y, text_y, text_color, "center")
@@ -154,9 +152,9 @@ function M.drawKeys()
         local key_name = function_keys[i]
         local x, y = offset[1] + replay_pos[1], offset[2] + replay_pos[2]
         if _input.isAnyRecordedKeyDown(key_name) then
-            Render("image:button_pressed", x, y, 0, 1, 1, 0.5)
+            Render("image:button_pressed", x, y, 0, 1, 1)
         else
-            Render("image:button_normal", x, y, 0, 1, 1, 0.5)
+            Render("image:button_normal", x, y, 0, 1, 1)
         end
         local color = Color(255, 60, 60, 60)
         local text_y = y + 14

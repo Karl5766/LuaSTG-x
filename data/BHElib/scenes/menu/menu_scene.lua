@@ -99,7 +99,6 @@ end
 function Menu:cleanup()
 end
 
-local input = require("BHElib.input.input_and_replay")
 function Menu:update(dt)
     GameScene.update(self, dt)
 end

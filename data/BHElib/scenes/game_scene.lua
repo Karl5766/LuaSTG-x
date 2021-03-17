@@ -44,6 +44,9 @@ function GameScene:createScene()
         self:gameRender()
     end, 0)
 
+    -- create an object for rendering the stage
+    New(Renderer, LAYER_BG, self, "ui")
+
     self.cocos_scene = scene
 
     return scene
@@ -188,9 +191,6 @@ function GameScene:gameRender()
     -- before render calls
     coordinates.setRenderView("ui")
     e:dispatchEvent('onBeforeRender')
-
-    -- render calls
-    self:render()
 
     coordinates.setRenderView("game")
     profiler.tic('ObjRender')

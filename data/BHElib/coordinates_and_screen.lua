@@ -24,6 +24,10 @@ local _ui_x, _ui_y, _ui_x_unit, _ui_y_unit                                      
 ---"3d": coordinates of the 3d background
 local _view3d = {}
 
+---dirty bit for setRenderView
+local _dirty  -- true if viewport or ortho has changed after the last setRenderView call
+local _current_render_view
+
 ---------------------------------------------------------------------------------------------------
 ---some rectangular areas
 
@@ -240,6 +244,8 @@ function M.setPlayFieldBoundary(left, right, bottom, top)
     _playfield_game_r = right
     _playfield_game_b = bottom
     _playfield_game_t = top
+
+    _dirty = true
 end
 
 ---set out of bound deletion boundary in "game" coordinates
@@ -263,6 +269,8 @@ function M.resetView3d()
     _view3d.fovy = PI_2                         -- controls size of spherical view field in vertical direction (in radians)
     _view3d.z = { 1, 2 }                        -- clipping plane, {near, far}
     _view3d.fog = { 0, 0, Color(0x00000000) }   -- fog param, {start, end, color}
+
+    _dirty = true
 end
 
 ---设置_view3d的值
@@ -287,6 +295,8 @@ function M.set3D(key, a, b, c)
     elseif key == "z" then
         _view3d.z = { a, b }
     end
+
+    _dirty = true
 end
 
 ---@~chinese 切换渲染使用的坐标系。可选的三个坐标系为"game", "ui"或"3d"；
@@ -300,64 +310,69 @@ end
 ---@~english functions like Render or ObjRender are affected by this function
 ---aram mode string specifies the mode to set; can be "game", "ui" or "3d"
 function M.setRenderView(coordinates_name)
-    lstg.viewmode = coordinates_name
-    if coordinates_name == "3d" then
-        local fovy = _view3d.fovy
-        local vec_z = _view3d.z
-        local pos_eye = _view3d.eye
-        local pos_at = _view3d.at
-        local vec_up = _view3d.up
-        local vec_fog = _view3d.fog
+    if _dirty or coordinates_name ~= _current_render_view then
+        _dirty = false
+        _current_render_view = coordinates_name
 
-        -- play field width/height in "game" coordinates
-        local playfield_width = _playfield_game_r - _playfield_game_l
-        local playfield_height = _playfield_game_t - _playfield_game_b
+        lstg.viewmode = coordinates_name
+        if coordinates_name == "3d" then
+            local fovy = _view3d.fovy
+            local vec_z = _view3d.z
+            local pos_eye = _view3d.eye
+            local pos_at = _view3d.at
+            local vec_up = _view3d.up
+            local vec_fog = _view3d.fog
 
-        local vl, vr, vb, vt = GetGameViewport()
-        SetViewport(vl, vr, vb, vt)
+            -- play field width/height in "game" coordinates
+            local playfield_width = _playfield_game_r - _playfield_game_l
+            local playfield_height = _playfield_game_t - _playfield_game_b
 
-        SetPerspective(
-                pos_eye[1], pos_eye[2], pos_eye[3],
-                pos_at[1], pos_at[2], pos_at[3],
-                vec_up[1], vec_up[2], vec_up[3],
-                fovy,
-                playfield_width / playfield_height,
-                vec_z[1], vec_z[2])
+            local vl, vr, vb, vt = GetGameViewport()
+            SetViewport(vl, vr, vb, vt)
 
-        SetFog(vec_fog[1], vec_fog[2], vec_fog[3])
+            SetPerspective(
+                    pos_eye[1], pos_eye[2], pos_eye[3],
+                    pos_at[1], pos_at[2], pos_at[3],
+                    vec_up[1], vec_up[2], vec_up[3],
+                    fovy,
+                    playfield_width / playfield_height,
+                    vec_z[1], vec_z[2])
 
-        local dx, dy, dz = pos_eye[1] - pos_at[1], pos_eye[2] - pos_at[2], pos_eye[3] - pos_at[3]
-        SetImageScale(
-                sqrt(dx * dx + dy * dy + dz * dz) * 2
-                        * tan(fovy * 0.5)
-                        / (playfield_width / _game_x_unit * _ui_x_unit))
+            SetFog(vec_fog[1], vec_fog[2], vec_fog[3])
 
-    elseif coordinates_name == "game" then
+            local dx, dy, dz = pos_eye[1] - pos_at[1], pos_eye[2] - pos_at[2], pos_eye[3] - pos_at[3]
+            SetImageScale(
+                    sqrt(dx * dx + dy * dy + dz * dz) * 2
+                            * tan(fovy * 0.5)
+                            / (playfield_width / _game_x_unit * _ui_x_unit))
 
-        -- set viewport and ortho to the size of the play field
-        local l, r, b, t = GetGameViewport()
-        -- set display region on screen ("viewport")
-        SetViewport(l, r, b, t)  -- in "res"
-        l, r, b, t = GetGameOrtho()
-        SetOrtho(l, r, b, t)  -- in "game"
+        elseif coordinates_name == "game" then
 
-        SetFog()
-        --SetImageScale((world.r-world.l)/(world.scrr-world.scrl))--usually it is 1
-        SetImageScale(1)
+            -- set viewport and ortho to the size of the play field
+            local l, r, b, t = GetGameViewport()
+            -- set display region on screen ("viewport")
+            SetViewport(l, r, b, t)  -- in "res"
+            l, r, b, t = GetGameOrtho()
+            SetOrtho(l, r, b, t)  -- in "game"
 
-    elseif coordinates_name == "ui" then
+            SetFog()
+            --SetImageScale((world.r-world.l)/(world.scrr-world.scrl))--usually it is 1
+            SetImageScale(1)
 
-        -- set viewport and ortho to the size of the window
-        local l, r, b, t = GetUIViewport()
-        SetViewport(l, r, b, t)  -- in "res"
-        l, r, b, t = GetUIOrtho()
-        SetOrtho(l, r, b, t)  -- in "ui"
+        elseif coordinates_name == "ui" then
 
-        SetFog()
-        SetImageScale(1)
+            -- set viewport and ortho to the size of the window
+            local l, r, b, t = GetUIViewport()
+            SetViewport(l, r, b, t)  -- in "res"
+            l, r, b, t = GetUIOrtho()
+            SetOrtho(l, r, b, t)  -- in "ui"
 
-    else
-        error(i18n 'Invalid arguement for setRenderView')
+            SetFog()
+            SetImageScale(1)
+
+        else
+            error(i18n 'Invalid arguement for setRenderView')
+        end
     end
 end
 
@@ -450,6 +465,8 @@ function M.setUICoordinatesByResolution(hud_ui_width, hud_ui_height, res_width, 
     -- assign the scale
     _ui_x_unit = scale
     _ui_y_unit = scale
+
+    _dirty = true
 end
 
 ---setup "game" coordinates in terms of "ui" coordinates
@@ -469,59 +486,8 @@ function M.setGameCoordinatesInUI(x, y, x_unit, y_unit)
     _game_y = _ui_y + y * _ui_y_unit
     _game_x_unit = _ui_x_unit * x_unit
     _game_y_unit = _ui_y_unit * y_unit
-end
 
----------------------------------------------------------------------------------------------------
----initializing
-
----print information about viewport/ortho inputs to log file
-local function WriteToLog()
-    local fmt = '%.1f, %.1f, %.1f, %.1f'
-
-    local game_vl, game_vr, game_vb, game_vt = GetGameViewport()
-    local game_ol, game_or, game_ob, game_ot = GetGameOrtho()
-    local ui_vl, ui_vr, ui_vb, ui_vt = GetUIViewport()
-    local ui_ol, ui_or, ui_ob, ui_ot = GetUIOrtho()
-
-    local ui_viewport = string.format(fmt, ui_vl, ui_vr, ui_vb, ui_vt)
-    local ui_ortho = string.format(fmt, ui_ol, ui_or, ui_ob, ui_ot)
-    local game_viewport = string.format(fmt, game_vl, game_vr, game_vb, game_vt)
-    local game_ortho = string.format(fmt, game_ol, game_or, game_ob, game_ot)
-    local t = {
-        ui_vp        = ui_viewport,     ui_ortho = ui_ortho,
-        game_vp     = game_viewport,    world_ortho = game_ortho,
-        screen_scale = _ui_x_unit
-    }
-    SystemLog('view params:\n' .. stringify(t))
-
-    local scale = _glv:getDesignResolutionSize().height / 480
-    SystemLog(string.format(
-            'by default, ui scale = %.3f should be the same as screen.scale = %.3f', scale, _ui_x_unit))
-end
-
----initialize coordinate systems;
----the design resolution of GLView should be set when is function is called
-function M.initGameCoordinates()
-    -- the "game" coordinates depends on "ui", "3d" depends on "game", so the order of setup is important
-
-    -- setup "ui" coordinates
-    local res_width, res_height = M.getResolution()
-    M.setUICoordinatesByResolution(640, 480, res_width, res_height)
-
-    -- setup "game" coordinates
-    local playfield_center_ui_x, playfield_center_ui_y = 320, 240  -- in "ui" cooridinates
-    M.setGameCoordinatesInUI(playfield_center_ui_x, playfield_center_ui_y, 1, 1)
-
-    M.setPlayFieldBoundary(-192, 192, -224, 224)
-    M.setOutOfBoundDeletionBoundary(-224, 224, -256, 256)
-
-    -- setup "3d" coordinates
-    M.resetView3d()
-
-    -- previous changes are enforced by setting the render view
-    M.setRenderView("ui")
-
-    WriteToLog()
+    _dirty = true
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -581,6 +547,61 @@ function M.getViewModeInfo(mode)
                 vp, or_)
     end
     return ret
+end
+
+---------------------------------------------------------------------------------------------------
+---initializing
+
+---print information about viewport/ortho inputs to log file
+local function WriteToLog()
+    local fmt = '%.1f, %.1f, %.1f, %.1f'
+
+    local game_vl, game_vr, game_vb, game_vt = GetGameViewport()
+    local game_ol, game_or, game_ob, game_ot = GetGameOrtho()
+    local ui_vl, ui_vr, ui_vb, ui_vt = GetUIViewport()
+    local ui_ol, ui_or, ui_ob, ui_ot = GetUIOrtho()
+
+    local ui_viewport = string.format(fmt, ui_vl, ui_vr, ui_vb, ui_vt)
+    local ui_ortho = string.format(fmt, ui_ol, ui_or, ui_ob, ui_ot)
+    local game_viewport = string.format(fmt, game_vl, game_vr, game_vb, game_vt)
+    local game_ortho = string.format(fmt, game_ol, game_or, game_ob, game_ot)
+    local t = {
+        ui_vp        = ui_viewport,     ui_ortho = ui_ortho,
+        game_vp     = game_viewport,    world_ortho = game_ortho,
+        screen_scale = _ui_x_unit
+    }
+    SystemLog('view params:\n' .. stringify(t))
+
+    local scale = _glv:getDesignResolutionSize().height / 480
+    SystemLog(string.format(
+            'by default, ui scale = %.3f should be the same as screen.scale = %.3f', scale, _ui_x_unit))
+end
+
+---initialize coordinate systems;
+---the design resolution of GLView should be set when is function is called
+function M.initGameCoordinates()
+    -- the "game" coordinates depends on "ui", "3d" depends on "game", so the order of setup is important
+
+    -- setup "ui" coordinates
+    local res_width, res_height = M.getResolution()
+    M.setUICoordinatesByResolution(640, 480, res_width, res_height)
+
+    -- setup "game" coordinates
+    local playfield_center_ui_x, playfield_center_ui_y = 320, 240  -- in "ui" cooridinates
+    M.setGameCoordinatesInUI(playfield_center_ui_x, playfield_center_ui_y, 1, 1)
+
+    M.setPlayFieldBoundary(-192, 192, -224, 224)
+    M.setOutOfBoundDeletionBoundary(-224, 224, -256, 256)
+
+    -- setup "3d" coordinates
+    M.resetView3d()
+
+    -- previous changes are enforced by setting the render view
+    _current_render_view = "ui"
+    _dirty = true
+    M.setRenderView("ui")
+
+    WriteToLog()
 end
 
 return M
