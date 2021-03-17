@@ -12,4 +12,4 @@
 /replay/
 
 # ignore lstg_log change
-lstg_log.txt
+/lstg_log.txt
