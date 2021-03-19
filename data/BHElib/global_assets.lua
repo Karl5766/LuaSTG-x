@@ -19,3 +19,6 @@ LoadImageFromFile("image:test", "data_assets/THlib/bullet/Magic1.png")
 
 LoadImageFromFile("image:button_normal", "creator/image/default_btn_normal.png")
 LoadImageFromFile("image:button_pressed", "creator/image/default_btn_pressed.png")
+
+LoadTexture('tex:bullet', 'THlib\\bullet\\bullet1.png', true)
+LoadImageGroup('img:ball_mid', 'tex:bullet', 176, 0, 32, 32, 1, 8, 4, 4)

@@ -45,7 +45,7 @@ function GameScene:createScene()
     end, 0)
 
     -- create an object for rendering the stage
-    New(Renderer, LAYER_BG, self, "ui")
+    New(Renderer, LAYER_HUD, self, "ui")
 
     self.cocos_scene = scene
 

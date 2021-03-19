@@ -164,17 +164,23 @@ end
 
 ---override base class method for pause menu
 function Stage:frameUpdate(dt)
-    if _input.isAnyDeviceKeyJustChanged("escape", false, true) then
-        self.is_paused = not self.is_paused
+    if _input.isAnyDeviceKeyJustChanged("escape", false, true) and
+        not self.is_paused then
+
+        self.is_paused = true
+        local PauseMenu = require("BHElib.scenes.stage.pause_menu")
+        self.pause_menu = PauseMenu(self)
     end
 
     if self.is_paused then
-        -- menu mode
-
         -- only update device input, ignore recorded input
         GameScene.updateUserInput(self)
+
+        if not self.pause_menu:update(dt) then
+            self.is_paused = false
+        end
     else
-        GameScene.frameUpdate(self, dt)  -- non-menu mode
+        GameScene.frameUpdate(self, dt)  -- call base method on non-menu mode
     end
 end
 
@@ -191,7 +197,7 @@ function Stage:render()
     _hud_painter.draw(
             "image:menu_hud_background",
             1.3,
-            "font:hud_default",
+            "font:menu",
             "image:white"
     )
 end

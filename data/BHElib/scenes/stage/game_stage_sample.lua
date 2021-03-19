@@ -86,6 +86,29 @@ function TestClass:init()
 end
 RegisterPrefab(TestClass)
 
+local Bullet = MakePrefab(Object)
+Bullet.frame = task.Do
+function Bullet:init(x, y, vx, vy, color)
+    self.x = x
+    self.y = y
+    self.vx = vx
+    self.vy = vy
+    self.img = "img:ball_mid"..int(1)
+    self.group = GROUP_INDES
+    self.resImg = FindResSprite(self.img)
+    self.color = color
+    --self.resImg:setColor(self.color)
+end
+
+Bullet.render = DefaultRenderFunc
+--function Bullet:render()
+--    --self.resImg:setColor(self.color)
+--    --Render(self.img, self.x, self.y, self.rot, self.hscale, self.vscale, 0.5)
+--    --self.resImg:render(self.x, self.y, self.rot, self.hscale * factor, self.vscale * factor, 0.5)
+--    DefaultRenderFunc(self)
+--end
+RegisterPrefab(Bullet)
+
 function SampleStage:update(dt)
     Stage.update(self, dt)
 
@@ -98,6 +121,11 @@ function SampleStage:update(dt)
         local Menu = require("BHElib.scenes.menu.menu_scene")
         local SceneTransition = require("BHElib.scenes.scene_transition")
         SceneTransition.transitionTo(self, Menu())
+    end
+
+    for i = 1, 2 do
+        local a = ran:Float(0, 360)
+        New(Bullet, 0, 0, 2 * cos(a), 2 * sin(a), Color(255, ran:Int(0, 255), ran:Int(0, 255), 255))
     end
 
     --if _input.isMouseButtonJustChanged(true, true) then
@@ -116,7 +144,6 @@ end
 local _hud_painter = require("BHElib.ui.hud_painter")
 function SampleStage:render()
     Stage.render(self)
-    _hud_painter.drawKeys()
 end
 
 

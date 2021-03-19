@@ -14,6 +14,7 @@ GROUP_NUM_OF_GROUP    = 16
 
 --层次结构
 
+LAYER_HUD             = -800  -- for ui hud
 LAYER_BG              = -700
 LAYER_ENEMY           = -600
 LAYER_PLAYER_BULLET   = -500
