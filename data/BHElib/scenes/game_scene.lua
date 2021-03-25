@@ -97,7 +97,7 @@ end
 ---update objects and call the scene update() function;
 ---advance the time by 1 frame
 ---can be re-written in sub-classes
-function GameScene:frameUpdate(dt)
+function GameScene:updateSceneAndObjects(dt)
     UpdateObjList()
     self:updateUserInput()
 
@@ -120,7 +120,6 @@ function GameScene:frameUpdate(dt)
     CollisionCheck(GROUP_PLAYER, GROUP_ENEMY)
     CollisionCheck(GROUP_PLAYER, GROUP_INDES)
     CollisionCheck(GROUP_ENEMY, GROUP_PLAYER_BULLET)
-    CollisionCheck(GROUP_NONTJT, GROUP_PLAYER_BULLET)
     CollisionCheck(GROUP_ITEM, GROUP_PLAYER)
     profiler.toc('CollisionCheck')
 
@@ -131,9 +130,15 @@ function GameScene:frameUpdate(dt)
     profiler.tic('AfterFrame')
     AfterFrame()--帧末更新函数
     profiler.toc('AfterFrame')
+end
+
+---update the game by one time step;
+---advance the time by 1 frame
+function GameScene:frameUpdate(dt)
+    self:updateSceneAndObjects(dt)
 
     -- it is possible that after transition is set, some new objects are created before the update completes
-    -- so wait until the end of loop to replace the current scene with the next scene
+    -- so wait until the end of frame to replace the current scene with the next scene
     -- also for some reasons the game crashes if ResetPool is put *after* ObjRender in the current frame
     if SceneTransition.isNextScenePrepared() then
         SceneTransition.goToNextScene()

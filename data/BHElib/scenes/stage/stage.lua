@@ -163,7 +163,7 @@ function Stage:completeSceneGroup()
 end
 
 ---override base class method for pause menu
-function Stage:frameUpdate(dt)
+function Stage:updateSceneAndObjects(dt)
     if _input.isAnyDeviceKeyJustChanged("escape", false, true) and
         not self.is_paused then
 
@@ -180,7 +180,7 @@ function Stage:frameUpdate(dt)
             self.is_paused = false
         end
     else
-        GameScene.frameUpdate(self, dt)  -- call base method on non-menu mode
+        GameScene.updateSceneAndObjects(self, dt)  -- call base method on non-menu mode
     end
 end
 
