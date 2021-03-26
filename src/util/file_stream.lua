@@ -37,9 +37,10 @@ end
 
 ---@brief 跳转到位置
 ---@param offset number 新的位置
----@param base number 基准
+---@param base string 基准
+---@return number 读写位置
 function FileStream:seek(base, offset)
-    assert(self.file:seek(base, offset))
+    return assert(self.file:seek(base, offset))
 end
 
 ---@brief 关闭文件流

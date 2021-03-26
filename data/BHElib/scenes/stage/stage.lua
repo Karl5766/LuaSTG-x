@@ -19,7 +19,6 @@ local _all_stages = {}
 ---------------------------------------------------------------------------------------------------
 
 local _input = require("BHElib.input.input_and_replay")
-local FS = require("file_system")
 local _GlobalState = require("BHElib.scenes.stage.state_of_global")
 
 ---------------------------------------------------------------------------------------------------
@@ -37,15 +36,17 @@ local _GlobalState = require("BHElib.scenes.stage.state_of_global")
 ---create and return a new stage instance, representing an actual play-through;
 ---the init state parameters should not be modified by the Stage object
 ---@param stage_init_state GameSceneInitState specifies the initial state of the stage
----@param group_init_state table a table containing the global initial state of the play-through
+---@param group_init_state SceneGroupInitState a table containing the global initial state of the play-through
+---@param replay_io_manager ReplayIOManager an object that manages the replay read and write
 ---@return Stage a stage object
-function Stage.__create(group_init_state, stage_init_state)
+function Stage.__create(group_init_state, stage_init_state, replay_io_manager)
     local self = GameScene.__create()
 
     self.timer = 0
 
     self.group_init_state = group_init_state
     self.stage_init_state = stage_init_state
+    self.replay_io_manager = replay_io_manager
     self.global_state = _GlobalState(group_init_state.is_replay)
 
     self.is_paused = false  -- for pause menu
@@ -96,22 +97,7 @@ function Stage:createScene()
 
     ---TOBEADDED: initialize the player
 
-    _input.resetRecording(self:isReplay())
-
-    if self:isReplay() then
-        local FileStream = require("util.file_stream")
-        local file_stream = FileStream(group_init_state.replay_path_for_read, "rb")
-        local SequentialFileReader = require("util.sequential_file_reader")
-        self.replay_file_reader = SequentialFileReader(file_stream)
-    end
-
-    if not FS.isFileExist("replay") then
-        FS.createDirectory("replay/")
-    end
-    local FileStream = require("util.file_stream")
-    local file_stream = FileStream(group_init_state.replay_path_for_write, "wb")
-    local SequentialFileWriter = require("util.sequential_file_writer")
-    self.replay_file_writer = SequentialFileWriter(file_stream)
+    self.replay_io_manager:startNewScene()  -- clear input from last scene, setup replay reader/writer
 
     return GameScene.createScene(self)
 end
@@ -121,22 +107,20 @@ end
 ---subclasses
 function Stage:cleanup()
     GameScene.cleanup(self)
-    if self:isReplay() then
-        self.replay_file_reader:close()
-        self.replay_file_writer:close()
-    else
-        self.replay_file_writer:close()
-    end
+
+    --TODO:implement multi stage replay
+    self.replay_io_manager:finishCurrentScene(self)
+    self.replay_io_manager:cleanup()
 end
 
 ---construct the initialization parameters for the next scene
 ---@return GameSceneInitState, SceneGroupInitState, table init parameters for Stage.__create
 function Stage:constructNextSceneInitState()
-    local GameSceneInitState = require("BHElib.scenes.stage.state_of_stage_init")
+    local GameSceneInitState = require("BHElib.scenes.stage.state_of_scene_init")
     local cur_init_state = self.stage_init_state
     local next_init_state = GameSceneInitState()
 
-    next_init_state.random_seed = cur_init_state.random_seed
+    next_init_state.random_seed = cur_init_state.random_seed  -- use the same random seed
     next_init_state.score = self.score
     ---TOBEADDED: initialize player info as well
 
@@ -149,7 +133,7 @@ end
 
 ---@return boolean if the state is entered in replay mode
 function Stage:isReplay()
-    return self.global_state.is_replay
+    return self.replay_io_manager:isReplay()
 end
 
 ---ends the play-through and go back to menu
@@ -205,25 +189,11 @@ end
 ---called in frameFunc()
 ---update recorded device input for replay
 function Stage:updateUserInput()
-    -- update _prev and _cur of non-recorded input
+    -- update device input
     GameScene.updateUserInput(self)
 
-    -- update _prev and _cur of recorded input
-    if self:isReplay() then
-        _input.updateRecordedInputInReplayMode(self.replay_file_reader, self.replay_file_writer)
-
-        --if _input.isAnyDeviceKeyDown("up")
-        --        or _input.isAnyDeviceKeyDown("down")
-        --        or _input.isAnyDeviceKeyDown("left")
-        --        or _input.isAnyDeviceKeyDown("right") then
-        --
-        --    self.global_state.is_replay = false
-        --    _input.changeToNonReplayMode()
-        --    self.replay_file_reader:close()
-        --end
-    else
-        _input.updateRecordedInputInNonReplayMode(self.replay_file_writer)
-    end
+    -- update recorded input
+    self.replay_io_manager:updateUserInput()
 end
 
 

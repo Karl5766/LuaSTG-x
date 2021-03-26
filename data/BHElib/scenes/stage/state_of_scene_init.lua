@@ -1,5 +1,5 @@
 ---------------------------------------------------------------------------------------------------
----state_of_stage_init.lua
+---state_of_scene_init.lua
 ---author: Karl
 ---date: 2021.3.10
 ---desc: Defines the GameSceneInitState object, which is created and used for initialization of

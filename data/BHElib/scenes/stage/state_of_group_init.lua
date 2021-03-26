@@ -19,8 +19,6 @@ function InitState.__create()
     self.player_class_id = nil
     self.stage_id_array = nil
     self.is_replay = nil
-    self.replay_path_for_write = nil
-    self.replay_path_for_read = nil
 
     return self
 end

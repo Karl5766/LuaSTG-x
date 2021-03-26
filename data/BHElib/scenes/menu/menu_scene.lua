@@ -77,17 +77,16 @@ function Menu.constructStage(self)
     local SceneGroupInitState = require("BHElib.scenes.stage.state_of_group_init")
     local next_group_init_state = SceneGroupInitState()
     next_group_init_state.is_replay = is_replay
-    next_group_init_state.replay_path_for_write = "replay/current.rep"
-    if is_replay then
-        next_group_init_state.replay_path_for_read = "replay/read.rep"
-    end
+
+    local ReplayIOManager = require("BHElib.input.replay_io_manager")
+    local replay_io_manager = ReplayIOManager(is_replay, 1, "replay/read", "replay/current")
 
     -- for first stage
-    local GameSceneInitState = require("BHElib.scenes.stage.state_of_stage_init")
+    local GameSceneInitState = require("BHElib.scenes.stage.state_of_scene_init")
     local next_init_state = GameSceneInitState()
 
     local StageClass = require("BHElib.scenes.stage.game_stage_sample")
-    local stage = StageClass(next_group_init_state, next_init_state)
+    local stage = StageClass(next_group_init_state, next_init_state, replay_io_manager)
 
     return stage
 end
