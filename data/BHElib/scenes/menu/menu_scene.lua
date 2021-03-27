@@ -13,8 +13,14 @@ local Menu = LuaClass("scenes.Menu", GameScene)
 
 -- require modules
 require("BHElib.scenes.menu.menu_page")
-local _scene_transition = require("BHElib.scenes.scene_transition")
+local SceneTransition = require("BHElib.scenes.scene_transition")
 local _menu_transition = require("BHElib.scenes.menu.menu_page_transition")
+
+---------------------------------------------------------------------------------------------------
+---task spec format
+
+---{"no_task"}
+---{"save_replay"}
 
 ---------------------------------------------------------------------------------------------------
 ---override/virtual
@@ -47,7 +53,7 @@ function Menu:createScene()
                 self.is_replay = false
                 -- start stage
                 local stage = self:constructStage()
-                _scene_transition.transitionTo(self, stage)
+                SceneTransition.transitionTo(self, stage, SceneTransition.instantTransition)
             end)
         end},
         {"Start Replay", function()
@@ -59,7 +65,7 @@ function Menu:createScene()
                 self.is_replay = true
                 -- start stage
                 local stage = self:constructStage()
-                _scene_transition.transitionTo(self, stage)
+                SceneTransition.transitionTo(self, stage, SceneTransition.instantTransition)
             end)
         end},
     }
@@ -74,16 +80,29 @@ end
 function Menu.constructStage(self)
     -- for all stages
     local is_replay = self.is_replay
-    local SceneGroupInitState = require("BHElib.scenes.stage.state_of_group_init")
-    local next_group_init_state = SceneGroupInitState()
-    next_group_init_state.is_replay = is_replay
 
     local ReplayIOManager = require("BHElib.input.replay_io_manager")
     local replay_io_manager = ReplayIOManager(is_replay, 1, "replay/read", "replay/current")
 
-    -- for first stage
-    local GameSceneInitState = require("BHElib.scenes.stage.state_of_scene_init")
-    local next_init_state = GameSceneInitState()
+    local next_init_state = nil
+    local next_group_init_state = nil
+    if is_replay then
+        -- read from file
+        local replay_summaries = replay_io_manager:readSummariesFromFile()
+        local first_scene_summary = replay_summaries.scene_summary_array[1]
+
+        next_group_init_state = replay_summaries.scene_group_summary.group_init_state
+
+        next_init_state = first_scene_summary.scene_init_state
+    else
+        -- use default settings
+        local SceneGroupInitState = require("BHElib.scenes.stage.state_of_group_init")
+        next_group_init_state = SceneGroupInitState()
+        next_group_init_state.is_replay = is_replay
+
+        local GameSceneInitState = require("BHElib.scenes.stage.state_of_scene_init")
+        next_init_state = GameSceneInitState()
+    end
 
     local StageClass = require("BHElib.scenes.stage.game_stage_sample")
     local stage = StageClass(next_group_init_state, next_init_state, replay_io_manager)

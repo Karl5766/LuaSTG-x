@@ -130,18 +130,18 @@ function SequentialFileReader:readVarLengthString()
 end
 
 ---read the fields saved by SequentialFileWriter:writeFieldsOfTable back into the give table
----@param t table the table to write to
+---@param targetTable table the table to read into
 ---@param floatFields table an array of strings specifying the names of the fields to read as float
 ---@param stringFields table an array of strings specifying the names of the fields to read as string
 ---@return table the given table t
-function SequentialFileReader:readFieldsOfTable(t, floatFields, stringFields)
+function SequentialFileReader:readFieldsOfTable(targetTable, floatFields, stringFields)
     for i = 1, #floatFields do
         local field = floatFields[i]
-        t[field] = self:readFloat()
+        targetTable[field] = self:readFloat()
     end
     for i = 1, #stringFields do
         local field = stringFields[i]
-        t[field] = self:readVarLengthString()
+        targetTable[field] = self:readVarLengthString()
     end
 end
 

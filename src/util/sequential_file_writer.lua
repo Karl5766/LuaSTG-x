@@ -157,17 +157,17 @@ function SequentialFileWriter:writeVarLengthString(str)
 end
 
 ---write the specified float/string fields of a given table to the file stream
----@param t table the table to read from
+---@param sourceTable table the table to read from
 ---@param floatFields table an array of strings specifying the names of the fields to write as float
 ---@param stringFields table an array of strings specifying the names of the fields to write as string
-function SequentialFileWriter:writeFieldsOfTable(t, floatFields, stringFields)
+function SequentialFileWriter:writeFieldsOfTable(sourceTable, floatFields, stringFields)
     for i = 1, #floatFields do
         local field = floatFields[i]
-        self:writeFloat(t[field])
+        self:writeFloat(sourceTable[field])
     end
     for i = 1, #stringFields do
         local field = stringFields[i]
-        self:writeVarLengthString(t[field])
+        self:writeVarLengthString(sourceTable[field])
     end
 end
 

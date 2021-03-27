@@ -35,17 +35,17 @@ local _GlobalState = require("BHElib.scenes.stage.state_of_global")
 
 ---create and return a new stage instance, representing an actual play-through;
 ---the init state parameters should not be modified by the Stage object
----@param stage_init_state GameSceneInitState specifies the initial state of the stage
+---@param scene_init_state GameSceneInitState specifies the initial state of the stage
 ---@param group_init_state SceneGroupInitState a table containing the global initial state of the play-through
 ---@param replay_io_manager ReplayIOManager an object that manages the replay read and write
 ---@return Stage a stage object
-function Stage.__create(group_init_state, stage_init_state, replay_io_manager)
+function Stage.__create(group_init_state, scene_init_state, replay_io_manager)
     local self = GameScene.__create()
 
     self.timer = 0
 
     self.group_init_state = group_init_state
-    self.stage_init_state = stage_init_state
+    self.scene_init_state = scene_init_state
     self.replay_io_manager = replay_io_manager
     self.global_state = _GlobalState(group_init_state.is_replay)
 
@@ -81,19 +81,31 @@ function Stage.getSceneType()
 end
 
 ---------------------------------------------------------------------------------------------------
----instance method
+---setters and getters
+
+---@return boolean if the state is entered in replay mode
+function Stage:isReplay()
+    return self.replay_io_manager:isReplay()
+end
+
+function Stage:getScore()
+    return self.score
+end
+
+---------------------------------------------------------------------------------------------------
+---create scene
 
 ---@return cc.Scene a new cocos scene
 function Stage:createScene()
     ---@type GameSceneInitState
-    local stage_init_state = self.stage_init_state
+    local scene_init_state = self.scene_init_state
     local group_init_state = self.group_init_state
 
     -- set random seed
-    ran:Seed(stage_init_state.random_seed)
+    ran:Seed(scene_init_state.random_seed)
 
     -- init score
-    self.score = stage_init_state.init_score
+    self.score = scene_init_state.init_score
 
     ---TOBEADDED: initialize the player
 
@@ -102,54 +114,14 @@ function Stage:createScene()
     return GameScene.createScene(self)
 end
 
----for game scene transition;
----cleanup before exiting the scene; overwritten in case anything is changed during the scene of
----subclasses
-function Stage:cleanup()
-    GameScene.cleanup(self)
-
-    --TODO:implement multi stage replay
-    self.replay_io_manager:finishCurrentScene(self)
-    self.replay_io_manager:cleanup()
-end
-
----construct the initialization parameters for the next scene
----@return GameSceneInitState, SceneGroupInitState, table init parameters for Stage.__create
-function Stage:constructNextSceneInitState()
-    local GameSceneInitState = require("BHElib.scenes.stage.state_of_scene_init")
-    local cur_init_state = self.stage_init_state
-    local next_init_state = GameSceneInitState()
-
-    next_init_state.random_seed = cur_init_state.random_seed  -- use the same random seed
-    next_init_state.score = self.score
-    ---TOBEADDED: initialize player info as well
-
-    -- update global state
-    self.global_state:completeCurrentScene(cur_init_state)
-    self.global_state:advanceScene()
-
-    return self.group_init_state, next_init_state
-end
-
----@return boolean if the state is entered in replay mode
-function Stage:isReplay()
-    return self.replay_io_manager:isReplay()
-end
-
----ends the play-through and go back to menu
-function Stage:completeSceneGroup()
-    local Menu = require("BHElib.scenes.menu.menu_scene")
-    local SceneTransition = require("BHElib.scenes.scene_transition")
-
-    local task_spec = {"no_task"}
-
-    SceneTransition.transitionTo(self, Menu(task_spec))
-end
+---------------------------------------------------------------------------------------------------
+---scene update
 
 ---override base class method for pause menu
+---update (only) the scene and the objects, but does not check for scene transition
 function Stage:updateSceneAndObjects(dt)
     if _input.isAnyDeviceKeyJustChanged("escape", false, true) and
-        not self.is_paused then
+            not self.is_paused then
 
         self.is_paused = true
         local PauseMenu = require("BHElib.scenes.stage.pause_menu")
@@ -196,5 +168,46 @@ function Stage:updateUserInput()
     self.replay_io_manager:updateUserInput()
 end
 
+---------------------------------------------------------------------------------------------------
+---scene completion
+
+---for game scene transition;
+---cleanup before exiting the scene; overwritten in case anything is changed during the scene of
+---subclasses
+function Stage:cleanup()
+    GameScene.cleanup(self)
+
+    --TODO:implement multi stage replay
+    self.replay_io_manager:finishCurrentScene(self)
+    self.replay_io_manager:cleanup()
+end
+
+---a default transition to the next stage;
+---construct the object for the next scene and go to the next scene
+function Stage:goToNextStage()
+    local GameSceneInitState = require("BHElib.scenes.stage.state_of_scene_init")
+    local cur_init_state = self.scene_init_state
+    local next_init_state = GameSceneInitState()
+
+    next_init_state.random_seed = cur_init_state.random_seed  -- use the same random seed
+    next_init_state.score = self:getScore()  -- set the start score of next stage the same as the current score
+    ---TOBEADDED: initialize player info as well
+
+    -- update global state
+    self.global_state:completeCurrentScene(cur_init_state)
+    self.global_state:advanceScene()
+end
+
+---construct the initialization parameters for the next scene
+---@return GameSceneInitState, SceneGroupInitState, table init parameters for Stage.__create
+function Stage:completeScene()
+    self.replay_io_manager:finishCurrentScene(self)
+end
+
+---ends the play-through and go back to menu
+---will be called on scene transition
+function Stage:completeSceneGroup()
+    self.replay_io_manager:finishCurrentSceneGroup(self)
+end
 
 return Stage

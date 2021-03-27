@@ -1,6 +1,7 @@
 ---------------------------------------------------------------------------------------------------
 ---replay_io_manager.lua
----desc: Manages replay information writing or reading
+---desc: Manages replay information writing or reading; this class is responsible for updating the
+---     input every frame in input_and_replay.lua
 ---modifier:
 ---------------------------------------------------------------------------------------------------
 ---replay file structure
@@ -25,9 +26,24 @@
 ---general replay summary (player signature etc.)
 
 ---------------------------------------------------------------------------------------------------
----replay summaries
+---replay scene/scene group summaries
 
 ---see stage/group init states along with global states for items that need to be saved
+
+---------------------------------------------------------------------------------------------------
+---you can use the following pattern of function calls for this object (does not include update in
+---each frame)
+
+---ReplayIOManager() creates the object
+---...
+---readSummariesFromFile() in replay mode to get stages or scene group information about the replay
+---...
+---startNewScene() at the start of first scene
+---...
+---finishCurrentScene() at the end of the first scene
+---...repeat once for each scene
+---finishCurrentScene() at the end of the final scene
+---finishCurrentSceneGroup() immediately follows
 
 ---------------------------------------------------------------------------------------------------
 
@@ -68,7 +84,35 @@ function ReplayIOManager.__create(is_replay, init_scene_num, replay_path_for_rea
 end
 
 ---------------------------------------------------------------------------------------------------
----instance methods
+---getter
+
+---@return boolean true if the game is currently in replay mode
+function ReplayIOManager:isReplay()
+    return self.is_replay
+end
+
+---------------------------------------------------------------------------------------------------
+---update
+
+---update the recorded input on the current frame
+function ReplayIOManager:updateUserInput()
+    -- update recorded input
+    if self:isReplay() then
+        -- may be better to separate read and write in two function calls
+        -- so this can be written in a more flexible way
+        _input.updateRecordedInputInReplayMode(
+                self.replay_file_reader:getFileReader(),
+                self.replay_file_writer:getFileWriter()
+        )
+    else
+        _input.updateRecordedInputInNonReplayMode(
+                self.replay_file_writer:getFileWriter()
+        )
+    end
+end
+
+---------------------------------------------------------------------------------------------------
+---for transition
 
 ---start a new scene
 function ReplayIOManager:startNewScene()
@@ -87,24 +131,25 @@ function ReplayIOManager:finishCurrentScene(stage)
     self.replay_file_writer:finishCurrentScene(stage)
 end
 
----@return boolean true if the game is currently in replay mode
-function ReplayIOManager:isReplay()
-    return self.is_replay
+---finish writing the entire replay to the replay file
+---@param stage Stage the current stage object
+function ReplayIOManager:finishCurrentSceneGroup(stage)
+    self.replay_file_writer:finishCurrentSceneGroup(stage)
 end
 
----update the recorded input on the current frame
-function ReplayIOManager:updateUserInput()
-    -- update recorded input
+function ReplayIOManager:cleanup()
     if self:isReplay() then
-        _input.updateRecordedInputInReplayMode(
-                self.replay_file_reader:getFileReader(),
-                self.replay_file_writer:getFileWriter()
-        )
-    else
-        _input.updateRecordedInputInNonReplayMode(
-                self.replay_file_writer:getFileWriter()
-        )
+        self.replay_file_reader:close()
     end
+    self.replay_file_writer:close()
+end
+
+---------------------------------------------------------------------------------------------------
+---for replay mode only
+
+---@return table summaries read from replay file
+function ReplayIOManager:readSummariesFromFile()
+    return self.replay_file_reader:readSummariesFromFile()
 end
 
 ---switch the game to non-replay mode
@@ -115,17 +160,11 @@ function ReplayIOManager:changeToNonReplayMode()
     self.replay_file_reader:close()
 end
 
----write the information of the entire replay to the replay file
----@param group_init_state SceneGroupInitState the initial state of the scene group to record
-function ReplayIOManager:writeGeneralReplaySummary(group_init_state)
-
-end
-
-function ReplayIOManager:cleanup()
-    if self:isReplay() then
-        self.replay_file_reader:close()
-    end
-    self.replay_file_writer:close()
+---return if the input of current stage from the replay file has all been read;
+---this function should only be called when the cursor is within replay input or immediately after that
+---@return boolean true if the file reader has finished reading the final input of the current stage
+function ReplayIOManager:isStageEndReached()
+    return self.replay_file_reader:isStageEndReached()
 end
 
 return ReplayIOManager

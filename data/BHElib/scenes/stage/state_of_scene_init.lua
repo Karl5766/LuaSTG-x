@@ -27,4 +27,33 @@ function InitState.__create()
     return self
 end
 
+---------------------------------------------------------------------------------------------------
+---save to/load from file
+
+local _player_init_state_float_fields = {
+    "x",
+    "y",
+    "num_life",
+    "num_bomb",
+}
+local _player_init_state_string_fields = {}
+
+---manages saving the object to file at the current file cursor position
+---@param file_writer SequentialFileWriter the object for writing to file
+function InitState:writeToFile(file_writer)
+    file_writer:writeUInt(self.random_seed)
+    file_writer:writeUInt(self.init_score)
+
+    file_writer:writeFieldsOfTable(self.player_init_state, _player_init_state_float_fields, _player_init_state_string_fields)
+end
+
+---manages reading the object from file at the current file cursor position
+---@param file_reader SequentialFileReader the object for reading from file
+function InitState:readFromFile(file_reader)
+    self.random_seed = file_reader:readUInt()
+    self.init_score = file_reader:readUInt()
+
+    file_reader:readFieldsOfTable(self.player_init_state, _player_init_state_float_fields, _player_init_state_string_fields)
+end
+
 return InitState

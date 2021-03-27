@@ -23,4 +23,16 @@ function InitState.__create()
     return self
 end
 
+---manages saving the object to file at the current file cursor position
+---@param file_writer SequentialFileWriter the object for writing to file
+function InitState:writeToFile(file_writer)
+
+end
+
+---manages reading the object from file at the current file cursor position
+---@param file_reader SequentialFileReader the object for reading from file
+function InitState:readFromFile(file_reader)
+
+end
+
 return InitState

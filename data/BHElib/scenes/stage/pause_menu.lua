@@ -33,7 +33,7 @@ function PauseMenu.__create(stage)
     -- define behavior for selecting each option
     local pause_menu_content = {
         {"Resume", function()
-            task.New(self, function()
+            TaskNew(self, function()
 
                 -- fade out menu page
                 _menu_transition.transitionTo(self.cur_menu, nil, transition_time)
@@ -43,7 +43,7 @@ function PauseMenu.__create(stage)
             end)
         end},
         {"End the Game", function()
-            task.New(self, function()
+            TaskNew(self, function()
                 -- fade out menu page
                 _menu_transition.transitionTo(self.cur_menu, nil, transition_time)
                 task.Wait(transition_time)
@@ -71,7 +71,7 @@ function PauseMenu:update(dt)
     end
 
     -- do tasks added by menu pages
-    task.PropagateDo(self)
+    TaskPropagateDo(self)
 
     return self.continue_menu
 end

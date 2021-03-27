@@ -13,25 +13,20 @@ local _scene_to
 
 ---------------------------------------------------------------------------------------------------
 
----setup scene transition at the end of the frame
+---setup scene transition at the end of the frame;
+---the transition may not be immediately executed, depending on the time transition_callback sets
+---_transition_flag to true
 ---@param scene_from GameScene
 ---@param scene_to GameScene
-function M.transitionTo(scene_from, scene_to)
+---@param transition_callback function(scene_from, scene_to) manages transition effect and waiting
+function M.transitionTo(scene_from, scene_to, transition_callback)
     _scene_from = scene_from
     _scene_to = scene_to
 
     assert(_scene_from, "ERROR: scene transition, current scene not set!")
     assert(_scene_to, "ERROR: scene transition, next scene not set!")
 
-    local type_from = _scene_from:getSceneType()
-    local type_to = _scene_to:getSceneType()
-    if type_from == "stage" and type_to == "stage" then
-        M.stageToStage(_scene_from, _scene_to)
-    elseif type_from == "stage" and type_to == "menu" then
-        M.stageToMenu(_scene_from, _scene_to)
-    elseif type_from == "menu" and type_to == "stage" then
-        M.menuToStage(_scene_from, _scene_to)
-    end
+    transition_callback(scene_from, scene_to)
 end
 
 ---return if transitionTo has been called in this frame
@@ -41,13 +36,30 @@ function M.isNextScenePrepared()
 end
 
 ---------------------------------------------------------------------------------------------------
+---predefined transition callback
+
+function M.instantTransition(scene_from, scene_to)
+    _transition_flag = true
+end
+
+---------------------------------------------------------------------------------------------------
 ---swap frame
 
 local director = cc.Director:getInstance()
 
 ---should be called at the end of the game frame loop
 function M.goToNextScene()
-    _scene_from:cleanup()
+    local type_from = _scene_from:getSceneType()
+    local type_to = _scene_to:getSceneType()
+    if type_from == "stage" and type_to == "stage" then
+        M.stageToStage(_scene_from, _scene_to)
+    elseif type_from == "stage" and type_to == "menu" then
+        M.stageToMenu(_scene_from, _scene_to)
+    elseif type_from == "menu" and type_to == "stage" then
+        M.menuToStage(_scene_from, _scene_to)
+    end
+
+    _scene_from:cleanup()  -- cleanup the scene
 
     -- start the next stage
     local cocos_scene = _scene_to:createScene()
@@ -61,33 +73,28 @@ end
 ---------------------------------------------------------------------------------------------------
 ---go to the next stage
 
-local director = cc.Director:getInstance()
-
----@param scene_from GameScene
----@param scene_to GameScene
+---@param scene_from Stage
+---@param scene_to Stage
 function M.stageToStage(scene_from, scene_to)
-    _transition_flag = true
+    scene_from:completeScene()
 end
 
 ---------------------------------------------------------------------------------------------------
 ---back to menu from stage
 
----@param scene_from GameScene
----@param scene_to GameScene
+---@param scene_from Stage
+---@param scene_to Menu
 function M.stageToMenu(scene_from, scene_to)
-    task.New(scene_from, function()
-        task.Wait(60)
-        _transition_flag = true
-    end)
+    scene_from:completeScene()
+    scene_from:completeSceneGroup()
 end
 
 ---------------------------------------------------------------------------------------------------
 ---enter a stage
 
----@param scene_from GameScene
----@param scene_to GameScene
+---@param scene_from Menu
+---@param scene_to Stage
 function M.menuToStage(scene_from, scene_to)
-    _transition_flag = true
 end
 
 return M

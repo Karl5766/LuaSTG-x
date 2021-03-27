@@ -41,12 +41,33 @@ function ReplayFileWriter:initReplayIndex()
 end
 
 ---------------------------------------------------------------------------------------------------
----instance methods
+---getter
 
 ---@return SequentialFileWriter the replay file writer
 function ReplayFileWriter:getFileWriter()
     return self.file_writer
 end
+
+---------------------------------------------------------------------------------------------------
+---file write
+
+---write the information of the current scene to the replay file
+---@param stage Stage the current stage object
+function ReplayFileWriter:writeSceneSummary(stage)
+    local file_writer = self.file_writer
+    stage.scene_init_state:writeToFile(file_writer)  -- record the initial state of the stage
+    file_writer:writeUInt(stage:getScore())  -- record the finish score
+end
+
+---write the information of the current scene to the replay file
+---@param stage Stage the current stage object
+function ReplayFileWriter:writeSceneGroupSummary(stage)
+    local file_writer = self.file_writer
+    stage.group_init_state:writeToFile(file_writer)  -- record the initial state of the scene group
+end
+
+---------------------------------------------------------------------------------------------------
+---for transition
 
 ---write the recorded file cursor positions to file, along with the number of scenes in total
 function ReplayFileWriter:writeReplayIndexToFile()
@@ -95,10 +116,9 @@ function ReplayFileWriter:startNewScene()
     scene_index_array[current_scene_num] = scene_index
 end
 
----record the cursor position
+---record the cursor position, and write the scene summary
 ---@param stage Stage the current stage object
 function ReplayFileWriter:finishCurrentScene(stage)
-    local file_writer = self.file_writer
     local stream = self.stream
     local scene_index_array = self.replay_index.scene_index_array
     local current_scene_num = self.current_scene_num
@@ -112,10 +132,10 @@ function ReplayFileWriter:finishCurrentScene(stage)
     scene_index.next_index_start = stream:getCursorPosition()
 end
 
----write the information of the current scene to the replay file
+---write the scene group summary
 ---@param stage Stage the current stage object
-function ReplayFileWriter:writeSceneSummary(stage)
-
+function ReplayFileWriter:finishCurrentSceneGroup(stage)
+    self:writeSceneGroupSummary(stage)
 end
 
 function ReplayFileWriter:close()

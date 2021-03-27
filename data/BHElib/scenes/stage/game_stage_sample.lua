@@ -120,7 +120,7 @@ function SampleStage:update(dt)
     if self.timer > 600.5 and self.timer < 601.5 then
         local Menu = require("BHElib.scenes.menu.menu_scene")
         local SceneTransition = require("BHElib.scenes.scene_transition")
-        SceneTransition.transitionTo(self, Menu())
+        SceneTransition.transitionTo(self, Menu(), SceneTransition.instantTransition)
     end
 
     for i = 1, 2 do
