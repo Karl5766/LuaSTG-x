@@ -196,4 +196,14 @@ function SequentialFileWriter:writeBitArray(bit_array)
     end
 end
 
+---write the given string array to the file stream
+---@param str_array table an array of strings to write to the file
+function SequentialFileWriter:writeVarLengthStringArray(str_array)
+    local n = #str_array
+    self:writeUInt(n)
+    for i = 1, n do
+        self:writeVarLengthString(str_array[i])
+    end
+end
+
 return SequentialFileWriter

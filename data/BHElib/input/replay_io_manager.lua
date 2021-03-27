@@ -60,20 +60,19 @@ local ReplayFileWriter = require("BHElib.input.replay_file_writer")
 ---init
 
 ---@param is_replay boolean whether the game starts in replay mode
----@param init_scene_num number the scene that this replay starts from
 ---@param replay_path_for_read string the path to read in replay information; can be nil if not in replay mode
 ---@param replay_path_for_write string the path to write in replay information
-function ReplayIOManager.__create(is_replay, init_scene_num, replay_path_for_read, replay_path_for_write)
+---@param start_stage_for_replay number the starting stage in the replay; can be nil if not in replay mode
+function ReplayIOManager.__create(is_replay, replay_path_for_read, replay_path_for_write, start_stage_for_replay)
     local self = {}
 
     self.is_replay = is_replay
-    self.init_scene_num = init_scene_num  -- TODO: can start at any scene
     self.replay_path_for_read = replay_path_for_read
     self.replay_path_for_write = replay_path_for_write
 
     if is_replay then  -- only read from replay if in replay mode
         local file_stream = FileStream(replay_path_for_read, "rb")
-        self.replay_file_reader = ReplayFileReader(file_stream, 1)
+        self.replay_file_reader = ReplayFileReader(file_stream, start_stage_for_replay)
     end
     do  -- always write to a replay file, recording the input states
         local file_stream = FileStream(replay_path_for_write, "wb")

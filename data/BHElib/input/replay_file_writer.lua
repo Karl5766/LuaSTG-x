@@ -63,7 +63,7 @@ end
 ---@param stage Stage the current stage object
 function ReplayFileWriter:writeSceneGroupSummary(stage)
     local file_writer = self.file_writer
-    stage.group_init_state:writeToFile(file_writer)  -- record the initial state of the scene group
+    stage.scene_group:getSceneGroupInitState():writeToFile(file_writer)  -- record the initial state of the scene group
 end
 
 ---------------------------------------------------------------------------------------------------

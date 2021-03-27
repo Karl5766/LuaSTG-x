@@ -112,33 +112,14 @@ RegisterPrefab(Bullet)
 function SampleStage:update(dt)
     Stage.update(self, dt)
 
-    --if self.timer > 1.5 and self.timer < 2.5 then
-    --    local obj = New(TestClass)
-    --    obj.img = "image:test"
-    --end
-
     if self.timer > 600.5 and self.timer < 601.5 then
-        local Menu = require("BHElib.scenes.menu.menu_scene")
-        local SceneTransition = require("BHElib.scenes.scene_transition")
-        SceneTransition.transitionTo(self, Menu(), SceneTransition.instantTransition)
+        self:completeSceneGroup()
     end
 
     for i = 1, 2 do
         local a = ran:Float(0, 360)
         New(Bullet, 0, 0, 2 * cos(a), 2 * sin(a), Color(255, ran:Int(0, 255), ran:Int(0, 255), 255))
     end
-
-    --if _input.isMouseButtonJustChanged(true, true) then
-    --if _input.isAnyRecordedKeyDown("down") then
-    --    for _=1, 9 do
-    --        if ran:Float(0, 1) > 0 then
-    --            local obj = New(Object)
-    --            obj.img = "image:test"
-    --            obj.vx = ran:Float(-4, 4)
-    --            obj.vy = ran:Float(-4, 4)
-    --        end
-    --    end
-    --end
 end
 
 local _hud_painter = require("BHElib.ui.hud_painter")

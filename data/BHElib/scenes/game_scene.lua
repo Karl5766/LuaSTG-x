@@ -140,9 +140,7 @@ function GameScene:frameUpdate(dt)
     -- it is possible that after transition is set, some new objects are created before the update completes
     -- so wait until the end of frame to replace the current scene with the next scene
     -- also for some reasons the game crashes if ResetPool is put *after* ObjRender in the current frame
-    if SceneTransition.isNextScenePrepared() then
-        SceneTransition.goToNextScene()
-    end
+    SceneTransition.update()  -- if next scene is prepared, swap the scene; otherwise do the usual update
 end
 
 local e = lstg.eventDispatcher

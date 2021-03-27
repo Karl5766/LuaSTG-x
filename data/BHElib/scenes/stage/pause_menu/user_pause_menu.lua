@@ -1,0 +1,51 @@
+---------------------------------------------------------------------------------------------------
+---user_pause_menu.lua
+---author: Karl
+---date: 2021.3.26
+---desc: user pause menu is the pause menu that is created when the player interrupts the game
+---------------------------------------------------------------------------------------------------
+
+local PauseMenu = require("BHElib.scenes.stage.pause_menu.pause_menu")
+
+---@class UserPauseMenu:PauseMenu
+local UserPauseMenu = LuaClass("scenes.stage.UserPauseMenu", PauseMenu)
+
+local _menu_transition = require("BHElib.scenes.menu.menu_page_transition")
+local _scene_transition = require("BHElib.scenes.scene_transition")
+local _menu = require("BHElib.scenes.menu.menu_scene")  -- end the game and go back to main menu
+
+---------------------------------------------------------------------------------------------------
+---cache variables and functions
+
+local TaskNew = task.New
+local TaskPropagateDo = task.PropagateDo
+local SetChild = task.SetChild
+local Insert = table.insert
+
+---------------------------------------------------------------------------------------------------
+
+---@param stage Stage the stage object that created this pause menu
+function UserPauseMenu.__create(stage)
+    local self = PauseMenu.__create(stage)
+
+    local transition_time = 30
+    -- define behavior for selecting each option
+    local pause_menu_content = {
+        {"Resume", function()
+            PauseMenu.resume(self, transition_time)
+        end},
+        {"End the Game", function()
+            PauseMenu.quitToMenu(self, transition_time)
+        end},
+    }
+    local init_select_index = 1
+    local pause_menu_page = New(SimpleTextMenuPage, "TestMenu", pause_menu_content, init_select_index)
+    pause_menu_page.update = SimpleTextMenuPage.frame
+    Insert(self.pause_menu_pages, pause_menu_page)
+
+    self.cur_menu = _menu_transition.transitionTo(nil, pause_menu_page, transition_time)
+
+    return self
+end
+
+return UserPauseMenu

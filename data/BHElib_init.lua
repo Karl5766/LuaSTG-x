@@ -56,9 +56,16 @@ local function BHElibInit()
     require("BHElib.coordinates_and_screen").initGameCoordinates()  -- setup the coordinates
     require("BHElib.input.input_and_replay").init()  -- initialize player input
 
+    -- initialize all stage classes
+    require("BHElib.scenes.stage.game_stage_sample")
+
     -- create menu and return its cocos scene
     local MenuClass = require("BHElib.scenes.menu.menu_scene")
+    local SceneTransition = require("BHElib.scenes.scene_transition")
     local menu = MenuClass({"no_task"})
+
+    SceneTransition.init(menu)  -- initialize scene transition
+
     return menu:createScene()
 end
 

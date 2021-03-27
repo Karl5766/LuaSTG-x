@@ -173,4 +173,15 @@ function SequentialFileReader:readBitArray()
     return bit_array
 end
 
+---read the given string array from the file stream
+---@param str_array table an array of strings to read from the file
+function SequentialFileReader:readVarLengthStringArray()
+    local n = self:readUInt()
+    local str_array = {}
+    for i = 1, n do
+        str_array[i] = self:readVarLengthString()
+    end
+    return str_array
+end
+
 return SequentialFileReader
