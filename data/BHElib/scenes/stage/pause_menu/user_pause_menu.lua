@@ -11,14 +11,11 @@ local PauseMenu = require("BHElib.scenes.stage.pause_menu.pause_menu")
 local UserPauseMenu = LuaClass("scenes.stage.UserPauseMenu", PauseMenu)
 
 local _menu_transition = require("BHElib.scenes.menu.menu_page_transition")
-local _scene_transition = require("BHElib.scenes.scene_transition")
-local _menu = require("BHElib.scenes.menu.menu_scene")  -- end the game and go back to main menu
 
 ---------------------------------------------------------------------------------------------------
 ---cache variables and functions
 
 local TaskNew = task.New
-local TaskPropagateDo = task.PropagateDo
 local SetChild = task.SetChild
 local Insert = table.insert
 
@@ -36,6 +33,9 @@ function UserPauseMenu.__create(stage)
         end},
         {"End the Game", function()
             PauseMenu.quitToMenu(self, transition_time)
+        end},
+        {"Retry", function()
+            PauseMenu.restartSceneGroup(self, transition_time)
         end},
     }
     local init_select_index = 1

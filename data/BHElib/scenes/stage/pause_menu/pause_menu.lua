@@ -17,7 +17,7 @@ local _menu = require("BHElib.scenes.menu.menu_scene")  -- end the game and go b
 ---cache variables and functions
 
 local TaskNew = task.New
-local TaskPropagateDo = task.PropagateDo
+local TaskDo = task.Do
 local TaskWait = task.Wait
 
 ---------------------------------------------------------------------------------------------------
@@ -27,7 +27,7 @@ function PauseMenu.__create(stage)
     local self = {}
 
     self.stage = stage
-    self.continue_menu = true
+    self.continue_menu = true  -- the game will check if this is false each frame; if so, the game resumes
 
     self.pause_menu_pages = {}  -- an array of game objects that represents pause menu pages
     self.cur_menu = nil  -- current menu page
@@ -44,7 +44,7 @@ function PauseMenu:update(dt)
     end
 
     -- do tasks added by menu pages
-    TaskPropagateDo(self)
+    TaskDo(self)
 
     return self.continue_menu
 end

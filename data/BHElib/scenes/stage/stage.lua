@@ -127,13 +127,13 @@ end
 ---------------------------------------------------------------------------------------------------
 ---scene update
 
----override base class method for pause menu
----update (only) the scene and the objects, but does not check for scene transition
-function Stage:updateSceneAndObjects(dt)
+---modify the game loop in GameScene:frameUpdate for pause menu
+function Stage:frameUpdate(dt)
     -- check if pause menu should be created
     if _input.isAnyDeviceKeyJustChanged("escape", false, true) and
             not self.is_paused then
 
+        -- create pause menu
         self.is_paused = true
         local PauseMenu = require("BHElib.scenes.stage.pause_menu.user_pause_menu")
         self.pause_menu = PauseMenu(self)
@@ -147,11 +147,14 @@ function Stage:updateSceneAndObjects(dt)
             self.is_paused = false
         end
     else
-        GameScene.updateSceneAndObjects(self, dt)  -- call base method on non-menu mode
+        self:updateSceneAndObjects(dt)  -- call base method on non-menu mode
     end
+
+    SceneTransition.update()
 end
 
 ---update the stage itself
+---to be overridden in sub-classes
 function Stage:update(dt)
     GameScene.update(self, dt)
     self.timer = self.timer + dt
@@ -169,18 +172,26 @@ function Stage:render()
     )
 end
 
----called in frameFunc()
 ---update recorded device input for replay
 function Stage:updateUserInput()
     -- update device input
     GameScene.updateUserInput(self)
 
     -- update recorded input
-    self.replay_io_manager:updateUserInput()
+    local replay_io_manager = self.replay_io_manager
+    if replay_io_manager:isReplay() and replay_io_manager:isStageEndReached() then
+        -- end of replay reached
+
+        self.is_paused = true
+        local PauseMenu = require("BHElib.scenes.stage.pause_menu.replay_end_menu")
+        self.pause_menu = PauseMenu(self)
+    else
+        replay_io_manager:updateUserInput()
+    end
 end
 
 ---------------------------------------------------------------------------------------------------
----for transition
+---transition implementation
 
 ---for game scene transition;
 ---cleanup before exiting the scene; overwritten in case anything is changed during the scene of
@@ -242,6 +253,10 @@ function Stage:createNextGameScene()
         error("Error: Invalid stage transition type!")
     end
 end
+
+---------------------------------------------------------------------------------------------------
+---direct transitions
+---these transitions can be called almost anywhere through the current stage object
 
 ---construct the initialization parameters for the next scene
 function Stage:completeScene()

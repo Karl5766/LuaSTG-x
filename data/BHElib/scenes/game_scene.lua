@@ -39,7 +39,7 @@ function GameScene:createScene()
     -- schedule update so this function is executed every frame after the scene is pushed to
     -- cc director
     scene:scheduleUpdateWithPriorityLua(function(dt)
-        self:updateBetweenRender(dt)
+        self:doUpdatesBetweenRender(dt)
 
         self:gameRender()
     end, 0)
@@ -150,7 +150,7 @@ local _process_one_task = async.processOneTask
 ---
 ---@~english Will be invoked every frame to process all frame logic. Game will exit if it returns `true`.
 ---
-function GameScene:updateBetweenRender(dt)
+function GameScene:doUpdatesBetweenRender(dt)
     profiler.tic('FrameFunc')
     if _raw_input.isAnyDeviceKeyDown("snapshot") and setting.allowsnapshot then
         Screenshot()
