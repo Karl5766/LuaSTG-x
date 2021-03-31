@@ -33,7 +33,21 @@ local TaskNew = task.New
 local TaskWait = task.Wait
 
 ---------------------------------------------------------------------------------------------------
----override/virtual
+---class methods
+
+---temporary used for setting the game parameters; must be called before the player select start game
+function Menu.setStartGameInitState(group_init_state)
+    Menu.default_group_init_state = group_init_state
+end
+
+---temporary used for setting the game parameters; must be called before the player select start replay
+function Menu.setReplayFilePath(replay_path_for_read, replay_path_for_write)
+    Menu.replay_path_for_read = replay_path_for_read
+    Menu.replay_path_for_write = replay_path_for_write
+end
+
+---------------------------------------------------------------------------------------------------
+---init
 
 ---create and return a new Menu instance
 ---@param current_task table specifies a task that the menu should carry out; format {string, table}
@@ -83,53 +97,54 @@ function Menu:createScene()
     return GameScene.createScene(self)
 end
 
+---------------------------------------------------------------------------------------------------
+---instance methods
+
 ---construct the next stage
 ---@return Stage an object of Stage class
 function Menu:createNextGameScene()
     -- for all stages
     local is_replay = self.is_replay
 
-    local replay_path_for_write = "replay/current"
-    local replay_path_for_read = "replay/read"
     local start_stage_in_replay = 1
 
     -- create init states for stage and the scene group
-    local next_init_state = nil
-    local next_group_init_state = nil
+    local scene_init_state = nil
+    local group_init_state = nil
     if is_replay then
+
         -- read from file
-        local file_stream = FileStream(replay_path_for_read, "rb")
+        local file_stream = FileStream(Menu.replay_path_for_read, "rb")
         local replay_file_reader = ReplayFileReader(file_stream, start_stage_in_replay)
         local replay_summaries = replay_file_reader:readSummariesFromFile()
 
-        next_group_init_state = replay_summaries.scene_group_summary.group_init_state
+        group_init_state = replay_summaries.scene_group_summary.group_init_state
         local first_scene_summary = replay_summaries.scene_summary_array[1]
-        next_init_state = first_scene_summary.scene_init_state
+        scene_init_state = first_scene_summary.scene_init_state
     else
         -- use default settings
-        next_group_init_state = SceneGroupInitState()
-        next_init_state = SceneInitState()
-
-        next_group_init_state.scene_id_array = {"sample_stage"}
+        group_init_state = Menu.default_group_init_state
+        scene_init_state = SceneInitState()
     end
     -- modify status that is not the same as when the replay is recorded
-    next_group_init_state.is_replay = is_replay
-    next_group_init_state.replay_path_for_read = replay_path_for_read
-    next_group_init_state.replay_path_for_write = replay_path_for_write
-    next_group_init_state.start_stage_in_replay = 1
+    group_init_state.is_replay = is_replay
+    group_init_state.replay_path_for_read = Menu.replay_path_for_read
+    group_init_state.replay_path_for_write = Menu.replay_path_for_write
+    group_init_state.start_stage_in_replay = start_stage_in_replay
 
     local SceneGroup = require("BHElib.scenes.stage.scene_group")
-    local next_scene_group = SceneGroup(next_group_init_state)
+    local next_scene_group = SceneGroup(group_init_state)
 
-    -- find the first stage class
+    -- find the stage class of the first stage
     local Stage = require("BHElib.scenes.stage.stage")
     local stage_id = next_scene_group:getCurrentSceneId()
     local StageClass = Stage.findStageClassById(stage_id)
 
-    local next_stage = StageClass(next_init_state, next_scene_group)
+    local next_stage = StageClass(scene_init_state, next_scene_group)
     return next_stage
 end
 
+---@return string name of the scene type
 function Menu:getSceneType()
     return "menu"
 end
@@ -137,12 +152,13 @@ end
 function Menu:cleanup()
 end
 
+---@param dt number elapsed time
 function Menu:update(dt)
     GameScene.update(self, dt)
 end
 
 local hud_painter = require("BHElib.ui.hud_painter")
-function Menu.render(self)
+function Menu:render()
     GameScene.render(self)
     hud_painter.drawHudBackground(
             "image:menu_hud_background",
