@@ -13,7 +13,7 @@ local function SetupStartGameInitState()
 
     -- create init states for stage and the scene group
     local group_init_state = SceneGroupInitState()
-    group_init_state.scene_id_array = {"sample_stage"}  -- start at sample_stage
+    group_init_state.scene_id_array = {"stage.SampleStage"}  -- start at sample_stage
     group_init_state.is_replay = is_replay
 
     Menu.setStartGameInitState(group_init_state)

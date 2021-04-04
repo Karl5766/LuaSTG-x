@@ -54,7 +54,7 @@ function SceneGroup:getCurrentSceneNum()
     return self.current_scene_num
 end
 
----@return string the current stage id
+---@return string the current stage class id
 function SceneGroup:getCurrentSceneId()
     return self.group_init_state.scene_id_array[self.current_scene_num]
 end

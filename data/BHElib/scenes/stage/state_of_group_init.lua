@@ -17,7 +17,7 @@ function InitState.__create()
     local self = {}
 
     self.player_class_id = nil
-    self.scene_id_array = nil  -- an array of string ids of all the stages in the scene group
+    self.scene_id_array = nil  -- an array of string ids of all the stage classes in the scene group
 
     self.is_replay = nil
     self.replay_path_for_write = nil

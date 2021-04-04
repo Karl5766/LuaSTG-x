@@ -136,9 +136,8 @@ function Menu:createNextGameScene()
     local next_scene_group = SceneGroup(group_init_state)
 
     -- find the stage class of the first stage
-    local Stage = require("BHElib.scenes.stage.stage")
     local stage_id = next_scene_group:getCurrentSceneId()
-    local StageClass = Stage.findStageClassById(stage_id)
+    local StageClass = GetLuaClassById(stage_id)
 
     local next_stage = StageClass(scene_init_state, next_scene_group)
     return next_stage

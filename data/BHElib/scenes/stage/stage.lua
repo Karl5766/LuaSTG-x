@@ -64,30 +64,8 @@ function Stage.__create(scene_init_state, scene_group)
     return self
 end
 
----@return table an array of all stages created by Stage.new()
-function Stage.getAll()
-    return _all_stages
-end
-
----register the stage for look up
----@param stage Stage a class derived from Stage to register
-function Stage.registerStageClass(stage)
-    table.insert(_all_stages, stage)
-end
-
----@param id string the id to look for
----@return Stage a class derived from Stage with the given id; if not found, return nil
-function Stage.findStageClassById(id)
-    for i = 1, #_all_stages do
-        if _all_stages[i]:getSid() == id then
-            return _all_stages[i]
-        end
-    end
-    error("Error: stage class is not found!")
-end
-
 ---@return string scene type
-function Stage.getSceneType()
+function Stage:getSceneType()
     return "stage"
 end
 
@@ -230,7 +208,7 @@ function Stage:createNextGameScene()
         scene_group:completeCurrentScene(cur_init_state)
         scene_group:advanceScene()
         local stage_id = self.scene_group:getCurrentSceneId()
-        local StageClass = Stage.findStageClassById(stage_id)
+        local StageClass = GetLuaClassById(stage_id)
 
         -- pass over the scene group object and create the next stage
         local next_stage = StageClass(next_init_state, scene_group)
@@ -245,7 +223,7 @@ function Stage:createNextGameScene()
 
         -- find the first stage class
         local stage_id = next_scene_group:getCurrentSceneId()
-        local StageClass = Stage.findStageClassById(stage_id)
+        local StageClass = GetLuaClassById(stage_id)
 
         local next_stage = StageClass(next_init_state, next_scene_group)
         return next_stage

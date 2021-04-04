@@ -21,6 +21,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
 ]]
+--- modifier:
+---     Karl, 2021.4.4, added LuaClass() and GetLuaClass() as a wrapper of class()
+---     The motivation of this change is from the need to remember a stage class/ player class in a replay
+---     where classes can not be directly written to files, and need to be referenced as strings
 
 function printLog(tag, fmt, ...)
     local t = {
@@ -257,20 +261,6 @@ function class(classname, ...)
         setmetatableindex(instance, cls)
         instance.class = cls
         instance['.classname'] = classname
-        -- for super is native class
-        --[[
-            if not instance.super then
-                instance.super = {}
-                setmetatable(instance.super, {
-                    __index = function(_, k)
-                        local log = cls[k]
-                        cls[k] = nil
-                        local ret = instance[k]
-                        cls[k] = log
-                        return ret
-                    end
-                })
-            end]]
 
         instance:ctor(...)
         return instance
@@ -282,62 +272,31 @@ function class(classname, ...)
     return cls
 end
 
+---a table for referencing classes with string ids
+local all_lua_classes = {}
+
+---return the lua class with the given unique id
+---@param class_id string id of the class to be found
+---@return table the class to be found; if no class is found, return nil
+function GetLuaClassById(class_id)
+    return all_lua_classes[class_id]
+end
+
 ---create a lua class of the given name; zero or more super classes may be specified
 ---objects of the new class will have [".classname"] set as the given classname.
 ---
 ---the inherited constructor .__create can be overwritten;
 ---then use the new(...) method to create objects, where new(...) call __create(...) automatically.
----@param classname string name of the new class to be created
+---@param class_id string id of the new class to be created
 ---@param ... parameters specifies an optional list of super classes; super classes must be of type table
-function LuaClass(classname, ...)
-    return class(classname, ...)
+function LuaClass(class_id, ...)
+    local new_class = class(class_id, ...)
+    if all_lua_classes[class_id] then
+        error("class "..class_id.." already exists!")
+    end
+    all_lua_classes[class_id] = new_class
+    return new_class
 end
-
--- LuaClass can be equivalently written as follows, as it assumes only pure lua classes are involved
---function LuaClass(classname, ...)
---    local cls = { __cname = classname }
---
---    local supers = { ... }
---    for _, super in ipairs(supers) do
---        -- super is pure lua class
---        cls.__supers = cls.__supers or {}
---        cls.__supers[#cls.__supers + 1] = super
---        if not cls.super then
---            -- set first super pure lua class as class.super
---            cls.super = super
---        end
---    end
---
---    cls.__index = cls
---
---    local __call = function(...)
---        local instance = cls.__create(...)
---
---        setmetatableindex(instance, cls)
---        instance.class = cls
---        instance['.classname'] = classname
---
---        return instance
---    end
---
---    if not cls.__supers or #cls.__supers == 1 then
---        setmetatable(cls, { __index = cls.super, __call = __call })
---    else
---        setmetatable(cls, {
---            __index = function(_, key)
---                local supers = cls.__supers
---                for i = 1, #supers do
---                    local super = supers[i]
---                    if super[key] then
---                        return super[key]
---                    end
---                end
---            end,
---            __call  = __call })
---    end
---
---    return cls
---end
 
 function getclassname(obj)
     local t = type(obj)

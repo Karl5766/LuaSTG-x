@@ -7,8 +7,7 @@
 local Stage = require("BHElib.scenes.stage.stage")
 
 ---@class SampleStage:Stage
-local SampleStage = LuaClass("scenes.SampleStage", Stage)
-Stage.registerStageClass(SampleStage)
+local SampleStage = LuaClass("stage.SampleStage", Stage)
 
 ---------------------------------------------------------------------------------------------------
 ---override/virtual
