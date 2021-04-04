@@ -258,7 +258,7 @@ end
 ---direct transitions
 ---these transitions can be called almost anywhere through the current stage object
 
----construct the initialization parameters for the next scene
+---go to the next scene
 function Stage:completeScene()
     self.transition_type = Stage.GO_TO_NEXT_STAGE
     SceneTransition.transitionTo(self, SceneTransition.instantTransition)
