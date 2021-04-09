@@ -8,6 +8,7 @@ local Stage = require("BHElib.scenes.stage.stage")
 
 ---@class SampleStage:Stage
 local SampleStage = LuaClass("stage.SampleStage", Stage)
+local Prefab = require("BHElib.prefab")
 
 ---------------------------------------------------------------------------------------------------
 ---override/virtual
@@ -59,17 +60,13 @@ function SampleStage:getDisplayName()
     return "sample stage"
 end
 
-function SampleStage:getSid()
-    return "sample_stage"
-end
-
 function SampleStage:cleanup()
     Stage.cleanup(self)
 end
 
 local _input = require("BHElib.input.input_and_replay")
 
-local TestClass = MakePrefab(Object)
+local TestClass = Prefab.New(Prefab.Object)
 TestClass.frame = task.Do
 function TestClass:init()
     local scr = require("BHElib.coordinates_and_screen")
@@ -83,9 +80,8 @@ function TestClass:init()
         end
     end)
 end
-RegisterPrefab(TestClass)
 
-local Bullet = MakePrefab(Object)
+local Bullet = Prefab.New(Prefab.Object)
 Bullet.frame = task.Do
 function Bullet:init(x, y, vx, vy, color)
     self.x = x
@@ -106,13 +102,12 @@ Bullet.render = DefaultRenderFunc
 --    --self.resImg:render(self.x, self.y, self.rot, self.hscale * factor, self.vscale * factor, 0.5)
 --    DefaultRenderFunc(self)
 --end
-RegisterPrefab(Bullet)
 
 function SampleStage:update(dt)
     Stage.update(self, dt)
 
     if self.timer > 600.5 and self.timer < 601.5 then
-        self:completeSceneGroup()
+        self:goToNextScene()
     end
 
     for i = 1, 2 do

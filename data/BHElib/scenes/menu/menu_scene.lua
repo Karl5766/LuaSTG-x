@@ -16,9 +16,9 @@ require("BHElib.scenes.menu.menu_page")
 local SceneTransition = require("BHElib.scenes.scene_transition")
 local _menu_transition = require("BHElib.scenes.menu.menu_page_transition")
 local SceneInitState = require("BHElib.scenes.stage.state_of_scene_init")
-local SceneGroupInitState = require("BHElib.scenes.stage.state_of_group_init")
 local ReplayFileReader = require("BHElib.input.replay_file_reader")
 local FileStream = require("util.file_stream")
+local Prefab = require("BHElib.prefab")
 
 ---------------------------------------------------------------------------------------------------
 ---task spec format
@@ -91,7 +91,7 @@ function Menu:createScene()
             end)
         end},
     }
-    local main_menu = New(SimpleTextMenuPage, "TestMenu", main_menu_content, 1)
+    local main_menu = New(Prefab.SimpleTextMenuPage, "TestMenu", main_menu_content, 1)
     self.cur_menu = _menu_transition.transitionTo(nil, main_menu, 30)
 
     return GameScene.createScene(self)

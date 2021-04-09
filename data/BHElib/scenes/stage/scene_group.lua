@@ -64,6 +64,11 @@ function SceneGroup:getCompletedSceneNum()
     return self.completed_scene
 end
 
+---@return boolean true if the current stage is the final stage in the stage array
+function SceneGroup:isFinalScene()
+    return self.current_scene_num == #self.group_init_state.scene_id_array
+end
+
 ---@return ReplayIOManager an object that manages the replay read and write
 function SceneGroup:getReplayIOManager()
     return self.replay_io_manager

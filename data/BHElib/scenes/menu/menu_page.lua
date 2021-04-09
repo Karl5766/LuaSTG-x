@@ -32,6 +32,7 @@ local _menu_const = {
 }
 
 local _input = require("BHElib.input.input_and_replay")
+local Prefab = require("BHElib.prefab")
 
 -------------------------------------------------------------------------------------------------
 ---cache functions
@@ -42,7 +43,8 @@ local _insert = table.insert
 ---base object class
 
 ---@class MenuPage:Object
-MenuPage = MakePrefab(Object)
+Prefab.MenuPage = Prefab.New(Prefab.Object)
+local MenuPage = Prefab.MenuPage
 
 ---@param title_text string display title
 ---@param option_callback table an array of selection callbacks for each option
@@ -80,12 +82,13 @@ function MenuPage:playMoveOptionSound()
     -- PlaySound("sound:ok00", 0.3)
 end
 
-RegisterPrefab(MenuPage)
+Prefab.Register(MenuPage)
 
 -------------------------------------------------------------------------------------------------
 
 ---@class SimpleTextMenuPage:MenuPage
-SimpleTextMenuPage = MakePrefab(MenuPage)
+Prefab.SimpleTextMenuPage = Prefab.New(MenuPage)
+local SimpleTextMenuPage = Prefab.SimpleTextMenuPage
 
 ---@param title string display title
 ---@param num_options number number of options in the menu
@@ -180,4 +183,4 @@ function SimpleTextMenuPage:render()
     )
 end
 
-RegisterPrefab(SimpleTextMenuPage)
+Prefab.Register(SimpleTextMenuPage)

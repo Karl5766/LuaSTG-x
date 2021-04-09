@@ -11,6 +11,7 @@ local PauseMenu = require("BHElib.scenes.stage.pause_menu.pause_menu")
 local ReplayEndMenu = LuaClass("scenes.stage.ReplayEndMenu", PauseMenu)
 
 local _menu_transition = require("BHElib.scenes.menu.menu_page_transition")
+local Prefab = require("BHElib.prefab")
 
 ---------------------------------------------------------------------------------------------------
 ---cache variables and functions
@@ -36,8 +37,8 @@ function ReplayEndMenu.__create(stage)
         end},
     }
     local init_select_index = 1
-    local pause_menu_page = New(SimpleTextMenuPage, "TestMenu", pause_menu_content, init_select_index)
-    pause_menu_page.update = SimpleTextMenuPage.frame
+    local pause_menu_page = New(Prefab.SimpleTextMenuPage, "TestMenu", pause_menu_content, init_select_index)
+    pause_menu_page.update = Prefab.SimpleTextMenuPage.frame
     Insert(self.pause_menu_pages, pause_menu_page)
 
     self.cur_menu = _menu_transition.transitionTo(nil, pause_menu_page, transition_time)

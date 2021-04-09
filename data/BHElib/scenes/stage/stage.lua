@@ -33,10 +33,6 @@ Stage.RESTART_SCENE_GROUP = 3
 ---------------------------------------------------------------------------------------------------
 ---virtual methods
 
----return the stage id
----@return string unique string that identifies the stage
----virtual Stage:getSid()
-
 ---virtual Stage:getDisplayName()
 
 ---------------------------------------------------------------------------------------------------
@@ -236,8 +232,8 @@ end
 ---direct transitions
 ---these transitions can be called almost anywhere through the current stage object
 
----go to the next scene
-function Stage:completeScene()
+---go to the next stage
+function Stage:goToNextStage()
     self.transition_type = Stage.GO_TO_NEXT_STAGE
     SceneTransition.transitionTo(self, SceneTransition.instantTransition)
 end
@@ -252,6 +248,15 @@ end
 function Stage:restartSceneGroup()
     self.transition_type = Stage.RESTART_SCENE_GROUP
     SceneTransition.transitionTo(self, SceneTransition.instantTransition)
+end
+
+---go to next stage or end play-through depending on the progress in the scene group
+function Stage:goToNextScene()
+    if self.scene_group:isFinalScene() then
+        self:completeSceneGroup()
+    else
+        self:goToNextStage()
+    end
 end
 
 return Stage
