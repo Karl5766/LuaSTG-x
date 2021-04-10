@@ -58,7 +58,7 @@ function Prefab.New(callback_base, attribute_base)
     local new_prefab = { 0, 0, 0, 0, 0, 0 }
     if attribute_base then
         for key, value in pairs(attribute_base) do
-            if type(value) ~= "number" then
+            if type(key) ~= "number" then
                 new_prefab[key] = value
             end
         end
@@ -84,7 +84,7 @@ local RawNew = lstg.RawNew
 ---@param base object
 ---@param define table
 ---@return object
-function xclass(base)
+function Prefab.NewX(base)
 
     local ret = Prefab.New(base, base)
     ret['.x'] = true
@@ -93,9 +93,11 @@ function xclass(base)
     end
     local methods
     local function get_methods()
+        methods = {}
         for k, v in pairs(ret) do
             if type(v) == 'function' and type(k) == 'string' and not callbacks_lookup_table[k] then
                 methods[k] = v
+                print(k)
             end
         end
     end
@@ -112,6 +114,7 @@ function xclass(base)
     end }
     return setmetatable(ret, mt)
 end
+xclass = Prefab.NewX
 
 ---------------------------------------------------------------------------------------------------
 

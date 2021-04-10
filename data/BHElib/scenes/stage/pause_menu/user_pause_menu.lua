@@ -40,7 +40,7 @@ function UserPauseMenu.__create(stage)
         end},
     }
     local init_select_index = 1
-    local pause_menu_page = New(Prefab.SimpleTextMenuPage, "TestMenu", pause_menu_content, init_select_index)
+    local pause_menu_page = Prefab.SimpleTextMenuPage("TestMenu", pause_menu_content, init_select_index)
     pause_menu_page.update = Prefab.SimpleTextMenuPage.frame
     Insert(self.pause_menu_pages, pause_menu_page)
 

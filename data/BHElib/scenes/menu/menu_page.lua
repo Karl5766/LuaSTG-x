@@ -37,13 +37,13 @@ local Prefab = require("BHElib.prefab")
 -------------------------------------------------------------------------------------------------
 ---cache functions
 
-local _insert = table.insert
+local Insert = table.insert
 
 -------------------------------------------------------------------------------------------------
 ---base object class
 
 ---@class MenuPage:Object
-Prefab.MenuPage = Prefab.New(Prefab.Object)
+Prefab.MenuPage = Prefab.NewX(Prefab.Object)
 local MenuPage = Prefab.MenuPage
 
 ---@param title_text string display title
@@ -61,11 +61,6 @@ function MenuPage:init(title_text, option_callback, init_select_index)
     self.num_options = #option_callback  -- number of options in the menu
     self.option_callback = option_callback
     self.select_index = init_select_index
-
-    -- manually inherit methods
-    self.setAcceptInput = MenuPage.setAcceptInput
-    self.playSelectSound = MenuPage.playSelectSound
-    self.playMoveOptionSound = MenuPage.playMoveOptionSound
 end
 
 ---freeze or unfreeze user input
@@ -87,7 +82,7 @@ Prefab.Register(MenuPage)
 -------------------------------------------------------------------------------------------------
 
 ---@class SimpleTextMenuPage:MenuPage
-Prefab.SimpleTextMenuPage = Prefab.New(MenuPage)
+Prefab.SimpleTextMenuPage = Prefab.NewX(MenuPage)
 local SimpleTextMenuPage = Prefab.SimpleTextMenuPage
 
 ---@param title string display title
@@ -97,18 +92,14 @@ function SimpleTextMenuPage:init(title_text, option_content, init_select_index)
     local text_array = {}
     local callback_array = {}
     for i = 1, #option_content do
-        _insert(text_array, option_content[i][1])
-        _insert(callback_array, option_content[i][2])
+        Insert(text_array, option_content[i][1])
+        Insert(callback_array, option_content[i][2])
     end
 
     self.option_text_array = text_array
     self.shake_timer = 0
     self.blink_timer = 0
     MenuPage.init(self, title_text, callback_array, init_select_index)  -- call base class initializer
-
-    -- manually inherit methods
-    self.processUserInput = SimpleTextMenuPage.processUserInput
-    self.moveOption = SimpleTextMenuPage.moveOption
 end
 
 ---move the position of the selected option index by the given difference

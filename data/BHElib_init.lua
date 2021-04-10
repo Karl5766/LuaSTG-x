@@ -6,8 +6,6 @@
 ---desc: Includes files that implements the shmup game mechanics of luastg engine
 ---------------------------------------------------------------------------------------------------
 
-local M = {}
-
 local _include_list = {
     "BHElib.const",  -- defines some constant values
     "BHElib.status",

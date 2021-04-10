@@ -91,7 +91,7 @@ function Menu:createScene()
             end)
         end},
     }
-    local main_menu = New(Prefab.SimpleTextMenuPage, "TestMenu", main_menu_content, 1)
+    local main_menu = Prefab.SimpleTextMenuPage("TestMenu", main_menu_content, 1)
     self.cur_menu = _menu_transition.transitionTo(nil, main_menu, 30)
 
     return GameScene.createScene(self)

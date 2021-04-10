@@ -66,22 +66,7 @@ end
 
 local _input = require("BHElib.input.input_and_replay")
 
-local TestClass = Prefab.New(Prefab.Object)
-TestClass.frame = task.Do
-function TestClass:init()
-    local scr = require("BHElib.coordinates_and_screen")
-    task.New(self, function()
-        task.Wait(60)
-        for i = 1, 10000000 do
-            local w, h = 192 + 96 * sin(i), 224 + 112 * cos(i)
-            scr.setPlayFieldBoundary(-w, w, -h, h)
-            scr.setOutOfBoundDeletionBoundary(-w - 30, w + 30, -h - 30, h + 30)
-            task.Wait(1)
-        end
-    end)
-end
-
-local Bullet = Prefab.New(Prefab.Object)
+local Bullet = Prefab.NewX(Prefab.Object)
 Bullet.frame = task.Do
 function Bullet:init(x, y, vx, vy, color)
     self.x = x
