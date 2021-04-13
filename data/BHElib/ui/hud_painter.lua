@@ -106,7 +106,7 @@ function M.draw(img_background, background_scale, font_profile, img_border)
     RenderPerformanceProfile(font_profile)
 end
 
-local _input = require("BHElib.input.input_and_replay")
+local _input = require("BHElib.input.input_and_recording")
 local _coordinates = require("BHElib.coordinates_and_screen")
 
 function M.drawKeys()
@@ -133,7 +133,7 @@ function M.drawKeys()
         local offset = offsets[i]
         local key_name = function_keys[i]
         local x, y = offset[1] + normal_pos[1], offset[2] + normal_pos[2]
-        if _input.isAnyDeviceKeyDown(key_name) then
+        if _input:isAnyDeviceKeyDown(key_name) then
             Render("image:button_pressed", x, y, 0, 1, 1)
         else
             Render("image:button_normal", x, y, 0, 1, 1)
@@ -151,7 +151,7 @@ function M.drawKeys()
         local offset = offsets[i]
         local key_name = function_keys[i]
         local x, y = offset[1] + replay_pos[1], offset[2] + replay_pos[2]
-        if _input.isAnyRecordedKeyDown(key_name) then
+        if _input:isAnyRecordedKeyDown(key_name) then
             Render("image:button_pressed", x, y, 0, 1, 1)
         else
             Render("image:button_normal", x, y, 0, 1, 1)
@@ -167,22 +167,22 @@ function M.drawKeys()
 
     --mouse text
     do
-        local x, y = _input.getMousePosition()
+        local x, y = _input:getMousePosition()
         local offx, offy = _coordinates.getUIOriginInRes()
         local sx, sy = _coordinates.getUIScale()
         x, y = x - offx / sx, y - offy / sy
-        if _input.isMousePressed() then
+        if _input:isMousePressed() then
             RenderTTF("font:menu", "mouse pressed", x, x, y, y, comment_color, "left")
         else
             RenderTTF("font:menu", "mouse", x, x, y, y, comment_color, "left")
         end
     end
     do
-        local x, y = _input.getRecordedMousePosition()
+        local x, y = _input:getRecordedMousePosition()
         local offx, offy = _coordinates.getUIOriginInRes()
         local sx, sy = _coordinates.getUIScale()
         x, y = x - offx / sx, y - offy / sy - 20
-        if _input.isRecordedMousePressed() then
+        if _input:isRecordedMousePressed() then
             RenderTTF("font:menu", "mouse pressed (recorded)", x, x, y, y, comment_color, "left")
         else
             RenderTTF("font:menu", "mouse (recorded)", x, x, y, y, comment_color, "left")

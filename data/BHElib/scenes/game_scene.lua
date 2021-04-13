@@ -10,7 +10,7 @@
 local GameScene = LuaClass("scenes.GameScene")
 
 local _raw_input = require("setting.key_mapping")
-local _input = require("BHElib.input.input_and_replay")
+local _input = require("BHElib.input.input_and_recording")
 local Prefab = require("BHElib.prefab")
 
 ---------------------------------------------------------------------------------------------------
@@ -88,7 +88,7 @@ end
 
 ---dispatch "onUserInputUpdate" event; overridden in Stage class for replay input update
 function GameScene:updateUserInput()
-    _input.updateInputSnapshot()  -- only update non-replay input
+    _input:updateInputSnapshot()  -- only update non-replay input
     lstg.eventDispatcher:dispatchEvent("onUserInputUpdate")
 end
 
@@ -153,7 +153,7 @@ local _process_one_task = async.processOneTask
 ---
 function GameScene:doUpdatesBetweenRender(dt)
     profiler.tic('FrameFunc')
-    if _raw_input.isAnyDeviceKeyDown("snapshot") and setting.allowsnapshot then
+    if _raw_input:isAnyDeviceKeyDown("snapshot") and setting.allowsnapshot then
         Screenshot()
     end
     _process_one_task()  -- async load of resources etc.

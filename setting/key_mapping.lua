@@ -42,12 +42,12 @@ local _IsDeviceKeyDown
 
 ---get a device's label by its id
 ---@param device_id number id of the device
-function M.getDeviceByID(device_id)
+function M:getDeviceByID(device_id)
     return _devices[device_id]
 end
 
 ---@return number number of keyboard/controller devices connected
-function M.getDeviceCount()
+function M:getDeviceCount()
     local n = 0
     for _, _ in pairs(_devices) do
         n = n + 1
@@ -57,7 +57,7 @@ end
 
 ---get an array of currently active device id
 ---@return table an array of all device id
-function M.getDeviceIDArray()
+function M:getDeviceIDArray()
     local result = {}
     for device_id, _ in pairs(_devices) do
         table.insert(result, device_id)
@@ -69,22 +69,22 @@ end
 ---setters
 
 ---@param function_key_name string name of the function key
-function M.setKeyboardKeyMapping(function_key_name, keyboard_keycode)
+function M:setKeyboardKeyMapping(function_key_name, keyboard_keycode)
     _keyboard_keymap[function_key_name] = keyboard_keycode
 end
 
 ---@param function_key_name string name of the function key
-function M.rememberKeyboardKeyMapping(function_key_name, keyboard_keycode)
+function M:rememberKeyboardKeyMapping(function_key_name, keyboard_keycode)
     _keyboard_setting[function_key_name] = keyboard_keycode
 end
 
 ---@param function_key_name string name of the function key
-function M.setControllerGameKey(function_key_name, controller_key)
+function M:setControllerGameKey(function_key_name, controller_key)
     _controller_keymap[function_key_name] = controller_key
 end
 
 ---@param function_key_name string name of the function key
-function M.rememberControllerGameKey(function_key_name, controller_key)
+function M:rememberControllerGameKey(function_key_name, controller_key)
     _controller_setting[function_key_name] = controller_key
 end
 
@@ -94,7 +94,7 @@ end
 ---raise an error if the given key does not have a corresponding mapping
 ---@param function_key_name string name of the function key
 ---@return boolean if the corresponding keyboard key is down
-function M.isKeyboardKeyDown(function_key_name)
+function M:isKeyboardKeyDown(function_key_name)
 
     local keyboard_keycode = _keyboard_keymap[function_key_name]
     assert(keyboard_keycode, "Error: Keyboard mapping for \""..function_key_name.."\" is nil!")
@@ -121,10 +121,10 @@ _IsControllerKeyDown = M.isControllerKeyDown
 ---@param device_index number device index in the device table
 ---@param function_key_name string name of the function key
 ---@return boolean if the key is down; guaranteed not nil
-function M.isDeviceKeyDown(device_index, function_key_name)
+function M:isDeviceKeyDown(device_index, function_key_name)
     local device_label = _devices[device_index]
     if device_label.device_type == "keyboard" then
-        return _IsKeyboardKeyDown(function_key_name) == true
+        return _IsKeyboardKeyDown(self, function_key_name) == true
     elseif device_label.device_type == "controller" then
         return _IsControllerKeyDown(device_label.device, function_key_name) == true
     else
@@ -136,9 +136,9 @@ _IsDeviceKeyDown = M.isDeviceKeyDown
 ---return if there exists a device among active devices, and on that device, the given key is pressed
 ---@param function_key_name string name of the function key
 ---@return boolean true if any device presses the input; otherwise return false
-function M.isAnyDeviceKeyDown(function_key_name)
+function M:isAnyDeviceKeyDown(function_key_name)
     for i, _ in pairs(_devices) do
-        if _IsDeviceKeyDown(i, function_key_name) then
+        if _IsDeviceKeyDown(self, i, function_key_name) then
             return true
         end
     end
@@ -152,7 +152,7 @@ local _glv = cc.Director:getInstance():getOpenGLView()
 ---@~english Get mouse position in screen coordinates starts from the bottom left of the window.
 ---
 ---@return number,number
-function M.getMousePosition()
+function M:getMousePosition()
     local res = _glv:getDesignResolutionSize()
     local rect = _glv:getViewPortRect()
     local x, y = _GetMousePosition()
@@ -166,7 +166,7 @@ function M.getMousePosition()
 end
 
 ---@return boolean, boolean, boolean button1, button2, button3
-function M.getMouseState()
+function M:getMouseState()
     local b1 = GetMouseState(1)
     local b2 = GetMouseState(2)
     local b3 = GetMouseState(3)
@@ -184,7 +184,7 @@ end
 ---@param device_label1 DeviceLabel
 ---@param device_label2 DeviceLabel
 ---@return boolean true if two labels are the same
-function M.isSameDevice(device_label1, device_label2)
+function M:isSameDevice(device_label1, device_label2)
     return device_label1.device_type == device_label2.device_type and device_label1.device == device_label2.device
 end
 
@@ -205,7 +205,7 @@ end
 ---Add a device to the active device table
 ---@param device_label DeviceLabel the device to insert
 local function InsertDevice(device_label)
-    assert(M.getDeviceCount() < 25, "Assertion failed: Too many input devices connected")
+    assert(M:getDeviceCount() < 25, "Assertion failed: Too many input devices connected")
 
     _devices[_next_device_id] = device_label
     _next_device_id = _next_device_id + 1
@@ -247,7 +247,7 @@ local function InputDeviceInit()
     lstg.eventDispatcher:addListener("onInputDeviceDisconnect", function(device_label)
         -- find device and remove it
         for id, label in pairs(_devices) do
-            if M.isSameDevice(label, device_label) then
+            if M:isSameDevice(label, device_label) then
                 DeleteDevice(id)
                 return
             end
@@ -269,7 +269,7 @@ local function KeyMappingInit(keyboard_keys, controller_keys)
 end
 
 ---this function should only be called on application startup
-function M.init()
+function M:init()
     KeyMappingInit(setting.keyboard_keys, setting.controller_keys)
 
     InputDeviceInit()

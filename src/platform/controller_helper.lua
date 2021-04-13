@@ -236,7 +236,7 @@ function M.init()
 end
 
 ---return information about all the connected controllers
----@return table an array of controller device labels; see input_and_replay.lua
+---@return table an array of controller device labels; see input_and_recording.lua
 function M.getAllControllerLabels()
     local result = {}
     local controllers = GetAllControllers()

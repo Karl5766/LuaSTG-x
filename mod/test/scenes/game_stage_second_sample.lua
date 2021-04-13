@@ -26,7 +26,7 @@ function SampleStage:cleanup()
     Stage.cleanup(self)
 end
 
-local _input = require("BHElib.input.input_and_replay")
+local _input = require("BHElib.input.input_and_recording")
 
 local Bullet = Prefab.New(Prefab.Object)
 Bullet.frame = task.Do

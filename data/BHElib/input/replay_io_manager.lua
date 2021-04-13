@@ -1,7 +1,7 @@
 ---------------------------------------------------------------------------------------------------
 ---replay_io_manager.lua
 ---desc: Manages replay information writing or reading; this class is responsible for updating the
----     input every frame in input_and_replay.lua
+---     input every frame in input_and_recording.lua
 ---modifier:
 ---------------------------------------------------------------------------------------------------
 ---replay file structure
@@ -51,7 +51,7 @@
 ---@brief An object of this class manages replay information read/write in one play-through
 local ReplayIOManager = LuaClass("input.ReplayIOManager")
 
-local _input = require("BHElib.input.input_and_replay")
+local _input = require("BHElib.input.input_and_recording")
 local FileStream = require("util.file_stream")
 local ReplayFileReader = require("BHElib.input.replay_file_reader")
 local ReplayFileWriter = require("BHElib.input.replay_file_writer")
@@ -99,12 +99,12 @@ function ReplayIOManager:updateUserInput()
     if self:isReplay() then
         -- may be better to separate read and write in two function calls
         -- so this can be written in a more flexible way
-        _input.updateRecordedInputInReplayMode(
+        _input:updateRecordedInputInReplayMode(
                 self.replay_file_reader:getFileReader(),
                 self.replay_file_writer:getFileWriter()
         )
     else
-        _input.updateRecordedInputInNonReplayMode(
+        _input:updateRecordedInputInNonReplayMode(
                 self.replay_file_writer:getFileWriter()
         )
     end
@@ -116,7 +116,7 @@ end
 ---start a new scene
 function ReplayIOManager:startNewScene()
     local is_replay = self.is_replay
-    _input.resetRecording(is_replay)  -- clear the current input states
+    _input:resetRecording(is_replay)  -- clear the current input states
 
     if is_replay then
         self.replay_file_reader:startNewScene()
@@ -155,7 +155,7 @@ end
 ---this operation is irreversible, the game cannot be switched back to replay mode
 function ReplayIOManager:changeToNonReplayMode()
     self.is_replay = false
-    _input.changeToNonReplayMode()
+    _input:changeToNonReplayMode()
     self.replay_file_reader:close()
 end
 

@@ -1,5 +1,5 @@
 ---------------------------------------------------------------------------------------------------
----input_and_replay.lua
+---input_and_recording.lua
 ---author: Karl
 ---date created: 2021.3.3
 ---desc: Manages input devices, input apis and interactions between input and replay; because the
@@ -13,7 +13,7 @@
 ---     function name)
 ---------------------------------------------------------------------------------------------------
 
----@class InputDeviceManager
+---@class InputManager
 local M = {}
 
 local _raw_input = require("setting.key_mapping")
@@ -49,7 +49,6 @@ local pairs = pairs
 local _IsDeviceKeyDown
 local _IsAnyDeviceKeyDown
 local _IsRecordedKeyDown
-local _IsAnyRecordedKeyDown
 
 ---------------------------------------------------------------------------------------------------
 ---categorize function keys into game keys and system keys
@@ -83,12 +82,12 @@ local SYSTEM_KEYS = {
 }
 
 ---return the list of game keys
-function M.getGameKeys()
+function M:getGameKeys()
     return GAME_KEYS
 end
 
 ---return the list of system keys
-function M.getSystemKeys()
+function M:getSystemKeys()
     return SYSTEM_KEYS
 end
 
@@ -96,7 +95,7 @@ end
 ---getters
 
 ---@return number number of devices
-function M.getDeviceCount()
+function M:getDeviceCount()
     local n = 0
     for _, _ in pairs(_device_states) do
         n = n + 1
@@ -105,7 +104,7 @@ function M.getDeviceCount()
 end
 
 ---@return number number of devices
-function M.getRecordedDeviceCount()
+function M:getRecordedDeviceCount()
     local n = 0
     for _, _ in pairs(_recorded_device_states) do
         n = n + 1
@@ -115,7 +114,7 @@ end
 
 ---get an array of currently active device id
 ---@return table an array of all device id
-function M.getDeviceIDArray()
+function M:getDeviceIDArray()
     local result = {}
     for device_id, _ in pairs(_device_states) do
         table.insert(result, device_id)
@@ -125,7 +124,7 @@ end
 
 ---get an array of currently recorded device id
 ---@return table an array of all recorded device id
-function M.getRecordedDeviceIDArray()
+function M:getRecordedDeviceIDArray()
     local result = {}
     for device_id, _ in pairs(_recorded_device_states) do
         table.insert(result, device_id)
@@ -138,13 +137,13 @@ end
 
 ---return if the device is in the active device table;
 ---recommend checking if device is active before accessing the device input
-function M.isDeviceActive(device_id)
+function M:isDeviceActive(device_id)
     return _device_states[device_id] ~= nil
 end
 
 ---return if the device is in the recorded device table;
 ---recommend checking before accessing the device input
-function M.isDeviceRecorded(device_id)
+function M:isDeviceRecorded(device_id)
     return _recorded_device_states[device_id] ~= nil
 end
 
@@ -152,24 +151,22 @@ end
 ---@param device_index number device index in the device table
 ---@param function_key_name string name of the function key; can be game key or system key
 ---@return boolean
-function M.isDeviceKeyDown(device_index, function_key_name)
+function M:isDeviceKeyDown(device_index, function_key_name)
     return _device_states[device_index][function_key_name]
 end
-_IsDeviceKeyDown = M.isDeviceKeyDown
 
 ---get recorded input from the given device
 ---@param device_index number device index in the device table
 ---@param function_key_name string name of the function key; can only be a game key
 ---@return boolean
-function M.isRecordedKeyDown(device_index, function_key_name)
+function M:isRecordedKeyDown(device_index, function_key_name)
     return _recorded_device_states[device_index][function_key_name]
 end
-_IsRecordedKeyDown = M.isRecordedKeyDown
 
 ---return if there exists a device among recorded devices, and on that device, the given key is pressed
 ---@param function_key_name string name of the function key; can be game key or system key
 ---@return boolean true if any device presses the input; otherwise return false
-function M.isAnyDeviceKeyDown(function_key_name)
+function M:isAnyDeviceKeyDown(function_key_name)
     for _, key_state_array in pairs(_device_states) do
         if key_state_array[function_key_name] then
             return true
@@ -182,7 +179,7 @@ _IsAnyDeviceKeyDown = M.isAnyDeviceKeyDow
 ---return if there exists a device among recorded devices, and on that device, the given key is pressed
 ---@param function_key_name string name of the function key; can only be a game key
 ---@return boolean true if any device presses the input; otherwise return false
-function M.isAnyRecordedKeyDown(function_key_name)
+function M:isAnyRecordedKeyDown(function_key_name)
     for _, key_state_array in pairs(_recorded_device_states) do
         if key_state_array[function_key_name] then
             return true
@@ -190,25 +187,24 @@ function M.isAnyRecordedKeyDown(function_key_name)
     end
     return false
 end
-_IsAnyRecordedKeyDown = M.isAnyRecordedKeyDown
 
 ---@return number, number x, y position of the mouse
-function M.getMousePosition()
+function M:getMousePosition()
     return _mouse_states[4], _mouse_states[5]
 end
 
 ---@return number, number recorded x, y position of the mouse
-function M.getRecordedMousePosition()
+function M:getRecordedMousePosition()
     return _recorded_mouse_states[4], _recorded_mouse_states[5]
 end
 
 ---@return boolean if the mouse is pressed
-function M.isMousePressed()
+function M:isMousePressed()
     return _mouse_states[1]
 end
 
 ---@return boolean if the recorded mouse is pressed
-function M.isRecordedMousePressed()
+function M:isRecordedMousePressed()
     return _recorded_mouse_states[1]
 end
 
@@ -220,7 +216,7 @@ end
 ---@param function_key_name string name of the function key
 ---@param is_recorded boolean if true, return device input; if false return recorded input
 ---@param is_down boolean if true, return if the key is just pressed; otherwise return if the key is just released
-function M.isDeviceKeyJustChanged(device_id, function_key_name, is_recorded, is_down)
+function M:isDeviceKeyJustChanged(device_id, function_key_name, is_recorded, is_down)
     local states = _device_states
     local prev_states = _prev_device_states
     if is_recorded then
@@ -241,13 +237,13 @@ end
 ---@param function_key_name string name of the function key
 ---@param is_recorded boolean if true, return device input; if false return recorded input
 ---@param is_down boolean if true, return if the key is just pressed; otherwise return if the key is just released
-function M.isAnyDeviceKeyJustChanged(function_key_name, is_recorded, is_down)
+function M:isAnyDeviceKeyJustChanged(function_key_name, is_recorded, is_down)
     local states = _device_states
     if is_recorded then
         states = _recorded_device_states
     end
     for device_id, _ in pairs(states) do
-        if M.isDeviceKeyJustChanged(device_id, function_key_name, is_recorded, is_down) then
+        if M:isDeviceKeyJustChanged(device_id, function_key_name, is_recorded, is_down) then
             return true
         end
     end
@@ -257,7 +253,7 @@ end
 ---return if the mouse is just pressed/released
 ---@param is_recorded boolean if true, return device input; if false return recorded input
 ---@param is_down boolean if true, return if the button is just pressed; otherwise return if the key is just released
-function M.isMouseButtonJustChanged(is_recorded, is_down)
+function M:isMouseButtonJustChanged(is_recorded, is_down)
     local states = _mouse_states
     local prev_states = _prev_mouse_states
     if is_recorded then
@@ -279,7 +275,7 @@ end
 ---reset the recorded key state table at the start of a play-through;
 ---immediately update fill input tables with zeros twice; this is to allow input to be accessible at any time
 ---@param is_replay_mode boolean whether the input is going to be processed in replay mode
-function M.resetRecording(is_replay_mode)
+function M:resetRecording(is_replay_mode)
     _is_replay_mode = is_replay_mode
 
     -- zero re-initialize all the variables
@@ -299,13 +295,13 @@ end
 
 ---record raw device input in the current frame to _device_states and _mouse_states;
 ---update _prev_device_states and _prev_mouse_state by the current states
-function M.updateInputSnapshot()
+function M:updateInputSnapshot()
 
     -- device input
     _prev_device_states = _device_states
     _device_states = {}  -- clear the input table
 
-    local device_id_array = _raw_input.getDeviceIDArray()
+    local device_id_array = _raw_input:getDeviceIDArray()
     for index = 1, #device_id_array do
         -- update the state table
         local device_id = device_id_array[index]
@@ -313,12 +309,12 @@ function M.updateInputSnapshot()
 
         for i = 1, #GAME_KEYS do
             local function_key_name = GAME_KEYS[i]
-            local is_down = _raw_input.isDeviceKeyDown(device_id, function_key_name)
+            local is_down = _raw_input:isDeviceKeyDown(device_id, function_key_name)
             device_state[function_key_name] = is_down
         end
         for i = 1, #SYSTEM_KEYS do
             local function_key_name = SYSTEM_KEYS[i]
-            local is_down = _raw_input.isDeviceKeyDown(device_id, function_key_name)
+            local is_down = _raw_input:isDeviceKeyDown(device_id, function_key_name)
             device_state[function_key_name] = is_down
         end
         _device_states[device_id] = device_state
@@ -326,8 +322,8 @@ function M.updateInputSnapshot()
 
     -- mouse input
     _prev_mouse_states = _mouse_states
-    local b1, b2, b3 = _raw_input.getMouseState()
-    local mouse_x, mouse_y = _raw_input.getMousePosition()
+    local b1, b2, b3 = _raw_input:getMouseState()
+    local mouse_x, mouse_y = _raw_input:getMousePosition()
     _mouse_states = {b1, b2, b3, mouse_x, mouse_y}  -- overwrite mouse state
 end
 
@@ -335,7 +331,7 @@ end
 ---@param sequential_writer SequentialFileWriter stream for write to replay file
 local function WriteRecordedInputToStream(sequential_writer)
     -- device input
-    local device_count = M.getRecordedDeviceCount()
+    local device_count = M:getRecordedDeviceCount()
     sequential_writer:writeUInt(device_count)
 
     for device_id, device_state in pairs(_recorded_device_states) do
@@ -388,7 +384,7 @@ end
 ---check if the replay input has ended before calling the function;
 ---@param sequential_reader SequentialFileReader stream for read from replay file
 ---@param sequential_writer SequentialFileWriter stream for write to replay file
-function M.updateRecordedInputInReplayMode(sequential_reader, sequential_writer)
+function M:updateRecordedInputInReplayMode(sequential_reader, sequential_writer)
     assert(_is_replay_mode)
 
     -- device input
@@ -402,7 +398,7 @@ end
 
 ---update the input by one frame and record it to replay file;
 ---@param sequential_writer SequentialFileWriter stream for write to replay file
-function M.updateRecordedInputInNonReplayMode(sequential_writer)
+function M:updateRecordedInputInNonReplayMode(sequential_writer)
     assert(not _is_replay_mode)
 
     _prev_recorded_device_states = _recorded_device_states
@@ -417,7 +413,7 @@ end
 
 ---set replay mode to false; now on update of recorded input, normal input will be used instead of
 ---input read from replay file
-function M.changeToNonReplayMode()
+function M:changeToNonReplayMode()
     _is_replay_mode = false
 end
 
@@ -425,9 +421,9 @@ end
 ---init
 
 ---this function should only be called on application startup
-function M.init()
-    _raw_input.init()
-    M.resetRecording(false)  -- input is available after this function call
+function M:init()
+    _raw_input:init()
+    M:resetRecording(false)  -- input is available after this function call
 end
 
 

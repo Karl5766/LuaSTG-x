@@ -97,7 +97,6 @@ function Prefab.NewX(base)
         for k, v in pairs(ret) do
             if type(v) == 'function' and type(k) == 'string' and not callbacks_lookup_table[k] then
                 methods[k] = v
-                print(k)
             end
         end
     end

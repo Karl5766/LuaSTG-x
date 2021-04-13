@@ -19,7 +19,7 @@ local _all_stages = {}
 ---------------------------------------------------------------------------------------------------
 
 local SceneTransition = require("BHElib.scenes.scene_transition")
-local _input = require("BHElib.input.input_and_replay")
+local _input = require("BHElib.input.input_and_recording")
 local GameSceneInitState = require("BHElib.scenes.stage.state_of_scene_init")
 local SceneGroup = require("BHElib.scenes.stage.scene_group")
 
@@ -104,7 +104,7 @@ end
 ---modify the game loop in GameScene:frameUpdate for pause menu
 function Stage:frameUpdate(dt)
     -- check if pause menu should be created
-    if _input.isAnyDeviceKeyJustChanged("escape", false, true) and
+    if _input:isAnyDeviceKeyJustChanged("escape", false, true) and
             not self.is_paused then
 
         -- create pause menu

@@ -11,7 +11,7 @@ local _include_list = {
     "BHElib.status",
 
     -- input
-    "BHElib.input.input_and_replay",
+    "BHElib.input.input_and_recording",
 
     "BHElib.screen_capture",
     "BHElib.coordinates_and_screen",

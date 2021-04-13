@@ -31,7 +31,7 @@ local _menu_const = {
     rep_line_height     = 20,
 }
 
-local _input = require("BHElib.input.input_and_replay")
+local _input = require("BHElib.input.input_and_recording")
 local Prefab = require("BHElib.prefab")
 
 -------------------------------------------------------------------------------------------------
@@ -119,10 +119,10 @@ end
 function SimpleTextMenuPage:processUserInput()
     -- moving through options
     local index_diff = 0
-    if _input.isAnyDeviceKeyJustChanged("up", false, true) then
+    if _input:isAnyDeviceKeyJustChanged("up", false, true) then
         index_diff = -1
     end
-    if _input.isAnyDeviceKeyJustChanged("down", false, true) then
+    if _input:isAnyDeviceKeyJustChanged("down", false, true) then
         index_diff = 1
     end
     if index_diff ~= 0 then
@@ -130,7 +130,7 @@ function SimpleTextMenuPage:processUserInput()
     end
 
     -- selecting an option
-    if _input.isAnyDeviceKeyJustChanged("select", false, true) then
+    if _input:isAnyDeviceKeyJustChanged("select", false, true) then
         local selected_option_callback = self.option_callback[self.select_index]
         selected_option_callback()
         self:playSelectSound()
