@@ -33,6 +33,7 @@ M.lresults2 = {}
 function M.initialize()
     M.rand = {
         NextDouble = function()
+            error("hw")
             return ran:Float(0, 1)
         end
     }

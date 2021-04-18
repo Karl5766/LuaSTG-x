@@ -8,6 +8,7 @@ local Main = require('game.mbg.Main')
 local Math = require('game.mbg._math')
 local MathHelper = Math
 local function Rand1()
+    error("hw")
     return ran:Float(-1, 1)
 end
 local ipairs = ipairs

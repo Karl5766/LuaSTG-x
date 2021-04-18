@@ -15,6 +15,8 @@
 ---will be put under this namespace.
 local Prefab = {}
 
+local Ustorage = require("util.universal_id")
+
 ---------------------------------------------------------------------------------------------------
 ---cache variables and functions
 
@@ -82,9 +84,9 @@ local RawNew = lstg.RawNew
 --- You can use classname(...) to create an instance of game object.
 --- Example: `classname = xclass(object)`
 ---@param base object
----@param define table
+---@param class_id string unique string id for referencing the class
 ---@return object
-function Prefab.NewX(base)
+function Prefab.NewX(base, class_id)
 
     local ret = Prefab.New(base, base)
     ret['.x'] = true
@@ -111,6 +113,12 @@ function Prefab.NewX(base)
         ret[1](obj, ...)
         return obj
     end }
+
+    if class_id then
+        Ustorage:store(ret, class_id)
+        ret[".class_id"] = class_id
+    end
+
     return setmetatable(ret, mt)
 end
 xclass = Prefab.NewX

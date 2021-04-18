@@ -14,6 +14,11 @@ local _input = require("BHElib.input.input_and_recording")
 local Prefab = require("BHElib.prefab")
 
 ---------------------------------------------------------------------------------------------------
+---cache variables and functions
+
+local floor = math.floor
+
+---------------------------------------------------------------------------------------------------
 ---virtual methods
 
 ---virtual GameScene:getSceneType()
@@ -50,6 +55,11 @@ function GameScene:createScene()
 
     self.cocos_scene = scene
 
+    -- for varying playback speed in replay mode
+    self.playback_speed = 1
+    self.playback_timer = 0
+    self.continue_scene = true
+
     return scene
 end
 
@@ -57,9 +67,16 @@ end
 ---cleanup before exiting the scene; overwritten in case anything is changed during the scene of
 ---subclasses
 function GameScene:cleanup()
-    -- it seems that at the end of both menu and stages,
-    -- we need to clean all objects, so put it here for now
+    -- at the end of menu or stages, clean all objects created by this scene
     ResetPool() -- clear all game objects
+
+    self.continue_scene = false
+end
+
+---set the current replay playback speed
+---@param speed_coeff number playback_speed multiplier; default as 1
+function GameScene:setPlaybackSpeed(speed_coeff)
+    self.playback_speed = speed_coeff
 end
 
 ---add touch key to the current scene
@@ -135,6 +152,7 @@ end
 
 ---update the game by one time step;
 ---advance the time by 1 frame
+---@return boolean true if the current scene has ended
 function GameScene:frameUpdate(dt)
     self:updateSceneAndObjects(dt)
 
@@ -161,18 +179,24 @@ function GameScene:doUpdatesBetweenRender(dt)
     e:dispatchEvent('onFrameFunc')  -- in case any event is registered
 
     -- update game state k times, k depending on the value given by
-    -- setting.render_skip + 1
-    local factor = 1
+    -- (setting.render_skip + 1) * self.playback_speed
+    local factor = self.playback_speed
     if setting.render_skip then
-        factor = int(setting.render_skip) + 1
+        factor = factor * (int(setting.render_skip) + 1)
     end
-    for _ = 1, factor do  -- currently multiple updates do not wait at all
-        self:frameUpdate(dt)
+    local cur_playback_timer = self.playback_timer + factor
+    for _ = 1, floor(cur_playback_timer) - floor(self.playback_timer) do
+        -- currently multiple updates do not wait at all
+        if self.continue_scene then
+            self:frameUpdate(dt)
+        end
     end
+    self.playback_timer = cur_playback_timer
 
     if lstg.quit_flag then
         GameExit()
     end
+
     profiler.toc('FrameFunc')
 end
 

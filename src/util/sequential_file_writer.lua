@@ -86,6 +86,7 @@ function SequentialFileWriter:writeFloat(f)
         stream:writeByte(0)
         stream:writeByte(0)
         stream:writeByte(0)
+        return
     end
 
     local sign = 0

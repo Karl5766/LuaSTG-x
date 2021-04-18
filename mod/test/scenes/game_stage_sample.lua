@@ -34,7 +34,7 @@ function SampleStage:createScene()
     local param = ccui.LinearLayoutParameter:create()
     exit_button:setLayoutParameter(param)
     exit_button:setTitleFontName('Arial')
-    exit_button:setTitleText("hello world")
+    exit_button:setTitleText("hw")
     exit_button:setTitleColor(cc.c3b(255, 125, 125))
     exit_button:setTitleAlignment(cc.TEXT_ALIGNMENT_LEFT)
     exit_button:setTitleFontSize(180)
@@ -50,6 +50,11 @@ function SampleStage:createScene()
     --exit_button:setTouchEnabled(true)
     exit_button:setEnabled(true)
     exit_button:setBright(true)
+
+    task.New(self, function()
+        task.Wait(600)
+        self:goToNextScene()
+    end)
 
     canvas:addChild(exit_button, 0)
 
@@ -74,7 +79,7 @@ function Bullet:init(x, y, vx, vy, color)
     self.vx = vx
     self.vy = vy
     self.img = "img:ball_mid"..int(1)
-    self.group = GROUP_INDES
+    self.group = GROUP_ENEMY_BULLET
     self.resImg = FindResSprite(self.img)
     self.color = color
     --self.resImg:setColor(self.color)
@@ -91,13 +96,9 @@ Bullet.render = DefaultRenderFunc
 function SampleStage:update(dt)
     Stage.update(self, dt)
 
-    if self.timer > 600.5 and self.timer < 601.5 then
-        self:goToNextScene()
-    end
-
-    for i = 1, 2 do
+    for i = 1, 7 do
         local a = ran:Float(0, 360)
-        New(Bullet, 0, 0, 2 * cos(a), 2 * sin(a), Color(255, ran:Int(0, 255), ran:Int(0, 255), 255))
+        New(Bullet, 0, 120, 4 * cos(a), 4 * sin(a), Color(255, 255, 255, 200))
     end
 end
 

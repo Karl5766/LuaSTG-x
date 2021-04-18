@@ -31,12 +31,14 @@ end
 ---@param file_writer SequentialFileWriter the object for writing to file
 function InitState:writeToFile(file_writer)
     file_writer:writeVarLengthStringArray(self.scene_id_array)
+    file_writer:writeVarLengthString(self.player_class_id)
 end
 
 ---manages reading the object from file at the current file cursor position
 ---@param file_reader SequentialFileReader the object for reading from file
 function InitState:readFromFile(file_reader)
     self.scene_id_array = file_reader:readVarLengthStringArray()
+    self.player_class_id = file_reader:readVarLengthString()
 end
 
 return InitState

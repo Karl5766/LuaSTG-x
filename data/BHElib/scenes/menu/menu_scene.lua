@@ -113,7 +113,7 @@ function Menu:createNextGameScene()
     local scene_init_state = nil
     local group_init_state = nil
     if is_replay then
-
+        ---replay mode
         -- read from file
         local file_stream = FileStream(Menu.replay_path_for_read, "rb")
         local replay_file_reader = ReplayFileReader(file_stream, start_stage_in_replay)
@@ -123,6 +123,7 @@ function Menu:createNextGameScene()
         local first_scene_summary = replay_summaries.scene_summary_array[1]
         scene_init_state = first_scene_summary.scene_init_state
     else
+        ---game mode
         -- use default settings
         group_init_state = Menu.default_group_init_state
         scene_init_state = SceneInitState()

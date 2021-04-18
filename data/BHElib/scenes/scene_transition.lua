@@ -54,10 +54,11 @@ local director = cc.Director:getInstance()
 ---@param scene_from GameScene the current game scene
 ---@return GameScene a new game scene created by scene from
 function M.goToNextScene(scene_from)
-    scene_from:cleanup()  -- cleanup the scene
-
     -- start the next scene
     local scene_to = _scene_from:createNextGameScene()
+
+    scene_from:cleanup()  -- cleanup the scene
+
     local cocos_scene = scene_to:createScene()
     director:replaceScene(cocos_scene)
 

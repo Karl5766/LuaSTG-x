@@ -15,6 +15,11 @@ end
 function SampleStage:createScene()
     local scene = Stage.createScene(self)
 
+    task.New(self, function()
+        task.Wait(600)
+        self:completeSceneGroup()
+    end)
+
     return scene
 end
 
@@ -36,7 +41,7 @@ function Bullet:init(x, y, vx, vy, color)
     self.vx = vx
     self.vy = vy
     self.img = "img:ball_mid"..int(1)
-    self.group = GROUP_INDES
+    self.group = GROUP_ENEMY_BULLET
     self.resImg = FindResSprite(self.img)
     self.color = color
     --self.resImg:setColor(self.color)
@@ -47,13 +52,12 @@ Bullet.render = DefaultRenderFunc
 function SampleStage:update(dt)
     Stage.update(self, dt)
 
-    if self.timer > 600.5 and self.timer < 601.5 then
-        self:completeSceneGroup()
-    end
-
-    for i = 1, 4 do
+    for i = 1, 9 do
         local a = ran:Float(0, 360)
-        New(Bullet, 0, 0, 2 * cos(a), 2 * sin(a), Color(255, ran:Int(0, 255), ran:Int(0, 255), 255))
+        if self.timer < 3 then
+            print(a)
+        end
+        New(Bullet, 0, 125, 4.5 * cos(a), 4.5 * sin(a), Color(255, ran:Int(0, 255), ran:Int(0, 255), 255))
     end
 end
 

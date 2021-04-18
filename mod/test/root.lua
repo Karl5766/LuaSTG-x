@@ -5,7 +5,7 @@ local _replay_path_for_write = "replay/current"
 local _replay_path_for_read = "replay/read"
 
 ---setup the default scene group init state to run the scene group with when the player select start game
-local function SetupGameplayInitState()
+local function SetupGroupInitState()
     local Menu = require("BHElib.scenes.menu.menu_scene")
     local SceneGroupInitState = require("BHElib.scenes.stage.state_of_group_init")
 
@@ -13,6 +13,8 @@ local function SetupGameplayInitState()
 
     -- create init states for stage and the scene group
     local group_init_state = SceneGroupInitState()
+    group_init_state.player_class_id = "units.player.reimu"
+
     group_init_state.scene_id_array = {
         "stage.SampleStage",
         "stage.SecondSampleStage"
@@ -70,6 +72,9 @@ local function Init()
     require("scenes.game_stage_sample")
     require("scenes.game_stage_second_sample")
 
+    -- initialize all player classes
+    require("player.reimu.reimu")
+
     local Prefab = require("BHElib.prefab")
     local SceneTransition = require("BHElib.scenes.scene_transition")
 
@@ -77,7 +82,7 @@ local function Init()
     Prefab.RegisterAllDefinedPrefabs()
 
     -- create the menu
-    SetupGameplayInitState()
+    SetupGroupInitState()
     SetupReplayFilePath()
     local menu = CreateMenu()
     SceneTransition.init(menu)  -- initialize scene transition

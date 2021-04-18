@@ -15,6 +15,7 @@ local M = LuaClass("units.ClockedAnimation")
 local floor = math.floor
 local ceil = math.ceil
 local mod = math.mod
+local Insert = table.insert
 
 ---------------------------------------------------------------------------------------------------
 
@@ -58,6 +59,32 @@ function M:loadRowImages(row_id, images)
     self.rows[row_id] = images
 end
 
+---@param row_id string id of the sequence of images
+---@param images table an array of name of the images in the sequence
+function M:loadRowImagesFromTexture(row_id, tex_name, image_name, x, dx, y, dy, width, height, image_num, a, b, is_rect)
+    local image_array = {}
+    local flag = CheckRes("img", image_name..1)
+    for i = 1, image_num do
+        local cur_image_name = image_name..i
+        if not flag then
+            local cur_x, cur_y = x + dx * (i - 1), y + dy * (i - 1)
+            LoadImage(
+                    cur_image_name,
+                    tex_name,
+                    cur_x,
+                    cur_y,
+                    width,
+                    height,
+                    a or 0,
+                    b or 0,
+                    is_rect == true
+            )
+        end
+        Insert(image_array, cur_image_name)
+    end
+    self:loadRowImages(row_id, image_array)
+end
+
 ---@param row_id string id of the sequence of images in the animation to be played
 ---@param animation_interval number time in frames each image lasts
 ---@param start_time number starting timer value
@@ -65,6 +92,7 @@ end
 ---@param is_loop boolean if the animation loops
 function M:playAnimation(row_id, animation_interval, start_time, is_forward, is_loop)
     self.cur_row = self.rows[row_id]
+    assert(self.cur_row, "row '"..row_id.."' does not exist")
     self.animation_interval = animation_interval
     self:setAnimationDirection(is_forward)
     self.is_loop = is_loop
@@ -89,15 +117,14 @@ function M:update(dt)
 
     local duration = self.animation_duration
     local animation_interval = self.animation_interval
-    local is_forward = self.is_forward
     local is_loop = self.is_loop
 
     -- test if the animation has ended
     if not is_loop then
-        if is_forward and t >= duration then
+        if dir_coeff == 1 and t >= duration then
             self:clearAttributes()
             return self.timer - duration
-        elseif not is_forward and t <= 0 then
+        elseif dir_coeff == -1 and t <= 0 then
             self:clearAttributes()
             return -self.timer
         end
@@ -105,7 +132,7 @@ function M:update(dt)
 
     -- if not, update the animation
     local i
-    if is_forward then
+    if dir_coeff == 1 then
         i = floor(t / animation_interval) + 1
     else
         i = ceil(t / animation_interval)  -- deal with rounding problems in playing animation backward

@@ -4,33 +4,118 @@
 ---desc: This file defines the player class, from which all player sub-classes derive from
 ---------------------------------------------------------------------------------------------------
 
-local Prefab = require("prefab")
+local Prefab = require("BHElib.prefab")
 
+---@class PlayerClass
 local PlayerClass = Prefab.NewX(Prefab.Object)
 
 local ClockedAnimation = require("BHElib.units.clocked_animation")
+local Coordinates = require("BHElib.coordinates_and_screen")
 
 ---------------------------------------------------------------------------------------------------
 ---cache variables and functions
+
+local max = max
+
+---------------------------------------------------------------------------------------------------
+---constants
+
+PlayerClass.const = {
+    spawn_x = 0,
+    spawn_y = -180,
+    spawn_time = 80,
+    spawn_speed = 1,
+    spawn_protect_time = 180
+}
+
+---------------------------------------------------------------------------------------------------
+---virtual methods
+
+---virtual PlayerClass:loadResources()  -- for loading player sprite etc.
+---virtual PlayerClass:initAnimation()  -- initialize sprite animation
 
 ---------------------------------------------------------------------------------------------------
 ---engine callbacks
 
 ---@param player_input InputManager an object that manages recorded player input
-function PlayerClass:init(player_input)
+---@param stage Stage the current stage this player is at
+function PlayerClass:init(
+        player_input,
+        animation_interval,
+        unfocused_speed,
+        focused_speed,
+        stage
+)
     self.layer = LAYER_PLAYER
     self.group = GROUP_PLAYER
+    self.bound = false
+
+    self:loadResources()
 
     -- player object properties
-    self.sprite_animation_interval = 8  -- in frames
-    self.sprite_movement_state = 0  -- -2, -1 for left, 0 for idle, 1, 2 for right
+    self.sprite_animation_interval = animation_interval  -- in frames
+    self.sprite_animation_transition_interval = 4
     self.sprite_animation = ClockedAnimation()
+    self:initAnimation()
+    self.sprite_movement_state = 0  -- -2, -1 for left, 0 for idle, 1, 2 for right
+    self.sprite_animation:playAnimation(
+            "idle",
+            self.sprite_animation_interval,
+            0,
+            true,
+            true
+    )
 
     self.player_input = player_input
+    self.stage = stage
+
+    self.unfocused_speed = unfocused_speed
+    self.focused_speed = focused_speed
+    self.protect_counter = 0
+    self.spawn_counter = 0
 end
 
 function PlayerClass:frame()
-    self:processUserInput(self.player_input)
+    if self.spawn_counter == 0 then
+        self:processPlayerInput(self.player_input)
+        self:limitMovementInBound()
+    else
+        self:updateSpriteByMovement(false, false)
+        self.x = PlayerClass.const.spawn_x
+        self.y = PlayerClass.const.spawn_y - PlayerClass.const.spawn_speed * self.spawn_counter
+        self.spawn_counter = max(0, self.spawn_counter - 1)
+    end
+
+    self.protect_counter = max(0, self.protect_counter - 1)
+
+    self:updateMissStatus()
+end
+
+function PlayerClass:updateMissStatus()
+    if self.miss_counter ~= nil then
+        self.miss_counter = max(0, self.miss_counter - 1)
+        if self.miss_counter == 0 then
+            self:respawn()
+        end
+    end
+end
+
+function PlayerClass:limitMovementInBound()
+    local l, r, b, t = Coordinates.getPlayfieldBoundaryInGame()
+
+    local min_dist = 10
+    local top_min_dist = 20
+    local bottom_min_dist = 24
+    if self.x < l + min_dist then
+        self.x = l + min_dist
+    elseif self.x > r - min_dist then
+        self.x = r - min_dist
+    end
+    if self.y < b + bottom_min_dist then
+        self.y = b + bottom_min_dist
+    elseif self.y > t - top_min_dist then
+        self.y = t - top_min_dist
+    end
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -83,6 +168,7 @@ function PlayerClass:updateSpriteByMovement(is_moving_rightward, is_moving_leftw
     end
 
     local interval = self.sprite_animation_interval
+    local transition_interval = self.sprite_animation_transition_interval
     local prev_state = self.sprite_movement_state
     local product = cur_move_dir * prev_state
 
@@ -92,18 +178,18 @@ function PlayerClass:updateSpriteByMovement(is_moving_rightward, is_moving_leftw
     elseif cur_move_dir ~= 0 and prev_state == 0 then  -- from idle to moving
         local row_id
         if cur_move_dir > 0 then
-            row_id = "move_right"
+            row_id = "move_right_loop"
         else
-            row_id = "move_left"
+            row_id = "move_left_loop"
         end
         self.sprite_animation:playAnimation(
                 row_id,
                 interval,
                 0,
                 true,
-                false
+                true
         )
-        self.sprite_movement_state = cur_move_dir
+        self.sprite_movement_state = cur_move_dir * 2
     elseif prev_state == -2 or prev_state == 2 then  -- from continuous moving to moving
         local row_id
         if prev_state == -2 then
@@ -115,7 +201,7 @@ function PlayerClass:updateSpriteByMovement(is_moving_rightward, is_moving_leftw
         end
         self.sprite_animation:playAnimation(
                 row_id,
-                interval,
+                transition_interval,
                 0,
                 false,
                 false
@@ -142,33 +228,35 @@ function PlayerClass:updateSpriteByMovement(is_moving_rightward, is_moving_leftw
                 self.sprite_movement_state = 2 * cur_move_dir
             end
         else  -- going in the opposite direction or from moving to idle
-            self.sprite_animation:setAnimationDirection(false)
-            local t = self.sprite_animation:update(1)
-            if t then  -- transition animation has ended
-                if cur_move_dir == 0 then
-                    self.sprite_animation:playAnimation(
-                            "idle",
-                            interval,
-                            self.timer,
-                            true,
-                            true
-                    )
-                    self.sprite_movement_state = 0
+            if cur_move_dir ~= 0 then
+                local row_id
+                if cur_move_dir == 1 then
+                    row_id = "move_right_loop"
                 else
-                    local row_id
-                    if cur_move_dir == 1 then
-                        row_id = "move_right"
-                    else
-                        row_id = "move_left"
+                    row_id = "move_left_loop"
+                end
+                self.sprite_animation:playAnimation(
+                        row_id,
+                        transition_interval,
+                        0,
+                        true,
+                        true
+                )
+                self.sprite_movement_state = cur_move_dir * 2
+            else
+                self.sprite_animation:setAnimationDirection(false)
+                local t = self.sprite_animation:update(1)
+                if t then  -- transition animation has ended
+                    if cur_move_dir == 0 then
+                        self.sprite_animation:playAnimation(
+                                "idle",
+                                interval,
+                                0,
+                                true,
+                                true
+                        )
+                        self.sprite_movement_state = 0
                     end
-                    self.sprite_animation:playAnimation(
-                            row_id,
-                            interval,
-                            t,
-                            false,
-                            false
-                    )
-                    self.sprite_movement_state = cur_move_dir
                 end
             end
         end
@@ -177,7 +265,43 @@ function PlayerClass:updateSpriteByMovement(is_moving_rightward, is_moving_leftw
     self.img = self.sprite_animation:getImage()
 end
 
-function player_class:render()
+---------------------------------------------------------------------------------------------------
+
+---respawn a new player
+function PlayerClass:respawn()
+    local Player = self.class
+    local new_player = Player(self.stage)
+    local spawn_time = PlayerClass.const.spawn_time
+    local spawn_speed = PlayerClass.const.spawn_speed
+    new_player.x = PlayerClass.const.spawn_x
+    new_player.y = PlayerClass.const.spawn_y - spawn_speed * spawn_time
+    new_player.spawn_counter = PlayerClass.const.spawn_time
+    new_player.protect_counter = PlayerClass.const.spawn_protect_time
+    self.stage:setPlayer(new_player)
+
+    Del(self)
+end
+
+function PlayerClass:colli(other)
+    local other_group = other.group
+    if other_group == GROUP_ENEMY or other_group == GROUP_ENEMY_BULLET or other_group == GROUP_INDES then
+        if other_group == GROUP_ENEMY_BULLET then
+            Del(other)
+        end
+
+        -- player miss
+        if self.protect_counter == 0 and self.miss_counter == nil then
+            self.miss_counter = 12
+        end
+    end
+end
+
+function PlayerClass:render()
+    if self.protect_counter % 3 == 2 then  -- 避开初始值 counter = 0
+        self.color = Color(0xFF0000FF)
+    else
+        self.color = Color(0xFFFFFFFF)
+    end
     DefaultRenderFunc(self)
 end
 

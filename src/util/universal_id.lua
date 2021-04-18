@@ -25,10 +25,9 @@ end
 ---@param item_id string id of the item to be found
 ---@return any the stored object
 function Uid:getById(item_id)
+    assert(item_id, "item id parameter is nil")
     local item = _all_stored_items[item_id]
-    if item == nil then
-        error("item id "..item_id.." does not exist.")
-    end
+    assert(item, "item id "..item_id.." does not exist.")
     return _all_stored_items[item_id]
 end
 

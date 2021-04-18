@@ -19,7 +19,7 @@ local _all_stages = {}
 ---------------------------------------------------------------------------------------------------
 
 local SceneTransition = require("BHElib.scenes.scene_transition")
-local _input = require("BHElib.input.input_and_recording")
+local Input = require("BHElib.input.input_and_recording")
 local GameSceneInitState = require("BHElib.scenes.stage.state_of_scene_init")
 local SceneGroup = require("BHElib.scenes.stage.scene_group")
 local Ustorage = require("util.universal_id")
@@ -78,6 +78,15 @@ function Stage:getScore()
     return self.score
 end
 
+---@param player PlayerClass the player of this stage
+function Stage:setPlayer(player)
+    self.player = player
+end
+
+function Stage:getPlayer()
+    return self.player
+end
+
 ---------------------------------------------------------------------------------------------------
 ---create scene
 
@@ -85,6 +94,8 @@ end
 function Stage:createScene()
     ---@type GameSceneInitState
     local scene_init_state = self.scene_init_state
+    local player_init_state = scene_init_state.player_init_state
+    local group_init_state = self.scene_group:getSceneGroupInitState()
 
     -- set random seed
     ran:Seed(scene_init_state.random_seed)
@@ -92,7 +103,12 @@ function Stage:createScene()
     -- init score
     self.score = scene_init_state.init_score
 
-    ---TOBEADDED: initialize the player
+    -- init player
+    local Player = Ustorage:getById(group_init_state.player_class_id)
+    local player = Player(self)
+    player.x = player_init_state.x
+    player.y = player_init_state.y
+    self.player = player
 
     self.replay_io_manager:startNewScene()  -- clear input from last scene, setup replay reader/writer
 
@@ -105,7 +121,7 @@ end
 ---modify the game loop in GameScene:frameUpdate for pause menu
 function Stage:frameUpdate(dt)
     -- check if pause menu should be created
-    if _input:isAnyDeviceKeyJustChanged("escape", false, true) and
+    if Input:isAnyDeviceKeyJustChanged("escape", false, true) and
             not self.is_paused then
 
         -- create pause menu
@@ -163,6 +179,20 @@ function Stage:updateUserInput()
     else
         replay_io_manager:updateUserInput()
     end
+
+    self:setPlaybackSpeed(1)
+    if replay_io_manager:isReplay() and not self.is_paused then
+        if Input:isAnyDeviceKeyDown("left") or
+                Input:isAnyDeviceKeyDown("right") or
+                Input:isAnyDeviceKeyDown("up") or
+                Input:isAnyDeviceKeyDown("down") then
+            replay_io_manager:changeToNonReplayMode()
+        elseif Input:isAnyDeviceKeyDown("repslow") then
+            self:setPlaybackSpeed(0.25)
+        elseif Input:isAnyDeviceKeyDown("repfast") then
+            self:setPlaybackSpeed(4)
+        end
+    end
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -198,7 +228,8 @@ function Stage:createNextGameScene()
 
         next_init_state.random_seed = cur_init_state.random_seed  -- use the same random seed
         next_init_state.score = self:getScore()  -- set the start score of next stage the same as the current score
-        ---TOBEADDED: initialize player info as well
+        next_init_state.player_init_state.x = self.player.x
+        next_init_state.player_init_state.y = self.player.y
 
         -- update the scene group
         local scene_group = self.scene_group
