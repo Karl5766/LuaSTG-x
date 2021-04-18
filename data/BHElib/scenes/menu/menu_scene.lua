@@ -19,6 +19,7 @@ local SceneInitState = require("BHElib.scenes.stage.state_of_scene_init")
 local ReplayFileReader = require("BHElib.input.replay_file_reader")
 local FileStream = require("util.file_stream")
 local Prefab = require("BHElib.prefab")
+local Ustorage = require("util.universal_id")
 
 ---------------------------------------------------------------------------------------------------
 ---task spec format
@@ -137,7 +138,7 @@ function Menu:createNextGameScene()
 
     -- find the stage class of the first stage
     local stage_id = next_scene_group:getCurrentSceneId()
-    local StageClass = GetLuaClassById(stage_id)
+    local StageClass = Ustorage:getById(stage_id)
 
     local next_stage = StageClass(scene_init_state, next_scene_group)
     return next_stage

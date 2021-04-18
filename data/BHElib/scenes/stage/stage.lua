@@ -22,6 +22,7 @@ local SceneTransition = require("BHElib.scenes.scene_transition")
 local _input = require("BHElib.input.input_and_recording")
 local GameSceneInitState = require("BHElib.scenes.stage.state_of_scene_init")
 local SceneGroup = require("BHElib.scenes.stage.scene_group")
+local Ustorage = require("util.universal_id")
 
 ---------------------------------------------------------------------------------------------------
 ---const
@@ -204,7 +205,7 @@ function Stage:createNextGameScene()
         scene_group:completeCurrentScene(cur_init_state)
         scene_group:advanceScene()
         local stage_id = self.scene_group:getCurrentSceneId()
-        local StageClass = GetLuaClassById(stage_id)
+        local StageClass = Ustorage:getById(stage_id)
 
         -- pass over the scene group object and create the next stage
         local next_stage = StageClass(next_init_state, scene_group)
@@ -219,7 +220,7 @@ function Stage:createNextGameScene()
 
         -- find the first stage class
         local stage_id = next_scene_group:getCurrentSceneId()
-        local StageClass = GetLuaClassById(stage_id)
+        local StageClass = Ustorage:getById(stage_id)
 
         local next_stage = StageClass(next_init_state, next_scene_group)
         return next_stage

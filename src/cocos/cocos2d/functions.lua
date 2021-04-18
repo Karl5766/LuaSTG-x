@@ -22,9 +22,8 @@ THE SOFTWARE.
 
 ]]
 --- modifier:
----     Karl, 2021.4.4, added LuaClass() and GetLuaClass() as a wrapper of class()
----     The motivation of this change is from the need to remember a stage class/ player class in a replay
----     where classes can not be directly written to files, and need to be referenced as strings
+---     Karl, 2021.4.15, Add LuaClass() as a wrapper of class, in case later the
+---     implementation needs to be changed
 
 function printLog(tag, fmt, ...)
     local t = {
@@ -272,15 +271,7 @@ function class(classname, ...)
     return cls
 end
 
----a table for referencing classes with string ids
-local all_lua_classes = {}
-
----return the lua class with the given unique id
----@param class_id string id of the class to be found
----@return table the class to be found; if no class is found, return nil
-function GetLuaClassById(class_id)
-    return all_lua_classes[class_id]
-end
+local Ustorage = require("util.universal_id")
 
 ---create a lua class of the given name; zero or more super classes may be specified
 ---objects of the new class will have [".classname"] set as the given classname.
@@ -291,10 +282,7 @@ end
 ---@param ... parameters specifies an optional list of super classes; super classes must be of type table
 function LuaClass(class_id, ...)
     local new_class = class(class_id, ...)
-    if all_lua_classes[class_id] then
-        error("class "..class_id.." already exists!")
-    end
-    all_lua_classes[class_id] = new_class
+    Ustorage:store(new_class, class_id)
     return new_class
 end
 
