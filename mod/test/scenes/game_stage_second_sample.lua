@@ -32,32 +32,22 @@ function SampleStage:cleanup()
 end
 
 local _input = require("BHElib.input.input_and_recording")
-
-local Bullet = Prefab.New(Prefab.Object)
-Bullet.frame = task.Do
-function Bullet:init(x, y, vx, vy, color)
-    self.x = x
-    self.y = y
-    self.vx = vx
-    self.vy = vy
-    self.img = "img:ball_mid"..int(1)
-    self.group = GROUP_ENEMY_BULLET
-    self.resImg = FindResSprite(self.img)
-    self.color = color
-    --self.resImg:setColor(self.color)
-end
-
-Bullet.render = DefaultRenderFunc
+local BulletPrefabs = require("BHElib.units.enemy_bullet.bullet_prefabs")
+local BulletTypes = require("BHElib.units.enemy_bullet.bullet_types")
 
 function SampleStage:update(dt)
     Stage.update(self, dt)
 
     for i = 1, 9 do
         local a = ran:Float(0, 360)
-        if self.timer < 3 then
-            print(a)
-        end
-        New(Bullet, 0, 125, 4.5 * cos(a), 4.5 * sin(a), Color(255, ran:Int(0, 255), ran:Int(0, 255), 255))
+        local bullet_type_name = "grain"
+        local bullet_info = BulletTypes.bullet_type_to_info[bullet_type_name]
+        local b = BulletPrefabs.Base("ball", COLOR_BLUE, GROUP_ENEMY_BULLET, 11, bullet_info.size)
+        b.x = 0
+        b.y = 120
+        b.vx = 4 * cos(a)
+        b.vy = 4 * sin(a)
+        b.rot = a
     end
 end
 

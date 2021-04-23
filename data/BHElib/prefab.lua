@@ -172,6 +172,8 @@ end
 ---@~English the base prefab of all game objects
 ---@type Prefab
 local DefaultFrameFunc = function() end
+
+---@class prefab.Object
 Prefab.Object = {
     0, 0, 0, 0, 0, 0;
     is_class = true,
@@ -191,6 +193,7 @@ Prefab.Register(Prefab.Object)
 ---------------------------------------------------------------------------------------------------
 ---Object3d
 
+---@class prefab.Object3d:prefab.Object
 Prefab.Object3d = Prefab.New(Prefab.Object)
 Prefab.Object3d['.3d'] = true
 Prefab.Register(Prefab.Object3d)
@@ -198,7 +201,7 @@ Prefab.Register(Prefab.Object3d)
 ---------------------------------------------------------------------------------------------------
 ---Renderer
 
-local SetRenderView = require("BHElib.coordinates_and_screen").setRenderView
+---@class prefab.Renderer:prefab.Object
 Prefab.Renderer = Prefab.New(Prefab.Object)
 function Prefab.Renderer:init(layer, master, coordinates_name)
     self.group = GROUP_GHOST
@@ -207,6 +210,7 @@ function Prefab.Renderer:init(layer, master, coordinates_name)
     self.coordinates_name = coordinates_name
 end
 
+local SetRenderView = require("BHElib.coordinates_and_screen").setRenderView
 function Prefab.Renderer:render()
     local master = self.master
     SetRenderView(self.coordinates_name)

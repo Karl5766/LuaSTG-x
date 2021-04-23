@@ -42,7 +42,6 @@ function SampleStage:createScene()
     lb:setAnchorPoint(cc.p(0, 0.5))
     lb:setPosition(cc.p(5, 0))
     exit_button:addTouchEventListener(function(self, arg)
-        print(arg)
     end)
     exit_button:setName("button_exit2")
     exit_button:setPosition(cc.p(500, 200))
@@ -70,35 +69,22 @@ function SampleStage:cleanup()
 end
 
 local _input = require("BHElib.input.input_and_recording")
-
-local Bullet = Prefab.NewX(Prefab.Object)
-Bullet.frame = task.Do
-function Bullet:init(x, y, vx, vy, color)
-    self.x = x
-    self.y = y
-    self.vx = vx
-    self.vy = vy
-    self.img = "img:ball_mid"..int(1)
-    self.group = GROUP_ENEMY_BULLET
-    self.resImg = FindResSprite(self.img)
-    self.color = color
-    --self.resImg:setColor(self.color)
-end
-
-Bullet.render = DefaultRenderFunc
---function Bullet:render()
---    --self.resImg:setColor(self.color)
---    --Render(self.img, self.x, self.y, self.rot, self.hscale, self.vscale, 0.5)
---    --self.resImg:render(self.x, self.y, self.rot, self.hscale * factor, self.vscale * factor, 0.5)
---    DefaultRenderFunc(self)
---end
+local BulletPrefabs = require("BHElib.units.enemy_bullet.bullet_prefabs")
+local BulletTypes = require("BHElib.units.enemy_bullet.bullet_types")
 
 function SampleStage:update(dt)
     Stage.update(self, dt)
 
     for i = 1, 7 do
         local a = ran:Float(0, 360)
-        New(Bullet, 0, 120, 4 * cos(a), 4 * sin(a), Color(255, 255, 255, 200))
+        local bullet_type_name = "grain"
+        local bullet_info = BulletTypes.bullet_type_to_info[bullet_type_name]
+        local b = BulletPrefabs.Base("grain", COLOR_BLUE, GROUP_ENEMY_BULLET, 11, bullet_info.size)
+        b.x = 0
+        b.y = 120
+        b.vx = 4 * cos(a)
+        b.vy = 4 * sin(a)
+        b.rot = a
     end
 end
 

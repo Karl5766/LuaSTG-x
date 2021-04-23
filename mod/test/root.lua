@@ -68,6 +68,9 @@ local function Init()
     -- initialize the entire library
     require("BHElib_init")
 
+    -- initialize units
+    require("BHElib.units.enemy_bullet.bullet_types"):init()  -- load resources & init local variables
+
     -- initialize all stage classes
     require("scenes.game_stage_sample")
     require("scenes.game_stage_second_sample")

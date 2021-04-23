@@ -68,7 +68,6 @@ function M.goToNextScene(scene_from)
 end
 
 ---------------------------------------------------------------------------------------------------
----predefined transition callback
 
 ---@param self SceneTransition
 ---@param scene_from GameScene the current game scene
