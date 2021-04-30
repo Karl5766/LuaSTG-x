@@ -199,7 +199,6 @@ function class(classname, ...)
             assert(cls.__create == nil,
                    string.format("class() - create class \"%s\" with more than one creating function",
                                  classname));
-            -- if super is function, set it to __create
             cls.__create = super
         elseif superType == "table" then
             if super[".isclass"] then

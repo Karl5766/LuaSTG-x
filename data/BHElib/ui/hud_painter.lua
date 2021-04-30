@@ -168,9 +168,7 @@ function M.drawKeys()
     --mouse text
     do
         local x, y = _input:getMousePosition()
-        local offx, offy = _coordinates.getUIOriginInRes()
-        local sx, sy = _coordinates.getUIScale()
-        x, y = x - offx / sx, y - offy / sy
+        x, y = _coordinates.resToUI(x, y)
         if _input:isMousePressed() then
             RenderTTF("font:menu", "mouse pressed", x, x, y, y, comment_color, "left")
         else
@@ -179,9 +177,8 @@ function M.drawKeys()
     end
     do
         local x, y = _input:getRecordedMousePosition()
-        local offx, offy = _coordinates.getUIOriginInRes()
-        local sx, sy = _coordinates.getUIScale()
-        x, y = x - offx / sx, y - offy / sy - 20
+        x, y = _coordinates.resToUI(x, y)
+        y = y - 20
         if _input:isRecordedMousePressed() then
             RenderTTF("font:menu", "mouse pressed (recorded)", x, x, y, y, comment_color, "left")
         else

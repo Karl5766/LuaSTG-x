@@ -9,6 +9,22 @@
 ---@class BulletTypes
 local M = {}
 
+---contains information about a given bullet type
+---has 3 attributes:
+---color_to_sprite_name (table) - map from color to the sprite name
+---sprite_array_name (string) - name of sprite array
+---size (number) - size of visual effect
+M.bullet_type_to_info = {}
+local bullet_type_to_info = M.bullet_type_to_info
+
+---color_index to image name of the blink effect
+M.color_index_to_blink_effects = {}
+local color_index_to_blink_effects = M.color_index_to_blink_effects
+
+---color_index to animation name of the cancel effect
+M.color_index_to_cancel_effects = {}
+local color_index_to_cancel_effects = M.color_index_to_cancel_effects
+
 ---------------------------------------------------------------------------------------------------
 ---bullets
 
@@ -85,22 +101,6 @@ COLOR_GOLDEN_YELLOW = 13
 COLOR_ORANGE = 14
 COLOR_DEEP_GRAY = 15
 COLOR_GRAY = 16
-
----contains information about a given bullet type
----has 3 attributes:
----color_to_sprite_name (table) - map from color to the sprite name
----sprite_array_name (string) - name of sprite array
----size (number) - size of visual effect
-M.bullet_type_to_info = {}
-local bullet_type_to_info = M.bullet_type_to_info
-
----color_index to image name of the blink effect
-M.color_index_to_blink_effects = {}
-local color_index_to_blink_effects = M.color_index_to_blink_effects
-
----color_index to animation name of the cancel effect
-M.color_index_to_cancel_effects = {}
-local color_index_to_cancel_effects = M.color_index_to_cancel_effects
 
 
 ---------------------------------------------------------------------------------------------------

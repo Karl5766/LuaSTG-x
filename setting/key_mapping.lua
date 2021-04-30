@@ -147,9 +147,9 @@ end
 
 local _GetMousePosition = lstg.GetMousePosition
 local _glv = cc.Director:getInstance():getOpenGLView()
----@~chinese 获取鼠标的screen坐标系位置，以窗口左下角为原点。
+---@~chinese 获取鼠标的resolution坐标系位置，以窗口左下角为原点。
 ---
----@~english Get mouse position in screen coordinates starts from the bottom left of the window.
+---@~english Get mouse position in resolution coordinates starts from the bottom left of the window.
 ---
 ---@return number,number
 function M:getMousePosition()
@@ -159,9 +159,9 @@ function M:getMousePosition()
     y = res.height - y
     x = x + rect.x / _glv:getScaleX()
     y = y + rect.y / _glv:getScaleY()
-    local ui_scale_x, ui_scale_y = require("BHElib.coordinates_and_screen").getUIScale()
-    x = x / ui_scale_x
-    y = y / ui_scale_y
+    --local ui_scale_x, ui_scale_y = require("BHElib.coordinates_and_screen").getUIScale()
+    --x = x / ui_scale_x
+    --y = y / ui_scale_y
     return x, y
 end
 

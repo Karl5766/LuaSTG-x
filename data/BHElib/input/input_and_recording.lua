@@ -188,11 +188,13 @@ function M:isAnyRecordedKeyDown(function_key_name)
     return false
 end
 
+---get the position of the mouse expressed in resolution coordinates
 ---@return number, number x, y position of the mouse
 function M:getMousePosition()
     return _mouse_states[4], _mouse_states[5]
 end
 
+---get the recorded position of the mouse expressed in resolution coordinates
 ---@return number, number recorded x, y position of the mouse
 function M:getRecordedMousePosition()
     return _recorded_mouse_states[4], _recorded_mouse_states[5]
@@ -252,7 +254,7 @@ end
 
 ---return if the mouse is just pressed/released
 ---@param is_recorded boolean if true, return device input; if false return recorded input
----@param is_down boolean if true, return if the button is just pressed; otherwise return if the key is just released
+---@param is_down boolean if true, return if the button is just pressed; if false, return if the key is just released; if nil, return true if either case occurs
 function M:isMouseButtonJustChanged(is_recorded, is_down)
     local states = _mouse_states
     local prev_states = _prev_mouse_states
@@ -262,10 +264,23 @@ function M:isMouseButtonJustChanged(is_recorded, is_down)
     end
 
     local mouse_is_pressed_on_last_frame = prev_states ~= nil and prev_states[1]
-    if is_down then
+    if is_down == true then
         return states[1] and not mouse_is_pressed_on_last_frame
-    else
+    elseif is_down == false then
         return not states[1] and mouse_is_pressed_on_last_frame
+    else  -- is_down = nil
+        return states[1] ~= mouse_is_pressed_on_last_frame
+    end
+end
+
+---get position change of the mouse over the previous frame in resolution coordinates
+---@param is_recorded boolean if true, return device input; if false return recorded input
+---@return number, number position change of the mouse in form x, y
+function M:getMousePositionChange(is_recorded)
+    if is_recorded then
+        return _recorded_mouse_states[4] - _prev_recorded_mouse_states[4], _recorded_mouse_states[5] - _prev_recorded_mouse_states[5]
+    else
+        return _mouse_states[4] - _prev_mouse_states[4], _mouse_states[5] - _prev_mouse_states[5]
     end
 end
 
