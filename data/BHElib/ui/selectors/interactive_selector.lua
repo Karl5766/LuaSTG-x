@@ -21,12 +21,15 @@ M.OTHER = 5
 
 ---------------------------------------------------------------------------------------------------
 
-function M.__create()
+---@param selection_input InputManager the object for this selector to receive input from
+function M.__create(selection_input)
     local self = {}
     self.is_selecting = false  -- default not active
     self.selected_choice = nil
-    self.ani_state = M.OTHER
+    self.transition_state = M.OTHER
     self.transition_progress = 0
+    self.timer = 0
+    self.selection_input = selection_input
     return self
 end
 
@@ -39,9 +42,9 @@ function M:isSelecting()
     return self.is_selecting
 end
 
----@param ani_state number a constant indicating the state of the selector about transitioning, E.g. IN_FORWARD
-function M:setTransition(ani_state)
-    self.ani_state = ani_state
+---@param state_const number a constant indicating the state of the selector about transitioning, E.g. IN_FORWARD
+function M:setTransition(state_const)
+    self.transition_state = state_const
 end
 
 ---set the transition state of the selector
@@ -52,6 +55,7 @@ end
 
 ---@param dt number time elapsed since last update
 function M:update(dt)
+    self.timer = self.timer + dt
 end
 
 return M

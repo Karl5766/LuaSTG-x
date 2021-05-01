@@ -8,7 +8,7 @@
 
 local _include_list = {
     "BHElib.const",  -- defines some constant values
-    "BHElib.status",
+    "BHElib.object_status",
 
     -- input
     "BHElib.input.input_and_recording",

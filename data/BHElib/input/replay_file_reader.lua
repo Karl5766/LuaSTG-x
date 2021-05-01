@@ -31,7 +31,7 @@ function ReplayFileReader.__create(stream, init_scene_num)
     return self
 end
 
----initialize an index of cursor position from reading the replay file
+---initialize an index of cursor positions from reading the replay file
 function ReplayFileReader:initReplayIndex()
     local file_reader = self.file_reader
     local stream = self.stream

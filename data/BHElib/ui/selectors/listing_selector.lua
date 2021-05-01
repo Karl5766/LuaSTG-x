@@ -14,12 +14,29 @@ local M = LuaClass("selectors.ListingSelector", InteractiveSelector)
 local Vec2 = math.vec2
 
 ---------------------------------------------------------------------------------------------------
+---virtual methods
+
+---retrieve the absolute position of the item of given index; the value of decimal input change may vary smoothly
+---between index for smooth transition of selection
+---@param index number index of the item; if this is not integer, then the result should given some interpolation between adjacent indices
+---M:getListingPos(index)
+
+---move the focus over to a (new) item
+---@param index number new index before range checking; can be out of range
+---M:moveFocus(index)
+
+---if the focused index is outside the range of the list, execute warping so it is inside the list
+---M:warpFocusedIndex()
+
+---------------------------------------------------------------------------------------------------
 
 ---@param focused_index number index of the selected item when the selector is created
-function M.__create(focused_index)
-    local self = InteractiveSelector.__create()
+---@param init_pos_offset math.vec2 initial position offset
+---@param selection_input InputManager the object for this selector to receive input from
+function M.__create(selection_input, focused_index, init_pos_offset)
+    local self = InteractiveSelector.__create(selection_input)
     self.focused_index = focused_index
-    self.pos_offset = Vec2(0, 0)
+    self.pos_offset = init_pos_offset
     return self
 end
 
@@ -33,16 +50,4 @@ function M:getPositionOffset()
     return self.pos_offset
 end
 
----retrieve the absolute position of the item of given index; the value of decimal input change may vary smoothly
----between index for smooth transition of selection
----@param index number index of the item; if this is not integer, then the result should given some interpolation between adjacent indices
-function M:getListingPos(index)
-end
-
----move the focus over to a (new) item
----@param diff_index number raw change in index before range checking; positive means forward change; negative means backward change; can be 0
-function M:moveFocus(diff_index)
-end
-
-function M:warpFocusedIndex()
-end
+return M
