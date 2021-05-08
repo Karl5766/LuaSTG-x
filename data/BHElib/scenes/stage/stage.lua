@@ -61,11 +61,6 @@ function Stage.__create(scene_init_state, scene_group)
     return self
 end
 
----@return string scene type
-function Stage:getSceneType()
-    return "stage"
-end
-
 ---------------------------------------------------------------------------------------------------
 ---setters and getters
 
@@ -267,19 +262,19 @@ end
 ---go to the next stage
 function Stage:goToNextStage()
     self.transition_type = Stage.GO_TO_NEXT_STAGE
-    SceneTransition.transitionTo(self, SceneTransition.instantTransition)
+    SceneTransition.transitionFrom(self, SceneTransition.instantTransition)
 end
 
 ---ends the play-through and go back to menu
 function Stage:completeSceneGroup()
     self.transition_type = Stage.BACK_TO_MENU
-    SceneTransition.transitionTo(self, SceneTransition.instantTransition)
+    SceneTransition.transitionFrom(self, SceneTransition.instantTransition)
 end
 
 ---restart the scene group
 function Stage:restartSceneGroup()
     self.transition_type = Stage.RESTART_SCENE_GROUP
-    SceneTransition.transitionTo(self, SceneTransition.instantTransition)
+    SceneTransition.transitionFrom(self, SceneTransition.instantTransition)
 end
 
 ---go to next stage or end play-through depending on the progress in the scene group

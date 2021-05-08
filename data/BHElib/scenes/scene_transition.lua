@@ -36,7 +36,7 @@ end
 ---the transition may not be executed in this frame, depending on whether or not transition_callback wait
 ---@param scene_from GameScene
 ---@param transition_callback function(self, scene_from) create task under self that manages transition effect and waiting
-function M.transitionTo(scene_from, transition_callback)
+function M.transitionFrom(scene_from, transition_callback)
     _scene_from = scene_from
 
     assert(_scene_from, "ERROR: scene transition, current scene not set!")
@@ -53,18 +53,24 @@ local director = cc.Director:getInstance()
 ---and call cocos director's replaceScene() to replace the next scene with the current scene
 ---@param scene_from GameScene the current game scene
 ---@return GameScene a new game scene created by scene from
-function M.goToNextScene(scene_from)
+local function GoToNextScene(scene_from)
     -- start the next scene
     local scene_to = _scene_from:createNextGameScene()
 
     scene_from:cleanup()  -- cleanup the scene
 
+    if scene_to == nil then -- no scene to go to; end the current scene and quit the game in this case
+        -- create an empty scene as dummy scene
+        local GameScene = require("BHElib.scenes.game_scene")
+        scene_to = GameScene()
+
+        -- set quit flag as true
+        lstg.quit_flag = true
+    end
     local cocos_scene = scene_to:createScene()
     director:replaceScene(cocos_scene)
 
     _scene_from = nil
-
-    return scene_to
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -73,7 +79,7 @@ end
 ---@param scene_from GameScene the current game scene
 function M.instantTransition(self, scene_from)
     TaskNew(self, function()
-        M.goToNextScene(scene_from)
+        GoToNextScene(scene_from)
     end)
 end
 

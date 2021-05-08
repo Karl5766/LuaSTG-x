@@ -175,6 +175,11 @@ function M.getUIOriginInRes()
     return _ui_x, _ui_y
 end
 
+function M.getScreenCenterInUI()
+    local w, h = GetResolution()
+    return (w * 0.5 - _ui_x) / _ui_x_unit, (h * 0.5 - _ui_y) / _ui_y_unit
+end
+
 ---return the scale of game coordinates in respect to the resolution
 ---@return number, number the scaling factors in x, y direction (in pixel)
 function M.getGameScale()

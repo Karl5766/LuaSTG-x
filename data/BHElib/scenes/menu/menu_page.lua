@@ -1,177 +1,103 @@
 ---------------------------------------------------------------------------------------------------
 ---menu_page.lua
 ---author: Karl
----date: 2021.3.6
----references: THlib/UI/menu.lua
----desc: implements the MenuPage objects
+---date: 2021.5.1
+---desc: implements the simple default behaviors of MenuPage objects
 ---------------------------------------------------------------------------------------------------
 
-local _menu_const = {
-    font_size           = 0.625,
-    line_height         = 24,
-    char_width          = 20,
-    num_width           = 12.5,
-    title_color         = { 255, 255, 255 },
-    unfocused_color     = { 128, 128, 128 },
-    --unfocused_color={255,255,255},
-    focused_color1      = { 255, 255, 255 },
-    focused_color2      = { 255, 192, 192 },
-    blink_speed         = 7,
-    shake_time          = 9,
-    shake_speed         = 40,
-    shake_range         = 3,
-    --符卡练习每页行数
-    sc_pr_line_per_page = 12,
-    -- 符卡练习每行高度
-    sc_pr_line_height   = 22,
-    --符卡练习每行宽度
-    sc_pr_width         = 320,
-    sc_pr_margin        = 8,
-    rep_font_size       = 0.6,
-    rep_line_height     = 20,
-}
+local MenuPage = LuaClass("menu.MenuPage")
 
-local _input = require("BHElib.input.input_and_recording")
+local InteractiveSelector = require("BHElib.ui.selectors.interactive_selector")
 local Prefab = require("BHElib.prefab")
 
--------------------------------------------------------------------------------------------------
----cache functions
+---------------------------------------------------------------------------------------------------
 
-local Insert = table.insert
+---@param selector InteractiveSelector the selector used in this menu page
+function MenuPage.__create(selector)
+    local self = {
+        selector = selector,
+    }
+    self.renderer = New(Prefab.Renderer, LAYER_MENU, self, "ui")
 
--------------------------------------------------------------------------------------------------
----base object class
-
----@class MenuPage:Object
-Prefab.MenuPage = Prefab.NewX(Prefab.Object)
-local MenuPage = Prefab.MenuPage
-
----@param title_text string display title
----@param option_callback table an array of selection callbacks for each option
----@param init_select_index number initial selected option index
-function MenuPage:init(title_text, option_callback, init_select_index)
-    self.layer = LAYER_MENU
-    self.group = GROUP_GHOST
-    self.alpha = 1
-    self.bound = false
-
-    self.locked = true
-    self.hide = true
-    self.title_text = title_text
-    self.num_options = #option_callback  -- number of options in the menu
-    self.option_callback = option_callback
-    self.select_index = init_select_index
+    return self
 end
 
----freeze or unfreeze user input
----@param accept_input boolean if true, freeze user input; if false, unfreeze user input
-function MenuPage:setAcceptInput(accept_input)
-    self.locked = not accept_input
+---@param state_const number a constant indicating the state of the selector about transitioning, E.g. IN_FORWARD
+function MenuPage:setTransition(state_const)
+    self.selector:setTransition(state_const)
 end
 
-function MenuPage:playSelectSound()
-    -- PlaySound("sound:select00", 0.3)
+---set the rate of increase of transition progress per frame
+function MenuPage:setTransitionVelocity(transition_velocity)
+    self.selector:setTransitionVelocity(transition_velocity)
 end
 
-function MenuPage:playMoveOptionSound()
-    -- PlaySound("sound:ok00", 0.3)
+---set the rate of increase of transition progress by frames required to go from completely hidden to shown
+function MenuPage:transitionInWithTime(time)
+    self.selector:setTransitionInWithTime(time)
 end
 
-Prefab.Register(MenuPage)
+---set the rate of increase of transition progress by frames required to go from completely shown to hidden
+function MenuPage:transitionOutWithTime(time)
+    self.selector:setTransitionOutWithTime(time)
+end
 
--------------------------------------------------------------------------------------------------
+function MenuPage:resetSelection(is_selecting)
+    self.selector:resetSelection(is_selecting)
+end
 
----@class SimpleTextMenuPage:MenuPage
-Prefab.SimpleTextMenuPage = Prefab.NewX(MenuPage)
-local SimpleTextMenuPage = Prefab.SimpleTextMenuPage
+function MenuPage:isInputEnabled()
+    return self.selector:isInputEnabled()
+end
 
----@param title string display title
----@param num_options number number of options in the menu
----@param option_content table an array of menu options of the form {option_text, option_callback}
-function SimpleTextMenuPage:init(title_text, option_content, init_select_index)
-    local text_array = {}
-    local callback_array = {}
-    for i = 1, #option_content do
-        Insert(text_array, option_content[i][1])
-        Insert(callback_array, option_content[i][2])
+function MenuPage:continueMenu()
+    return self.selector:getTransitionProgress() ~= 0
+end
+
+function MenuPage:update(dt)
+    self.selector:update(dt)
+end
+
+function MenuPage:processInput()
+    self.selector:processInput()
+end
+
+function MenuPage:render()
+    self.selector:render()
+end
+
+function MenuPage:cleanup()
+    Del(self.renderer)
+end
+
+function MenuPage:getChoice()
+    return self.selector:getChoice()
+end
+
+---set a menu page to entering state; can be set on an already entering menu
+---@param transition_speed number a positive number indicating the rate of transition per frame
+function MenuPage:setPageEnter(is_forward, transition_speed)
+    local selector = self.selector
+    selector:resetSelection(true)
+    if is_forward then
+        selector:setTransition(InteractiveSelector.IN_FORWARD)
+    else
+        selector:setTransition(InteractiveSelector.IN_BACKWARD)
     end
-
-    self.option_text_array = text_array
-    self.shake_timer = 0
-    self.blink_timer = 0
-    MenuPage.init(self, title_text, callback_array, init_select_index)  -- call base class initializer
+    selector:setTransitionVelocity(transition_speed)
 end
 
----move the position of the selected option index by the given difference
----@param index_diff number index difference between the new index and the current index
-function SimpleTextMenuPage:moveOption(index_diff)
-    local new_index = self.select_index + index_diff
-
-    -- handles boundary condition, warp the index
-    self.select_index = (new_index - 1) % self.num_options + 1
-
-    self:playMoveOptionSound()
-
-    self.shake_timer = _menu_const.shake_time
+---set a menu page to exiting state; can be set on an already exiting menu
+---@param transition_speed number a positive number indicating the rate of transition per frame
+function MenuPage:setPageExit(is_forward, transition_speed)
+    local selector = self.selector
+    selector:resetSelection(false)
+    if is_forward then
+        selector:setTransition(InteractiveSelector.OUT_FORWARD)
+    else
+        selector:setTransition(InteractiveSelector.OUT_BACKWARD)
+    end
+    selector:setTransitionVelocity(-transition_speed)
 end
 
----test for and process user input on the menu
-function SimpleTextMenuPage:processUserInput()
-    -- moving through options
-    local index_diff = 0
-    if _input:isAnyDeviceKeyJustChanged("up", false, true) then
-        index_diff = -1
-    end
-    if _input:isAnyDeviceKeyJustChanged("down", false, true) then
-        index_diff = 1
-    end
-    if index_diff ~= 0 then
-        self:moveOption(index_diff)
-    end
-
-    -- selecting an option
-    if _input:isAnyDeviceKeyJustChanged("select", false, true) then
-        local selected_option_callback = self.option_callback[self.select_index]
-        selected_option_callback()
-        self:playSelectSound()
-    end
-end
-
-function SimpleTextMenuPage:frame()
-    task.PropagateDo(self)
-    self.shake_timer = max(self.shake_timer - 1, 0)
-
-    if self.locked then
-        return
-    end
-    -- below deals with user input
-
-    self:processUserInput()
-end
-
-local _menu_painter = require("BHElib.ui.menu_painter")
----draw the menu page
-function SimpleTextMenuPage:render()
-    _menu_painter.drawTextMenuPage(
-            "font:menu",
-            self.title_text,
-            _menu_const.title_color,
-            self.option_text_array,
-            _menu_const.unfocused_color,
-            _menu_const.focused_color1,
-            _menu_const.focused_color2,
-            _menu_const.line_height,
-            self.select_index,
-            self.x,
-            self.y,
-            self.alpha,
-            self.timer,
-            _menu_const.blink_speed,
-            self.shake_timer,
-            _menu_const.shake_range,
-            _menu_const.shake_speed,
-            {"center"}  -- see resources.lua
-    )
-end
-
-Prefab.Register(SimpleTextMenuPage)
+return MenuPage

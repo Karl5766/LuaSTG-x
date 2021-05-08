@@ -10,6 +10,11 @@
 local M = LuaClass("selectors.InteractiveSelector")
 
 ---------------------------------------------------------------------------------------------------
+---cache variables and functions
+
+local clamp = math.clamp
+
+---------------------------------------------------------------------------------------------------
 ---constants
 
 M.IN_FORWARD = 1
@@ -28,18 +33,24 @@ function M.__create(selection_input)
     self.selected_choice = nil
     self.transition_state = M.OTHER
     self.transition_progress = 0
+    self.transition_velocity = 0
     self.timer = 0
     self.selection_input = selection_input
     return self
 end
 
-function M:resetSelection()
-    self.is_selecting = true
+---@param is_selecting boolean true if the selection should start/continue; false if the selection should not continue
+function M:resetSelection(is_selecting)
+    self.is_selecting = is_selecting
     self.selected_choice = nil
 end
 
-function M:isSelecting()
+function M:isInputEnabled()
     return self.is_selecting
+end
+
+function M:getChoice()
+    return self.selected_choice
 end
 
 ---@param state_const number a constant indicating the state of the selector about transitioning, E.g. IN_FORWARD
@@ -53,9 +64,34 @@ function M:setTransitionProgress(t)
     self.transition_progress = t
 end
 
+---@return number transition progress from 0 to 1
+function M:getTransitionProgress()
+    return self.transition_progress
+end
+
+---set the rate of increase of transition progress per frame
+function M:setTransitionVelocity(transition_velocity)
+    self.transition_velocity = transition_velocity
+end
+
+---set the rate of increase of transition progress by frames required to go from completely hidden to shown
+function M:transitionInWithTime(time)
+    self.transition_velocity = 1 / time
+end
+
+---set the rate of increase of transition progress by frames required to go from completely shown to hidden
+function M:transitionOutWithTime(time)
+    self.transition_velocity = -1 / time
+end
+
 ---@param dt number time elapsed since last update
 function M:update(dt)
     self.timer = self.timer + dt
+    self.transition_progress = clamp(self.transition_progress + self.transition_velocity, 0, 1)
+end
+
+---test for and process user input on the menu
+function M:processInput()
 end
 
 return M

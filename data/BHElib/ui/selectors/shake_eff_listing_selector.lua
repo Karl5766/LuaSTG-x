@@ -62,10 +62,14 @@ end
 ---@param dt number time elapsed since last update
 function M:updateShakeTimer(dt)
     local selectable_array = self.selectable_array
-    for i = 1, self.num_selectable do
+    for i = 1, #selectable_array do
         local selectable = selectable_array[i]
         selectable.timer = selectable.timer + dt
     end
+end
+
+---to be overridden
+function M:getListingPos(index)
 end
 
 ---return the position of a selectable item after apply the shake effect position offset
@@ -75,12 +79,12 @@ function M:getListingPosAfterShakeEff(index)
 
     local t = self.shake_max_time - selectable.timer
     local raw_pos = self:getListingPos(index)
-    if t > 0 then
+    if t < 0 then
         -- shake effect has ended
         return raw_pos
     else
         -- modify the raw position, accounting for the shaking effect
-        local x_offset = self.shake_amplitude * sin(t / self.shake_period)
+        local x_offset = self.shake_amplitude * sin(t / self.shake_period * 180)
         return raw_pos + Vec2(x_offset, 0)
     end
 end

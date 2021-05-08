@@ -73,3 +73,5 @@ function M:render(x, y)
             unpack(self.font_align)
     )
 end
+
+return M

@@ -19,11 +19,6 @@ local Prefab = require("BHElib.prefab")
 local floor = math.floor
 
 ---------------------------------------------------------------------------------------------------
----virtual methods
-
----virtual GameScene:getSceneType()
-
----------------------------------------------------------------------------------------------------
 
 ---GameScene object constructor
 ---@return GameScene a GameScene object

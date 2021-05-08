@@ -41,13 +41,8 @@ function M.__create(selection_input, focused_index, init_pos_offset)
 end
 
 ---@param pos_offset math.vec2
-function M:setPositionOffset(pos_offset)
+function M:setPosition(pos_offset)
     self.pos_offset = pos_offset
-end
-
----@return math.vec2
-function M:getPositionOffset()
-    return self.pos_offset
 end
 
 return M
