@@ -11,6 +11,7 @@ local ShakeEffListingSelector = require("BHElib.ui.selectors.shake_eff_listing_s
 local M = LuaClass("selectors.SimpleMenuSelector", ShakeEffListingSelector)
 
 local InteractiveSelector = require("BHElib.ui.selectors.interactive_selector")
+local MenuConst = require("BHElib.scenes.menu.menu_const")
 
 ---------------------------------------------------------------------------------------------------
 ---cache variables and functions
@@ -29,8 +30,8 @@ local Selectable = M.Selectable
 ---@param init_timer_value number the initial time value of the shaking timer
 ---@param text string text to display
 ---@param choices any describes result of selecting the item
-function Selectable.__create(init_timer_value, text, choices)
-    local self = ShakeEffListingSelector.Selectable(init_timer_value)
+function Selectable.__create(text, choices)
+    local self = ShakeEffListingSelector.Selectable(math.huge)
     self.text = text
     self.choices = choices
     return self
@@ -96,6 +97,13 @@ end
 ---@param pos_offset math.vec2
 function M:setPosition(pos_offset)
     self.init_pos_offset = pos_offset
+    self:updatePosition()
+end
+
+function M:continueMenu()
+    local state = self.transition_state
+    local del_flag = self:getTransitionProgress() == 0 and (state == MenuConst.OUT_BACKWARD or state == MenuConst.OUT_FORWARD)
+    return not del_flag
 end
 
 function M:isInputEnabled()
@@ -108,6 +116,10 @@ function M:update(dt)
 
     self:updateShakeTimer(dt)
 
+    self:updatePosition()
+end
+
+function M:updatePosition()
     -- calculate position of the menu by transition progress
     local base_pos = self.init_pos_offset
     local p = self.transition_progress
@@ -167,6 +179,71 @@ function M:render()
         body_text_obj:set_text(self.selectable_array[index].text)
         body_text_obj:render(item_pos.x, item_pos.y)
     end
+end
+
+local Input = require("BHElib.input.input_and_recording")
+local MenuConst = require("BHElib.scenes.menu.menu_const")
+local TextObject = require("BHElib.ui.text_object")
+
+---@param init_focused_index number initial value of the selected index
+---@param scale number scaling of the displayed text size and line height
+---@param fly_distance number distance of travelling when transition in/out
+---@param relative_pos math.vec2 relative position of the menu page
+---@param selectable_array table an array of SimpleMenuSelector.Selectable objects
+---@param menu_page_title string text title of the page
+function M.shortInit(init_focused_index, scale, fly_distance, relative_pos, selectable_array, menu_page_title, enter_dir, exit_dir)
+    -- create simple menu selector
+    local text_line_height = MenuConst.line_height * scale
+    local text_align = {"center"}
+    local title_color = MenuConst.title_color
+    local title_text_object = TextObject(
+            menu_page_title,
+            Color(title_color.w, title_color.x, title_color.y, title_color.z),
+            MenuConst.font_name,
+            MenuConst.font_size * scale,
+            text_align
+    )
+    local body_text_object = TextObject(
+            nil,
+            nil,
+            MenuConst.font_name,
+            MenuConst.font_size * scale,
+            text_align
+    )
+    local transition_fly_directions = {
+        [InteractiveSelector.IN_FORWARD] = enter_dir or -180,
+        [InteractiveSelector.IN_BACKWARD] = exit_dir or 0,
+        [InteractiveSelector.OUT_FORWARD] = exit_dir or 0,
+        [InteractiveSelector.OUT_BACKWARD] = enter_dir or -180,
+    }
+    local transition_fly_distances = {
+        [InteractiveSelector.IN_FORWARD] = fly_distance,
+        [InteractiveSelector.IN_BACKWARD] = fly_distance,
+        [InteractiveSelector.OUT_FORWARD] = fly_distance,
+        [InteractiveSelector.OUT_BACKWARD] = fly_distance,
+    }
+
+    local selector = M(
+            Input,
+            init_focused_index,
+            relative_pos,
+            MenuConst.shake_time,
+            MenuConst.shake_range,
+            MenuConst.shake_period,
+            MenuConst.blink_speed,
+            MenuConst.focused_color_a,
+            MenuConst.focused_color_b,
+            MenuConst.unfocused_color,
+            Vec2(0, 2 * text_line_height),
+            title_text_object,
+            body_text_object,
+            Vec2(0, -text_line_height),
+            selectable_array,
+            transition_fly_directions,
+            transition_fly_distances
+    )
+
+    return selector
 end
 
 return M

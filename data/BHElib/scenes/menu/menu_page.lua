@@ -13,13 +13,21 @@ local Prefab = require("BHElib.prefab")
 ---------------------------------------------------------------------------------------------------
 
 ---@param selector InteractiveSelector the selector used in this menu page
-function MenuPage.__create(selector)
+function MenuPage.__create(selector, layer, game_view)
     local self = {
         selector = selector,
     }
     self.renderer = New(Prefab.Renderer, LAYER_MENU, self, "ui")
 
     return self
+end
+
+function MenuPage:setLayer(layer)
+    self.renderer.layer = layer
+end
+
+function MenuPage:setRenderView(view)
+    self.renderer.coordinates_name = view
 end
 
 ---@param state_const number a constant indicating the state of the selector about transitioning, E.g. IN_FORWARD
@@ -50,8 +58,8 @@ function MenuPage:isInputEnabled()
     return self.selector:isInputEnabled()
 end
 
-function MenuPage:continueMenu()
-    return self.selector:getTransitionProgress() ~= 0
+function MenuPage:continueMenuPage()
+    return self.selector:continueMenu()
 end
 
 function MenuPage:update(dt)

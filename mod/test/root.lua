@@ -35,9 +35,10 @@ end
 
 local function CreateMenu()
     -- create menu and return it
-    local MenuClass = require("BHElib.scenes.menu.menu_scene")
-    local menu = MenuClass({"no_task"})
-    return menu
+    local Menu = require("BHElib.scenes.menu.menu_scene")
+    local MenuManager = require("BHElib.scenes.main_menu.main_menu_manager")
+    local task_spec = {"no_task"}
+    return Menu(MenuManager(task_spec))
 end
 
 local function Init()

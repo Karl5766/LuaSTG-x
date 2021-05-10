@@ -55,9 +55,7 @@ local director = cc.Director:getInstance()
 ---@return GameScene a new game scene created by scene from
 local function GoToNextScene(scene_from)
     -- start the next scene
-    local scene_to = _scene_from:createNextGameScene()
-
-    scene_from:cleanup()  -- cleanup the scene
+    local scene_to = _scene_from:createNextAndCleanupCurrentScene()
 
     if scene_to == nil then -- no scene to go to; end the current scene and quit the game in this case
         -- create an empty scene as dummy scene
@@ -90,7 +88,14 @@ end
 ---in general, the tasks handle transition at the frame of transition, and is responsible for
 ---handling transition visual effect at other frames
 function M.update()
+    local scene = _scene_from
     TaskDo(M)
+    if scene ~= nil and _scene_from == nil then
+        -- a transition has happened
+        return true
+    else
+        return false
+    end
 end
 
 return M

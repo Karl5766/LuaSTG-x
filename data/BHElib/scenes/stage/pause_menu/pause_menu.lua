@@ -6,12 +6,12 @@
 ---desc: implements pause menu for stages
 ---------------------------------------------------------------------------------------------------
 
----@class PauseMenu
-local PauseMenu = LuaClass("scenes.stage.PauseMenu")
+local MenuManager = require("BHElib.scenes.menu.menu_manager")
 
-local _menu_transition = require("BHElib.scenes.menu.menu_page_transition")
-local SceneTransition = require("BHElib.scenes.scene_transition")
-local _menu = require("BHElib.scenes.menu.menu_scene")  -- end the game and go back to main menu
+---@class PauseMenuManager:MenuManager
+local M = LuaClass("menu.PauseMenuManager", MenuManager)
+
+local TitleMenuPage = require("BHElib.scenes.main_menu.title_menu_page")
 
 ---------------------------------------------------------------------------------------------------
 ---cache variables and functions
@@ -22,73 +22,55 @@ local TaskWait = task.Wait
 
 ---------------------------------------------------------------------------------------------------
 
----@param stage Stage the stage object that created this pause menu
-function PauseMenu.__create(stage)
-    local self = {}
-
-    self.stage = stage
-    self.continue_menu = true  -- the game will check if this is false each frame; if so, the game resumes
-
-    self.pause_menu_pages = {}  -- an array of game objects that represents pause menu pages
-    self.cur_menu = nil  -- current menu page
-
+---@param scene Stage the stage that created this pause menu
+function M.__create(stage)
+    local self = MenuManager.__create(1 / 15)
+    self.continue_menu = true
+    self.scene = stage
     return self
 end
 
----@param dt number
----@return boolean true if the menu continues; false if the game is to be resumed in this frame
-function PauseMenu:update(dt)
-    -- update each menu
-    for _, menu_page in ipairs(self.pause_menu_pages) do
-        menu_page:update()
+function M:createMenuPageFromClass(class_id)
+    if class_id == "menu.TitleMenuPage" then
+        return TitleMenuPage(1)
+    else
+        error("ERROR: Unexpected menu page class!")
     end
+end
 
-    -- do tasks added by menu pages
-    TaskDo(self)
+function M:initMenuPages()
+end
 
+function M:continueMenu()
     return self.continue_menu
 end
 
----------------------------------------------------------------------------------------------------
----common functions that may be used by derived classes
+function M:update(dt)
+    MenuManager.update(self, dt)
+    TaskDo(self)
+end
 
----return back to the game
----@param transition_time number time of the transition in frames
-function PauseMenu:resume(transition_time)
+function M:onMenuExit()
+    -- set all menu pages to exit state
+    self:setAllPageExit()
+
+    local to_do = self:queryChoice("to_do")
+    -- use task to implement waiting; requires calling task.Do in update function
     TaskNew(self, function()
-
         -- fade out menu page
-        _menu_transition.transitionTo(self.cur_menu, nil, transition_time)
-        TaskWait(transition_time)
+        TaskWait(math.ceil(1 / self.transition_speed))
 
-        self.continue_menu = false
+        -- start stage or exit game, depending on the state set by createNextGameScene
+        if to_do == "resume" then
+            self.continue_menu = false
+        elseif to_do == "quit_to_menu" then
+            self.scene:completeSceneGroup()
+        elseif to_do == "restart_scene_group" then
+            self.scene:restartSceneGroup()
+        else
+            error("onMenuExit() called without to_do set by any menu page in the page array!")
+        end
     end)
 end
 
----end the stage and go back to the main menu
----@param transition_time number time of the transition in frames
-function PauseMenu:quitToMenu(transition_time)
-    TaskNew(self, function()
-        -- fade out menu page
-        _menu_transition.transitionTo(self.cur_menu, nil, transition_time)
-        TaskWait(transition_time)
-
-        self.stage:completeSceneGroup()
-        SceneTransition.update()  -- immediately do the transition
-    end)
-end
-
----restart the scene group
----@param transition_time number time of the transition in frames
-function PauseMenu:restartSceneGroup(transition_time)
-    TaskNew(self, function()
-        -- fade out menu page
-        _menu_transition.transitionTo(self.cur_menu, nil, transition_time)
-        TaskWait(transition_time)
-
-        self.stage:restartSceneGroup()
-        SceneTransition.update()  -- immediately do the transition
-    end)
-end
-
-return PauseMenu
+return M

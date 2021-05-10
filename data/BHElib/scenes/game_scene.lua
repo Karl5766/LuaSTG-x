@@ -12,6 +12,7 @@ local GameScene = LuaClass("scenes.GameScene")
 local _raw_input = require("setting.key_mapping")
 local _input = require("BHElib.input.input_and_recording")
 local Prefab = require("BHElib.prefab")
+local Director = cc.Director:getInstance()
 
 ---------------------------------------------------------------------------------------------------
 ---cache variables and functions
@@ -42,7 +43,9 @@ function GameScene:createScene()
     scene:scheduleUpdateWithPriorityLua(function(dt)
         self:doUpdatesBetweenRender(dt)
 
-        self:gameRender()
+        if Director:getRunningScene() == self.cocos_scene then  -- only render if the update has not made a scene transition
+            self:gameRender()
+        end
     end, 0)
 
     -- create an object for rendering the stage

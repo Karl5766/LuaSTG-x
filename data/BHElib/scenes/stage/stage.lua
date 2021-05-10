@@ -13,9 +13,6 @@ local GameScene = require("BHElib.scenes.game_scene")  -- superclass
 ---@comment an instance of this class represents a shmup stage.
 local Stage = LuaClass("scenes.Stage", GameScene)
 
----@comment an array of all stages created by Stage.new().
-local _all_stages = {}
-
 ---------------------------------------------------------------------------------------------------
 
 local SceneTransition = require("BHElib.scenes.scene_transition")
@@ -122,16 +119,15 @@ function Stage:frameUpdate(dt)
         -- create pause menu
         self.is_paused = true
         local PauseMenu = require("BHElib.scenes.stage.pause_menu.user_pause_menu")
-        self.pause_menu = PauseMenu(self)
+        self.pause_menu = PauseMenu.Manager(self)
     end
 
     if self.is_paused then
         -- only update device input, ignore recorded input
         GameScene.updateUserInput(self)
 
-        if not self.pause_menu:update(dt) then  -- will return false when the menu chooses to resume the game
-            self.is_paused = false
-        end
+        self.pause_menu:update(dt)
+        self.is_paused = self.pause_menu:continueMenu()
     else
         self:updateSceneAndObjects(dt)  -- call base method on non-menu mode
     end
@@ -170,7 +166,7 @@ function Stage:updateUserInput()
 
         self.is_paused = true
         local PauseMenu = require("BHElib.scenes.stage.pause_menu.replay_end_menu")
-        self.pause_menu = PauseMenu(self)
+        self.pause_menu = PauseMenu.Manager(self)
     else
         replay_io_manager:updateUserInput()
     end
@@ -208,13 +204,17 @@ end
 
 ---construct the object for the next scene and return it
 ---@return GameScene the next game scene
-function Stage:createNextGameScene()
+function Stage:createNextAndCleanupCurrentScene()
+    local player_x, player_y = self.player.x, self.player.y  -- save object attributes
+    self:cleanup()  -- cleanups; includes clearing all objects
+
     local transition_type = self.transition_type
     if transition_type == Stage.BACK_TO_MENU then
         -- go back to menu
         local Menu = require("BHElib.scenes.menu.menu_scene")
+        local MenuManager = require("BHElib.scenes.main_menu.main_menu_manager")
         local task_spec = {"save_replay"}
-        return Menu(task_spec)
+        return Menu(MenuManager(task_spec))
     elseif transition_type == Stage.GO_TO_NEXT_STAGE then
 
         -- create scene init state for next stage
@@ -223,8 +223,8 @@ function Stage:createNextGameScene()
 
         next_init_state.random_seed = cur_init_state.random_seed  -- use the same random seed
         next_init_state.score = self:getScore()  -- set the start score of next stage the same as the current score
-        next_init_state.player_init_state.x = self.player.x
-        next_init_state.player_init_state.y = self.player.y
+        next_init_state.player_init_state.x = player_x
+        next_init_state.player_init_state.y = player_y
 
         -- update the scene group
         local scene_group = self.scene_group
