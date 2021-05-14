@@ -37,27 +37,27 @@ end
 ---------------------------------------------------------------------------------------------------
 
 ---@param text string text string to display
-function M:set_text(text)
+function M:setText(text)
     self.text = text
 end
 
 ---@param text_color lstg.Color color of the text
-function M:set_color(text_color)
+function M:setColor(text_color)
     self.text_color = text_color
 end
 
 ---@param font_name string name of the font to use
-function M:set_font_name(font_name)
+function M:setFontName(font_name)
     self.font_name = font_name
 end
 
 ---@param font_size number size of the text to display
-function M:set_font_size(font_size)
+function M:setFontSize(font_size)
     self.font_size = font_size
 end
 
 ---@param font_align table an array of strings specifying optional formats, see resources.lua
-function M:set_font_align(font_align)
+function M:setFontAlign(font_align)
     self.font_align = font_align
 end
 

@@ -1,8 +1,8 @@
 ---------------------------------------------------------------------------------------------------
----user_pause_menu.lua
+---replay_end_menu.lua
 ---author: Karl
 ---date: 2021.3.26
----desc: user pause menu is the pause menu that is created when the player interrupts the game
+---desc: replay end menu is a pause menu displayed in the end of a replay
 ---------------------------------------------------------------------------------------------------
 
 local ReplayEndMenu = {}
@@ -17,6 +17,7 @@ ReplayEndMenu.Page = LuaClass("menu.ReplayEndMenuPage", MenuPage)
 ReplayEndMenu.Manager = LuaClass("menu.ReplayEndMenuManager", PauseMenuManager)
 
 local SimpleMenuSelector = require("BHElib.ui.selectors.simple_menu_selector")
+local ShakeEffListingSelector = require("BHElib.ui.selectors.shake_eff_listing_selector")
 local MenuConst = require("BHElib.scenes.menu.menu_const")
 local Coordinates = require("BHElib.coordinates_and_screen")
 
@@ -24,7 +25,7 @@ local Coordinates = require("BHElib.coordinates_and_screen")
 ---cache variables and functions
 
 local Vec2 = math.vec2
-local Selectable = SimpleMenuSelector.Selectable
+local Selectable = ShakeEffListingSelector.Selectable
 
 ---------------------------------------------------------------------------------------------------
 ---menu page

@@ -53,4 +53,13 @@ M.CHOICE_GO_TO_MENUS = 3
 ---@param value any
 M.CHOICE_SPECIFY = 4
 
+---send a cascade signal to all of the parents of this page
+M.CHOICE_CASCADE = 5
+
+M.IN_FORWARD = 1
+M.IN_BACKWARD = 2
+M.OUT_FORWARD = 3
+M.OUT_BACKWARD = 4
+M.OTHER = 5
+
 return M

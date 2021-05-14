@@ -15,23 +15,14 @@ local M = LuaClass("selectors.InteractiveSelector")
 local clamp = math.clamp
 
 ---------------------------------------------------------------------------------------------------
----constants
 
-M.IN_FORWARD = 1
-M.IN_BACKWARD = 2
-M.OUT_FORWARD = 3
-M.OUT_BACKWARD = 4
-
-M.OTHER = 5
-
----------------------------------------------------------------------------------------------------
-
+local MenuConst = require("BHElib.scenes.menu.menu_const")
 ---@param selection_input InputManager the object for this selector to receive input from
 function M.__create(selection_input)
     local self = {}
     self.is_selecting = false  -- default not active
     self.selected_choice = nil
-    self.transition_state = M.OTHER
+    self.transition_state = MenuConst.OTHER
     self.transition_progress = 0
     self.transition_velocity = 0
     self.timer = 0

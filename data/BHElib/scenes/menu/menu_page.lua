@@ -13,13 +13,17 @@ local Prefab = require("BHElib.prefab")
 ---------------------------------------------------------------------------------------------------
 
 ---@param selector InteractiveSelector the selector used in this menu page
-function MenuPage.__create(selector, layer, game_view)
+function MenuPage.__create(selector)
     local self = {
         selector = selector,
     }
     self.renderer = New(Prefab.Renderer, LAYER_MENU, self, "ui")
 
     return self
+end
+
+---@param menu_page_array MenuPageArray
+function MenuPage:onCascade(menu_page_array)
 end
 
 function MenuPage:setLayer(layer)
@@ -82,15 +86,16 @@ function MenuPage:getChoice()
     return self.selector:getChoice()
 end
 
+local MenuConst = require("BHElib.scenes.menu.menu_const")
 ---set a menu page to entering state; can be set on an already entering menu
 ---@param transition_speed number a positive number indicating the rate of transition per frame
 function MenuPage:setPageEnter(is_forward, transition_speed)
     local selector = self.selector
     selector:resetSelection(true)
     if is_forward then
-        selector:setTransition(InteractiveSelector.IN_FORWARD)
+        selector:setTransition(MenuConst.IN_FORWARD)
     else
-        selector:setTransition(InteractiveSelector.IN_BACKWARD)
+        selector:setTransition(MenuConst.IN_BACKWARD)
     end
     selector:setTransitionVelocity(transition_speed)
 end
@@ -101,9 +106,9 @@ function MenuPage:setPageExit(is_forward, transition_speed)
     local selector = self.selector
     selector:resetSelection(false)
     if is_forward then
-        selector:setTransition(InteractiveSelector.OUT_FORWARD)
+        selector:setTransition(MenuConst.OUT_BACKWARD)
     else
-        selector:setTransition(InteractiveSelector.OUT_BACKWARD)
+        selector:setTransition(MenuConst.OUT_BACKWARD)
     end
     selector:setTransitionVelocity(-transition_speed)
 end

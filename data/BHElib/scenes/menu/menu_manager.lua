@@ -38,7 +38,7 @@ end
 function M.__create(transition_speed)
     local self = {}
 
-    self.transition_speed = transition_speed or 1 / 30
+    self.transition_speed = transition_speed or 1 / 15
 
     -- an array to track the sequence of menus leading to the current one
     self.menu_page_array = MenuPageArray()
@@ -53,10 +53,10 @@ function M:ctor()
 end
 
 ---add a menu page to the menu page array and menu page pool
-function M:registerPage(class_id, menu_page_id, menu_page)
-    local menu_page_pos = self.menu_page_array:appendMenu(class_id, menu_page_id)
-    self.menu_page_pool:setMenuInPool(menu_page_id, menu_page, menu_page_pos)
-    return menu_page_pos
+function M:registerPage(class_id, menu_page_id, menu_page, menu_pos)
+    print("registering page "..menu_page_id.." at position "..tostring(menu_pos))
+    self.menu_page_array:setMenu(menu_pos, class_id, menu_page_id)
+    self.menu_page_pool:setMenuInPool(menu_page_id, menu_page, menu_pos)
 end
 
 function M:cleanup()
@@ -95,30 +95,41 @@ function M:update(dt)
         local menu_page = info_array[2]
         menu_page:update(1)
     end
-    for menu_page_id, menu_page_pos in pairs(to_be_deleted) do
-        local menu_page = menu_page_pool:getMenuFromPool(menu_page_id)
-        menu_page:cleanup()
-        menu_page_pool:delMenuInPool(menu_page_id)
-    end
+    --for menu_page_id, menu_page_pos in pairs(to_be_deleted) do
+    --    print("Deleting menu page "..menu_page_id)
+    --    local menu_page = menu_page_pool:getMenuFromPool(menu_page_id)
+    --    menu_page:cleanup()
+    --    menu_page_pool:delMenuInPool(menu_page_id)
+    --end
 end
 
 ---handle choices raised by a menu page in the menu array at the given index
 function M:handleChoices(choices, menu_page_pos)
+    print("handle choices at position "..tostring(menu_page_pos))
     local menu_page_array = self.menu_page_array
 
     local exit_indicator = 0
     local next_pos = -1
+    local cascade_flag = false
     for i = 1, #choices do
         local choice = choices[i]
         local label = choice[1]  -- see menu_const.lua
         if label == MenuConst.CHOICE_SPECIFY then
             menu_page_array:setChoice(menu_page_pos, choice[2], choice[3])
+        elseif label == MenuConst.CHOICE_CASCADE then
+            cascade_flag = true
         else
             -- menu page switch
             if label == MenuConst.CHOICE_GO_BACK then
                 exit_indicator = 1
                 next_pos = menu_page_pos - 1
-            elseif label == MenuConst.CHOICE_EXIT or label == MenuConst.CHOICE_GO_TO_MENUS then
+
+                if next_pos <= 0 then
+                    -- no menu page to go back to, exit the menu
+                    label = MenuConst.CHOICE_EXIT
+                end
+            end
+            if label == MenuConst.CHOICE_EXIT or label == MenuConst.CHOICE_GO_TO_MENUS then
                 local menus = {}  -- for CHOICE_EXIT
                 if label == MenuConst.CHOICE_GO_TO_MENUS then
                     menus = choice[2]
@@ -129,10 +140,18 @@ function M:handleChoices(choices, menu_page_pos)
             end
         end
     end
+
+    if cascade_flag then
+        self:cascade(menu_page_array:getSize())  -- cascade from the current menu page
+    end
+
     if exit_indicator == 1 then
         self:goBackToMenuPage(next_pos)
     elseif exit_indicator == 2 then
         self:goToNextMenuPage()
+    else
+        local top_page = self.menu_page_pool:getMenuFromPool(menu_page_array:getMenuId(menu_page_pos))
+        top_page:resetSelection(true)
     end
 end
 
@@ -145,10 +164,11 @@ function M:goBackToMenuPage(next_pos)
     local cur_page = menu_page_pool:getMenuFromPool(cur_id)
 
     local next_class_id, next_id = menu_page_array:getMenuClassId(next_pos), menu_page_array:getMenuId(next_pos)
-
-    cur_page:setPageExit(false, self.transition_speed)
-
     menu_page_array:retrievePrevMenu("go_to_menus", "num_finished_menus")
+
+    assert(cur_pos == menu_page_array:getSize(), "Error: Size mismatch!")
+    menu_page_array:popMenu()
+    cur_page:setPageExit(false, self.transition_speed)
 
     local next_page = self:setupMenuPageAtPos(next_class_id, next_id, next_pos)
 
@@ -189,8 +209,21 @@ function M:queryChoice(choice_key)
     return self.menu_page_array:queryChoice(choice_key)
 end
 
+---@param menu_page_pos number the index from which the cascading starts
+function M:cascade(menu_page_pos)
+    while menu_page_pos ~= nil do
+        local class_id, menu_page_id
+        class_id, menu_page_id, menu_page_pos = self.menu_page_array:findPrevMenuOf(menu_page_pos, "go_to_menus", "num_finished_menus")
+        if menu_page_pos then
+            local menu_page = self.menu_page_pool:getMenuFromPool(menu_page_id)
+            menu_page:onCascade(self.menu_page_array)
+        end
+    end
+end
+
 ---setup a menu page at the given position; can be used to append new menu
----will update the menu page in the page array and page pool
+---will update the menu page in the page array and page pool;
+---it should be guaranteed that the new menu has no choices recorded in the array
 ---@return MenuPage a menu page that has been setup in the given index of the array
 function M:setupMenuPageAtPos(class_id, menu_id, menu_pos)
     -- check if menu already exist, if not, create a new one
@@ -199,13 +232,16 @@ function M:setupMenuPageAtPos(class_id, menu_id, menu_pos)
     local queried_menu_pos = menu_page_pool:getMenuPosFromPool(menu_id)
     local menu_page
     if queried_menu_pos == nil then
-        menu_page = self:createMenuPageFromClass(class_id)
-    else
-        menu_page = menu_page_pool:getMenuFromPool(menu_id)
-    end
+        menu_page = self:createMenuPageFromClass(class_id, menu_id)
+        print("setup creation at pos "..tostring(menu_pos).." with id "..menu_id)
 
-    -- add/set the menu page in the array
-    self:registerPage(class_id, menu_id, menu_page)
+        -- add/set the menu page in the array
+        self:registerPage(class_id, menu_id, menu_page, menu_pos)
+    else
+        print("setup retrieve at pos "..tostring(menu_pos).." with id "..menu_id)
+        menu_page = menu_page_pool:getMenuFromPool(menu_id)
+        self.menu_page_array:clearChoice(menu_pos)
+    end
 
     return menu_page
 end

@@ -44,8 +44,6 @@ Stage.RESTART_SCENE_GROUP = 3
 function Stage.__create(scene_init_state, scene_group)
     local self = GameScene.__create()
 
-    self.timer = 0
-
     self.scene_group = scene_group
     self.scene_init_state = scene_init_state
 
@@ -131,15 +129,6 @@ function Stage:frameUpdate(dt)
     else
         self:updateSceneAndObjects(dt)  -- call base method on non-menu mode
     end
-
-    SceneTransition.update()
-end
-
----update the stage itself
----to be overridden in sub-classes
-function Stage:update(dt)
-    GameScene.update(self, dt)
-    self.timer = self.timer + dt
 end
 
 local _hud_painter = require("BHElib.ui.hud_painter")
@@ -212,9 +201,7 @@ function Stage:createNextAndCleanupCurrentScene()
     if transition_type == Stage.BACK_TO_MENU then
         -- go back to menu
         local Menu = require("BHElib.scenes.menu.menu_scene")
-        local MenuManager = require("BHElib.scenes.main_menu.main_menu_manager")
-        local task_spec = {"save_replay"}
-        return Menu(MenuManager(task_spec))
+        return Menu.shortInit({"save_replay"})
     elseif transition_type == Stage.GO_TO_NEXT_STAGE then
 
         -- create scene init state for next stage

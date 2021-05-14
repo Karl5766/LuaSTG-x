@@ -17,6 +17,7 @@ UserPauseMenu.Page = LuaClass("menu.UserPauseMenuPage", MenuPage)
 UserPauseMenu.Manager = LuaClass("menu.UserPauseMenuManager", PauseMenuManager)
 
 local SimpleMenuSelector = require("BHElib.ui.selectors.simple_menu_selector")
+local ShakeEffListingSelector = require("BHElib.ui.selectors.shake_eff_listing_selector")
 local MenuConst = require("BHElib.scenes.menu.menu_const")
 local Coordinates = require("BHElib.coordinates_and_screen")
 
@@ -24,7 +25,7 @@ local Coordinates = require("BHElib.coordinates_and_screen")
 ---cache variables and functions
 
 local Vec2 = math.vec2
-local Selectable = SimpleMenuSelector.Selectable
+local Selectable = ShakeEffListingSelector.Selectable
 
 ---------------------------------------------------------------------------------------------------
 ---menu page

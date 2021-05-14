@@ -24,7 +24,14 @@ local floor = math.floor
 ---GameScene object constructor
 ---@return GameScene a GameScene object
 function GameScene.__create()
-    return {}
+    local self = {
+        timer = 0,
+        -- for varying playback speed in replay mode
+        playback_speed = 1,
+        playback_timer = 0,
+        continue_scene = true,
+    }
+    return self
 end
 
 local SceneTransition = require("BHElib.scenes.scene_transition")
@@ -38,25 +45,28 @@ local SceneTransition = require("BHElib.scenes.scene_transition")
 function GameScene:createScene()
     local scene = display.newScene("Scene")
 
-    -- schedule update so this function is executed every frame after the scene is pushed to
-    -- cc director
-    scene:scheduleUpdateWithPriorityLua(function(dt)
-        self:doUpdatesBetweenRender(dt)
-
-        if Director:getRunningScene() == self.cocos_scene then  -- only render if the update has not made a scene transition
-            self:gameRender()
-        end
-    end, 0)
-
     -- create an object for rendering the stage
     New(Prefab.Renderer, LAYER_HUD, self, "ui")
 
     self.cocos_scene = scene
 
-    -- for varying playback speed in replay mode
-    self.playback_speed = 1
-    self.playback_timer = 0
-    self.continue_scene = true
+    -- schedule update so this function is executed every frame after the scene is pushed to
+    -- cc director
+    local main_loop_function = function(dt)
+        -- put this here so on the frame of transition
+        -- 1) objects created in the next scene will not be rendered before they are updated at least once
+        -- 2) objects in the previous scene will be rendered before GameScene:cleanup() is called (after which their states become not render-able)
+        -- 3) somehow the engine breaks if ResetPool is followed by director:replaceScene in the same frame, so replacing scene has to be put here
+        SceneTransition.update()
+
+        if not SceneTransition.sceneReplacedInCurrentUpdate() then
+            self:doUpdatesBetweenRender(dt)
+
+            self:gameRender()
+        end
+    end
+
+    scene:scheduleUpdateWithPriorityLua(main_loop_function, 0)
 
     return scene
 end
@@ -93,6 +103,8 @@ local profiler = profiler
 ---@param dt number time step (currently not very useful)
 function GameScene:update(dt)
     task.PropagateDo(self)
+
+    self.timer = self.timer + dt
 end
 
 ---for cocos scheduler;
@@ -153,11 +165,6 @@ end
 ---@return boolean true if the current scene has ended
 function GameScene:frameUpdate(dt)
     self:updateSceneAndObjects(dt)
-
-    -- it is possible that after transition is set, some new objects are created before the update completes
-    -- so wait until the end of frame to replace the current scene with the next scene
-    -- also for some reasons the game crashes if ResetPool is put *after* ObjRender in the current frame
-    SceneTransition.update()  -- if next scene is prepared, swap the scene; otherwise do the usual update
 end
 
 local e = lstg.eventDispatcher

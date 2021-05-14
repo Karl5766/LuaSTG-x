@@ -17,9 +17,13 @@ M.Selectable = LuaClass("ShakeEffListingSelector.Selectable")
 local Selectable = M.Selectable
 
 ---@param init_timer_value number the initial time value of the shaking timer
-function Selectable.__create(init_timer_value)
+---@param text string text to display
+---@param choices any describes result of selecting the item
+function Selectable.__create(text, choices)
     local self = {}
-    self.timer = init_timer_value
+    self.timer = math.huge
+    self.text = text
+    self.choices = choices
     return self
 end
 
@@ -37,12 +41,37 @@ local sin = sin
 ---@param shake_max_time number duration of the shaking effect
 ---@param shake_amplitude number amplitude of the shaking effect; shaking only occurs in x direction
 ---@param shake_period number period of harmonic (sine) motion of shaking effect in frames
-function M.__create(selection_input, focused_index, init_pos_offset, shake_max_time, shake_amplitude, shake_period)
-    local self = ListingSelector.__create(selection_input, focused_index, init_pos_offset)
+---@param pos_increment math.vec2 increment in position between each two menu selectables
+---@param blink_speed number speed of selectable blinking
+---@param blink_color_a math.vec4 blinking color; of form {r, g, b, a}
+---@param blink_color_b math.vec4 blinking color; of form {r, g, b, a}
+---@param normal_color math.vec4 color of the text when they are not blinking; of form {r, g, b, a}
+---@param selectable_array table an array of selectables in this menu
+function M.__create(
+        selection_input,
+        focused_index,
+        init_pos_offset,
+        shake_max_time,
+        shake_amplitude,
+        shake_period,
+        pos_increment,
+        blink_speed,
+        blink_color_a,
+        blink_color_b,
+        normal_color,
+        selectable_array
+)
+    local self = ListingSelector.__create(selection_input, focused_index, init_pos_offset, pos_increment)
     self.shake_max_time = shake_max_time
     self.shake_amplitude = shake_amplitude
     self.shake_period = shake_period
-    self.selectable_array = {}
+
+    self.blink_speed = blink_speed
+    self.blink_color_a = blink_color_a
+    self.blink_color_b = blink_color_b
+    self.normal_color = normal_color
+
+    self.selectable_array = selectable_array
     return self
 end
 
@@ -54,7 +83,7 @@ end
 
 function M:resetShakeTimer(timer_value)
     local selectable_array = self.selectable_array
-    for i = 1, self.num_selectable do
+    for i = 1, #selectable_array do
         selectable_array[i].timer = timer_value
     end
 end
@@ -68,8 +97,27 @@ function M:updateShakeTimer(dt)
     end
 end
 
----to be overridden
-function M:getListingPos(index)
+function M:select(i)
+    self.is_selecting = false
+    self.selected_choice = self.selectable_array[i].choices
+end
+
+---@param index number index of the selectable in the selectable array
+function M:renderSelectable(index)
+    local body_text_obj = self.body_text_obj
+    local item_pos = self.pos_offset + self:getListingPosAfterShakeEff(index)
+    local color_vec
+    -- the selected selectable will blink
+    if index == self.focused_index then
+        local lerp_coeff = 0.5 + 0.5 * sin(self.timer * self.blink_speed)
+        color_vec = self.blink_color_a * lerp_coeff + self.blink_color_b * (1 - lerp_coeff)
+    else
+        color_vec = self.normal_color
+    end
+    body_text_obj:setColor(Color(color_vec.w, color_vec.x, color_vec.y, color_vec.z))
+
+    body_text_obj:setText(self.selectable_array[index].text)
+    body_text_obj:render(item_pos.x, item_pos.y)
 end
 
 ---return the position of a selectable item after apply the shake effect position offset
@@ -87,26 +135,6 @@ function M:getListingPosAfterShakeEff(index)
         local x_offset = self.shake_amplitude * sin(t / self.shake_period * 180)
         return raw_pos + Vec2(x_offset, 0)
     end
-end
-
----move the focus over to a (new) item
----@param index number new index before range checking; can be out of range
-function M:moveFocus(index)
-    self.focused_index = index
-    self:warpFocusedIndex()
-    local new_index = self.focused_index
-
-    -- shake the newly selected item
-    local selectable_array = self.selectable_array
-    selectable_array[new_index].timer = 0
-end
-
----warp the focused index in range 1...#self.selectable_array
-function M:warpFocusedIndex()
-    -- handles boundary condition, warp the index
-    local num_selectable = #self.selectable_array
-
-    self.focused_index = (self.focused_index - 1) % num_selectable + 1
 end
 
 return M

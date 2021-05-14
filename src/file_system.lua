@@ -37,6 +37,23 @@ function M.createDirectory(path)
     end
 end
 
+---copy file; overwrite if exists
+---@param path_from string 原文件路径
+---@param path_to string 副本的完整路径
+function M.copyFile(path_from, path_to)
+    local FileStream = require("util.file_stream")
+    local file_from = FileStream(path_from, "rb")
+    local file_to = FileStream(path_to, "wb")
+    while true do
+        local b = file_from:readByte()
+        if b then
+            file_to:writeByte(b)
+        else
+            break
+        end
+    end
+end
+
 
 ---default writable path
 local _writable_path
@@ -133,6 +150,7 @@ function M.enumFilesByType(dir_pah, suffix)
             end
         end
     end
+    return ret
 end
 
 ---------------------------------------------------------------------------------------------------

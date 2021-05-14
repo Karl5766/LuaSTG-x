@@ -1,9 +1,6 @@
 ---------------------------------------------------------------------------------------------------
 ---temporary use
 
-local _replay_path_for_write = "replay/current"
-local _replay_path_for_read = "replay/read"
-
 ---setup the default scene group init state to run the scene group with when the player select start game
 local function SetupGroupInitState()
     local Menu = require("BHElib.scenes.menu.menu_scene")
@@ -24,21 +21,13 @@ local function SetupGroupInitState()
     Menu.setStartGameInitState(group_init_state)
 end
 
-local function SetupReplayFilePath()
-    local Menu = require("BHElib.scenes.menu.menu_scene")
-
-    Menu.setReplayFilePath(_replay_path_for_read, _replay_path_for_write)
-end
-
 ---------------------------------------------------------------------------------------------------
 ---init
 
 local function CreateMenu()
     -- create menu and return it
     local Menu = require("BHElib.scenes.menu.menu_scene")
-    local MenuManager = require("BHElib.scenes.main_menu.main_menu_manager")
-    local task_spec = {"no_task"}
-    return Menu(MenuManager(task_spec))
+    return Menu.shortInit({"no_task"})
 end
 
 local function Init()
@@ -87,7 +76,6 @@ local function Init()
 
     -- create the menu
     SetupGroupInitState()
-    SetupReplayFilePath()
     local menu = CreateMenu()
     SceneTransition.init(menu)  -- initialize scene transition
     return menu:createScene()

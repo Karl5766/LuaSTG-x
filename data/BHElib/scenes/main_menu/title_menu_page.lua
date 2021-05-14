@@ -10,43 +10,41 @@ local MenuPage = require("BHElib.scenes.menu.menu_page")
 local M = LuaClass("menu.TitleMenuPage", MenuPage)
 
 local SimpleMenuSelector = require("BHElib.ui.selectors.simple_menu_selector")
+local ShakeEffListingSelector = require("BHElib.ui.selectors.shake_eff_listing_selector")
 local MenuConst = require("BHElib.scenes.menu.menu_const")
 local Coordinates = require("BHElib.coordinates_and_screen")
+local FS = require("file_system")
 
 ---------------------------------------------------------------------------------------------------
 ---cache variables and functions
 
 local Vec2 = math.vec2
 local Vec4 = math.vec4
-local Selectable = SimpleMenuSelector.Selectable
+local Selectable = ShakeEffListingSelector.Selectable
 
 ---------------------------------------------------------------------------------------------------
 
 local function CreateSelectableArray()
-    local start_game_choices = {
-        {MenuConst.CHOICE_GO_TO_MENUS, {}},  -- directly start game
-        {MenuConst.CHOICE_SPECIFY, "game_mode", "all"}
+    local ret = {
+        Selectable("Start Game", {
+            {MenuConst.CHOICE_GO_TO_MENUS, {}}, -- directly start game
+            {MenuConst.CHOICE_SPECIFY, "game_mode", "all"}
+        }),
+        Selectable("Start Replay",{
+            {MenuConst.CHOICE_GO_TO_MENUS, {
+                {"menu.ReplayMenuPage", "replay_loader"}
+            }},
+            {MenuConst.CHOICE_SPECIFY, "is_replay", true}
+        }),
+        Selectable("Exit Game", {
+            {MenuConst.CHOICE_EXIT}
+        })
     }
-    local start_game_option = Selectable("Start Game", start_game_choices)
-
-    local start_replay_choices = {
-        {MenuConst.CHOICE_GO_TO_MENUS, {}},  -- directly start game
-        {MenuConst.CHOICE_SPECIFY, "game_mode", "all"},
-        {MenuConst.CHOICE_SPECIFY, "is_replay", true}
-    }
-    local start_replay_option = Selectable("Start Replay", start_replay_choices)
-
-    local exit_choices = {
-        {MenuConst.CHOICE_EXIT}
-    }
-    local exit_option = Selectable("Exit Game", exit_choices)
-
-    local ret = {start_game_option, start_replay_option, exit_option}
     return ret
 end
 
 ---@param init_focused_index number initial position index of focused selectable
-function M.__create(init_focused_index)
+function M.__create(init_focused_index, temp_replay_file_path)
     -- create simple menu selector
 
     local width = Coordinates.getResolution()
@@ -63,8 +61,21 @@ function M.__create(init_focused_index)
             CreateSelectableArray(),
             "Main Menu"
     )
+    local self = MenuPage(selector)
+    self.temp_replay_file_path = temp_replay_file_path
 
-    return MenuPage(selector)
+    return self
+end
+
+---save replay to target path if the target path is specified
+---@param menu_page_array MenuPageArray
+function MenuPage:onCascade(menu_page_array)
+    local target_path = menu_page_array:queryChoice("replay_path_for_write")
+    if target_path ~= nil then
+        if target_path then
+            FS.copyFile(self.temp_replay_file_path, target_path)
+        end
+    end
 end
 
 return M

@@ -26,12 +26,6 @@ function M.setStartGameInitState(group_init_state)
     M.default_group_init_state = group_init_state
 end
 
----temporary used for setting the game parameters; must be called before the player select start replay
-function M.setReplayFilePath(replay_path_for_read, replay_path_for_write)
-    M.replay_path_for_read = replay_path_for_read
-    M.replay_path_for_write = replay_path_for_write
-end
-
 ---------------------------------------------------------------------------------------------------
 ---init
 
@@ -61,12 +55,16 @@ function M:createNextAndCleanupCurrentScene()
     self:cleanup()
 
     local menu_manager = self.menu_manager
-    if menu_manager:queryChoice("game_mode") == nil then
+
+    local is_replay = menu_manager:queryChoice("is_replay") ~= nil
+    local game_mode = menu_manager:queryChoice("game_mode")
+
+    if game_mode == nil and not is_replay then
         return nil  -- exit the game
     end
 
-    local is_replay = menu_manager:queryChoice("is_replay") ~= nil
     local start_stage_in_replay = 1
+    local replay_path_for_read = nil
 
     -- create init states for stage and the scene group
     local scene_init_state = nil
@@ -74,7 +72,8 @@ function M:createNextAndCleanupCurrentScene()
     if is_replay then
         ---replay mode
         -- read from file
-        local file_stream = FileStream(M.replay_path_for_read, "rb")
+        replay_path_for_read = menu_manager:queryChoice("replay_path_for_read")
+        local file_stream = FileStream(replay_path_for_read, "rb")
         local replay_file_reader = ReplayFileReader(file_stream, start_stage_in_replay)
         local replay_summaries = replay_file_reader:readSummariesFromFile()
 
@@ -89,8 +88,8 @@ function M:createNextAndCleanupCurrentScene()
     end
     -- modify status that is not the same as when the replay is recorded
     group_init_state.is_replay = is_replay
-    group_init_state.replay_path_for_read = M.replay_path_for_read
-    group_init_state.replay_path_for_write = M.replay_path_for_write
+    group_init_state.replay_path_for_read = replay_path_for_read
+    group_init_state.replay_path_for_write = self.menu_manager:getTempReplayPath()
     group_init_state.start_stage_in_replay = start_stage_in_replay
 
     local SceneGroup = require("BHElib.scenes.stage.scene_group")
@@ -117,32 +116,6 @@ function M:update(dt)
     self.menu_manager:update(dt)
 end
 
----handle choices raised by a menu page in the menu array at the given index
-function M:handleChoices(choices, menu_page_pos)
-    local menu_page_array = self.menu_page_array
-
-    for i = 1, #choices do
-        local choice = choices[i]
-        local label = choice[1]  -- see menu_const.lua
-        if label == MenuConst.CHOICE_SPECIFY then
-            menu_page_array:setChoice(menu_page_pos, choice[2], choice[3])
-        else
-            -- menu page switch
-            if label == MenuConst.CHOICE_GO_BACK then
-                self:goBackToMenuPage(menu_page_pos - 1)
-            elseif label == MenuConst.CHOICE_EXIT or label == MenuConst.CHOICE_GO_TO_MENUS then
-                local menus = {}  -- for CHOICE_EXIT
-                if label == MenuConst.CHOICE_GO_TO_MENUS then
-                    menus = choice[2]
-                end
-                menu_page_array:setChoice(menu_page_pos, "go_to_menus", menus)
-                menu_page_array:setChoice(menu_page_pos, "num_finished_menus", 0)
-                self:goToNextMenuPage()
-            end
-        end
-    end
-end
-
 local hud_painter = require("BHElib.ui.hud_painter")
 function M:render()
     GameScene.render(self)
@@ -150,6 +123,16 @@ function M:render()
             "image:menu_hud_background",
             1.3
     )
+end
+
+
+---------------------------------------------------------------------------------------------------
+---short init parameter list
+
+function M.shortInit(task_spec)
+    local MenuManager = require("BHElib.scenes.main_menu.main_menu_manager")
+    local self = M(MenuManager(task_spec, "data/BHElib/input/current", "replay"))
+    return self
 end
 
 

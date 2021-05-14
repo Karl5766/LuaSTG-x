@@ -11,8 +11,9 @@ local M = {
     task = {},  -- use task to
 }
 
----set to true on the frame the next scene starts
 local _scene_from
+---set to true on the frame the next scene starts
+local _replace_flag
 
 ---------------------------------------------------------------------------------------------------
 ---cache variables and functions
@@ -28,6 +29,7 @@ local TaskDo = task.Do
 ---@param scene GameScene the scene to be set as the current scene
 function M.init(scene)
     _scene_from = scene
+    _replace_flag = false
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -66,6 +68,7 @@ local function GoToNextScene(scene_from)
         lstg.quit_flag = true
     end
     local cocos_scene = scene_to:createScene()
+    assert(cocos_scene, "Error: Cocos scene expected, got nil!")
     director:replaceScene(cocos_scene)
 
     _scene_from = nil
@@ -90,12 +93,11 @@ end
 function M.update()
     local scene = _scene_from
     TaskDo(M)
-    if scene ~= nil and _scene_from == nil then
-        -- a transition has happened
-        return true
-    else
-        return false
-    end
+    _replace_flag = scene ~= nil and _scene_from == nil
+end
+
+function M.sceneReplacedInCurrentUpdate()
+    return _replace_flag
 end
 
 return M
