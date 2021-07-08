@@ -16,6 +16,8 @@ local FileStream = LuaClass("FileStream")
 ---@param mode string 打开模式
 function FileStream.__create(path, mode)
     local self = {}
+    --self.rid = ran:Int(0, 100000)
+    --print("file stream "..self.rid.." has been created with path "..path.." and mode "..mode)
     self.file = assert(io.open_u8(path, mode))  -- TOBEDEBUGGED
     return self
 end
@@ -45,6 +47,7 @@ end
 
 ---@brief 关闭文件流
 function FileStream:close()
+    --print("file stream "..self.rid.." has been closed")
     self.file:flush()
     self.file:close()
     self.file = nil
@@ -59,7 +62,7 @@ end
 ---@return number 若为文件尾则为nil，否则以number返回所读字节
 function FileStream:readByte()
     local b = self.file:read(1)
-    if b then
+    if b ~= nil then
         return string.byte(b)
     else
         return nil

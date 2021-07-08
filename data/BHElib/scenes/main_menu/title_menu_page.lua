@@ -14,6 +14,7 @@ local ShakeEffListingSelector = require("BHElib.ui.selectors.shake_eff_listing_s
 local MenuConst = require("BHElib.scenes.menu.menu_const")
 local Coordinates = require("BHElib.coordinates_and_screen")
 local FS = require("file_system")
+local _init_callbacks = require("BHElib.scenes.main_menu.main_menu_page_init_callbacks")
 
 ---------------------------------------------------------------------------------------------------
 ---cache variables and functions
@@ -32,7 +33,7 @@ local function CreateSelectableArray()
         }),
         Selectable("Start Replay",{
             {MenuConst.CHOICE_GO_TO_MENUS, {
-                {"menu.ReplayMenuPage", "replay_loader"}
+                {_init_callbacks.ReplayLoader, "replay_loader"}
             }},
             {MenuConst.CHOICE_SPECIFY, "is_replay", true}
         }),

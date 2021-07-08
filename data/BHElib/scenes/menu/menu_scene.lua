@@ -85,6 +85,7 @@ function M:createNextAndCleanupCurrentScene()
         -- use default settings
         group_init_state = table.deepcopy(M.default_group_init_state)
         scene_init_state = SceneInitState()
+        scene_init_state.random_seed = ((os.time() % 65536) * 877) % 65536
     end
     -- modify status that is not the same as when the replay is recorded
     group_init_state.is_replay = is_replay

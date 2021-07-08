@@ -25,7 +25,7 @@ local cos = cos
 
 ---@param selection_input InputManager the object for this selector to receive input from
 ---@param focused_index number initial focused index
----@param init_pos_offset math.vec2 initial position offset of the menu body
+---@param reference_pos math.vec2 position of reference
 ---@param shake_max_time number duration of the shaking effect
 ---@param shake_amplitude number amplitude of the shaking effect; shaking only occurs in x direction
 ---@param shake_period number period of harmonic (sine) motion of shaking effect in frames
@@ -43,7 +43,7 @@ local cos = cos
 function M.__create(
             selection_input,
             focused_index,
-            init_pos_offset,
+            reference_pos,
             shake_max_time,
             shake_amplitude,
             shake_period,
@@ -61,7 +61,7 @@ function M.__create(
     local self = ShakeEffListingSelector.__create(
             selection_input,
             focused_index,
-            init_pos_offset,
+            reference_pos,
             shake_max_time,
             shake_amplitude,
             shake_period,
@@ -73,7 +73,7 @@ function M.__create(
             selectable_array
     )
 
-    self.init_pos_offset = init_pos_offset
+    self.reference_pos = reference_pos
     self.title_pos_offset = title_pos_offset
     self.title_text_obj = title_text_obj
     self.body_text_obj = body_text_obj
@@ -84,14 +84,7 @@ function M.__create(
 end
 
 ---------------------------------------------------------------------------------------------------
----getter and setter
-
----set the base position of the menu
----@param pos_offset math.vec2
-function M:setPosition(pos_offset)
-    self.init_pos_offset = pos_offset
-    self:updatePosition()
-end
+---getters and setters
 
 function M:continueMenu()
     local state = self.transition_state
@@ -107,13 +100,13 @@ end
 ---update functions
 
 ---calculate position of the menu by transition progress
-function M:updatePosition()
-    local base_pos = self.init_pos_offset
+function M:updateMenuDisplay()
+    local reference_pos = self.reference_pos
     local p = self.transition_progress
     local state = self.transition_state
     local distance = (1 - p) ^ 2 * self.transition_fly_distances[state]
     local direction = self.transition_fly_directions[state]
-    self.pos_offset = base_pos + Vec2(cos(direction), sin(direction)) * distance
+    self.menu_body_pos = reference_pos + Vec2(cos(direction), sin(direction)) * distance
 end
 
 ---@param dt number time elapsed since last update
@@ -121,8 +114,6 @@ function M:update(dt)
     InteractiveSelector.update(self, dt)
 
     self:updateShakeTimer(dt)
-
-    self:updatePosition()
 end
 
 ---test for and process user input on the menu
@@ -155,7 +146,7 @@ end
 
 function M:render()
     -- render title
-    local pos = self.pos_offset + self.title_pos_offset
+    local pos = self.menu_body_pos + self.title_pos_offset
     self.title_text_obj:render(pos.x, pos.y)
 
     -- render body
@@ -205,16 +196,17 @@ function M.shortInit(init_focused_index,
     local transition_fly_directions = {
         [MenuConst.IN_FORWARD] = enter_dir or -180,
         [MenuConst.IN_BACKWARD] = exit_dir or 0,
-        [MenuConst.OUT_BACKWARD] = exit_dir or 0,
+        [MenuConst.OUT_FORWARD] = exit_dir or 0,
         [MenuConst.OUT_BACKWARD] = enter_dir or -180,
     }
     local transition_fly_distances = {
         [MenuConst.IN_FORWARD] = fly_distance,
         [MenuConst.IN_BACKWARD] = fly_distance,
-        [MenuConst.OUT_BACKWARD] = fly_distance,
+        [MenuConst.OUT_FORWARD] = fly_distance,
         [MenuConst.OUT_BACKWARD] = fly_distance,
     }
 
+    print(relative_pos.x)
     local selector = M(
             Input,
             init_focused_index,

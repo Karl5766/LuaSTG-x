@@ -5,8 +5,6 @@
 ---------------------------------------------------------------------------------------------------
 
 local Prefab = require("BHElib.prefab")
-
----@class PlayerBase
 local PlayerBase = Prefab.NewX(Prefab.Object)
 
 local ClockedAnimation = require("BHElib.units.clocked_animation")
@@ -16,6 +14,118 @@ local Coordinates = require("BHElib.coordinates_and_screen")
 ---cache variables and functions
 
 local max = max
+
+---------------------------------------------------------------------------------------------------
+
+---@param player_input InputManager an object that manages recorded player input
+---@param stage Stage the current stage this player is at
+function PlayerBase:init(
+        record_array, unfocused_speed, stage
+)
+    self.layer = LAYER_PLAYER
+    self.group = GROUP_PLAYER
+    self.bound = false
+
+    self:loadResources()
+
+    -- player object properties
+    self.sprite_animation_interval = 8  -- in frames
+    self.sprite_animation_transition_interval = 4
+    self.sprite_animation = ClockedAnimation()
+    self:initAnimation()
+    self.sprite_movement_state = 0  -- -2, -1 for left, 0 for idle, 1, 2 for right
+    self.sprite_animation:playAnimation(
+            "idle",
+            self.sprite_animation_interval,
+            0,
+            true,
+            true
+    )
+
+    self.record_array = record_array
+    self.ref_index = #record_array - 2
+    self.turn_time = 1
+
+    self.stage = stage
+
+    self.unfocused_speed = unfocused_speed
+    self.focused_speed = 2
+    self.protect_counter = 0
+    self.spawn_counter = 0
+end
+
+function PlayerBase:loadResources()
+    if CheckRes("tex", "tex:reimu_sprite") then
+        return
+    end
+    LoadTexture("tex:reimu_sprite", "THlib\\player\\reimu\\reimu.png")
+
+    LoadTexture('reimu_kekkai', 'THlib\\player\\reimu\\reimu_kekkai.png')
+    LoadTexture('reimu_orange_ef2', 'THlib\\player\\reimu\\reimu_orange_eff.png')
+    LoadImageFromFile('reimu_bomb_ef', 'THlib\\player\\reimu\\reimu_bomb_ef.png')
+    LoadAnimation('reimu_bullet_orange_ef2', 'reimu_orange_ef2', 0, 0, 64, 16, 1, 9, 1)
+    SetAnimationCenter('reimu_bullet_orange_ef2', 0, 8)
+    LoadImage('reimu_bullet_red', "tex:reimu_sprite", 192, 160, 64, 16, 16, 16)
+    SetImageState('reimu_bullet_red', '', Color(0xA0FFFFFF))
+    SetImageCenter('reimu_bullet_red', 56, 8)
+    LoadAnimation('reimu_bullet_red_ef', "tex:reimu_sprite", 0, 144, 16, 16, 4, 1, 4)
+    SetAnimationState('reimu_bullet_red_ef', 'mul+add', Color(0xA0FFFFFF))
+
+    LoadImage('reimu_bullet_blue', "tex:reimu_sprite", 0, 160, 16, 16, 16, 16)
+    SetImageState('reimu_bullet_blue', '', Color(0x80FFFFFF))
+    LoadAnimation('reimu_bullet_blue_ef', "tex:reimu_sprite", 0, 160, 16, 16, 4, 1, 4)
+    SetAnimationState('reimu_bullet_blue_ef', 'mul+add', Color(0xA0FFFFFF))
+
+    LoadImage('reimu_support', "tex:reimu_sprite", 64, 144, 16, 16)
+    LoadImage('reimu_bullet_ef_img', "tex:reimu_sprite", 48, 144, 16, 16)
+    LoadImage('reimu_kekkai', 'reimu_kekkai', 0, 0, 256, 256, 0, 0)
+    SetImageState('reimu_kekkai', 'mul+add', Color(0x804040FF))
+    LoadPS('reimu_bullet_ef', 'THlib\\player\\reimu\\reimu_bullet_ef.psi', 'reimu_bullet_ef_img')
+    -----------------------------------------
+    LoadImage('reimu_bullet_orange', "tex:reimu_sprite", 64, 176, 64, 16, 64, 16)
+    SetImageState('reimu_bullet_orange', '', Color(0x80FFFFFF))
+    SetImageCenter('reimu_bullet_orange', 32, 8)
+
+    LoadImage('reimu_bullet_orange_ef', "tex:reimu_sprite", 64, 176, 64, 16, 64, 16)
+    SetImageState('reimu_bullet_orange_ef', '', Color(0x80FFFFFF))
+    SetImageCenter('reimu_bullet_orange_ef', 32, 8)
+end
+
+---------------------------------------------------------------------------------------------------
+
+---setup sprite animation
+function PlayerBase:initAnimation()
+    -- row_id, (top left)x, y, (single image)width, height, image_num, image_name
+    local image_rows = {
+        {"idle", 0, 0, 32, 48, 8, "image_array:reimu_idle"},
+        {"move_left", 0, 48, 32, 48, 4, "image_array:reimu_move_left"},
+        {"move_right", 0, 96, 32, 48, 4, "image_array:reimu_move_right"},
+        {"move_left_loop", 128, 48, 32, 48, 4, "image_array:reimu_move_left_loop"},
+        {"move_right_loop", 128, 96, 32, 48, 4, "image_array:reimu_move_right_loop"},
+    }
+    local tex_name = "tex:reimu_sprite"
+    local colli_a, colli_b = 0, 0
+
+    for i, row in ipairs(image_rows) do
+        local row_id, x, dx, y, dy, image_name = row[1], row[2], row[4], row[3], 0, row[7]
+        local width, height, image_num = row[4], row[5], row[6]
+        self.sprite_animation:loadRowImagesFromTexture(
+                row_id,
+                tex_name,
+                image_name,
+                x,
+                y,
+                dx,
+                dy,
+                width,
+                height,
+                image_num,
+                colli_a,
+                colli_b,
+                false
+        )
+    end
+end
 
 ---------------------------------------------------------------------------------------------------
 ---constants
@@ -37,43 +147,6 @@ PlayerBase.const = {
 ---------------------------------------------------------------------------------------------------
 ---engine callbacks
 
----@param player_input InputManager an object that manages recorded player input
----@param stage Stage the current stage this player is at
-function PlayerBase:init(
-        player_input,
-        animation_interval,
-        unfocused_speed,
-        focused_speed,
-        stage
-)
-    self.layer = LAYER_PLAYER
-    self.group = GROUP_PLAYER
-    self.bound = false
-
-    self:loadResources()
-
-    -- player object properties
-    self.sprite_animation_interval = animation_interval  -- in frames
-    self.sprite_animation_transition_interval = 4
-    self.sprite_animation = ClockedAnimation()
-    self:initAnimation()
-    self.sprite_movement_state = 0  -- -2, -1 for left, 0 for idle, 1, 2 for right
-    self.sprite_animation:playAnimation(
-            "idle",
-            self.sprite_animation_interval,
-            0,
-            true,
-            true
-    )
-
-    self.player_input = player_input
-    self.stage = stage
-
-    self.unfocused_speed = unfocused_speed
-    self.focused_speed = focused_speed
-    self.invincible_timer = 0
-    self.spawn_counter = 0
-end
 
 function PlayerBase:frame()
     if self.spawn_counter == 0 then
@@ -88,7 +161,7 @@ function PlayerBase:frame()
         self.spawn_counter = max(0, self.spawn_counter - 1)
     end
 
-    self.invincible_timer = max(0, self.invincible_timer - 1)
+    self.protect_counter = max(0, self.protect_counter - 1)
 
     self:updateMissStatus()
 end
@@ -97,7 +170,7 @@ function PlayerBase:updateMissStatus()
     if self.miss_counter ~= nil then
         self.miss_counter = max(0, self.miss_counter - 1)
         if self.miss_counter == 0 then
-            self:onMiss()
+            self:miss()
             self:respawn()
         end
     end
@@ -127,44 +200,32 @@ end
 ---@param PlayerInput InputManager
 function PlayerBase:processPlayerInput(PlayerInput)
     self:processMovementInput(PlayerInput)
-    self:processAttackInput(PlayerInput)
-    self:processBombInput(PlayerInput)
-end
-
-function PlayerBase:processAttackInput(PlayerInput)
-end
-
-function PlayerBase:processBombInput(PlayerInput)
 end
 
 ---@param PlayerInput InputManager
 function PlayerBase:processMovementInput(PlayerInput)
     -- 2D-movement limited to 8 directions
 
-    local dx = 0
-    local dy = 0
-    -- take one direction if both keys are pressed
-    if PlayerInput:isAnyRecordedKeyDown("down") then
-        dy = -1
-    elseif PlayerInput:isAnyRecordedKeyDown("up") then
-        dy = 1
+    local record = self.record_array
+    if self.timer == self.turn_time then
+        local i = self.ref_index
+        local speed = 0
+        if record[i + 2] == 1 then
+            speed = self.unfocused_speed
+        end
+        local dir = record[i + 1] * 45
+        self.vx, self.vy = speed * cos(dir), speed * sin(dir)
+
+        if i - 3 > 0 then
+            self.ref_index = i - 3
+            self.turn_time = self.turn_time + record[i - 3]
+        else
+            self.turn_time = 99999999
+        end
     end
-    if PlayerInput:isAnyRecordedKeyDown("left") then
-        dx = -1
-    elseif PlayerInput:isAnyRecordedKeyDown("right") then
-        dx = 1
-    end
-    local speed_coeff = self.unfocused_speed
-    if PlayerInput:isAnyRecordedKeyDown("slow") then
-        speed_coeff = self.focused_speed
-    end
-    if dx * dy ~= 0 then  -- diagonal movement
-        speed_coeff = speed_coeff * SQRT2_2
-    end
-    self.x, self.y = self.x + dx * speed_coeff, self.y + dy * speed_coeff
 
     -- update sprite
-    self:updateSpriteByMovement(dx > 0, dx < 0)
+    self:updateSpriteByMovement(self.vx > 0.01, self.vx < -0.01)
 end
 
 ---update sprite of the player by the movement performed
@@ -278,8 +339,7 @@ end
 
 ---------------------------------------------------------------------------------------------------
 
----respawn a new player, replace the old one;
----update the player reference in stage object
+---respawn a new player
 function PlayerBase:respawn()
     local Player = self.class
     local new_player = Player(self.stage)
@@ -288,21 +348,18 @@ function PlayerBase:respawn()
     new_player.x = PlayerBase.const.spawn_x
     new_player.y = PlayerBase.const.spawn_y - spawn_speed * spawn_time
     new_player.spawn_counter = PlayerBase.const.spawn_time
-    new_player.invincible_timer = PlayerBase.const.spawn_protect_time
+    new_player.protect_counter = PlayerBase.const.spawn_protect_time
     self.stage:setPlayer(new_player)
 
     Del(self)
 end
 
-function PlayerBase:onMiss()
+function PlayerBase:miss()
     self:endCurrentSession()
 end
 
 function PlayerBase:endCurrentSession()
-    local current_stage = self.stage
-    ---@type Stage
-    local StageClass = current_stage.class
-    current_stage:stageTransition(StageClass.RESTART_AND_KEEP_RECORDING)
+    self.stage:stageTransition(Stage.RESTART_AND_KEEP_RECORDING)
 end
 
 function PlayerBase:colli(other)
@@ -313,7 +370,7 @@ function PlayerBase:colli(other)
         end
 
         -- player miss
-        if self.invincible_timer == 0 and self.miss_counter == nil then
+        if self.protect_counter == 0 and self.miss_counter == nil then
             PlaySound("pldead00", 0.5, 0, true)
             self.miss_counter = 12
         end
@@ -321,7 +378,7 @@ function PlayerBase:colli(other)
 end
 
 function PlayerBase:render()
-    if self.invincible_timer % 3 == 2 then  -- 避开初始值 counter = 0
+    if self.protect_counter % 3 == 2 then  -- 避开初始值 counter = 0
         self.color = Color(0xFF0000FF)
     else
         self.color = Color(0xFFFFFFFF)

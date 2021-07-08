@@ -11,8 +11,6 @@ local MenuManager = require("BHElib.scenes.menu.menu_manager")
 ---@class PauseMenuManager:MenuManager
 local M = LuaClass("menu.PauseMenuManager", MenuManager)
 
-local TitleMenuPage = require("BHElib.scenes.main_menu.title_menu_page")
-
 ---------------------------------------------------------------------------------------------------
 ---cache variables and functions
 
@@ -22,20 +20,12 @@ local TaskWait = task.Wait
 
 ---------------------------------------------------------------------------------------------------
 
----@param scene Stage the stage that created this pause menu
+---@param stage Stage the stage that created this pause menu
 function M.__create(stage)
     local self = MenuManager.__create(1 / 15)
     self.continue_menu = true
-    self.scene = stage
+    self.stage = stage
     return self
-end
-
-function M:createMenuPageFromClass(class_id)
-    if class_id == "menu.TitleMenuPage" then
-        return TitleMenuPage(1)
-    else
-        error("ERROR: Unexpected menu page class!")
-    end
 end
 
 function M:initMenuPages()
@@ -60,13 +50,14 @@ function M:onMenuExit()
         -- fade out menu page
         TaskWait(math.ceil(1 / self.transition_speed))
 
+        local StageClass = self.stage.class
         -- start stage or exit game, depending on the state set by createNextGameScene
         if to_do == "resume" then
             self.continue_menu = false
         elseif to_do == "quit_to_menu" then
-            self.scene:completeSceneGroup()
+            self.stage:stageTransition(StageClass.BACK_TO_MENU)
         elseif to_do == "restart_scene_group" then
-            self.scene:restartSceneGroup()
+            self.stage:stageTransition(StageClass.RESTART_SCENE_GROUP)
         else
             error("onMenuExit() called without to_do set by any menu page in the page array!")
         end

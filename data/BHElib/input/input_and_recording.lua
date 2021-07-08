@@ -16,7 +16,8 @@
 ---@class InputManager
 local M = {}
 
-local _raw_input = require("setting.key_mapping")
+local RawInput = require("setting.key_mapping")
+local Coordinates = require("BHElib.coordinates_and_screen")
 
 ---maps from device id to input key states;
 local _device_states
@@ -65,7 +66,7 @@ local GAME_KEYS = {
     "down",
 
     "slow",  -- slow down movement speed; focus mode
-    "shoot",  -- player normal attack
+    "shoot",  -- player main shot
     "spell",  -- bomb
     "special",  -- "C"
 }
@@ -190,13 +191,13 @@ end
 
 ---get the position of the mouse expressed in resolution coordinates
 ---@return number, number x, y position of the mouse
-function M:getMousePosition()
+function M:getMousePositionInUI()
     return _mouse_states[4], _mouse_states[5]
 end
 
 ---get the recorded position of the mouse expressed in resolution coordinates
 ---@return number, number recorded x, y position of the mouse
-function M:getRecordedMousePosition()
+function M:getRecordedMousePositionInUI()
     return _recorded_mouse_states[4], _recorded_mouse_states[5]
 end
 
@@ -276,7 +277,7 @@ end
 ---get position change of the mouse over the previous frame in resolution coordinates
 ---@param is_recorded boolean if true, return device input; if false return recorded input
 ---@return number, number position change of the mouse in form x, y
-function M:getMousePositionChange(is_recorded)
+function M:getMousePositionChangeInUI(is_recorded)
     if is_recorded then
         return _recorded_mouse_states[4] - _prev_recorded_mouse_states[4], _recorded_mouse_states[5] - _prev_recorded_mouse_states[5]
     else
@@ -316,7 +317,7 @@ function M:updateInputSnapshot()
     _prev_device_states = _device_states
     _device_states = {}  -- clear the input table
 
-    local device_id_array = _raw_input:getDeviceIDArray()
+    local device_id_array = RawInput:getDeviceIDArray()
     for index = 1, #device_id_array do
         -- update the state table
         local device_id = device_id_array[index]
@@ -324,12 +325,12 @@ function M:updateInputSnapshot()
 
         for i = 1, #GAME_KEYS do
             local function_key_name = GAME_KEYS[i]
-            local is_down = _raw_input:isDeviceKeyDown(device_id, function_key_name)
+            local is_down = RawInput:isDeviceKeyDown(device_id, function_key_name)
             device_state[function_key_name] = is_down
         end
         for i = 1, #SYSTEM_KEYS do
             local function_key_name = SYSTEM_KEYS[i]
-            local is_down = _raw_input:isDeviceKeyDown(device_id, function_key_name)
+            local is_down = RawInput:isDeviceKeyDown(device_id, function_key_name)
             device_state[function_key_name] = is_down
         end
         _device_states[device_id] = device_state
@@ -337,8 +338,14 @@ function M:updateInputSnapshot()
 
     -- mouse input
     _prev_mouse_states = _mouse_states
-    local b1, b2, b3 = _raw_input:getMouseState()
-    local mouse_x, mouse_y = _raw_input:getMousePosition()
+    local b1, b2, b3 = RawInput:getMouseState()
+    local mouse_x, mouse_y = RawInput:getMousePosition()
+
+    -- convert to ui coordinates then save to avoid some floating point precision issues that potentially can occur in
+    -- res-ui or res-game coordinates conversions (since the replay can be played in different resolution than when it
+    -- is recorded)
+    mouse_x, mouse_y = Coordinates.resToUI(mouse_x, mouse_y)
+
     _mouse_states = {b1, b2, b3, mouse_x, mouse_y}  -- overwrite mouse state
 end
 
@@ -365,8 +372,8 @@ local function WriteRecordedInputToStream(sequential_writer)
     -- mouse input
     local b1, b2, b3, x, y = unpack(_recorded_mouse_states)
     sequential_writer:writeBitArray({b1, b2, b3})
-    sequential_writer:writeFloat(x)
-    sequential_writer:writeFloat(y)
+    sequential_writer:writeDouble(x)
+    sequential_writer:writeDouble(y)
 end
 
 ---update _recorded_device_states and _recorded_mouse_states by reading from the given input stream
@@ -390,8 +397,8 @@ local function ReadRecordedInputFromStream(sequential_reader)
 
     -- mouse input
     local b1, b2, b3 = unpack(sequential_reader:readBitArray())
-    local x = sequential_reader:readFloat()
-    local y = sequential_reader:readFloat()
+    local x = sequential_reader:readDouble()
+    local y = sequential_reader:readDouble()
     _recorded_mouse_states = {b1, b2, b3, x, y}  -- overwrite the mouse states
 end
 
@@ -437,7 +444,7 @@ end
 
 ---this function should only be called on application startup
 function M:init()
-    _raw_input:init()
+    RawInput:init()
     M:resetRecording(false)  -- input is available after this function call
 end
 

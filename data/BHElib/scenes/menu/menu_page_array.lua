@@ -3,7 +3,7 @@
 ---author: Karl
 ---date: 2021.4.26
 ---desc: Defines an object consists of menu pages; each item of the array is an array of three
----     elements, namely {menu_class_id, menu_page, choices}, where the third element is the
+---     elements, namely {menu_page_init_callback, menu_page, choices}, where the third element is the
 ---     choices made in that menu; this is a strange class as every insert requires two separate
 ---     deletes (for two entries in array and in pool) to clean everything
 ---------------------------------------------------------------------------------------------------
@@ -15,8 +15,8 @@ local MenuPageArray = LuaClass("menu.MenuPageArray")
 ---interface
 
 ---MenuPageArray() -> MenuPageArray object
----append(class_id, menu_id, menu) -> (number) position index of the new item
----pop() -> {class_id, menu_id, choices}
+---append(init_callback, menu_id, menu) -> (number) position index of the new item
+---pop() -> {init_callback, menu_id, choices}
 ---setChoice(i, key, value)
 ---getChoice(i, key) -> value
 ---queryChoice(key, i) -> i, value
@@ -26,7 +26,7 @@ local MenuPageArray = LuaClass("menu.MenuPageArray")
 ---getSize()
 
 ---summary of what it does
----menu_pos -array[menu_pos]-> {class_id, menu_id, choices}
+---menu_pos -array[menu_pos]-> {init_callback, menu_id, choices}
 
 ---------------------------------------------------------------------------------------------------
 
@@ -43,21 +43,19 @@ end
 
 ---set a menu at the position
 ---@param i number position index of the menu page
----@param class_id string id of the menu page class
+---@param init_callback string initialization callback of the menu page
 ---@param menu_id string unique id of the menu
 ---@return number position index of the new menu page
-function MenuPageArray:setMenu(i, class_id, menu_id)
+function MenuPageArray:setMenu(i, init_callback, menu_id)
 
     local sizePlusOne = self.size + 1
 
     assert(i <=  sizePlusOne, "Error: Attempt to set menu page at an index out of range!")
     if i == sizePlusOne then
         self.size = sizePlusOne
-        print("setMenu called at position "..tostring(sizePlusOne).." with menu "..menu_id)
-        self[sizePlusOne] = {class_id, menu_id, {}}
+        self[sizePlusOne] = {init_callback, menu_id, {}}
     else
-        print("setMenu called at position "..tostring(i).." with menu "..menu_id)
-        self[i] = {class_id, menu_id, {}}
+        self[i] = {init_callback, menu_id, {}}
     end
 end
 
@@ -73,17 +71,17 @@ end
 ---increase the counter and retrieve a menu by the lists of next menus; can not be used when no menu is present
 ---@param menu_list_key string the key of choices that corresponds to the list of menus
 ---@param counter_key string the key of choices that corresponds to the counter of the list of menus
----@return string, string, number class_id, menu_page_id and index of the retrieved menu page if successful; return nil, nil otherwise
+---@return string, string, number init_callback, menu_page_id and index of the retrieved menu page if successful; return nil, nil otherwise
 function MenuPageArray:retrieveNextMenu(menu_list_key, counter_key)
     local i = self.size
-    local class_id, menu_page_id, menu_page_pos  -- find the next menu
+    local init_callback, menu_page_id, menu_page_pos  -- find the next menu
     while i > 0 do
         local choices = self[i][3]
         local count = choices[counter_key]
         if count ~= nil then
             local menus = choices[menu_list_key]
             if count < #menus then
-                class_id, menu_page_id = unpack(menus[count + 1])
+                init_callback, menu_page_id = unpack(menus[count + 1])
                 menu_page_pos = self.size + 1
                 choices[counter_key] = count + 1  --update counter of the menu that spawned this menu
                 break
@@ -91,18 +89,18 @@ function MenuPageArray:retrieveNextMenu(menu_list_key, counter_key)
         end
         i = i - 1
     end
-    return class_id, menu_page_id, menu_page_pos
+    return init_callback, menu_page_id, menu_page_pos
 end
 
 ---decrease the counter and retrieve a menu by the lists of next menus; should not be used when no menu is present
 ---@param menu_list_key string the key of choices that corresponds to the list of menus
 ---@param counter_key string the key of choices that corresponds to the counter of the list of menus
----@return string, string, number class_id, menu_page_id and index of the spawner of the menu page;
+---@return string, string, number init_callback, menu_page_id and index of the spawner of the menu page;
 function MenuPageArray:retrievePrevMenu(menu_list_key, counter_key)
     local size = self.size
 
     local current_menu_id = self[size][2]
-    local class_id, menu_page_id, menu_page_pos  -- find out which menu spawned the menu
+    local init_callback, menu_page_id, menu_page_pos  -- find out which menu spawned the menu
     local i = size - 1
     while i > 0 do
         local choices = self[i][3]
@@ -110,7 +108,7 @@ function MenuPageArray:retrievePrevMenu(menu_list_key, counter_key)
         if menus then
             local count = choices[counter_key]
             if count > 0 and current_menu_id == menus[count][2] then
-                class_id, menu_page_id = unpack(self[i])
+                init_callback, menu_page_id = unpack(self[i])
                 menu_page_pos = i
                 choices[counter_key] = count - 1
                 break
@@ -118,20 +116,19 @@ function MenuPageArray:retrievePrevMenu(menu_list_key, counter_key)
         end
         i = i - 1
     end
-    print("retrieve index is "..tostring(menu_page_pos))
-    return class_id, menu_page_id, menu_page_pos
+    return init_callback, menu_page_id, menu_page_pos
 end
 
 ---find a menu by the lists of next menus;
 ---@param cur_pos number
 ---@param menu_list_key string the key of choices that corresponds to the list of menus
 ---@param counter_key string the key of choices that corresponds to the counter of the list of menus
----@return string, string, number class_id, menu_page_id and index of the spawner of the menu page; nil if no result is found
+---@return string, string, number init_callback, menu_page_id and index of the spawner of the menu page; nil if no result is found
 function MenuPageArray:findPrevMenuOf(cur_pos, menu_list_key, counter_key)
     local size = self.size
 
     local current_menu_id = self[size][2]
-    local class_id, menu_page_id, menu_page_pos  -- find out which menu spawned the menu
+    local init_callback, menu_page_id, menu_page_pos  -- find out which menu spawned the menu
     local i = cur_pos - 1
     while i > 0 do
         local choices = self[i][3]
@@ -139,19 +136,18 @@ function MenuPageArray:findPrevMenuOf(cur_pos, menu_list_key, counter_key)
         if menus then
             local count = choices[counter_key]
             if count > 0 and current_menu_id == menus[count][2] then
-                class_id, menu_page_id = unpack(self[i])
+                init_callback, menu_page_id = unpack(self[i])
                 menu_page_pos = i
                 break
             end
         end
         i = i - 1
     end
-    return class_id, menu_page_id, menu_page_pos
+    return init_callback, menu_page_id, menu_page_pos
 end
 
 ---clear choices of a menu at the given position
-function MenuPageArray:clearChoice(i)
-    print("clearing choice at position "..tostring(i))
+function MenuPageArray:clearChoices(i)
     self[i][3] = {}
 end
 
@@ -160,8 +156,6 @@ end
 ---@param key string key for retrieval
 ---@param choice any data to be stored
 function MenuPageArray:setChoice(i, key, choice)
-    print("setting choice "..key.." to "..tostring(choice))
-    print("at index "..tostring(i))
     local choices = self[i][3]
     choices[key] = choice
 end
@@ -179,12 +173,9 @@ end
 ---@param key string key for retrieval
 ---@return any data stored with the given key
 function MenuPageArray:queryChoice(key)
-    print("querying key "..key)
     for i = self.size, 1, -1 do
-        print(i)
         local choices = self[i][3]
         local choice = choices[key]
-        print(choice)
         if choice ~= nil then
             return choice, i
         end
@@ -199,10 +190,10 @@ function MenuPageArray:getMenuId(i)
     return self[i][2]
 end
 
----get the class of the menu page
+---get the initialization callback of the menu page at the given index
 ---@param i number index of the menu page
 ---@return string id of the class of the menu page with the given index
-function MenuPageArray:getMenuClassId(i)
+function MenuPageArray:getMenuInitCallback(i)
     return self[i][1]
 end
 

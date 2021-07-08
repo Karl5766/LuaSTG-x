@@ -16,26 +16,28 @@ local Vec2 = math.vec2
 ---------------------------------------------------------------------------------------------------
 
 ---@param focused_index number index of the selected item when the selector is created
----@param init_pos_offset math.vec2 initial position offset
+---@param menu_body_pos math.vec2 base position of the menu body
 ---@param selection_input InputManager the object for this selector to receive input from
-function M.__create(selection_input, focused_index, init_pos_offset, pos_increment)
+function M.__create(selection_input, focused_index, menu_body_pos, pos_increment)
     local self = InteractiveSelector.__create(selection_input)
     self.focused_index = focused_index
-    self.pos_offset = init_pos_offset
+    self.menu_body_pos = menu_body_pos
     self.pos_increment = pos_increment
     return self
 end
 
----@param pos_offset math.vec2
-function M:setPosition(pos_offset)
-    self.pos_offset = pos_offset
+---set the position of the menu body
+---@param menu_body_pos math.vec2
+function M:setPosition(menu_body_pos)
+    self.menu_body_pos = menu_body_pos
+    self:updateMenuDisplay()
 end
 
 ---retrieve the absolute position of the item of given index; the value of decimal input change may vary smoothly
 ---between index for smooth transition of selection
 ---@param index number index of the item; if this is not integer, then the result should given some interpolation between adjacent indices
 ---@return math.vec2 the relative postion of the option in relation to the selector
-function M:getListingPos(index)
+function M:getListingPosOffset(index)
     return self.pos_increment * (index - 1)
 end
 

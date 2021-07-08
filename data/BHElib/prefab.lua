@@ -170,22 +170,20 @@ end
 ---@~chinese 所有game object的基类
 ---
 ---@~English the base prefab of all game objects
----@type Prefab
-local DefaultFrameFunc = function() end
-
----@class prefab.Object
+---@class Prefab.Object
 Prefab.Object = {
     0, 0, 0, 0, 0, 0;
     is_class = true,
-    init     = function()
+    init     = function(self)
     end,
-    del      = function()
+    del      = function(self)
     end,
-    frame    = DefaultFrameFunc,
+    frame    = function(self)
+    end,
     render   = DefaultRenderFunc,
-    colli    = function(other)
+    colli    = function(self, other)
     end,
-    kill     = function()
+    kill     = function(self)
     end
 }
 Prefab.Register(Prefab.Object)
@@ -193,7 +191,7 @@ Prefab.Register(Prefab.Object)
 ---------------------------------------------------------------------------------------------------
 ---Object3d
 
----@class prefab.Object3d:prefab.Object
+---@class Prefab.Object3d:Prefab.Object
 Prefab.Object3d = Prefab.New(Prefab.Object)
 Prefab.Object3d['.3d'] = true
 Prefab.Register(Prefab.Object3d)
@@ -201,7 +199,7 @@ Prefab.Register(Prefab.Object3d)
 ---------------------------------------------------------------------------------------------------
 ---Renderer
 
----@class prefab.Renderer:prefab.Object
+---@class prefab.Renderer:Prefab.Object
 Prefab.Renderer = Prefab.New(Prefab.Object)
 function Prefab.Renderer:init(layer, master, coordinates_name)
     self.group = GROUP_GHOST

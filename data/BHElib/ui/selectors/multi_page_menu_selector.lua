@@ -15,7 +15,7 @@ local M = LuaClass("selectors.MultiPageMenuSelector", SimpleMenuSelector)
 
 ---@param selection_input InputManager the object for this selector to receive input from
 ---@param focused_index number initial focused index
----@param init_pos_offset math.vec2 initial position offset of the menu body
+---@param menu_body_pos math.vec2 initial position of the menu body
 ---@param shake_max_time number duration of the shaking effect
 ---@param shake_amplitude number amplitude of the shaking effect; shaking only occurs in x direction
 ---@param shake_period number period of harmonic (sine) motion of shaking effect in frames
@@ -33,7 +33,7 @@ local M = LuaClass("selectors.MultiPageMenuSelector", SimpleMenuSelector)
 function M.__create(
         selection_input,
         focused_index,
-        init_pos_offset,
+        menu_body_pos,
         shake_max_time,
         shake_amplitude,
         shake_period,
@@ -53,7 +53,7 @@ function M.__create(
     local self = SimpleMenuSelector.__create(
             selection_input,
             focused_index,
-            init_pos_offset,
+            menu_body_pos,
             shake_max_time,
             shake_amplitude,
             shake_period,
@@ -76,7 +76,7 @@ function M.__create(
     self.page_index = 1
 
 
-    self.init_pos_offset = init_pos_offset
+    self.menu_body_pos = menu_body_pos
     self.title_pos_offset = title_pos_offset
     self.title_text_obj = title_text_obj
     self.body_text_obj = body_text_obj
@@ -123,7 +123,7 @@ end
 
 function M:renderDummySelectable(index)
     local body_text_obj = self.body_text_obj
-    local item_pos = self.pos_offset + self:getListingPosAfterShakeEff(index)
+    local item_pos = self.menu_body_pos + self:getListingPosOffsetAfterShakeEff(index)
     local color_vec
     -- the selected selectable will blink
     if index == self.focused_index then
@@ -240,13 +240,13 @@ function M.shortInit(init_global_focused_index,
     local transition_fly_directions = {
         [MenuConst.IN_FORWARD] = enter_dir or -180,
         [MenuConst.IN_BACKWARD] = exit_dir or 0,
-        [MenuConst.OUT_BACKWARD] = exit_dir or 0,
+        [MenuConst.OUT_FORWARD] = exit_dir or 0,
         [MenuConst.OUT_BACKWARD] = enter_dir or -180,
     }
     local transition_fly_distances = {
         [MenuConst.IN_FORWARD] = fly_distance,
         [MenuConst.IN_BACKWARD] = fly_distance,
-        [MenuConst.OUT_BACKWARD] = fly_distance,
+        [MenuConst.OUT_FORWARD] = fly_distance,
         [MenuConst.OUT_BACKWARD] = fly_distance,
     }
 

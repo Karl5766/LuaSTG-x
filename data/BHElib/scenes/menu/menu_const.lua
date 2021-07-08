@@ -53,8 +53,11 @@ M.CHOICE_GO_TO_MENUS = 3
 ---@param value any
 M.CHOICE_SPECIFY = 4
 
+---execute a given function, passing menu_manager as the first parameter
+M.CHOICE_EXECUTE = 5
+
 ---send a cascade signal to all of the parents of this page
-M.CHOICE_CASCADE = 5
+M.CHOICE_CASCADE = 6
 
 M.IN_FORWARD = 1
 M.IN_BACKWARD = 2

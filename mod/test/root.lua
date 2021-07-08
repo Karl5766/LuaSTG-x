@@ -13,8 +13,9 @@ local function SetupGroupInitState()
     group_init_state.player_class_id = "units.player.reimu"
 
     group_init_state.scene_id_array = {
-        "stage.SampleStage",
-        "stage.SecondSampleStage"
+        "stage.StageLab"
+        --"stage.SampleStage",
+        --"stage.SecondSampleStage"
     }
     group_init_state.is_replay = is_replay
 
@@ -51,7 +52,6 @@ local function Init()
     --    end
     --end
     --zip:close()
-
     require("BHElib.coordinates_and_screen").initGameCoordinates()  -- setup the coordinates
     require("BHElib.input.input_and_recording"):init()  -- initialize player input
 
@@ -64,12 +64,15 @@ local function Init()
     -- initialize all stage classes
     require("scenes.game_stage_sample")
     require("scenes.game_stage_second_sample")
+    require("scenes.stage_lab")
 
     -- initialize all player classes
     require("player.reimu.reimu")
 
     local Prefab = require("BHElib.prefab")
     local SceneTransition = require("BHElib.scenes.scene_transition")
+
+    require("BHElib.coordinates_and_screen").setResolution(1600, 900)
 
     -- register object classes
     Prefab.RegisterAllDefinedPrefabs()

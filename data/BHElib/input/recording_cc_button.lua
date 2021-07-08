@@ -10,6 +10,7 @@
 local M = class("input.RecordingCCButton")
 
 local Input = require("BHElib.input.input_and_recording")
+local Coordinates = require("BHElib.coordinates_and_screen")
 
 ---------------------------------------------------------------------------------------------------
 
@@ -21,7 +22,7 @@ end
 
 function M:ctor()
     self:setScale9Enabled(true)
-    self:setContentSize(cc.size(10, 10))
+    self:setButtonSize(25, 25)
     self:setSwallowTouches(true)
 
     local param = ccui.LinearLayoutParameter:create()
@@ -38,7 +39,7 @@ function M:ctor()
     --lb:setPosition(cc.p(5, 0))
 
     self:setName("button")
-    self:setPosition(cc.p(500, 200))
+    self:setPositionInUI(250, 100)
 
     self:setTouchEnabled(false)
     self:setEnabled(true)
@@ -63,12 +64,12 @@ function M:update(dt)
     -- compute mouse-related information
     local x, y
     if self.is_recording then
-        x, y = input:getRecordedMousePosition()
+        x, y = input:getRecordedMousePositionInUI()
     else
-        x, y = input:getMousePosition()
+        x, y = input:getMousePositionInUI()
     end
     local cam = _director:getRunningScene():getDefaultCamera()
-    local is_colliding = self:hitTest(cc.p(x, y), cam)
+    local is_colliding = self:pointHitTest(x, y)
     local just_changed = input:isMouseButtonJustChanged(self.is_recording)
     local pressed
     if self.is_recording then
@@ -87,7 +88,7 @@ function M:update(dt)
                 self:onTouchCanceled()
             end
         end
-        local dx, dy = input:getMousePositionChange(self.is_recording)
+        local dx, dy = input:getMousePositionChangeInUI(self.is_recording)
         if dx == 0 and dy == 0 then
             -- mouse not moving, do nothing
         else
@@ -101,6 +102,27 @@ function M:update(dt)
             self:onHover(x, y)
         end
     end
+end
+
+function M:setButtonSize(width, height)
+    -- save for collision testing
+    self.width_square = width * width * 0.25
+    self.height_square = height * height * 0.25
+    local scale_x, scale_y = Coordinates.getUIScale()
+    self:setContentSize(cc.size(width * scale_x, height * scale_y))
+end
+
+function M:setPositionInUI(ui_x, ui_y)
+    self.x = ui_x
+    self.y = ui_y
+    local res_x, res_y = Coordinates.uiToRes(ui_x, ui_y)
+    self:setPosition(cc.p(res_x, res_y))
+end
+
+function M:pointHitTest(x, y)
+    local dx = self.x - x
+    local dy = self.y - y
+    return (dx * dx <= self.width_square) and (dy * dy <= self.height_square)
 end
 
 function M:onHover(x, y)

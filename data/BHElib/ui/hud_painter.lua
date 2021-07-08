@@ -82,7 +82,7 @@ end
 
 ---------------------------------------------------------------------------------------------------
 
-function M.draw(img_background, background_scale, font_profile, img_border)
+function M.draw(img_background, background_scale, img_border)
     scr.setRenderView("ui")
 
     _timer = _timer + 1
@@ -101,7 +101,9 @@ function M.draw(img_background, background_scale, font_profile, img_border)
     Render(img_border, l, (t + b) / 2, 0, 2 / ww, (t - b + 1) / hh)
     Render(img_border, r, (t + b) / 2, 0, 2 / ww, (t - b + 1) / hh)
     SetImageState(img_border, '', color.White)
+end
 
+function M.drawPerfromanceProfile(font_profile)
     SetFontState(font_profile, '', Color(0xFFFFFFFF))
     RenderPerformanceProfile(font_profile)
 end
@@ -167,8 +169,7 @@ function M.drawKeys()
 
     --mouse text
     do
-        local x, y = _input:getMousePosition()
-        x, y = _coordinates.resToUI(x, y)
+        local x, y = _input:getMousePositionInUI()
         if _input:isMousePressed() then
             RenderTTF("font:menu", "mouse pressed", x, x, y, y, comment_color, "left")
         else
@@ -176,8 +177,7 @@ function M.drawKeys()
         end
     end
     do
-        local x, y = _input:getRecordedMousePosition()
-        x, y = _coordinates.resToUI(x, y)
+        local x, y = _input:getRecordedMousePositionInUI()
         y = y - 20
         if _input:isRecordedMousePressed() then
             RenderTTF("font:menu", "mouse pressed (recorded)", x, x, y, y, comment_color, "left")

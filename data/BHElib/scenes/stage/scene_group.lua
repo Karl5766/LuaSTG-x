@@ -56,7 +56,8 @@ end
 
 ---@return string the current stage class id
 function SceneGroup:getCurrentSceneId()
-    return self.group_init_state.scene_id_array[self.current_scene_num]
+    local scene_id = self.group_init_state.scene_id_array[self.current_scene_num]
+    return scene_id
 end
 
 ---@return number number of stages completed
@@ -82,6 +83,9 @@ end
 ---update the current stage num
 function SceneGroup:advanceScene()
     self.current_scene_num = self.current_scene_num + 1
+end
+
+function SceneGroup:restartScene()
 end
 
 ---remember the current stage init state

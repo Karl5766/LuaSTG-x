@@ -12,6 +12,7 @@ local MenuManager = require("BHElib.scenes.menu.menu_manager")
 local M = LuaClass("menu.MainMenuManager", MenuManager)
 
 local SceneTransition = require("BHElib.scenes.scene_transition")
+local _init_callbacks = require("BHElib.scenes.main_menu.main_menu_page_init_callbacks")
 
 ---------------------------------------------------------------------------------------------------
 ---cache variables and functions
@@ -21,13 +22,15 @@ local TaskDo = task.Do
 local TaskWait = task.Wait
 
 ---------------------------------------------------------------------------------------------------
----tasks format
 
----{"no_task"}
----{"save_replay"}
-
----------------------------------------------------------------------------------------------------
-
+---create a main menu manager
+---specifying the replay saving/loading paths should probably be done in the menu code,
+---so I put these parameters below
+---
+---possible tasks formats:
+---1.{"no_task"}
+---2.{"save_replay"}
+---
 function M.__create(task_spec, temp_replay_path, replay_folder_path)
     local self = MenuManager.__create()
     self.task_spec = task_spec
@@ -50,44 +53,24 @@ function M:setMenuScene(scene)
     self.scene = scene
 end
 
-local TitleMenuPage = require("BHElib.scenes.main_menu.title_menu_page")
-local ReplayMenuPage = require("BHElib.scenes.main_menu.replay_menu_page")
----@param class_id string id of the class of the menu to setup
----@param menu_id string id of the menu to setup
-function M:createMenuPageFromClass(class_id, menu_id)
-    if class_id == "menu.TitleMenuPage" then
-        return TitleMenuPage(1, self.temp_replay_path)
-    elseif class_id == "menu.ReplayMenuPage" then
-        local is_saving
-        if menu_id == "replay_saver" then
-            is_saving = true
-        elseif menu_id == "replay_loader" then
-            is_saving = false
-        end
-        return ReplayMenuPage(1, is_saving, self.replay_folder_path, 10, 3)
-    else
-        error("ERROR: Unexpected menu page class "..class_id.." with menu id "..menu_id.."!")
-    end
-end
-
 function M:initMenuPages()
     local task_name = self.task_spec[1]
 
     local menu_pages
     if task_name == "no_task" then
         menu_pages = {
-            {"menu.TitleMenuPage", "main_menu"},
+            {_init_callbacks.Title, "main_menu"},
         }
     elseif task_name == "save_replay" then
         menu_pages = {
-            {"menu.TitleMenuPage", "main_menu"},
-            {"menu.ReplayMenuPage", "replay_saver"},
+            {_init_callbacks.Title, "main_menu"},
+            {_init_callbacks.ReplaySaver, "replay_saver"},
         }
     end
 
     for i = 1, #menu_pages do
-        local class_id, menu_id = unpack(menu_pages[i])
-        self:setupMenuPageAtPos(class_id, menu_id, i)
+        local init_callback, menu_id = unpack(menu_pages[i])
+        self:setupMenuPageAtPos(init_callback, menu_id, i)
     end
     local menu_page_array = self.menu_page_array
 
@@ -98,7 +81,7 @@ function M:initMenuPages()
     end
 
     for i = 1, #menu_pages do
-        local class_id, menu_id = unpack(menu_pages[i])
+        local init_callback, menu_id = unpack(menu_pages[i])
         local cur_menu_page = self.menu_page_pool:getMenuFromPool(menu_id)
         if i == #menu_pages then
             cur_menu_page:setPageEnter(true, self.transition_speed)

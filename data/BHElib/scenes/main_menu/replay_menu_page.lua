@@ -11,7 +11,6 @@ local MenuPage = require("BHElib.scenes.menu.menu_page")
 local M = LuaClass("menu.ReplayMenuPage", MenuPage)
 
 local MultiPageMenuSelector = require("BHElib.ui.selectors.multi_page_menu_selector")
-local SimpleMenuSelector = require("BHElib.ui.selectors.simple_menu_selector")
 local ShakeEffListingSelector = require("BHElib.ui.selectors.shake_eff_listing_selector")
 local MenuConst = require("BHElib.scenes.menu.menu_const")
 local Coordinates = require("BHElib.coordinates_and_screen")
@@ -25,8 +24,12 @@ local Vec4 = math.vec4
 local Selectable = ShakeEffListingSelector.Selectable
 
 ---------------------------------------------------------------------------------------------------
+---name formatting parameters
 
-local prefix = "replay_"
+local STR_REPLAY_PREFIX = "Default_"
+local STR_REPLAY_SUFFIX = ".Replay"  -- credit to Trackmania replay suffix, hard to come up with a suffix better than ".rpy" myself
+
+---------------------------------------------------------------------------------------------------
 
 local function CreateSaveSelectable(display_text, full_path, i)
     local selectable = Selectable(display_text, {
@@ -36,7 +39,10 @@ local function CreateSaveSelectable(display_text, full_path, i)
     return selectable
 end
 
+---scan through all replay files in the directory, create an array of options with index specified by the replay file;
+---for empty slots, those elements in the array with corresponding index will be filled with empty selectable
 ---@param max_index number maximum number of items; must be multiple of mod_num
+---@param mod_num number number of items must be divisible by mod_num
 ---@return table, number an array of all selectables and the size of the array
 local function CreateAllSelectable(is_saving, replay_file_directory, max_index, mod_num, empty_room_num)
     local size = empty_room_num
@@ -44,13 +50,16 @@ local function CreateAllSelectable(is_saving, replay_file_directory, max_index, 
 
     local files = FS.getBriefOfFilesInDirectory(replay_file_directory)
     for i = 1, #files do
+
         local file = files[i]
-        local file_name = file.name
-        if file.isDirectory == false and string.sub(file_name, -4, -1)== ".rpy"
-                and string.sub(file_name, 1, 7) == "replay_" then
-            local number_str = string.sub(file_name, 8, -5)
+        local file_name = file.name  -- contains the suffix part
+        if file.isDirectory == false and string.sub(file_name, -#STR_REPLAY_SUFFIX, -1)== STR_REPLAY_SUFFIX
+                and string.sub(file_name, 1, #STR_REPLAY_PREFIX) == STR_REPLAY_PREFIX then
+
+            local number_str = string.sub(file_name, #STR_REPLAY_PREFIX + 1, -#STR_REPLAY_SUFFIX - 1)
             local number = tonumber(number_str)
             if number and number <= max_index then
+
                 local selectable
                 if is_saving then
                     selectable = CreateSaveSelectable(file_name, replay_file_directory.."/"..file_name, number)
@@ -75,7 +84,7 @@ local function CreateAllSelectable(is_saving, replay_file_directory, max_index, 
             if is_saving then
                 ret[i] = CreateSaveSelectable(
                         "--- empty ---",
-                        replay_file_directory.."/replay_"..tostring(i)..".rpy",
+                        replay_file_directory.."/"..STR_REPLAY_PREFIX..tostring(i)..STR_REPLAY_SUFFIX,
                         i
                 )
             else
@@ -100,7 +109,7 @@ end
 
 ---@param init_focused_index number initial position index of focused selectable
 function M.__create(
-        init_global_focused_index,
+        init_focused_index,
         is_saving,
         replay_file_directory,
         num_selectable_in_page,
@@ -121,7 +130,7 @@ function M.__create(
     local max_replay_num = num_pages * num_selectable_in_page
     local selectable_array, size = CreateAllSelectable(is_saving, replay_file_directory, max_replay_num, num_selectable_in_page, 10)
     local selector = MultiPageMenuSelector.shortInit(
-            init_global_focused_index,
+            init_focused_index,
             1,
             width * 0.7,
             Vec2(center_x, center_y),

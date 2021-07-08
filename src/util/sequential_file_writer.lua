@@ -12,6 +12,13 @@
 ---@class SequentialFileWriter
 local SequentialFileWriter = LuaClass("SequentialFileWriter")
 
+-------------------------------------------------------------------------------------------------
+---cache variables and functions
+
+local floor = math.floor
+
+-------------------------------------------------------------------------------------------------
+
 ---@param stream FileStream input file stream
 function SequentialFileWriter.__create(stream)
     assert(type(stream) == "table", "invalid argument type.")
@@ -53,7 +60,7 @@ function SequentialFileWriter:writeInt(i)
     if i < 0 then
         i = (0xFFFFFFFF + i) + 1
     end
-    local b1, b2, b3, b4 = i % 0x100, math.floor(i % 0x10000 / 0x100), math.floor(i % 0x1000000 / 0x10000), math.floor(i / 0x1000000)
+    local b1, b2, b3, b4 = i % 0x100, floor(i % 0x10000 / 0x100), floor(i % 0x1000000 / 0x10000), floor(i / 0x1000000)
     local stream = self.stream
     stream:writeByte(b1)
     stream:writeByte(b2)
@@ -67,7 +74,7 @@ end
 ---@param i number 要写入的整数
 function SequentialFileWriter:writeUInt(i)
     assert(type(i) == "number" and i >= 0 and i <= 0xFFFFFFFF, "invalid argument.")
-    local b1, b2, b3, b4 = i % 0x100, math.floor(i % 0x10000 / 0x100), math.floor(i % 0x1000000 / 0x10000), math.floor(i / 0x1000000)
+    local b1, b2, b3, b4 = i % 0x100, floor(i % 0x10000 / 0x100), floor(i % 0x1000000 / 0x10000), floor(i / 0x1000000)
     local stream = self.stream
     stream:writeByte(b1)
     stream:writeByte(b2)
@@ -95,6 +102,10 @@ function SequentialFileWriter:writeFloat(f)
         f = -f
     end
 
+    local temp = f
+    for i = 1, 256 do
+        temp = temp * 1024
+    end
     local mant, expo = math.frexp(f)
     if mant ~= mant then
         stream:writeByte(0x00)
@@ -120,11 +131,56 @@ function SequentialFileWriter:writeFloat(f)
         stream:writeByte(sign)
     else
         expo = expo + 0x7E
-        mant = (mant * 2.0 - 1.0) * math.ldexp(0.5, 24)
+        mant = (mant - 0.5) * 16777216  -- limit to [0, 0.5) then multiply by 2^24
         stream:writeByte(mant % 0x100)
-        stream:writeByte(math.floor(mant / 0x100) % 0x100)
-        stream:writeByte((expo % 0x2) * 0x80 + math.floor(mant / 0x10000))
-        stream:writeByte(sign + math.floor(expo / 0x2))
+        stream:writeByte(floor(mant / 0x100) % 0x100)
+        stream:writeByte((expo % 0x2) * 0x80 + floor(mant / 0x10000))
+        stream:writeByte(sign + floor(expo / 0x2))
+    end
+end
+
+local two_to_power_of_53 = math.ldexp(1, 53)
+---@~chinese 以小端序写入一个64位浮点数
+---
+---@~english write a 64 bit floating point number in little endian order
+---@param f number 要写入的浮点数
+function SequentialFileWriter:writeDouble(f)
+    local stream = self.stream
+    if f == 0.0 then  -- for optimization
+        self:writeUInt(0)
+        self:writeUInt(0)
+        return
+    end
+
+    local sign = 0
+    if f < 0.0 then
+        sign = 0x80000000
+        f = -f
+    end
+
+    local temp = f
+    for i = 1, 256 do
+        temp = temp * 1024
+    end
+    local mant, expo = math.frexp(f)
+    if mant ~= mant then  -- case of NaN
+        self:writeUInt(0x00000001)  -- non-zero
+        self:writeUInt(0xFFF00000)
+    elseif mant == math.huge then  -- positive or negative infinity
+        if sign == 0 then
+            self:writeUInt(0x00000000)
+            self:writeUInt(0x7FF00000)
+        else
+            self:writeUInt(0x00000000)
+            self:writeUInt(0xFFF00000)
+        end
+    elseif expo < -0x3FE then
+        error("Error: The number is too small to be recorded! (unimplemented feature)")
+    else
+        expo = expo + 0x3FE
+        mant = (mant - 0.5) * two_to_power_of_53 -- limit to [0, 0.5) then multiply by 2^53
+        self:writeUInt(mant % 0x100000000)
+        self:writeUInt(sign + expo * 0x00100000 + floor(mant / 0x100000000))
     end
 end
 
@@ -164,7 +220,7 @@ end
 function SequentialFileWriter:writeFieldsOfTable(sourceTable, floatFields, stringFields)
     for i = 1, #floatFields do
         local field = floatFields[i]
-        self:writeFloat(sourceTable[field])
+        self:writeDouble(sourceTable[field])
     end
     for i = 1, #stringFields do
         local field = stringFields[i]

@@ -40,7 +40,8 @@ end
 ---@brief 读取一个字节
 ---@return number 以number返回读取的字节
 function SequentialFileReader:readByte()
-    local byte = assert(self.stream:readByte(), "end of stream reached while attempting to read data from file.")
+    local byte = self.stream:readByte()
+    assert(byte, "end of stream reached while attempting to read data from file.")
     return byte
 end
 
@@ -83,7 +84,7 @@ function SequentialFileReader:readUInt()
 end
 
 ---@brief 以小端序读取一个32位浮点数
----@return number 以number返回读取的浮点数
+---@return number 读取的浮点数
 function SequentialFileReader:readFloat()
     local b1, b2, b3, b4 = self:readByte(), self:readByte(), self:readByte(), self:readByte()
     local sign = (b4 >= 0x80)
@@ -113,6 +114,38 @@ function SequentialFileReader:readFloat()
     return n
 end
 
+---@brief 以小端序读取一个64位浮点数
+---@return number 读取的浮点数
+function SequentialFileReader:readDouble()
+    local low = self:readUInt()
+    local high = self:readUInt()
+    local sign = (high >= 0x80000000)
+    local expo = math.floor((high % 0x80000000) / 0x00100000)
+    local mant = (high % 0x00100000) * 0x100000000 + low
+
+    if sign then
+        sign = -1
+    else
+        sign = 1
+    end
+
+    local n
+
+    if mant == 0 and expo == 0 then
+        n = sign * 0.0
+    elseif expo == 0x7FF then
+        if mant == 0 then
+            n = sign * math.huge
+        else
+            n = 0.0 / 0.0
+        end
+    else
+        n = sign * math.ldexp(1.0 + mant / 0x0010000000000000, expo - 0x3FF)
+    end
+
+    return n
+end
+
 ---@brief 读取一个字符串
 ---@param len number 长度
 ---@return string 读取的字符串
@@ -137,7 +170,7 @@ end
 function SequentialFileReader:readFieldsOfTable(targetTable, floatFields, stringFields)
     for i = 1, #floatFields do
         local field = floatFields[i]
-        targetTable[field] = self:readFloat()
+        targetTable[field] = self:readDouble()
     end
     for i = 1, #stringFields do
         local field = stringFields[i]
@@ -183,5 +216,37 @@ function SequentialFileReader:readVarLengthStringArray()
     end
     return str_array
 end
+
+-------------------------------------------------------------------------------------------------
+---unit test
+
+local FileStream = require("util.file_stream")
+local SequentialFileWriter = require("util.sequential_file_writer")
+local function Test()
+    local input = FileStream("mod/test/test_file.txt", "w")
+    local writer = SequentialFileWriter(input)
+    local test_set = {
+        1.2,
+        3.7,
+        1561.44119615991965155569195,
+        231.556981994191489,
+        -0.000056149491916,
+        -0.3e270,
+        -1e200 * 1e200,
+        0.0 / 0.0
+    }
+    for i, v in ipairs(test_set) do
+        writer:writeDouble(v)
+    end
+    writer:close()
+
+    local output = FileStream("mod/test/test_file.txt", "r")
+    local reader = SequentialFileReader(output)
+    for i, v in ipairs(test_set) do
+        print(reader:readDouble())
+    end
+    reader:close()
+end
+--Test()
 
 return SequentialFileReader

@@ -7,6 +7,7 @@
 ---     update() method, that manages playing the animation
 ---------------------------------------------------------------------------------------------------
 
+---@class ClockedAnimation
 local M = LuaClass("units.ClockedAnimation")
 
 ---------------------------------------------------------------------------------------------------
@@ -23,6 +24,7 @@ function M.__create()
     local self = {
         timer = 0,
         rows = {},  -- all image rows
+        row_sizes = {},  -- records sizes of the rows
     }
     M.clearAttributes(self)
     return self
@@ -32,6 +34,7 @@ end
 
 function M:clearAttributes()
     self.cur_row = nil  -- current row
+    self.cur_row_id = nil
     self.cur_img = nil  -- current image
     self.direction_coeff = nil  -- 1 if the animation is playing forward; -1 if backward
     self.is_loop = nil  -- a looping animation repeatedly displays the current row of images
@@ -57,11 +60,12 @@ end
 ---@param images table an array of name of the images in the sequence
 function M:loadRowImages(row_id, images)
     self.rows[row_id] = images
+    self.row_sizes[row_id] = #images
 end
 
 ---@param row_id string id of the sequence of images
 ---@param images table an array of name of the images in the sequence
-function M:loadRowImagesFromTexture(row_id, tex_name, image_name, x, dx, y, dy, width, height, image_num, a, b, is_rect)
+function M:loadRowImagesFromTexture(row_id, tex_name, image_name, x, y, dx, dy, width, height, image_num, a, b, is_rect)
     local image_array = {}
     local flag = CheckRes("img", image_name..1)
     for i = 1, image_num do
@@ -92,6 +96,7 @@ end
 ---@param is_loop boolean if the animation loops
 function M:playAnimation(row_id, animation_interval, start_time, is_forward, is_loop)
     self.cur_row = self.rows[row_id]
+    self.cur_row_id = row_id
     assert(self.cur_row, "row '"..row_id.."' does not exist")
     self.animation_interval = animation_interval
     self:setAnimationDirection(is_forward)
@@ -122,10 +127,8 @@ function M:update(dt)
     -- test if the animation has ended
     if not is_loop then
         if dir_coeff == 1 and t >= duration then
-            self:clearAttributes()
             return self.timer - duration
         elseif dir_coeff == -1 and t <= 0 then
-            self:clearAttributes()
             return -self.timer
         end
     end
@@ -148,6 +151,18 @@ end
 ---@return string name of the current sprite image to display; return nil if no animation is playing
 function M:getImage()
     return self.cur_img
+end
+
+function M:getCurrentRowId()
+    return self.cur_row_id
+end
+
+function M:getAnimationInterval()
+    return self.animation_interval
+end
+
+function M:getRowSizeById(row_id)
+    return self.row_sizes[row_id]
 end
 
 ---@return number the duration of the current animation playing

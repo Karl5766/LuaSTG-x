@@ -51,6 +51,7 @@ local SetFog
 ---view conversions
 
 ---convert a point in "game" coordinates to a point in "ui" coordinates
+---replay-compatible
 ---@param x number x coordinate in "game"
 ---@param y number y coordinate in "game"
 ---@return number, number x, y coordinates in "ui"
@@ -62,6 +63,7 @@ end
 local GameToUI = M.gameToUI
 
 ---convert a point in "ui" coordinates to a point in "game" coordinates
+---replay-compatible
 ---@param x number x coordinate in "ui"
 ---@param y number y coordinate in "ui"
 ---@return number, number x, y coordinates in "game"
@@ -104,6 +106,7 @@ end
 local ResToUI = M.resToUI
 
 ---project a point in "3d" coordinates to a point in "game" coordinates on camera
+---replay-compatible
 ---@param x number x coordinate in "3d"
 ---@param y number y coordinate in "3d"
 ---@param z number z coordinate in "3d"

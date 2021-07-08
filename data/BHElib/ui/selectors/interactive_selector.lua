@@ -16,6 +16,12 @@ local clamp = math.clamp
 
 ---------------------------------------------------------------------------------------------------
 
+---account for state changes happened in the current frame, prepare for the display coming up
+function M:updateMenuDisplay()
+end
+
+---------------------------------------------------------------------------------------------------
+
 local MenuConst = require("BHElib.scenes.menu.menu_const")
 ---@param selection_input InputManager the object for this selector to receive input from
 function M.__create(selection_input)
@@ -47,12 +53,14 @@ end
 ---@param state_const number a constant indicating the state of the selector about transitioning, E.g. IN_FORWARD
 function M:setTransition(state_const)
     self.transition_state = state_const
+    self:updateMenuDisplay()
 end
 
 ---set the transition state of the selector
 ---@param t number a number between 0 and 1 for transition state; 0 is completely hidden, while 1 is in the normal state
 function M:setTransitionProgress(t)
     self.transition_progress = t
+    self:updateMenuDisplay()
 end
 
 ---@return number transition progress from 0 to 1
@@ -78,7 +86,8 @@ end
 ---@param dt number time elapsed since last update
 function M:update(dt)
     self.timer = self.timer + dt
-    self.transition_progress = clamp(self.transition_progress + self.transition_velocity, 0, 1)
+    local transition_progress = clamp(self.transition_progress + self.transition_velocity, 0, 1)
+    self:setTransitionProgress(transition_progress)
 end
 
 ---test for and process user input on the menu

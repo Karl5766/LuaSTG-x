@@ -58,7 +58,6 @@ end
 
 ---@param menu_id string id of the menu
 function MenuPagePool:setMenuInPool(menu_id, menu, menu_pos)
-    print("set menu with id "..menu_id.." at pos "..tostring(menu_pos))
     self.pool[menu_id] = {menu_pos, menu}
 end
 

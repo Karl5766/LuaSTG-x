@@ -10,8 +10,8 @@
 ---@class GameSceneInitState
 local InitState = LuaClass("scenes.GameSceneInitState")
 
-local PlayerClass = require("BHElib.units.player.player_class")
-local _player_const = PlayerClass.const
+local PlayerBase = require("BHElib.units.player.player_class")
+local _player_const = PlayerBase.const
 
 ---create and return a default init state
 ---the attributes of an object of this class should not be modified more than once,

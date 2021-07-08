@@ -26,6 +26,7 @@ end
 function MenuPage:onCascade(menu_page_array)
 end
 
+---set the renderer object display layer of the menu page
 function MenuPage:setLayer(layer)
     self.renderer.layer = layer
 end
@@ -106,7 +107,7 @@ function MenuPage:setPageExit(is_forward, transition_speed)
     local selector = self.selector
     selector:resetSelection(false)
     if is_forward then
-        selector:setTransition(MenuConst.OUT_BACKWARD)
+        selector:setTransition(MenuConst.OUT_FORWARD)
     else
         selector:setTransition(MenuConst.OUT_BACKWARD)
     end

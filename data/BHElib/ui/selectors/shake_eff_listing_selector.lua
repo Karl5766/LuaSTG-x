@@ -37,7 +37,7 @@ local sin = sin
 
 ---@param selection_input InputManager the object for this selector to receive input from
 ---@param focused_index number initial focused index
----@param init_pos_offset math.vec2 initial position offset
+---@param menu_body_pos math.vec2 initial position offset
 ---@param shake_max_time number duration of the shaking effect
 ---@param shake_amplitude number amplitude of the shaking effect; shaking only occurs in x direction
 ---@param shake_period number period of harmonic (sine) motion of shaking effect in frames
@@ -50,7 +50,7 @@ local sin = sin
 function M.__create(
         selection_input,
         focused_index,
-        init_pos_offset,
+        menu_body_pos,
         shake_max_time,
         shake_amplitude,
         shake_period,
@@ -61,7 +61,7 @@ function M.__create(
         normal_color,
         selectable_array
 )
-    local self = ListingSelector.__create(selection_input, focused_index, init_pos_offset, pos_increment)
+    local self = ListingSelector.__create(selection_input, focused_index, menu_body_pos, pos_increment)
     self.shake_max_time = shake_max_time
     self.shake_amplitude = shake_amplitude
     self.shake_period = shake_period
@@ -105,7 +105,7 @@ end
 ---@param index number index of the selectable in the selectable array
 function M:renderSelectable(index)
     local body_text_obj = self.body_text_obj
-    local item_pos = self.pos_offset + self:getListingPosAfterShakeEff(index)
+    local item_pos = self.menu_body_pos + self:getListingPosOffsetAfterShakeEff(index)
     local color_vec
     -- the selected selectable will blink
     if index == self.focused_index then
@@ -122,11 +122,11 @@ end
 
 ---return the position of a selectable item after apply the shake effect position offset
 ---@param index number integer index of the item
-function M:getListingPosAfterShakeEff(index)
+function M:getListingPosOffsetAfterShakeEff(index)
     local selectable = self.selectable_array[index]
 
     local t = self.shake_max_time - selectable.timer
-    local raw_pos = self:getListingPos(index)
+    local raw_pos = self:getListingPosOffset(index)
     if t < 0 then
         -- shake effect has ended
         return raw_pos

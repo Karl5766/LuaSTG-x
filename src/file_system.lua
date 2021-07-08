@@ -52,6 +52,9 @@ function M.copyFile(path_from, path_to)
             break
         end
     end
+    file_from:close()
+    file_to:close()
+    print("finished copying file")
 end
 
 
@@ -153,6 +156,17 @@ function M.enumFilesByType(dir_pah, suffix)
     return ret
 end
 
+---@param script_names table
+---@param root_path string path to the directory that contains all scripts, with "." as separator
+---@return table an array of return value of the requires
+function M.requireScriptsInDirectory(script_names, root_path)
+    local ret = {}
+    for i, script_name in ipairs(script_names) do
+        ret[i] = require(root_path.."."..script_name)
+    end
+    return ret
+end
+
 ---------------------------------------------------------------------------------------------------
 
 ---@param rootpath string the root path to search on
@@ -168,6 +182,20 @@ function M.listFiles(rootpath, paths)
         end
     end
     return paths
+end
+
+---@param rootpath string the root path to search on
+---@return table an array of full path of files in the directory
+function M.listFilenames(rootpath)
+    local ret = {}
+    assert(rootpath)
+    local files = M.getBriefOfFilesInDirectory(rootpath)
+    for i, v in ipairs(files) do
+        if not v.isDirectory then
+            table.insert(ret, v.name)
+        end
+    end
+    return ret
 end
 
 ---getExtension

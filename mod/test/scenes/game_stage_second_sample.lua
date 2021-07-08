@@ -17,7 +17,7 @@ function SampleStage:createScene()
 
     task.New(self, function()
         task.Wait(600)
-        self:completeSceneGroup()
+        self:stageTransition(Stage.BACK_TO_MENU)
     end)
 
     return scene
