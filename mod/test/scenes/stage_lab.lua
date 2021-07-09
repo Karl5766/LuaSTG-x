@@ -101,7 +101,8 @@ function SampleStage:createScene()
             boss_fight:update(1)
             task.Wait(1)
         end
-        self:stageTransition(Stage.RESTART_AND_KEEP_RECORDING)
+        local callbacks = require("BHElib.scenes.stage.stage_transition_callbacks")
+        self:transitionWithCallback(callbacks.restartStageAndKeepRecording)
     end)
 
     return scene
@@ -109,10 +110,6 @@ end
 
 function SampleStage:getDisplayName()
     return "sample stage"
-end
-
-function SampleStage:cleanup()
-    Stage.cleanup(self)
 end
 
 function SampleStage:update(dt)

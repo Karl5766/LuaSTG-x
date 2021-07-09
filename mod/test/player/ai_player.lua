@@ -359,7 +359,7 @@ function PlayerBase:miss()
 end
 
 function PlayerBase:endCurrentSession()
-    self.stage:stageTransition(Stage.RESTART_AND_KEEP_RECORDING)
+    self.stage:transitionWithCallback(Stage.RESTART_AND_KEEP_RECORDING)
 end
 
 function PlayerBase:colli(other)

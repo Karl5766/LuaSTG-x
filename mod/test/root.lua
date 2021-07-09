@@ -3,7 +3,7 @@
 
 ---setup the default scene group init state to run the scene group with when the player select start game
 local function SetupGroupInitState()
-    local Menu = require("BHElib.scenes.menu.menu_scene")
+    local Menu = require("BHElib.scenes.main_menu.main_menu_scene")
     local SceneGroupInitState = require("BHElib.scenes.stage.state_of_group_init")
 
     local is_replay = false
@@ -27,7 +27,7 @@ end
 
 local function CreateMenu()
     -- create menu and return it
-    local Menu = require("BHElib.scenes.menu.menu_scene")
+    local Menu = require("BHElib.scenes.main_menu.main_menu_scene")
     return Menu.shortInit({"no_task"})
 end
 

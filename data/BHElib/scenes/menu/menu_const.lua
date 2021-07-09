@@ -2,7 +2,7 @@
 ---menu_actions.lua
 ---author: Karl
 ---date: 2021.5.1
----desc: defines constants used in a menu
+---desc: defines constants values in menus; menus abide to using them by default
 ---------------------------------------------------------------------------------------------------
 ---cache variables and functions
 

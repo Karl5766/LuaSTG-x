@@ -50,14 +50,14 @@ function M:onMenuExit()
         -- fade out menu page
         TaskWait(math.ceil(1 / self.transition_speed))
 
-        local StageClass = self.stage.class
         -- start stage or exit game, depending on the state set by createNextGameScene
+        local callbacks = require("BHElib.scenes.stage.stage_transition_callbacks")
         if to_do == "resume" then
             self.continue_menu = false
         elseif to_do == "quit_to_menu" then
-            self.stage:stageTransition(StageClass.BACK_TO_MENU)
+            self.stage:transitionWithCallback(callbacks.createMenuAndSaveReplay)
         elseif to_do == "restart_scene_group" then
-            self.stage:stageTransition(StageClass.RESTART_SCENE_GROUP)
+            self.stage:transitionWithCallback(callbacks.restartSceneGroup)
         else
             error("onMenuExit() called without to_do set by any menu page in the page array!")
         end

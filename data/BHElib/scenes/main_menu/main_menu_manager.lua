@@ -66,6 +66,8 @@ function M:initMenuPages()
             {_init_callbacks.Title, "main_menu"},
             {_init_callbacks.ReplaySaver, "replay_saver"},
         }
+    else
+        error("Error: Invalid menu task name: "..tostring(task_name))
     end
 
     for i = 1, #menu_pages do

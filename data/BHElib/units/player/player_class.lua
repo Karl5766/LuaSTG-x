@@ -300,9 +300,8 @@ end
 
 function PlayerBase:endCurrentSession()
     local current_stage = self.stage
-    ---@type Stage
-    local StageClass = current_stage.class
-    current_stage:stageTransition(StageClass.RESTART_AND_KEEP_RECORDING)
+    local callbacks = require("BHElib.scenes.stage.stage_transition_callbacks")
+    current_stage:transitionWithCallback(callbacks.restartStageAndKeepRecording)
 end
 
 function PlayerBase:colli(other)

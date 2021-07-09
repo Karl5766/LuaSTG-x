@@ -1,5 +1,5 @@
 ---------------------------------------------------------------------------------------------------
----menu_scene.lua
+---main_menu_scene.lua
 ---author: Karl
 ---date: 2021.3.4
 ---desc: implements the main menu

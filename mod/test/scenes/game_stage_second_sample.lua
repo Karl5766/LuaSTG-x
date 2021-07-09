@@ -17,7 +17,7 @@ function SampleStage:createScene()
 
     task.New(self, function()
         task.Wait(600)
-        self:stageTransition(Stage.BACK_TO_MENU)
+        self:transitionWithCallback(Stage.BACK_TO_MENU)
     end)
 
     return scene
@@ -25,10 +25,6 @@ end
 
 function SampleStage:getDisplayName()
     return "sample stage"
-end
-
-function SampleStage:cleanup()
-    Stage.cleanup(self)
 end
 
 local _input = require("BHElib.input.input_and_recording")

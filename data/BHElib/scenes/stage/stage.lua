@@ -179,13 +179,13 @@ end
 ---transition implementation
 
 ---for game scene transition;
----cleanup before exiting the scene; overwritten in case anything is changed during the scene of
----subclasses
-function Stage:cleanup()
+---for cleaning up before exiting the scene;
+---@param continue_scene_group boolean if true, continue replay; if false, stop and finish up replay io
+function Stage:cleanup(continue_scene_group)
     GameScene.cleanup(self)
 
     self.replay_io_manager:finishCurrentScene(self)
-    if not self.continue_scene_group then
+    if not continue_scene_group then
         self.replay_io_manager:finishCurrentSceneGroup(self)
         self.replay_io_manager:cleanup()
     end
@@ -194,84 +194,9 @@ end
 ---construct the object for the next scene and return it
 ---@return GameScene the next game scene
 function Stage:createNextAndCleanupCurrentScene()
-    local SceneInitState = require("BHElib.scenes.stage.state_of_scene_init")
-
-    local player_x, player_y = self.player.x, self.player.y  -- save object attributes before cleanup
-
-    local transition_type = self.transition_type
-    if transition_type == Stage.BACK_TO_MENU then
-        self.continue_scene_group = false
-        self:cleanup()
-
-        -- go back to menu
-        local Menu = require("BHElib.scenes.menu.menu_scene")
-        return Menu.shortInit({"save_replay"})
-    elseif transition_type == Stage.GO_TO_NEXT_STAGE then
-        self.continue_scene_group = true
-        self:cleanup()
-
-        -- create scene init state for next stage
-        local cur_init_state = self.scene_init_state
-        local next_init_state = SceneInitState()
-
-        next_init_state.random_seed = ran:Int(0, 65535)
-        next_init_state.score = self:getScore()  -- set the start score of next stage the same as the current score
-        next_init_state.player_init_state.x = player_x
-        next_init_state.player_init_state.y = player_y
-
-        -- update the scene group
-        local scene_group = self.scene_group
-        scene_group:completeCurrentScene(cur_init_state)
-        scene_group:advanceScene()
-        local stage_id = self.scene_group:getCurrentSceneId()
-        local StageClass = Ustorage:getById(stage_id)
-
-        -- pass over the scene group object and create the next stage
-        local next_stage = StageClass(next_init_state, scene_group)
-        return next_stage
-
-    elseif transition_type == Stage.RESTART_SCENE_GROUP then
-        self.continue_scene_group = false
-        self:cleanup()
-
-        -- start the game again, with the same scene init state and the scene group init state
-        local scene_group = self.scene_group
-        local next_init_state = scene_group:getFirstSceneInitState()
-        local group_init_state = scene_group:getSceneGroupInitState()
-        local next_scene_group = SceneGroup(group_init_state)
-
-        -- find the first stage class
-        local stage_id = next_scene_group:getCurrentSceneId()
-        local StageClass = Ustorage:getById(stage_id)
-
-        local next_stage = StageClass(next_init_state, next_scene_group)
-        return next_stage
-    elseif transition_type == Stage.RESTART_AND_KEEP_RECORDING then
-        self.continue_scene_group = true
-        self:cleanup()
-
-        -- create scene init state for next stage
-        local cur_init_state = self.scene_init_state
-        local next_init_state = SceneInitState()
-
-        next_init_state.random_seed = ran:Int(0, 65535)
-        next_init_state.score = self:getScore()  -- set the start score of next stage the same as the current score
-        next_init_state.player_init_state.x = player_x
-        next_init_state.player_init_state.y = player_y
-
-        -- update the scene group
-        local scene_group = self.scene_group
-        scene_group:completeCurrentScene(cur_init_state)
-        scene_group:restartScene()
-        local stage_id = self[".classname"]
-        local StageClass = Ustorage:getById(stage_id)
-
-        -- pass over the scene group object and create the next stage
-        local next_stage = StageClass(next_init_state, scene_group)
-        return next_stage
-    else
-        error("Error: Invalid stage transition type!")
-    end
+    local callback = self.transition_callback
+    assert(callback, "Error: Stage transition callback does not exist!")
+    return callback(self)
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -279,19 +204,20 @@ end
 ---these transitions can be called almost anywhere through the current stage object
 
 ---terminate current scene and transition to a new one
----@param transition_type number an integer that specifies the transition behavior
-function Stage:stageTransition(transition_type)
-    assert(type(transition_type) == "number", "Error: Invalid transition type!")
-    self.transition_type = transition_type
+---@param transition_callback function a function creates new scene and cleanup current scene
+function Stage:transitionWithCallback(transition_callback)
+    assert(type(transition_callback) == "function", "Error: Invalid transition callback!")
+    self.transition_callback = transition_callback
     SceneTransition.transitionFrom(self, SceneTransition.instantTransition)
 end
 
 ---go to next stage or end play-through depending on the progress in the scene group
 function Stage:goToNextScene()
+    local callbacks = require("BHElib.scenes.stage.stage_transition_callbacks")
     if self.scene_group:isFinalScene() then
-        self:stageTransition(Stage.BACK_TO_MENU)
+        self:transitionWithCallback(callbacks.createMenuAndSaveReplay)
     else
-        self:stageTransition(Stage.GO_TO_NEXT_STAGE)
+        self:transitionWithCallback(callbacks.goToNextStage)
     end
 end
 

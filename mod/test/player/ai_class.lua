@@ -208,7 +208,7 @@ function M:miss()
 end
 
 function M:endCurrentSession()
-    self.stage:stageTransition(Stage.RESTART_AND_KEEP_RECORDING)
+    self.stage:transitionWithCallback(Stage.RESTART_AND_KEEP_RECORDING)
 end
 
 function M:colli(other)
