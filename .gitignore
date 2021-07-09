@@ -10,6 +10,7 @@
 
 # ignore replay change
 /replay/
+/data/BHElib/input/current
 
 # ignore lstg_log change
 /lstg_log.txt
