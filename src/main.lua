@@ -1,7 +1,7 @@
 --
 --lstg.DoFile('jit_test.lua')
 local fu = cc.FileUtils:getInstance()
-fu:setPopupNotify(false)
+fu:setPopupNotify(true)
 -- note: GLView is opened in display.lua
 -- it's necessary for FrameInit
 require('config')
@@ -62,14 +62,61 @@ local function main()
     require("app.MyApp"):create():run()
 end
 
+local TRACE_MAX_LEVEL = 16
+local function traceback(msg, level)
+    local ret = ''
+    if msg then
+        ret = msg .. '\n'
+    end
+    ret = ret .. 'stack traceback:'
+    while true do
+        local info = debug.getinfo(level, "Slnf")
+        if not info then
+            break
+        end
+        local msgs = {}
+        local source = info.source or ''
+        if info.short_src == '[C]' then
+            source = '[C]'
+        else
+            source = string.format('[%s]', source)
+        end
+        table.insert(msgs, string.format('    %s', source, info.currentline, info.name or ""))
+        if info.currentline > 0 then
+            table.insert(msgs, string.format('%d:', info.currentline))
+        end
+        if info.namewhat and info.name then
+            table.insert(msgs, string.format(' in function \'%s\'', info.name))
+        else
+            if info.what == 'm' or info.linedefined == 0 then
+                table.insert(msgs, ' in main chunk')
+            elseif info.what == 'C' then
+                table.insert(msgs, string.format(' at %s', tostring(info.func)))
+            else
+                table.insert(msgs, string.format(' in function <%s:%d>', source, info.linedefined))
+            end
+        end
+        ret = ret .. '\n' .. table.concat(msgs, '')
+        level = level + 1
+        if level > TRACE_MAX_LEVEL then
+            ret = ret .. '\n...'
+            break
+        end
+    end
+    return ret
+end
+
 ---note: in app.run, only __G__TRACKBACK__ will take effect
 ---@param message string error message
 ---@return string error message
 __G__TRACKBACK__ = function(message)
-    message = tostring(debug.traceback(message, 3))  -- error() can give error message of non-string types
+    -- message = debug.traceback(message, 3)
+    message = traceback(message, 3)
+    message = tostring(message)
 
     local DebugUtil = require("util.debug_util")
-    DebugUtil.error(message, "Error")
+    DebugUtil.promptErrorMeesage(message, "Error")
+
     lstg.SystemLog('caught error in main')
 
     return message

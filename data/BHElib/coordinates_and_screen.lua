@@ -105,42 +105,6 @@ function M.resToUI(x, y)
 end
 local ResToUI = M.resToUI
 
----project a point in "3d" coordinates to a point in "game" coordinates on camera
----replay-compatible
----@param x number x coordinate in "3d"
----@param y number y coordinate in "3d"
----@param z number z coordinate in "3d"
----@return number, number x, y coordinates in "game"
-function M._3dToWorld(x, y, z)
-    local fovy = _view3d.fovy
-    local vec_z = _view3d.z
-    local pos_eye = _view3d.eye
-    local pos_at = _view3d.at
-    local vec_up = _view3d.up
-
-    local playfield_width = _playfield_game_r - _playfield_game_l
-    local playfield_height = _playfield_game_t - _playfield_game_b
-
-    local m1 = math.Mat4:createPerspective(
-            fovy,
-            -playfield_width / playfield_height,
-            vec_z[1], vec_z[2])
-    local eye = math.Vec3(pos_eye[1], pos_eye[2], pos_eye[3])
-    local target = math.Vec3(pos_at[1], pos_at[2], pos_at[3])
-    local up = math.Vec3(vec_up[1], vec_up[2], vec_up[3])
-    local m2 = math.Mat4:createLookAt(eye, target, up)
-    local m = m1 * m2
-    local v = m:transformVector(x, y, z, 1)
-
-    local xx, yy, zz, ww = v.x, v.y, v.z, v.w
-    xx = xx / ww
-    yy = yy / ww
-
-    xx = (xx + 1) * 0.5 * playfield_width / _game_x_unit * _ui_x_unit
-    yy = (yy + 1) * 0.5 * playfield_height / _game_y_unit * _ui_y_unit
-    return xx + _playfield_game_l, yy + _playfield_game_b
-end
-
 ---------------------------------------------------------------------------------------------------
 ---setters and getters
 

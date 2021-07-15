@@ -142,5 +142,4 @@ local function TableDeepEqualUnitTest()  -- for debug
     lstg.SystemLog(tostring(M.tableDeepEqual({1, 2, {7}, 5}, {1, 2, {7}, 5})))
 end
 
-
 return M

@@ -123,12 +123,9 @@ end
 
 local Director = cc.Director:getInstance()
 function GameExit()
-    print('GameExit')
     --require('jit.p').stop()
     require("setting.setting_util").saveSettingFile()
-    print('FrameEnd')
     lstg.FrameEnd()
-    print('FrameEnd finish')
 
     local platform_info = require("platform.platform_info")
     if platform_info.isMobile() then

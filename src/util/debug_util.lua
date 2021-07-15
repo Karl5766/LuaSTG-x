@@ -94,7 +94,7 @@ end
 ---exit the game after that
 ---@param message string error message to display
 ---@param title string title of the message box
-function M.error(message, title)
+function M.promptErrorMessage(message, title)
     print(message)  -- debug console
     lstg.SystemLog(message)  -- in log file
 

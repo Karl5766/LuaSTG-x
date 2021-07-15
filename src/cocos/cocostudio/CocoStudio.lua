@@ -36,10 +36,10 @@ function ccs.TInfo:ctor(c, f)
     -- @param {Function}f
     if nil ~= f then
         self._className = c
-        self._fun = f
+        self._fun       = f
     else
         self._className = c._className
-        self._fun = c._fun
+        self._fun       = c._fun
     end
 
     ccs.ObjectFactory.getInstance():registerType(self)
@@ -67,7 +67,7 @@ end
 
 function ccs.ObjectFactory:createObject(classname)
     local obj = nil
-    local t = self._typeMap[classname]
+    local t   = self._typeMap[classname]
     if nil ~= t then
         obj = t._fun()
     end
@@ -83,7 +83,7 @@ ccs.TriggerObj = class("TriggerObj")
 ccs.TriggerObj._cons = {}
 ccs.TriggerObj._acts = {}
 ccs.TriggerObj._enable = false
-ccs.TriggerObj._id = 0
+ccs.TriggerObj._id   = 0
 ccs.TriggerObj._vInt = {}
 
 function ccs.TriggerObj.extend(target)

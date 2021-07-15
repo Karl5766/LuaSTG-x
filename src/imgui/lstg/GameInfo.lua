@@ -21,10 +21,6 @@ function M:ctor(...)
     self:addChildChain(
             wi.TreeNode('KeyState'),
             require('imgui.lstg.KeyState')())
-
-    --self:addChildChain(
-    --        wi.TreeNode('3D Camera'),
-    --        require('game.camera_setter')())
 end
 
 return M

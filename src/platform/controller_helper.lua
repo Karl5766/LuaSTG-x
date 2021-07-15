@@ -29,15 +29,15 @@ local status_axis_negative = {}
 ---@param controller cc.Controller
 local function onConnect(controller)
     local name = controller:getDeviceName()
-    local id = controller:getDeviceId()
-    Print(string.format('controller connected: name: %q, id: %d', name, id))
-    status_button[controller] = {}
-    status_axis[controller] = {}
-    status_axis_positive[controller] = {}
-    status_axis_negative[controller] = {}
+    local controller_id = controller:getDeviceId()
+    Print(string.format('controller connected: name: %q, id: %d', name, controller_id))
+    status_button[controller_id] = {}
+    status_axis[controller_id] = {}
+    status_axis_positive[controller_id] = {}
+    status_axis_negative[controller_id] = {}
     local event_param = {
         device_type = "controller",
-        device = controller,
+        device = controller_id,
     }
     lstg.eventDispatcher:dispatchEvent('onInputDeviceConnect', event_param)
 end
@@ -46,30 +46,31 @@ end
 ---@param controller cc.Controller
 local function onDisconnect(controller)
     local name = controller:getDeviceName()
-    local id = controller:getDeviceId()
-    Print(string.format('controller disconnected: name: %q, id: %d', name, id))
-    status_button[controller] = nil
-    status_axis[controller] = nil
-    status_axis_positive[controller] = nil
-    status_axis_negative[controller] = nil
+    local controller_id = controller:getDeviceId()
+    Print(string.format('controller disconnected: name: %q, id: %d', name, controller_id))
+    status_button[controller_id] = nil
+    status_axis[controller_id] = nil
+    status_axis_positive[controller_id] = nil
+    status_axis_negative[controller_id] = nil
     local event_param = {
         device_type = "controller",
-        device = controller,
+        device = controller_id,
     }
     lstg.eventDispatcher:dispatchEvent('onInputDeviceDisconnect', event_param)
 end
 
 ---return if a controller has been connected to the game
----@param controller cc.Controller the controller to check
+---@param controller_id number the controller to check
 ---@return boolean whether the controller is connected
-function M.isControllerConnected(controller)
-    return status_button[controller] ~= nil
+function M.isControllerConnected(controller_id)
+    return status_button[controller_id] ~= nil
 end
 
 ---if the given controller is not connected, connect c
----@param controller cc.Controller the controller to check
-local function CheckAndConnect(controller)
-    if not status_button[controller] then
+---@param controller_id number the id of the controller to check
+local function CheckAndConnect(controller_id)
+    if not status_button[controller_id] then
+        local controller = cc.Controller:getControllerByDeviceId(controller_id)
         onConnect(controller)
     end
 end
@@ -95,37 +96,37 @@ end
 ---------------------------------------------------------------------------------------------------
 ---On Key Down/Up
 
----@param controlle cc.Controller
+---@param controller_id number
 ---@param keycode number controller keycode
 ---@param value any
 ---@param isPressed boolean
 ---@param isAnalog boolean
-local function onKeyDown(controller, keycode, value, isPressed, isAnalog)
+local function onKeyDown(controller_id, keycode, value, isPressed, isAnalog)
     if keycode >= 1000 then
         keycode = keycode - 1000
     end
-    CheckAndConnect(controller)
-    status_button[controller][keycode] = true
+    CheckAndConnect(controller_id)
+    status_button[controller_id][keycode] = true
 
     _last = {
-        id  = controller:getDeviceId(),
+        id  = controller_id,
         key = keycode,
     }
 end
 
----@param controller cc.Controller
+---@param controller_id number
 ---@param keycode number controller keycode
 ---@param value any
 ---@param isPressed boolean
 ---@param isAnalog boolean
-local function onKeyUp(controller, keycode, value, isPressed, isAnalog)
+local function onKeyUp(controller_id, keycode, value, isPressed, isAnalog)
     if keycode >= 1000 then
         keycode = keycode - 1000
     end
     --Print(string.format('[CTR] %d   up: %02d', c:getDeviceId(), keycode))
-    CheckAndConnect(controller)
-    status_button[controller][keycode] = false
-    if _is_last(controller:getDeviceId(), keycode, nil, nil) then
+    CheckAndConnect(controller_id)
+    status_button[controller_id][keycode] = false
+    if _is_last(controller_id, keycode, nil, nil) then
         _last = nil
     end
 end
@@ -144,48 +145,47 @@ local _axis_t = {
 --_axis_t[2][1] = {nil, false}  -- from 1 to 2
 --_axis_t[2][3] = {false, nil}  -- from 3 to 2
 
-local function _set_axis(controller, key, set_positive, set_negative)
-    local device_id = controller:getDeviceId()
+local function _set_axis(controller_id, key, set_positive, set_negative)
     if set_positive ~= nil then
-        status_axis_positive[controller][key] = set_positive
+        status_axis_positive[controller_id][key] = set_positive
         if set_positive then
             _last = {
-                id      = device_id,
+                id      = controller_id,
                 key     = key,
                 is_axis = true,
                 is_pos  = true,
             }
         else
-            if _is_last(device_id, key, true, true) then
+            if _is_last(controller_id, key, true, true) then
                 _last = nil
             end
         end
     end
     if set_negative ~= nil then
-        status_axis_negative[controller][key] = set_negative
+        status_axis_negative[controller_id][key] = set_negative
         if set_negative then
             _last = {
-                id      = device_id,
+                id      = controller_id,
                 key     = key,
                 is_axis = true,
                 is_pos  = false,
             }
         else
-            if _is_last(device_id, key, true, false) then
+            if _is_last(controller_id, key, true, false) then
                 _last = nil
             end
         end
     end
 end
 
-local function onAxisEvent(controller, key, cur_position, isPressed, isAnalog)
+local function onAxisEvent(controller_id, key, cur_position, isPressed, isAnalog)
     if key >= 1000 then
         key = key - 1000
     end
-    CheckAndConnect(controller)
+    CheckAndConnect(controller_id)
 
-    local prev_position = status_axis[controller][key]
-    status_axis[controller][key] = cur_position
+    local prev_position = status_axis[controller_id][key]
+    status_axis[controller_id][key] = cur_position
     local cur_level, prev_level
     if cur_position < -_threshold then
         cur_level = 1
@@ -208,7 +208,7 @@ local function onAxisEvent(controller, key, cur_position, isPressed, isAnalog)
 
     local set_action = _axis_t[cur_level][prev_level]
     if set_action then
-        _set_axis(controller, key, set_action[1],set_action[2])
+        _set_axis(controller_id, key, set_action[1],set_action[2])
     end
 end
 
