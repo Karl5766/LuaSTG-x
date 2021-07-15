@@ -115,7 +115,7 @@ __G__TRACKBACK__ = function(message)
     message = tostring(message)
 
     local DebugUtil = require("util.debug_util")
-    DebugUtil.promptErrorMeesage(message, "Error")
+    DebugUtil.promptErrorMessage(message, "Error")
 
     lstg.SystemLog('caught error in main')
 

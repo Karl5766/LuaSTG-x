@@ -5,7 +5,7 @@
 ---
 
 local Prefab = require("BHElib.prefab")
-local SpellBase = require("BHElib.units.boss.spell")
+local SpellBase = assert(require("BHElib.units.boss.single_boss_spell_base"))
 
 local Spell = LuaClass("Nue.spell1", SpellBase)
 
@@ -100,17 +100,17 @@ Prefab.Register(Orb)
 
 ---------------------------------------------------------------------------------------------------
 
-function Spell.__create(animation)
+function Spell.__create(boss)
     local hp = 180
     local hitbox = EnemyHitbox(16, 180)
-    local self = SpellBase.__create(animation, hitbox, 1500)
+    local self = SpellBase.__create(boss, hitbox, 1500)
 
     return self
 end
 
 function Spell:ctor()
     ---@type RumiaAnimation
-    local boss = self.animation
+    local boss = self.boss
 
     local boss_y = boss.y
 
@@ -220,7 +220,7 @@ end
 
 function Spell:autoMove(l, r, b, t)
     ---@type RumiaAnimation
-    local boss = self.animation
+    local boss = self.boss
     local x_dir = ran:Sign()
     local y_dir = ran:Sign()
     if boss.x < l then

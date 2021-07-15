@@ -206,7 +206,6 @@ function M.shortInit(init_focused_index,
         [MenuConst.OUT_BACKWARD] = fly_distance,
     }
 
-    print(relative_pos.x)
     local selector = M(
             Input,
             init_focused_index,

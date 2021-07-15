@@ -35,10 +35,10 @@ function BossFight.__create()
     return self
 end
 
-function BossFight:update(dt)
-    task.Do(self)
+function BossFight:updateSession(dt)
+    assert(self.session, "Error: Boss fight session does not exist!")
 
-    if self.continue_flag and self.session ~= nil then
+    if self.continue_flag then
         local session = self.session
         session:update(dt)
         if not session:continueSession() then
@@ -47,12 +47,17 @@ function BossFight:update(dt)
     end
 end
 
+function BossFight:setSession(session)
+    self.session = session
+end
+
 function BossFight:continueBossFight()
     return self.continue_flag
 end
 
-function BossFight:setContinueFlag(flag)
-    self.continue_flag = flag
+---set the boss fight to stop
+function BossFight:setEndOfFight()
+    self.continue_flag = false
 end
 
 return BossFight

@@ -4,9 +4,9 @@
 --- DateTime: 2021/6/1 23:29
 ---
 
-local BossFight = require("BHElib.units.boss.boss_fight")
+local BossFight = require("BHElib.units.boss.single_boss_with_spell_boss_fight")
 
----@class BossFight.Nue:BossFight
+---@class BossFight.Nue:BossFight.SingleBossWithSpell
 local M = LuaClass("boss_fight.Nue", BossFight)
 
 ---------------------------------------------------------------------------------------------------
@@ -17,40 +17,22 @@ local Yield = coroutine.yield
 
 ---------------------------------------------------------------------------------------------------
 
-local FS = require("file_system")
-local _rets = FS.requireScriptsInDirectory({
-    "nue_boss_animation",
-    "nue_spell1",
-}, "enemy")
-
 ---@type Prefab.NueAnimation
-local _Animation = _rets[1]
+local _Animation = require("enemy.nue_boss_animation")
 
-local _Spell1 = _rets[2]
+local _Spell1 = require("enemy.nue_spell1")
 
 ---------------------------------------------------------------------------------------------------
 
-function M:ctor()
-
+function M.__create()
     local spell_class_array = {
         _Spell1,
     }
-    local animation = _Animation()
-    animation.x = -100
-    animation.y = 300
-
-    TaskNew(self, function()
-        local count = 0
-        while count < #spell_class_array do
-            count = count + 1
-            local Spell = spell_class_array[count]
-            self.session = Spell(animation)
-            while self.session do
-                Yield()
-            end
-        end
-        self:setContinueFlag(false)
-    end)
+    local boss = _Animation()
+    boss.x = -100
+    boss.y = 300
+    local self = BossFight.__create(boss, spell_class_array)
+    return self
 end
 
 return M

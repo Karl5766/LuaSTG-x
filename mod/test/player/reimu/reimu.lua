@@ -24,6 +24,8 @@ function Player:init(stage)
     )
 end
 
+---------------------------------------------------------------------------------------------------
+
 function Player:loadResources()
     if CheckRes("tex", "tex:reimu_sprite") then
         return

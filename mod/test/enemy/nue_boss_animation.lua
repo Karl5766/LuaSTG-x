@@ -1,7 +1,7 @@
 local Prefab = require("BHElib.prefab")
 local Animation = require("BHElib.units.animation_prefab")
 
----@class Prefab.NueAnimation:Prefab.Animation
+---@class Prefab.Animation.Nue:Prefab.Animation
 local BossAnimation = Prefab.NewX(Animation)
 
 function BossAnimation:init()

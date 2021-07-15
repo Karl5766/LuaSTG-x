@@ -8,7 +8,7 @@
 
 local Prefab = require("BHElib.prefab")
 
----@class EnemyHitbox:Prefab.Object
+---@class Prefab.EnemyHitbox:Prefab.Object
 local EnemyHitbox = Prefab.NewX(Prefab.Object)
 
 ---------------------------------------------------------------------------------------------------
