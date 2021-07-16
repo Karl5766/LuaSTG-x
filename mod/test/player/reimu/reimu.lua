@@ -7,13 +7,13 @@ local Prefab = require("BHElib.prefab")
 local PlayerBase = require("BHElib.units.player.player_class")
 
 ---@class ReimuPlayer:PlayerBase
-local Player = Prefab.NewX(PlayerBase, "units.player.reimu")
+local M = Prefab.NewX(PlayerBase, "units.player.reimu")
 
 local Input = require("BHElib.input.input_and_recording")
 
 ---------------------------------------------------------------------------------------------------
 
-function Player:init(stage)
+function M:init(stage)
     PlayerBase.init(
             self,
             Input,
@@ -26,7 +26,7 @@ end
 
 ---------------------------------------------------------------------------------------------------
 
-function Player:loadResources()
+function M:loadResources()
     if CheckRes("tex", "tex:reimu_sprite") then
         return
     end
@@ -68,7 +68,7 @@ end
 ---------------------------------------------------------------------------------------------------
 
 ---setup sprite animation
-function Player:initAnimation()
+function M:initAnimation()
     -- row_id, (top left)x, y, (single image)width, height, image_num, image_name
     local image_rows = {
         {"idle", 0, 0, 32, 48, 8, "image_array:reimu_idle"},
@@ -102,42 +102,123 @@ function Player:initAnimation()
 end
 
 ---------------------------------------------------------------------------------------------------
----player shot
 
-local PlayerShotPrefabs = require("BHElib.units.player.player_shot_prefabs")
+local FindTarget = require("BHElib.scripts.target").findTargetByAngleWithVerticalLine
+local ObjList = ObjList
 
----@class Reimu.MainShot:PlayerShotPrefabs.Base
-local MainShot = Prefab.NewX(PlayerShotPrefabs.Base)
+function M:frame()
+    PlayerBase.frame(self)
 
-function MainShot:init(init_x, init_y, attack, vy)
-    PlayerShotPrefabs.Base.init(self, attack)
-    self.x = init_x
-    self.y = init_y
-    self.vy = vy
-    self.rot = 90
-    self.img = "image:reimu_bullet"
+    -- maintain a list of collidable enemies in the player object
+    local collidable_enemies = {}
+    for i, object in ObjList(GROUP_ENEMY) do
+        if object.colli then
+            collidable_enemies[#collidable_enemies + 1] = object
+        end
+    end
+    -- object may have colli set to false after in the same frame, but no need to be too precise here
+    self.targets = collidable_enemies
 end
 
-function MainShot:createCancelEffect()
-    local object = PlayerShotPrefabs.CancelEffect(12)  -- exists for 12 frames
-    object.img = "image:reimu_bullet_cancel_effect"
-    object.x = self.x
-    object.y = self.y
-    object.vy = self.vy * 0.4
+function M:getTargetFrom(source)
+    FindTarget(source, self.targets)
 end
 
-Prefab.Register(MainShot)
-
----@param PlayerInput InputManager manages player input
-function Player:processAttackInput(PlayerInput)
+---@param PlayerInput InputManager
+function M:processAttackInput(PlayerInput)
     if self.timer % 4 == 0 then
         if PlayerInput:isAnyRecordedKeyDown("shoot") then
             PlaySound('plst00', 0.2, self.x / 1024, true)
             local attack = 1
-            local bullet_1 = MainShot(self.x + 9, self.y, attack, 16)
-            local bullet_2 = MainShot(self.x - 9, self.y, attack, 16)
+            local img = "image:reimu_bullet"
+            M.MainShot(img, self.x + 9, self.y, attack, 16)
+            M.MainShot(img, self.x - 9, self.y, attack, 16)
         end
     end
 end
 
-return Player
+---------------------------------------------------------------------------------------------------
+---main shot
+
+local PlayerBullet = require("BHElib.units.player.player_bullet_prefab")
+local _shoot = require("BHElib.scripts.shoot")
+
+---@class Reimu.MainShot:Prefab.PlayerBullet
+M.MainShot = Prefab.NewX(PlayerBullet)
+
+function M.MainShot:init(img, init_x, init_y, attack, vy)
+    PlayerBullet.init(self, attack)
+    self.x = init_x
+    self.y = init_y
+    self.vy = vy
+    self.rot = 90
+    self.img = img
+end
+
+function M.MainShot:createCancelEffect()
+    _shoot.CreatePlayerBulletCancelEffectS(
+            "image:reimu_bullet_cancel_effect",
+            12,
+            self.x,
+            self.y,
+            0,
+            self.vy * 0.4,
+            self.rot
+    )
+end
+
+Prefab.Register(M.MainShot)
+
+---------------------------------------------------------------------------------------------------
+---sub shot
+
+---@class Reimu.FollowShot:Prefab.PlayerBullet
+M.FollowShot = Prefab.NewX(PlayerBullet)
+
+---@param trail_coeff number coefficient linear to the turning speed
+function M.FollowShot:init(img, player, init_x, init_y, attack, speed, angle, trail_coeff)
+    PlayerBullet.init(self, attack)
+    self.x = init_x
+    self.y = init_y
+    self.vx, self.vy = speed * cos(angle), speed * sin(angle)
+    self.rot = angle
+    self.v = speed
+    self.img = img
+    self.trail = trail_coeff
+    self.player = player
+end
+
+function M.FollowShot:frame()
+    local target = self.player:getTargetFrom(self)
+
+    local deviate_angle = math.mod(Angle(self, target) - self.rot + 720, 360)
+    if deviate_angle > 180 then
+        deviate_angle = deviate_angle - 360
+    end
+    local turn_speed = self.trail / (Dist(self, target) + 1)
+    if turn_speed >= abs(deviate_angle) then
+        self.rot = Angle(self, self.target)
+    else
+        self.rot = self.rot + sign(deviate_angle) * turn_speed
+    end
+
+    self.vx = self.v * cos(self.rot)
+    self.vy = self.v * sin(self.rot)
+end
+
+function M.FollowShot:createCancelEffect()
+    _shoot.CreatePlayerBulletCancelEffectS(
+            "image:reimu_bullet_cancel_effect",
+            12,
+            self.x,
+            self.y,
+            self.vx * 0.4,
+            self.vy * 0.4,
+            self.rot
+    )
+end
+
+Prefab.Register(M.FollowShot)
+
+
+return M
