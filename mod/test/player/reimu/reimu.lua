@@ -10,6 +10,7 @@ local PlayerBase = require("BHElib.units.player.player_class")
 local M = Prefab.NewX(PlayerBase, "units.player.reimu")
 
 local Input = require("BHElib.input.input_and_recording")
+local ReimuSupport = require("player.reimu.reimu_support")
 
 ---------------------------------------------------------------------------------------------------
 
@@ -22,6 +23,7 @@ function M:init(stage)
             2,
             stage
     )
+    self.support = ReimuSupport(self.stage, self, "image:reimu_support")
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -39,18 +41,19 @@ function M:loadResources()
     LoadAnimation("image:reimu_bullet_cancel_effect", "tex:reimu_sprite", 0, 144, 16, 16, 4, 1, 4)
     SetAnimationState("image:reimu_bullet_cancel_effect", 'mul+add', Color(0xA0FFFFFF))
 
+    LoadImage("image:reimu_support", "tex:reimu_sprite", 64, 144, 16, 16)
+    LoadImage("image:reimu_follow_bullet", "tex:reimu_sprite", 0, 160, 16, 16, 16, 16)
+    SetImageState("image:reimu_follow_bullet", '', Color(0x80FFFFFF))
+    LoadAnimation("image:reimu_follow_bullet_cancel_effect", "tex:reimu_sprite", 0, 160, 16, 16, 4, 1, 4)
+    SetAnimationState("image:reimu_follow_bullet_cancel_effect", 'mul+add', Color(0xA0FFFFFF))
+
+
     LoadTexture('reimu_kekkai', 'THlib\\player\\reimu\\reimu_kekkai.png')
     LoadTexture('reimu_orange_ef2', 'THlib\\player\\reimu\\reimu_orange_eff.png')
     LoadImageFromFile('reimu_bomb_ef', 'THlib\\player\\reimu\\reimu_bomb_ef.png')
     LoadAnimation('reimu_bullet_orange_ef2', 'reimu_orange_ef2', 0, 0, 64, 16, 1, 9, 1)
     SetAnimationCenter('reimu_bullet_orange_ef2', 0, 8)
 
-    LoadImage('reimu_bullet_blue', "tex:reimu_sprite", 0, 160, 16, 16, 16, 16)
-    SetImageState('reimu_bullet_blue', '', Color(0x80FFFFFF))
-    LoadAnimation('reimu_bullet_blue_ef', "tex:reimu_sprite", 0, 160, 16, 16, 4, 1, 4)
-    SetAnimationState('reimu_bullet_blue_ef', 'mul+add', Color(0xA0FFFFFF))
-
-    LoadImage('reimu_support', "tex:reimu_sprite", 64, 144, 16, 16)
     LoadImage('reimu_bullet_ef_img', "tex:reimu_sprite", 48, 144, 16, 16)
     LoadImage('reimu_kekkai', 'reimu_kekkai', 0, 0, 256, 256, 0, 0)
     SetImageState('reimu_kekkai', 'mul+add', Color(0x804040FF))
@@ -103,38 +106,35 @@ end
 
 ---------------------------------------------------------------------------------------------------
 
-local FindTarget = require("BHElib.scripts.target").findTargetByAngleWithVerticalLine
-local ObjList = ObjList
-
 function M:frame()
     PlayerBase.frame(self)
 
-    -- maintain a list of collidable enemies in the player object
-    local collidable_enemies = {}
-    for i, object in ObjList(GROUP_ENEMY) do
-        if object.colli then
-            collidable_enemies[#collidable_enemies + 1] = object
-        end
+    if ran:Float(0, 100) < 0.4 then
+        self.support:setPower(ran:Float(0, 400))
     end
-    -- object may have colli set to false after in the same frame, but no need to be too precise here
-    self.targets = collidable_enemies
+    self.support:update(1)
 end
 
-function M:getTargetFrom(source)
-    FindTarget(source, self.targets)
-end
-
----@param PlayerInput InputManager
-function M:processAttackInput(PlayerInput)
+---@param player_input InputManager
+function M:processAttackInput(player_input)
     if self.timer % 4 == 0 then
-        if PlayerInput:isAnyRecordedKeyDown("shoot") then
+        if player_input:isAnyRecordedKeyDown("shoot") then
             PlaySound('plst00', 0.2, self.x / 1024, true)
             local attack = 1
             local img = "image:reimu_bullet"
             M.MainShot(img, self.x + 9, self.y, attack, 16)
             M.MainShot(img, self.x - 9, self.y, attack, 16)
+            self.support:fireAllSub()
         end
     end
+end
+
+---------------------------------------------------------------------------------------------------
+---render
+
+function M:render()
+    PlayerBase.render(self)
+    self.support:render()
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -168,57 +168,6 @@ function M.MainShot:createCancelEffect()
 end
 
 Prefab.Register(M.MainShot)
-
----------------------------------------------------------------------------------------------------
----sub shot
-
----@class Reimu.FollowShot:Prefab.PlayerBullet
-M.FollowShot = Prefab.NewX(PlayerBullet)
-
----@param trail_coeff number coefficient linear to the turning speed
-function M.FollowShot:init(img, player, init_x, init_y, attack, speed, angle, trail_coeff)
-    PlayerBullet.init(self, attack)
-    self.x = init_x
-    self.y = init_y
-    self.vx, self.vy = speed * cos(angle), speed * sin(angle)
-    self.rot = angle
-    self.v = speed
-    self.img = img
-    self.trail = trail_coeff
-    self.player = player
-end
-
-function M.FollowShot:frame()
-    local target = self.player:getTargetFrom(self)
-
-    local deviate_angle = math.mod(Angle(self, target) - self.rot + 720, 360)
-    if deviate_angle > 180 then
-        deviate_angle = deviate_angle - 360
-    end
-    local turn_speed = self.trail / (Dist(self, target) + 1)
-    if turn_speed >= abs(deviate_angle) then
-        self.rot = Angle(self, self.target)
-    else
-        self.rot = self.rot + sign(deviate_angle) * turn_speed
-    end
-
-    self.vx = self.v * cos(self.rot)
-    self.vy = self.v * sin(self.rot)
-end
-
-function M.FollowShot:createCancelEffect()
-    _shoot.CreatePlayerBulletCancelEffectS(
-            "image:reimu_bullet_cancel_effect",
-            12,
-            self.x,
-            self.y,
-            self.vx * 0.4,
-            self.vy * 0.4,
-            self.rot
-    )
-end
-
-Prefab.Register(M.FollowShot)
 
 
 return M

@@ -3,20 +3,8 @@
 local Stage = require("BHElib.scenes.stage.stage")
 
 ---@class StageLab:Stage
-local SampleStage = LuaClass("stage.StageLab", Stage)
+local M = LuaClass("stage.StageLab", Stage)
 local Prefab = require("BHElib.prefab")
-local SequentialFileWriter = require("util.sequential_file_writer")
-local SequentialFileReader = require("util.sequential_file_reader")
-local FileStream = require("util.file_stream")
-
-local GameScene = require("BHElib.scenes.game_scene")
-local GameSceneInitState = require("BHElib.scenes.stage.state_of_scene_init")
-local SceneGroup = require("BHElib.scenes.stage.scene_group")
-local Ustorage = require("util.universal_id")
-
-local _input = require("BHElib.input.input_and_recording")
-local BulletPrefabs = require("BHElib.units.enemy_bullet.bullet_prefabs")
-local BulletTypes = require("BHElib.units.enemy_bullet.bullet_types")
 
 require("se")
 
@@ -67,12 +55,12 @@ Prefab.Register(WBG)
 ---------------------------------------------------------------------------------------------------
 ---override/virtual
 
-function SampleStage.__create(...)
+function M.__create(...)
     local self = Stage.__create(...)
     return self
 end
 
-function SampleStage:createScene()
+function M:createScene()
     local scene = Stage.createScene(self)
 
     local canvas = require('imgui.Widget').ChildWindow('canvas')
@@ -108,20 +96,42 @@ function SampleStage:createScene()
     return scene
 end
 
-function SampleStage:getDisplayName()
+function M:getDisplayName()
     return "sample stage"
 end
 
-function SampleStage:update(dt)
+local FindTarget = require("BHElib.scripts.target").findTargetByAngleWithVerticalLine
+local ObjList = ObjList
+
+function M:fetchEnemyTargets()
+    -- maintain a list of collidable enemies in the player object
+    local collidable_enemies = {}
+    for i, object in ObjList(GROUP_ENEMY) do
+        if IsValid(object) and object.colli then
+            collidable_enemies[#collidable_enemies + 1] = object
+        end
+    end
+    -- object may have colli set to false after in the same frame, but no need to be too precise here
+    self.targets = collidable_enemies
+end
+
+---@return Prefab.Object
+function M:getEnemyTargetFrom(source)
+    return FindTarget(source, self.targets)
+end
+
+function M:update(dt)
     for i, button in ipairs(self.exit_button) do
         button:update(1)
     end
+
+    self:fetchEnemyTargets()
 
     Stage.update(self, dt)
 end
 
 local _hud_painter = require("BHElib.ui.hud_painter")
-function SampleStage:render()
+function M:render()
     Stage.render(self)
     do
         local color = Color(255, 255, 255, 255)
@@ -134,4 +144,4 @@ function SampleStage:render()
     _hud_painter.drawKeys()
 end
 
-return SampleStage
+return M
