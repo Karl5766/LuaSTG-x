@@ -41,6 +41,13 @@ function M:loadResources()
     LoadAnimation("image:reimu_bullet_cancel_effect", "tex:reimu_sprite", 0, 144, 16, 16, 4, 1, 4)
     SetAnimationState("image:reimu_bullet_cancel_effect", 'mul+add', Color(0xA0FFFFFF))
 
+    LoadImage("image:reimu_needle", "tex:reimu_sprite", 64, 176, 64, 16, 16, 16)
+    SetImageState("image:reimu_needle", '', Color(0x80FFFFFF))
+    SetImageCenter("image:reimu_needle", 32, 8)
+    LoadImage("image:reimu_needle_cancel_effect", "tex:reimu_sprite", 64, 176, 64, 16, 16, 16)
+    SetImageState("image:reimu_needle_cancel_effect", '', Color(0x80FFFFFF))
+    SetImageCenter("image:reimu_needle_cancel_effect", 32, 8)
+
     LoadImage("image:reimu_support", "tex:reimu_sprite", 64, 144, 16, 16)
     LoadImage("image:reimu_follow_bullet", "tex:reimu_sprite", 0, 160, 16, 16, 16, 16)
     SetImageState("image:reimu_follow_bullet", '', Color(0x80FFFFFF))
@@ -58,14 +65,6 @@ function M:loadResources()
     LoadImage('reimu_kekkai', 'reimu_kekkai', 0, 0, 256, 256, 0, 0)
     SetImageState('reimu_kekkai', 'mul+add', Color(0x804040FF))
     LoadPS('reimu_bullet_ef', 'THlib\\player\\reimu\\reimu_bullet_ef.psi', 'reimu_bullet_ef_img')
-    -----------------------------------------
-    LoadImage('reimu_bullet_orange', "tex:reimu_sprite", 64, 176, 64, 16, 64, 16)
-    SetImageState('reimu_bullet_orange', '', Color(0x80FFFFFF))
-    SetImageCenter('reimu_bullet_orange', 32, 8)
-
-    LoadImage('reimu_bullet_orange_ef', "tex:reimu_sprite", 64, 176, 64, 16, 64, 16)
-    SetImageState('reimu_bullet_orange_ef', '', Color(0x80FFFFFF))
-    SetImageCenter('reimu_bullet_orange_ef', 32, 8)
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -109,12 +108,11 @@ end
 function M:frame()
     PlayerBase.frame(self)
 
-    if ran:Float(0, 100) < 0.4 then
-        self.support:setPower(ran:Float(0, 400))
-    end
+    self.support:setPower(300)
     self.support:update(1)
 end
 
+local _shoot = require("BHElib.scripts.shoot")
 ---@param player_input InputManager
 function M:processAttackInput(player_input)
     if self.timer % 4 == 0 then
@@ -122,8 +120,23 @@ function M:processAttackInput(player_input)
             PlaySound('plst00', 0.2, self.x / 1024, true)
             local attack = 1
             local img = "image:reimu_bullet"
-            M.MainShot(img, self.x + 9, self.y, attack, 16)
-            M.MainShot(img, self.x - 9, self.y, attack, 16)
+            local cancel_img = "image:reimu_bullet_cancel_effect"
+
+            local offset_x = -9
+            for i = 1, 2 do
+                _shoot.CreatePlayerBulletS(
+                        img,
+                        cancel_img,
+                        attack,
+                        self.x + offset_x,
+                        self.y,
+                        0,
+                        16,
+                        90,
+                        12,
+                        0.4)
+                offset_x = -offset_x
+            end
             self.support:fireAllSub()
         end
     end
@@ -136,38 +149,6 @@ function M:render()
     PlayerBase.render(self)
     self.support:render()
 end
-
----------------------------------------------------------------------------------------------------
----main shot
-
-local PlayerBullet = require("BHElib.units.player.player_bullet_prefab")
-local _shoot = require("BHElib.scripts.shoot")
-
----@class Reimu.MainShot:Prefab.PlayerBullet
-M.MainShot = Prefab.NewX(PlayerBullet)
-
-function M.MainShot:init(img, init_x, init_y, attack, vy)
-    PlayerBullet.init(self, attack)
-    self.x = init_x
-    self.y = init_y
-    self.vy = vy
-    self.rot = 90
-    self.img = img
-end
-
-function M.MainShot:createCancelEffect()
-    _shoot.CreatePlayerBulletCancelEffectS(
-            "image:reimu_bullet_cancel_effect",
-            12,
-            self.x,
-            self.y,
-            0,
-            self.vy * 0.4,
-            self.rot
-    )
-end
-
-Prefab.Register(M.MainShot)
 
 
 return M

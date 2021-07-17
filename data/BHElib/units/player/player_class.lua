@@ -131,6 +131,11 @@ function PlayerBase:processPlayerInput(PlayerInput)
     self:processBombInput(PlayerInput)
 end
 
+---@return InputManager
+function PlayerBase:getPlayerInput()
+    return self.player_input
+end
+
 function PlayerBase:processAttackInput(PlayerInput)
 end
 

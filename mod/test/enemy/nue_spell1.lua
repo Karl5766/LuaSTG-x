@@ -101,8 +101,8 @@ Prefab.Register(Orb)
 ---------------------------------------------------------------------------------------------------
 
 function Spell.__create(boss)
-    local hp = 180
-    local hitbox = EnemyHitbox(16, 180)
+    local hp = 720
+    local hitbox = EnemyHitbox(16, hp)
     local self = SpellBase.__create(boss, hitbox, 1500)
 
     return self

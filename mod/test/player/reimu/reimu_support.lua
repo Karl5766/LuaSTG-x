@@ -18,6 +18,9 @@ local floor = math.floor
 ---------------------------------------------------------------------------------------------------
 ---init
 
+---@param stage Stage
+---@param player PlayerBase
+---@param img string
 function M.__create(stage, player, img)
     local self = {}
     self.min_power = 0
@@ -25,24 +28,36 @@ function M.__create(stage, player, img)
     self.power = self.min_power
 
     self.scale = 1
+    self.focused_coeff = 0  -- 0 = non-focused; 1 = focused
     self.img = img
     self.stage = stage
     self.player = player
     self.power_level_transition_speed = 0.05
     self.support_rot = 0
+    self.needle_range = 68
 
     -- in all following lists, each row is for a separate power level starting from level 1
     self.support_num_list = {
         0, 1, 2, 3, 4,
     }
+
     -- stores relative positions (to the player object), note the column order matters in transitions
     self.support_pos_list = {
         {},
         {{0, -30}},
         {{-30, 0}, {30, 0}},
-        {{-30, 0}, {0, -30}, {30, 0}},
-        {{-10, -20}, {-25, -10}, {25, -10}, {10, -20}},
+        {{-30, -13}, {0, -30}, {30, -13}},
+        {{-30, -13}, {-11, -30}, {11, -30}, {30, -13}},
     }
+    local range = self.needle_range
+    self.focused_support_pos_list = {
+        {},
+        {{0, 30}},
+        {{-range / 5, 30}, {range / 5, 30}},
+        {{-20, 24}, {0, 32}, {20, 24}},
+        {{-20, 24}, {-20 / 3, 30}, {20 / 3, 30}, {20, 24}},
+    }
+
     -- stores angles to shoot bullets at
     self.support_shoot_angle_list = {
         {},
@@ -54,6 +69,11 @@ function M.__create(stage, player, img)
 
     self.existing_support_num_cache = nil
     self.sub_position_cache = {}  -- cache x, y of every sub object
+
+    function self.power_easer(from, to, t)
+        return from * (1 - t) + to * t
+    end
+    self.focused_easer = self.power_easer
 
     return self
 end
@@ -167,8 +187,7 @@ function FollowShot:createCancelEffect()
             self.y,
             self.vx * 0.4,
             self.vy * 0.4,
-            self.rot
-    )
+            self.rot)
 end
 
 Prefab.Register(FollowShot)
@@ -177,20 +196,37 @@ function M:fireAllSub()
     local base_x, base_y = self.x, self.y
     local power_level = self:getCurrentPowerLevel()
     local n = self:getActiveSubNum()
-    local attack = 0.8
-    for i = 1, n do
-        local offset_x, offset_y = self:getSubRelativePosition(i)
-        FollowShot(
-                "image:reimu_follow_bullet",
-                "image:reimu_follow_bullet_cancel_effect",
-                self.stage,
-                base_x + offset_x,
-                base_y + offset_y,
-                attack,
-                12,
-                self.support_shoot_angle_list[power_level][i],
-                160
-        )
+    if self.focused_coeff > 0.7 then
+        local m = n * 2
+        local attack = 0.45
+        for i = 1, m do
+            _shoot.CreatePlayerBulletS(
+                    "image:reimu_needle",
+                    "image:reimu_needle_cancel_effect",
+                    attack,
+                    (-0.5 + i / (m + 1)) * self.needle_range + self.x,
+                    self.y + 30,
+                    0,
+                    18,
+                    90,
+                    12,
+                    0.4)
+        end
+    else
+        local attack = 0.8
+        for i = 1, n do
+            local offset_x, offset_y = self:getSubRelativePosition(i)
+            FollowShot(
+                    "image:reimu_follow_bullet",
+                    "image:reimu_follow_bullet_cancel_effect",
+                    self.stage,
+                    base_x + offset_x,
+                    base_y + offset_y,
+                    attack,
+                    12,
+                    self.support_shoot_angle_list[power_level][i],
+                    240)
+        end
     end
 end
 
@@ -198,32 +234,44 @@ end
 ---update
 
 function M:easeToPlayerPosition()
-    local ease_coeff = 0.3
+    local ease_coeff = 0.33
     local player = self.player
     local x, y = self.x, self.y
     self.x = x + (player.x - x) * ease_coeff
     self.y = y + (player.y - y) * ease_coeff
 end
 
----this function assumes support_num > other_support_num as pre-condition
+---this function assumes support_num > other_support_num as pre-condition;
+---this function applies focused easing first and power easing then
 ---@param self player_support.Reimu
-local function UpdatePositionCache(self, power_level, support_num, other_power_level, other_support_num)
+---@param power_easer function callback of form f(from, to, t) that controls easing of power change
+---@param focused_easer function callback of form f(from, to, t) that controls easing of focused change
+local function UpdatePositionCache(
+        self,
+        power_level,
+        support_num,
+        other_power_level,
+        other_support_num,
+        power_easer,
+        focused_easer)
     -- carry out a linear interpolation between two power levels
     local ratio = abs(self.transition_state - power_level)
-    local other_ratio = 1 - ratio
 
     local n = self.existing_support_num_cache
+    local focused_coeff = self.focused_coeff
     local support_pos_list = self.support_pos_list
+    local focused_support_pos_list = self.focused_support_pos_list
     local sub_position_cache = self.sub_position_cache
 
     if other_support_num == 0 then
         ---interpolate with the position of the player
         for i = 1, n do
             local x, y = unpack(support_pos_list[power_level][i])
+            local focused_x, focused_y = unpack(focused_support_pos_list[power_level][i])
 
             local base_index = i * 2
-            sub_position_cache[base_index - 1] = x * other_ratio
-            sub_position_cache[base_index] = y * other_ratio
+            sub_position_cache[base_index - 1] = power_easer(focused_easer(x, focused_x, focused_coeff), 0, ratio)
+            sub_position_cache[base_index] = power_easer(focused_easer(y, focused_y, focused_coeff), 0, ratio)
         end
     else
         local support_num_div = floor(support_num / other_support_num)
@@ -240,11 +288,19 @@ local function UpdatePositionCache(self, power_level, support_num, other_power_l
             end
 
             local x, y = unpack(support_pos_list[power_level][i])
+            local focused_x, focused_y = unpack(focused_support_pos_list[power_level][i])
             local other_x, other_y = unpack(support_pos_list[other_power_level][other_i])
+            local other_focused_x, other_focused_y = unpack(focused_support_pos_list[other_power_level][other_i])
 
             local base_index = i * 2
-            sub_position_cache[base_index - 1] = x * other_ratio + other_x * ratio
-            sub_position_cache[base_index] = y * other_ratio + other_y * ratio
+            sub_position_cache[base_index - 1] = power_easer(
+                    focused_easer(x, focused_x, focused_coeff),
+                    focused_easer(other_x, other_focused_x, focused_coeff),
+                    ratio)
+            sub_position_cache[base_index] = power_easer(
+                    focused_easer(y, focused_y, focused_coeff),
+                    focused_easer(other_y, other_focused_y, focused_coeff),
+                    ratio)
         end
     end
 end
@@ -255,15 +311,34 @@ function M:updateCache()
     local higher_power_level = ceil(self.transition_state)
     local support_num_list = self.support_num_list
 
+    assert(lower_power_level <= #support_num_list,
+            "Error: Lower power level = "..tostring(lower_power_level).." out of range!")
+    assert(higher_power_level <= #support_num_list,
+            "Error: Higher power level = "..tostring(higher_power_level).." out of range!")
+
     local lower_support_num = support_num_list[lower_power_level]
     local higher_support_num = support_num_list[higher_power_level]
     local existing_support_num = max(lower_support_num, higher_support_num)
     self.existing_support_num_cache = existing_support_num
 
+    local power_easer = self.power_easer
+    local focused_easer = self.focused_easer
     if lower_support_num > higher_support_num then
-        UpdatePositionCache(self, lower_power_level, lower_support_num, higher_power_level, higher_support_num)
+        UpdatePositionCache(
+                self,
+                lower_power_level,
+                lower_support_num, higher_power_level,
+                higher_support_num,
+                power_easer,
+                focused_easer)
     else
-        UpdatePositionCache(self, higher_power_level, higher_support_num, lower_power_level, lower_support_num)
+        UpdatePositionCache(
+                self,
+                higher_power_level,
+                higher_support_num, lower_power_level,
+                lower_support_num,
+                power_easer,
+                focused_easer)
     end
 end
 
@@ -274,10 +349,18 @@ function M:update(dt)
     local target_power_level = self:getTargetPowerLevel()
     local diff_level = target_power_level - self.transition_state
     local transition_speed = self.power_level_transition_speed
-    if diff_level < transition_speed then
+    if abs(diff_level) < transition_speed then
         self.transition_state = target_power_level
     else
         self.transition_state = self.transition_state + sign(diff_level) * transition_speed
+    end
+
+    local player_input = self.player:getPlayerInput()
+    local focused_coeff = self.focused_coeff
+    if player_input:isAnyRecordedKeyDown("slow") then
+        self.focused_coeff = min(1, focused_coeff + 0.15)
+    else
+        self.focused_coeff = max(0, focused_coeff - 0.15)
     end
 
     self:updateCache()  -- make sure cache is updated when transition_state is changed
@@ -297,8 +380,7 @@ function M:render()
                 self.support_rot,
                 self.scale,
                 self.scale,
-                0.5
-        )
+                0.5)
     end
 end
 
