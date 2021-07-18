@@ -111,6 +111,9 @@ end
 
 ---modify the game loop in GameScene:frameUpdate for pause menu
 function Stage:frameUpdate(dt)
+    -- update screen effects if any
+    require("BHElib.screen_effect"):update(dt)
+
     -- check if pause menu should be created
     if Input:isAnyDeviceKeyJustChanged("escape", false, true) and
             not self.is_paused then

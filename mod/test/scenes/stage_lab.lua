@@ -84,6 +84,7 @@ function M:createScene()
         WBG(0, 0, 10)
         BBG(0, 0, 10)
         local Nue = require("enemy.nue_boss_fight")
+
         local boss_fight = Nue()
         while boss_fight:continueBossFight() do
             boss_fight:update(1)

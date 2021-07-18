@@ -143,6 +143,16 @@ function M:processAttackInput(player_input)
     end
 end
 
+function M:processBombInput(player_input)
+    if player_input:isAnyRecordedKeyDown("spell") then
+        require("BHElib.screen_effect"):shakePlayfield(
+                self.stage,
+                3,
+                60,
+                3)
+    end
+end
+
 ---------------------------------------------------------------------------------------------------
 ---render
 

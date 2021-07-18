@@ -152,38 +152,38 @@ end
 ---------------------------------------------------------------------------------------------------
 ---input
 
----@param PlayerInput InputManager
-function PlayerBase:processPlayerInput(PlayerInput)
-    self:processMovementInput(PlayerInput)
-    self:processAttackInput(PlayerInput)
-    self:processBombInput(PlayerInput)
+---@param player_input InputManager
+function PlayerBase:processPlayerInput(player_input)
+    self:processMovementInput(player_input)
+    self:processAttackInput(player_input)
+    self:processBombInput(player_input)
 end
 
-function PlayerBase:processAttackInput(PlayerInput)
+function PlayerBase:processAttackInput(player_input)
 end
 
-function PlayerBase:processBombInput(PlayerInput)
+function PlayerBase:processBombInput(player_input)
 end
 
----@param PlayerInput InputManager
-function PlayerBase:processMovementInput(PlayerInput)
+---@param player_input InputManager
+function PlayerBase:processMovementInput(player_input)
     -- 2D-movement limited to 8 directions
 
     local dx = 0
     local dy = 0
     -- take one direction if both keys are pressed
-    if PlayerInput:isAnyRecordedKeyDown("down") then
+    if player_input:isAnyRecordedKeyDown("down") then
         dy = -1
-    elseif PlayerInput:isAnyRecordedKeyDown("up") then
+    elseif player_input:isAnyRecordedKeyDown("up") then
         dy = 1
     end
-    if PlayerInput:isAnyRecordedKeyDown("left") then
+    if player_input:isAnyRecordedKeyDown("left") then
         dx = -1
-    elseif PlayerInput:isAnyRecordedKeyDown("right") then
+    elseif player_input:isAnyRecordedKeyDown("right") then
         dx = 1
     end
     local speed_coeff = self.unfocused_speed
-    if PlayerInput:isAnyRecordedKeyDown("slow") then
+    if player_input:isAnyRecordedKeyDown("slow") then
         speed_coeff = self.focused_speed
     end
     if dx * dy ~= 0 then  -- diagonal movement

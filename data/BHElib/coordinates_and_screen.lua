@@ -7,7 +7,10 @@
 ---coordinates (views)
 ---defines a few coordinate systems in respect to the screen resolution; each coordinate system is
 ---composed of an origin and two "rulers" that measures length in x and y directions; the unit of
----length of each system may not be the same
+---length of each system may not be the same; the rulers are always aligned with x and y axis
+---each coordinates besides "res" is expressed in terms of another coordinates, meaning the position
+---of the origin and the relative scale of the coordinates are calculated based on the other coordinate
+---system when they are needed
 
 ---@class Coordinates
 local M = {}
@@ -178,16 +181,19 @@ function M.getPlayfieldBoundaryInRes()
     return game_res_l, game_res_r, game_res_b, game_res_t
 end
 
----return the boundary of playfield in "res" coordinates;
+---return the viewport in "res" coordinates;
 ---@return number, number, number, number l, r, b, t
 local function GetGameViewport()
-    return M.getPlayfieldBoundaryInRes()
+    local l, r, b, t = M.getPlayfieldBoundaryInRes()
+    return l, r, b ,t
 end
 
----return the boundary of playfield in "game" coordinates;
+---return the ortho in "game" coordinates;
 ---@return number, number, number, number l, r, b, t
 local function GetGameOrtho()
-    return _playfield_game_l, _playfield_game_r, _playfield_game_b, _playfield_game_t
+    local screen_effect = require("BHElib.screen_effect")
+    local dx, dy = screen_effect:getPlayfieldDisplayOffset()
+    return _playfield_game_l + dx, _playfield_game_r + dx, _playfield_game_b + dy, _playfield_game_t + dy
 end
 
 ---return the boundary of window in "res" coordinates;
@@ -559,8 +565,8 @@ function M.initGameCoordinates()
     M.setUICoordinatesByResolution(640, 480, res_width, res_height)
 
     -- setup "game" coordinates
-    local playfield_center_ui_x, playfield_center_ui_y = 320, 240  -- in "ui" cooridinates
-    M.setGameCoordinatesInUI(playfield_center_ui_x, playfield_center_ui_y, 1, 1)
+    local game_center_ui_x, game_center_ui_y = 320, 240  -- in "ui" cooridinates
+    M.setGameCoordinatesInUI(game_center_ui_x, game_center_ui_y, 1, 1)
 
     M.setPlayFieldBoundary(-192, 192, -224, 224)
     M.setOutOfBoundDeletionBoundary(-224, 224, -256, 256)

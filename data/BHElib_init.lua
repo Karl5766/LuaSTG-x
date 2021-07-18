@@ -13,7 +13,7 @@ local _include_list = {
     -- input
     "BHElib.input.input_and_recording",
 
-    "BHElib.screen_capture",
+    "BHElib.screen_effect",
     "BHElib.coordinates_and_screen",
 
     "BHElib.global_assets",  -- loads some assets globally
