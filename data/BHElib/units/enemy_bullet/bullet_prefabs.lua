@@ -34,9 +34,6 @@ local GetAttr = GetAttr
 local Del = Del
 local DefaultRenderFunc = DefaultRenderFunc  -- engine default render for object to render self.img
 local Render = Render  -- render arbitrary images
-local TaskNew = task.New
-local TaskWait = task.Wait
-local TaskDo = task.Do
 
 ---------------------------------------------------------------------------------------------------
 ---bullet prefab

@@ -35,7 +35,7 @@ PlayerBase.const = {
 ---virtual PlayerBase:initAnimation()  -- initialize sprite animation
 
 ---------------------------------------------------------------------------------------------------
----engine callbacks
+---init
 
 ---@param player_input InputManager an object that manages recorded player input
 ---@param stage Stage the current stage this player is at
@@ -71,9 +71,27 @@ function PlayerBase:init(
 
     self.unfocused_speed = unfocused_speed
     self.focused_speed = focused_speed
-    self.invincible_timer = 0
+    self.invincibility_timer = 0
     self.spawn_counter = 0
 end
+
+---------------------------------------------------------------------------------------------------
+---setters and getters
+
+---@return InputManager
+function PlayerBase:getPlayerInput()
+    return self.player_input
+end
+
+---@param time number the time to increase to if less (in number of frames)
+function PlayerBase:increaseInvincibilityTimerTo(time)
+    if time > self.invincibility_timer then
+        self.invincibility_timer = time
+    end
+end
+
+---------------------------------------------------------------------------------------------------
+---update
 
 function PlayerBase:frame()
     if self.spawn_counter == 0 then
@@ -88,7 +106,7 @@ function PlayerBase:frame()
         self.spawn_counter = max(0, self.spawn_counter - 1)
     end
 
-    self.invincible_timer = max(0, self.invincible_timer - 1)
+    self.invincibility_timer = max(0, self.invincibility_timer - 1)
 
     self:updateMissStatus()
 end
@@ -121,6 +139,16 @@ function PlayerBase:limitMovementInBound()
     end
 end
 
+
+function PlayerBase:render()
+    if self.invincibility_timer % 3 == 2 then  -- 避开初始值 counter = 0
+        self.color = Color(0xFF0000FF)
+    else
+        self.color = Color(0xFFFFFFFF)
+    end
+    DefaultRenderFunc(self)
+end
+
 ---------------------------------------------------------------------------------------------------
 ---input
 
@@ -129,11 +157,6 @@ function PlayerBase:processPlayerInput(PlayerInput)
     self:processMovementInput(PlayerInput)
     self:processAttackInput(PlayerInput)
     self:processBombInput(PlayerInput)
-end
-
----@return InputManager
-function PlayerBase:getPlayerInput()
-    return self.player_input
 end
 
 function PlayerBase:processAttackInput(PlayerInput)
@@ -282,6 +305,7 @@ function PlayerBase:updateSpriteByMovement(is_moving_rightward, is_moving_leftwa
 end
 
 ---------------------------------------------------------------------------------------------------
+---other events
 
 ---respawn a new player, replace the old one;
 ---update the player reference in stage object
@@ -293,7 +317,7 @@ function PlayerBase:respawn()
     new_player.x = PlayerBase.const.spawn_x
     new_player.y = PlayerBase.const.spawn_y - spawn_speed * spawn_time
     new_player.spawn_counter = PlayerBase.const.spawn_time
-    new_player.invincible_timer = PlayerBase.const.spawn_protect_time
+    new_player.invincibility_timer = PlayerBase.const.spawn_protect_time
     self.stage:setPlayer(new_player)
 
     Del(self)
@@ -317,20 +341,11 @@ function PlayerBase:colli(other)
         end
 
         -- player miss
-        if self.invincible_timer == 0 and self.miss_counter == nil then
+        if self.invincibility_timer == 0 and self.miss_counter == nil then
             PlaySound("pldead00", 0.5, 0, true)
             self.miss_counter = 12
         end
     end
-end
-
-function PlayerBase:render()
-    if self.invincible_timer % 3 == 2 then  -- 避开初始值 counter = 0
-        self.color = Color(0xFF0000FF)
-    else
-        self.color = Color(0xFFFFFFFF)
-    end
-    DefaultRenderFunc(self)
 end
 
 Prefab.Register(PlayerBase)

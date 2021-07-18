@@ -1,5 +1,6 @@
 ---------------------------------------------------------------------------------------------------
 ---reimu.lua
+---date: 2021.4.18
 ---desc: Defines the Reimu player
 ---------------------------------------------------------------------------------------------------
 
@@ -108,7 +109,7 @@ end
 function M:frame()
     PlayerBase.frame(self)
 
-    self.support:setPower(300)
+    self.support:setPower(400)
     self.support:update(1)
 end
 

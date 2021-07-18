@@ -17,12 +17,14 @@ local M = Prefab.NewX(PlayerBullet)
 ---@param attack number attack of the player bullet
 ---@param cancel_speed_coeff number
 ---@param cancel_exist_time number time that the cancel effect last until disappear
-function M:init(img, cancel_img, attack, cancel_speed_coeff, cancel_exist_time)
+---@param cancel_scale number image scale of the cancel effect; use self.hscale, self.vscale if nil
+function M:init(img, cancel_img, attack, cancel_speed_coeff, cancel_exist_time, cancel_scale)
     PlayerBullet.init(self, attack)
     self.cancel_img = cancel_img
     self.img = img
     self.cancel_speed_coeff = cancel_speed_coeff
     self.cancel_exist_time = cancel_exist_time
+    self.cancel_scale = cancel_scale
 end
 
 function M:createCancelEffect()
@@ -34,6 +36,9 @@ function M:createCancelEffect()
     object.vx = self.vx * cancel_speed_coeff
     object.vy = self.vy * cancel_speed_coeff
     object.rot = self.rot
+    local scale = self.cancel_scale
+    object.hscale = scale or self.hscale
+    object.vscale = scale or self.vscale
 end
 
 Prefab.Register(M)

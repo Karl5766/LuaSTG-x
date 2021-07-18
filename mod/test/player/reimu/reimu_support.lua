@@ -1,7 +1,7 @@
 ---------------------------------------------------------------------------------------------------
 ---reimu_support.lua
 ---date: 2021.7.16
----desc: This file provides short interfaces to create simple pre-defined objects
+---desc: This file defines the sub shots of reimu
 ---------------------------------------------------------------------------------------------------
 
 ---@class player_support.Reimu
@@ -198,7 +198,7 @@ function M:fireAllSub()
     local n = self:getActiveSubNum()
     if self.focused_coeff > 0.7 then
         local m = n * 2
-        local attack = 0.45
+        local attack = 0.48
         for i = 1, m do
             _shoot.CreatePlayerBulletS(
                     "image:reimu_needle",
