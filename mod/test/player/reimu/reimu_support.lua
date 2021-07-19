@@ -138,7 +138,7 @@ end
 ---------------------------------------------------------------------------------------------------
 ---support shots
 
-local PlayerBullet = require("BHElib.units.player.player_bullet_prefab")
+local PlayerBullet = require("BHElib.units.bullet.player_bullet_prefab")
 local _shoot = require("BHElib.scripts.shoot")
 
 ---@class Reimu.FollowShot:Prefab.PlayerBullet

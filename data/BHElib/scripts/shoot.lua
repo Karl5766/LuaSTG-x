@@ -8,7 +8,22 @@
 local M = {}
 
 local BulletCancelEffect = require("BHElib.units.bullet.bullet_cancel_effect_prefab")
-local PlayerBulletWithCancelEffect = require("BHElib.units.player.player_bullet_with_cancel_effect_prefab")
+local PlayerBullet = require("BHElib.units.bullet.player_bullet_prefab")
+
+local function CreatePlayerBulletCancelEffect(bullet)
+    local cancel = BulletCancelEffect(bullet.cancel_exist_time)
+    cancel.x = bullet.x
+    cancel.y = bullet.y
+    local cancel_speed_coeff = bullet.cancel_speed_coeff
+    cancel.vx = bullet.vx * cancel_speed_coeff
+    cancel.vy = bullet.vy * cancel_speed_coeff
+    cancel.layer = LAYER_PLAYER_BULLET_CANCEL
+    cancel.img = bullet.cancel_img
+    cancel.rot = bullet.rot
+    local scale = bullet.cancel_scale
+    cancel.hscale = scale or bullet.hscale
+    cancel.vscale = scale or bullet.vscale
+end
 
 ---create a player bullet that leaves a cancel effect when destroyed
 ---@param img string
@@ -22,9 +37,13 @@ local PlayerBulletWithCancelEffect = require("BHElib.units.player.player_bullet_
 ---@param rot number
 ---@param cancel_speed_coeff number
 function M.createPlayerBulletS(img, cancel_img, attack, x, y, vx, vy, rot, cancel_exist_time, cancel_speed_coeff)
-    local bullet = PlayerBulletWithCancelEffect(
-            img, cancel_img, attack, cancel_speed_coeff, cancel_exist_time)
+    local bullet = PlayerBullet(attack)
+    bullet.img = img
+    bullet.cancel_img = cancel_img
     bullet.x, bullet.y, bullet.vx, bullet.vy = x, y, vx, vy
+    bullet.cancel_exist_time = cancel_exist_time
+    bullet.cancel_speed_coeff = cancel_speed_coeff
+    bullet.createCancelEffect = CreatePlayerBulletCancelEffect
     bullet.rot = rot
 end
 
