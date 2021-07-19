@@ -24,7 +24,6 @@ local Color = Color
 ---@param exist_time number time that this cancel effect lasts in total, in frames
 function M:init(exist_time)
     self.exist_time = exist_time
-    self.layer = LAYER_PLAYER_BULLET_CANCEL
     self.group = GROUP_GHOST
     self.color = Color(255, 255, 255, 255)
 end

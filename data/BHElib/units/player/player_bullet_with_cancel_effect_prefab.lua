@@ -7,7 +7,7 @@
 
 local Prefab = require("BHElib.prefab")
 local PlayerBullet = require("BHElib.units.player.player_bullet_prefab")
-local PlayerBulletCancelEffect = require("BHElib.units.player.player_bullet_cancel_effect_prefab")
+local BulletCancelEffect = require("BHElib.units.bullet.bullet_cancel_effect_prefab")
 
 ---@class Prefab.PlayerBulletWithCancelEffect:Prefab.PlayerBullet
 local M = Prefab.NewX(PlayerBullet)
@@ -28,7 +28,7 @@ function M:init(img, cancel_img, attack, cancel_speed_coeff, cancel_exist_time, 
 end
 
 function M:createCancelEffect()
-    local object = PlayerBulletCancelEffect(self.cancel_exist_time)  -- exists for 12 frames
+    local object = BulletCancelEffect(self.cancel_exist_time)  -- exists for 12 frames
     object.img = self.cancel_img
     object.x = self.x
     object.y = self.y
@@ -39,6 +39,7 @@ function M:createCancelEffect()
     local scale = self.cancel_scale
     object.hscale = scale or self.hscale
     object.vscale = scale or self.vscale
+    object.layer = LAYER_PLAYER_BULLET_CANCEL
 end
 
 Prefab.Register(M)

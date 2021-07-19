@@ -87,8 +87,8 @@ function SampleStage:getDisplayName()
 end
 
 local _input = require("BHElib.input.input_and_recording")
-local BulletPrefabs = require("BHElib.units.enemy_bullet.bullet_prefabs")
-local BulletTypes = require("BHElib.units.enemy_bullet.bullet_types")
+local BulletPrefabs = require("BHElib.units.bullet.bullet_prefab")
+local BulletTypes = require("BHElib.units.bullet.bullet_types")
 
 function SampleStage:update(dt)
     Stage.update(self, dt)

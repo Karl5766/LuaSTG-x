@@ -1,27 +1,21 @@
 ---------------------------------------------------------------------------------------------------
----bullet_prefabs.lua
+---bullet_prefab.lua
 ---author: Karl
 ---date: 2021.4.22
 ---references: THlib/bullet/bullet.lua
----desc: Defines simple bullet prefabs; bullets here refer to the ones shot by the enemies (instead
+---desc: Defines simple bullet prefab; bullets here refer to the ones shot by the enemies (instead
 ---     of by the players)
+---modifiers:
+---     Karl, 2021.7.19, replaced bullet cancel effect with generic cancel effect for both player
+---     and enemy bullets
 ---------------------------------------------------------------------------------------------------
----define a table, and define two prefabs for bullets and their cancel effects under the table
-
----@class BulletPrefabs
-local M = {}
 
 local Prefab = require("BHElib.prefab")
-local BulletTypes = require("BHElib.units.enemy_bullet.bullet_types")
-local Coordinates = require("BHElib.coordinates_and_screen")
+local BulletTypes = require("BHElib.units.bullet.bullet_types")
+local BulletCancelEffect = require("BHElib.units.bullet.bullet_cancel_effect_prefab")
 
----@class BulletPrefabs.CancelEffect
-M.CancelEffect = Prefab.NewX(Prefab.Object)
-local BulletCancelEffect = M.CancelEffect
-
----@class BulletPrefabs.Base
-M.Base = Prefab.NewX(Prefab.Object)
-local Bullet = M.Base
+---@class Prefab.Bullet
+local M = Prefab.NewX(Prefab.Object)
 
 ---------------------------------------------------------------------------------------------------
 ---cache variables and functions
@@ -30,8 +24,6 @@ local bullet_type_to_info = BulletTypes.bullet_type_to_info
 local color_index_to_blink_effects = BulletTypes.color_index_to_blink_effects
 local color_index_to_cancel_effects = BulletTypes.color_index_to_cancel_effects
 local ran = ran
-local GetAttr = GetAttr
-local Del = Del
 local DefaultRenderFunc = DefaultRenderFunc  -- engine default render for object to render self.img
 local Render = Render  -- render arbitrary images
 
@@ -46,7 +38,7 @@ local Render = Render  -- render arbitrary images
 ---initial x, y position are not included in the parameter list since sometimes it is more
 ---convenient to use tools like tasks to initialize the position
 ---@param color_index number indicate color of the bullet
-function Bullet:init(bullet_type_name, color_index, group, blink_time, size)
+function M:init(bullet_type_name, color_index, group, blink_time, size)
 
     self.group = GROUP_GHOST
 
@@ -64,7 +56,7 @@ function Bullet:init(bullet_type_name, color_index, group, blink_time, size)
     end
 end
 
-function Bullet:frame()
+function M:frame()
     local blink_time = self.blink_time
     if blink_time then
         local cur_time = self.timer
@@ -75,7 +67,7 @@ function Bullet:frame()
     end
 end
 
-function Bullet:render()
+function M:render()
     local blink_time = self.blink_time
     if blink_time then
         local cur_time = self.timer
@@ -86,61 +78,39 @@ function Bullet:render()
     end
 end
 
-function Bullet:del()
-    BulletCancelEffect(self.x, self.y, self.color_index, self.effect_size)
-end
-
-function Bullet:kill()
-    BulletCancelEffect(self.x, self.y, self.color_index, self.effect_size)
-end
-
 ---@param dt number time elapsed since the end of blink time
-function Bullet:fire(dt)
+function M:fire(dt)
     self.layer = LAYER_ENEMY_BULLET
     self:changeSpriteTo(self.bullet_type_name, self.color_index)
 end
 
 ---@param bullet_type_name string name of the bullet type to change to
 ---@param color_index number number specifying the color of the bullet
-function Bullet:changeSpriteTo(bullet_type_name, color_index)
+function M:changeSpriteTo(bullet_type_name, color_index)
     self.bullet_type_name = bullet_type_name
     self.blink_time = nil
     self.color_index = color_index
     self.img = bullet_type_to_info[bullet_type_name].color_to_sprite_name[color_index]
 end
 
-Prefab.Register(Bullet)
-
----------------------------------------------------------------------------------------------------
----bullet cancel effect
-
----@param x number spawn x coordinate in "game" view
----@param y number spawn y coordinate in "game" view
----@param color_index number indicate color of the bullet
-function BulletCancelEffect:init(x, y, color_index, size)
-
-    self.x = x
-    self.y = y
-    self.group = GROUP_GHOST
-    self.layer = LAYER_BULLET_CANCEL
+local function CreateCancelEffect(bullet)
+    local exist_time = 23
+    local cancel = BulletCancelEffect(exist_time)
+    cancel.x = self.x
+    cancel.y = self.y
+    cancel.layer = LAYER_BULLET_CANCEL
+    self.img = color_index_to_cancel_effects[self.color_index]
 
     -- randomizing size and rotation of the cancel effect
-    local scale = size * ran:Float(0.5, 0.75)
-    self.hscale = scale
-    self.vscale = scale
-    self.rot = ran:Float(0, 360)
-
-    self.img = color_index_to_cancel_effects[color_index]
+    cancel.rot = ran:Float(0, 360)
+    local size = self.effect_size * ran:Float(0.5, 0.75)
+    cancel.hscale = size
+    cancel.vscale = size
 end
 
-function BulletCancelEffect:frame()
-    if GetAttr(self, "timer") == 23 then
-        Del(self)
-    end
-end
+M.del = CreateCancelEffect
+M.kill = CreateCancelEffect
 
-BulletCancelEffect.render = DefaultRenderFunc
-
-Prefab.Register(BulletCancelEffect)
+Prefab.Register(M)
 
 return M

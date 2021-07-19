@@ -125,7 +125,7 @@ function M:processAttackInput(player_input)
 
             local offset_x = -9
             for i = 1, 2 do
-                _shoot.CreatePlayerBulletS(
+                _shoot.createPlayerBulletS(
                         img,
                         cancel_img,
                         attack,

@@ -180,8 +180,9 @@ function FollowShot:frame()
 end
 
 function FollowShot:createCancelEffect()
-    _shoot.CreatePlayerBulletCancelEffectS(
+    _shoot.createBulletCancelEffectS(
             self.cancel_img,
+            LAYER_PLAYER_BULLET_CANCEL,
             12,
             self.x,
             self.y,
@@ -200,7 +201,7 @@ function M:fireAllSub()
         local m = n * 2
         local attack = 0.48
         for i = 1, m do
-            _shoot.CreatePlayerBulletS(
+            _shoot.createPlayerBulletS(
                     "image:reimu_needle",
                     "image:reimu_needle_cancel_effect",
                     attack,
