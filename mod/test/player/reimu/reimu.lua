@@ -142,6 +142,7 @@ end
 
 function M:processBombInput(player_input)
     if self.bomb_cooldown_timer <= 0 and player_input:isAnyRecordedKeyDown("spell") then
+        self:saveFromMiss()
         require("BHElib.screen_effect"):shakePlayfield(
                 self.stage,
                 3,

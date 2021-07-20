@@ -98,10 +98,9 @@ function PlayerBase:frame()
     task.Do(self)
 
     if self.spawn_counter == 0 then
-        if self.miss_counter == nil then
-            self:processPlayerInput(self.player_input)
-            self:limitMovementInBound()
-        end
+        -- receive input not in spawning
+        self:processPlayerInput(self.player_input)
+        self:limitMovementInBound()
     else
         self:updateSpriteByMovement(false, false)
         self.x = PlayerBase.const.spawn_x
@@ -158,8 +157,10 @@ end
 
 ---@param player_input InputManager
 function PlayerBase:processPlayerInput(player_input)
-    self:processMovementInput(player_input)
-    self:processAttackInput(player_input)
+    if self.miss_counter == nil then
+        self:processMovementInput(player_input)
+        self:processAttackInput(player_input)
+    end
     self:processBombInput(player_input)
 end
 
@@ -329,6 +330,11 @@ end
 
 function PlayerBase:onMiss()
     self:endCurrentSession()
+end
+
+---if the player is hit but miss counter has not reached 0, cancel the miss counter
+function PlayerBase:saveFromMiss()
+    self.miss_counter = nil
 end
 
 function PlayerBase:endCurrentSession()
