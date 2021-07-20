@@ -33,6 +33,7 @@ function M:loadResources()
     if CheckRes("tex", "tex:reimu_sprite") then
         return
     end
+    --sprite
     LoadTexture("tex:reimu_sprite", "THlib\\player\\reimu\\reimu.png")
 
     --main shot
@@ -40,8 +41,9 @@ function M:loadResources()
     SetImageState("image:reimu_bullet", '', Color(0xA0FFFFFF))
     SetImageCenter("image:reimu_bullet", 56, 8)
     LoadAnimation("image:reimu_bullet_cancel_effect", "tex:reimu_sprite", 0, 144, 16, 16, 4, 1, 4)
-    SetAnimationState("image:reimu_bullet_cancel_effect", 'mul+add', Color(0xA0FFFFFF))
+    SetAnimationState("image:reimu_bullet_cancel_effect", "mul+add", Color(0xA0FFFFFF))
 
+    --sub shots
     LoadImage("image:reimu_needle", "tex:reimu_sprite", 64, 176, 64, 16, 16, 16)
     SetImageState("image:reimu_needle", '', Color(0x80FFFFFF))
     SetImageCenter("image:reimu_needle", 32, 8)
@@ -53,19 +55,14 @@ function M:loadResources()
     LoadImage("image:reimu_follow_bullet", "tex:reimu_sprite", 0, 160, 16, 16, 16, 16)
     SetImageState("image:reimu_follow_bullet", '', Color(0x80FFFFFF))
     LoadAnimation("image:reimu_follow_bullet_cancel_effect", "tex:reimu_sprite", 0, 160, 16, 16, 4, 1, 4)
-    SetAnimationState("image:reimu_follow_bullet_cancel_effect", 'mul+add', Color(0xA0FFFFFF))
+    SetAnimationState("image:reimu_follow_bullet_cancel_effect", "mul+add", Color(0xA0FFFFFF))
 
+    --bomb
+    LoadTexture("tex:reimu_kekkai", "THlib\\player\\reimu\\reimu_kekkai.png")
+    LoadImage("image:reimu_kekkai", "tex:reimu_kekkai", 0, 0, 256, 256, 0, 0)
+    SetImageState("image:reimu_kekkai", "mul+add", Color(0x804040FF))
 
-    LoadTexture('reimu_kekkai', 'THlib\\player\\reimu\\reimu_kekkai.png')
-    LoadTexture('reimu_orange_ef2', 'THlib\\player\\reimu\\reimu_orange_eff.png')
-    LoadImageFromFile('reimu_bomb_ef', 'THlib\\player\\reimu\\reimu_bomb_ef.png')
-    LoadAnimation('reimu_bullet_orange_ef2', 'reimu_orange_ef2', 0, 0, 64, 16, 1, 9, 1)
-    SetAnimationCenter('reimu_bullet_orange_ef2', 0, 8)
-
-    LoadImage('reimu_bullet_ef_img', "tex:reimu_sprite", 48, 144, 16, 16)
-    LoadImage('reimu_kekkai', 'reimu_kekkai', 0, 0, 256, 256, 0, 0)
-    SetImageState('reimu_kekkai', 'mul+add', Color(0x804040FF))
-    LoadPS('reimu_bullet_ef', 'THlib\\player\\reimu\\reimu_bullet_ef.psi', 'reimu_bullet_ef_img')
+    LoadImage("image:reimu_bomb_square", "tex:reimu_sprite", 0, 192, 64, 64, 0, 0)
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -144,12 +141,15 @@ function M:processAttackInput(player_input)
 end
 
 function M:processBombInput(player_input)
-    if player_input:isAnyRecordedKeyDown("spell") then
+    if self.bomb_cooldown_timer <= 0 and player_input:isAnyRecordedKeyDown("spell") then
         require("BHElib.screen_effect"):shakePlayfield(
                 self.stage,
                 3,
-                60,
+                180,
                 3)
+        require("player.reimu.reimu_bomb"):bomb(self, self.stage)
+        self.bomb_cooldown_timer = 480
+        self:increaseInvincibilityTimerTo(510)
     end
 end
 

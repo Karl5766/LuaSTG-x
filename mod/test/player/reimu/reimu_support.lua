@@ -146,7 +146,7 @@ local FollowShot = Prefab.NewX(PlayerBullet)
 
 ---@param trail_coeff number coefficient linear to the turning speed
 function FollowShot:init(img, cancel_img, stage, init_x, init_y, attack, speed, angle, trail_coeff)
-    PlayerBullet.init(self, attack)
+    PlayerBullet.init(self, attack, true)
     self.x = init_x
     self.y = init_y
     self.vx, self.vy = speed * cos(angle), speed * sin(angle)

@@ -37,7 +37,7 @@ end
 ---@param rot number
 ---@param cancel_speed_coeff number
 function M.createPlayerBulletS(img, cancel_img, attack, x, y, vx, vy, rot, cancel_exist_time, cancel_speed_coeff)
-    local bullet = PlayerBullet(attack)
+    local bullet = PlayerBullet(attack, true)
     bullet.img = img
     bullet.cancel_img = cancel_img
     bullet.x, bullet.y, bullet.vx, bullet.vy = x, y, vx, vy
@@ -59,10 +59,10 @@ end
 ---@param rot number
 ---@param cancel_speed_coeff number
 function M.createPlayerBulletP(img, cancel_img, attack, x, y, speed, angle, rot, cancel_exist_time, cancel_speed_coeff)
-    local bullet = PlayerBulletWithCancelEffect(
-            img, cancel_img, attack, cancel_speed_coeff, cancel_exist_time)
-    bullet.x, bullet.y, bullet.vx, bullet.vy = x, y, speed * cos(angle), speed * sin(angle)
-    bullet.rot = rot
+    M.createPlayerBulletS(img, cancel_img, attack,
+            speed * cos(angle),
+            speed * sin(angle),
+            speed, angle, rot, cancel_exist_time, cancel_speed_coeff)
 end
 
 ---@param img string

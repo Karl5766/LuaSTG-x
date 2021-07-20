@@ -23,18 +23,20 @@ end
 ---player bullet prefab
 
 ---@param attack number numeric value of the damage towards enemies
-function M:init(attack)
+---@param del_on_colli boolean
+function M:init(attack, del_on_colli)
     self.attack = attack  -- damage to the enemies on hit
     self.layer = LAYER_PLAYER_BULLET
     self.group = GROUP_PLAYER_BULLET
+    self.del_on_colli = del_on_colli
     self.colli_flag = false  -- deal with multiple collisions in a single frame; set to true at the first collision
 end
 
 ---called by enemy colli function
 function M:onEnemyCollision(enemy)
-    if self.colli_flag == false then
-        Kill(self)
+    if self.colli_flag == false and self.del_on_colli then
         self:createCancelEffect()
+        Kill(self)
         self.colli_flag = true
     end
 end

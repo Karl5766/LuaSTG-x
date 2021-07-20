@@ -50,3 +50,5 @@ SQRT3                 = math.sqrt(3)
 SQRT2_2               = math.sqrt(0.5)
 ---0.618*360
 GOLD                  = 360 * (math.sqrt(5) - 1) / 2
+
+INFINITE = math.huge

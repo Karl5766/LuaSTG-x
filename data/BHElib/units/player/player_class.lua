@@ -73,6 +73,7 @@ function PlayerBase:init(
     self.focused_speed = focused_speed
     self.invincibility_timer = 0
     self.spawn_counter = 0
+    self.bomb_cooldown_timer = 0
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -94,6 +95,8 @@ end
 ---update
 
 function PlayerBase:frame()
+    task.Do(self)
+
     if self.spawn_counter == 0 then
         if self.miss_counter == nil then
             self:processPlayerInput(self.player_input)
@@ -107,6 +110,7 @@ function PlayerBase:frame()
     end
 
     self.invincibility_timer = max(0, self.invincibility_timer - 1)
+    self.bomb_cooldown_timer = max(0, self.bomb_cooldown_timer - 1)
 
     self:updateMissStatus()
 end
