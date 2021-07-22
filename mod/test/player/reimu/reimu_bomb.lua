@@ -7,7 +7,7 @@
 ---@class player_bomb.Reimu
 local M = {}
 
-local Prefab = require("BHElib.prefab")
+local Prefab = require("core.prefab")
 local PlayerBullet = require("BHElib.units.bullet.player_bullet_prefab")
 
 ---------------------------------------------------------------------------------------------------

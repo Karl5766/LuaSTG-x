@@ -5,7 +5,7 @@
 ---desc: Defines an object prefab that handles animations consists of arrays of images
 ---------------------------------------------------------------------------------------------------
 
-local Prefab = require("BHElib.prefab")
+local Prefab = require("core.prefab")
 
 ---@class Prefab.Animation:Prefab.Object
 local AnimationPrefab = Prefab.NewX(Prefab.Object)

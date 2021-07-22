@@ -6,7 +6,7 @@
 ---     collision box with some hp, the hitbox is killed when hp reaches or goes below 0
 ---------------------------------------------------------------------------------------------------
 
-local Prefab = require("BHElib.prefab")
+local Prefab = require("core.prefab")
 
 ---@class Prefab.EnemyHitbox:Prefab.Object
 local EnemyHitbox = Prefab.NewX(Prefab.Object)

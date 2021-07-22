@@ -1,7 +1,7 @@
 --
 
 ---@type object
-local object = xclass()
+local object = require("core.prefab").XObject
 
 local c4f_white = { a = 1, r = 1, g = 1, b = 1 }
 local function color_to_c4f(c)

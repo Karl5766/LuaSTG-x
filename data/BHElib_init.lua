@@ -18,7 +18,6 @@ local _include_list = {
 
     "BHElib.global_assets",  -- loads some assets globally
 
-    "BHElib.prefab",  -- game objects
     "BHElib.task",
 
     "BHElib.global",  -- defines some in-game global variables

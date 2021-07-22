@@ -7,7 +7,7 @@
 ---     Karl, 2021.7.16, split from player_shot_prefabs.lua
 ---------------------------------------------------------------------------------------------------
 
-local Prefab = require("BHElib.prefab")
+local Prefab = require("core.prefab")
 
 ---@class Prefab.PlayerBullet:Prefab.Object
 ---@desc an object of this class is a player bullet that does damage and gets cancelled when the enemy is hit

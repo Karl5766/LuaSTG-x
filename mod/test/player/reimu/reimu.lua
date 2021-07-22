@@ -4,7 +4,7 @@
 ---desc: Defines the Reimu player
 ---------------------------------------------------------------------------------------------------
 
-local Prefab = require("BHElib.prefab")
+local Prefab = require("core.prefab")
 local PlayerBase = require("BHElib.units.player.player_class")
 
 ---@class ReimuPlayer:PlayerBase
@@ -22,8 +22,7 @@ function M:init(stage)
             8,
             4.5,
             2,
-            stage
-    )
+            stage)
     self.support = ReimuSupport(self.stage, self, "image:reimu_support")
 end
 

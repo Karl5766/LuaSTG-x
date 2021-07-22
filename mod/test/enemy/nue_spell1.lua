@@ -4,7 +4,7 @@
 --- DateTime: 2021/6/1 23:39
 ---
 
-local Prefab = require("BHElib.prefab")
+local Prefab = require("core.prefab")
 local SpellBase = assert(require("BHElib.units.boss.single_boss_spell_base"))
 
 local Spell = LuaClass("Nue.spell1", SpellBase)

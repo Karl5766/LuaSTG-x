@@ -7,7 +7,7 @@
 ---     Karl, 2021.7.16, split from player_shot_prefabs.lua
 ---------------------------------------------------------------------------------------------------
 
-local Prefab = require("BHElib.prefab")
+local Prefab = require("core.prefab")
 
 ---@class Prefab.PlayerBulletCancelEffect:Prefab.Object
 ---@desc an object of this class plays an image of player bullet cancel effect and fades out with time

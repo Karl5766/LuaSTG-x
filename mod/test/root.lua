@@ -69,7 +69,7 @@ local function Init()
     -- initialize all player classes
     require("player.reimu.reimu")
 
-    local Prefab = require("BHElib.prefab")
+    local Prefab = require("core.prefab")
     local SceneTransition = require("BHElib.scenes.scene_transition")
 
     require("BHElib.coordinates_and_screen").setResolution(1600, 900)

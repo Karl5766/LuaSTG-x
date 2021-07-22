@@ -84,7 +84,7 @@ local RawNew = lstg.RawNew
 --- You can use classname(...) to create an instance of game object.
 --- Example: `classname = xclass(object)`
 ---@param base object
----@param class_id string unique string id for referencing the class
+---@param class_id string if exists, this is the unique string id for referencing the class
 ---@return object
 function Prefab.NewX(base, class_id)
 
@@ -121,6 +121,7 @@ function Prefab.NewX(base, class_id)
 
     return setmetatable(ret, mt)
 end
+
 xclass = Prefab.NewX
 
 ---------------------------------------------------------------------------------------------------
@@ -188,6 +189,9 @@ Prefab.Object = {
 }
 Prefab.Register(Prefab.Object)
 
+Prefab.XObject = Prefab.NewX(Prefab.Object)
+Prefab.Register(Prefab.XObject)
+
 ---------------------------------------------------------------------------------------------------
 ---Object3d
 
@@ -195,28 +199,6 @@ Prefab.Register(Prefab.Object)
 Prefab.Object3d = Prefab.New(Prefab.Object)
 Prefab.Object3d['.3d'] = true
 Prefab.Register(Prefab.Object3d)
-
----------------------------------------------------------------------------------------------------
----Renderer
-
----@class prefab.Renderer:Prefab.Object
-Prefab.Renderer = Prefab.New(Prefab.Object)
-function Prefab.Renderer:init(layer, master, coordinates_name)
-    self.group = GROUP_GHOST
-    self.layer = layer
-    self.master = master
-    self.coordinates_name = coordinates_name
-end
-
-local SetRenderView = require("BHElib.coordinates_and_screen").setRenderView
-function Prefab.Renderer:render()
-    local master = self.master
-    SetRenderView(self.coordinates_name)
-    master:render()
-    SetRenderView("game")  -- game objects are usually rendered in "game" view
-end
-
-Prefab.Register(Prefab.Renderer)
 
 ---------------------------------------------------------------------------------------------------
 

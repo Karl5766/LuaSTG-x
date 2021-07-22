@@ -7,7 +7,7 @@
 ---@class player_support.Reimu
 local M = LuaClass("player.reimu.ReimuSupport")
 
-local Prefab = require("BHElib.prefab")
+local Prefab = require("core.prefab")
 
 ---------------------------------------------------------------------------------------------------
 ---cache functions and variables

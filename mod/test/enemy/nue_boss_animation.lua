@@ -1,4 +1,4 @@
-local Prefab = require("BHElib.prefab")
+local Prefab = require("core.prefab")
 local Animation = require("BHElib.units.animation_prefab")
 
 ---@class Prefab.Animation.Nue:Prefab.Animation

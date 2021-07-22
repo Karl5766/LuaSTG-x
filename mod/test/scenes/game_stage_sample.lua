@@ -8,7 +8,7 @@ local Stage = require("BHElib.scenes.stage.stage")
 
 ---@class SampleStage:Stage
 local SampleStage = LuaClass("stage.SampleStage", Stage)
-local Prefab = require("BHElib.prefab")
+local Prefab = require("core.prefab")
 local Button = require("BHElib.input.recording_cc_button")
 
 ---------------------------------------------------------------------------------------------------

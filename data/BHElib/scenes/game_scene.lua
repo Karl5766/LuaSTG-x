@@ -11,7 +11,7 @@ local GameScene = LuaClass("scenes.GameScene")
 
 local _raw_input = require("setting.key_mapping")
 local _input = require("BHElib.input.input_and_recording")
-local Prefab = require("BHElib.prefab")
+local Prefab = require("core.prefab")
 local Director = cc.Director:getInstance()
 
 ---------------------------------------------------------------------------------------------------
@@ -46,7 +46,8 @@ function GameScene:createScene()
     local scene = display.newScene("Scene")
 
     -- create an object for rendering the stage
-    New(Prefab.Renderer, LAYER_HUD, self, "ui")
+    local Renderer = require("BHElib.ui.renderer")
+    New(Renderer, LAYER_HUD, self, "ui")
 
     self.cocos_scene = scene
 

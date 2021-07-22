@@ -8,6 +8,7 @@ local _include_list = {
     'core/loading.lua',
     'core/async.lua',
     'core/score.lua',
+    'core/prefab.lua',
 }
 
 for _, f in ipairs(_include_list) do

@@ -2,7 +2,7 @@ local Stage = require("BHElib.scenes.stage.stage")
 
 ---@class SampleStage:Stage
 local SampleStage = LuaClass("stage.SecondSampleStage", Stage)
-local Prefab = require("BHElib.prefab")
+local Prefab = require("core.prefab")
 
 ---------------------------------------------------------------------------------------------------
 ---override/virtual

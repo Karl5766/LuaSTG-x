@@ -8,7 +8,7 @@
 local MenuPage = LuaClass("menu.MenuPage")
 
 local InteractiveSelector = require("BHElib.ui.selectors.interactive_selector")
-local Prefab = require("BHElib.prefab")
+local Prefab = require("core.prefab")
 
 ---------------------------------------------------------------------------------------------------
 
@@ -17,7 +17,8 @@ function MenuPage.__create(selector)
     local self = {
         selector = selector,
     }
-    self.renderer = New(Prefab.Renderer, LAYER_MENU, self, "ui")
+    local Renderer = require("BHElib.ui.renderer")
+    self.renderer = New(Renderer, LAYER_MENU, self, "ui")
 
     return self
 end

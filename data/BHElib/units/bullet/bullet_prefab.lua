@@ -10,7 +10,7 @@
 ---     and enemy bullets
 ---------------------------------------------------------------------------------------------------
 
-local Prefab = require("BHElib.prefab")
+local Prefab = require("core.prefab")
 local BulletTypes = require("BHElib.units.bullet.bullet_types")
 local BulletCancelEffect = require("BHElib.units.bullet.bullet_cancel_effect_prefab")
 

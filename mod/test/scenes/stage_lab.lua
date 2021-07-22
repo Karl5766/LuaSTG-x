@@ -4,7 +4,7 @@ local Stage = require("BHElib.scenes.stage.stage")
 
 ---@class StageLab:Stage
 local M = LuaClass("stage.StageLab", Stage)
-local Prefab = require("BHElib.prefab")
+local Prefab = require("core.prefab")
 
 require("se")
 
@@ -121,6 +121,8 @@ function M:getEnemyTargetFrom(source)
     return FindTarget(source, self.targets)
 end
 
+local function IsIntersected()  end
+
 function M:update(dt)
     for i, button in ipairs(self.exit_button) do
         button:update(1)
@@ -141,7 +143,7 @@ function M:render()
         x, y = 660, 440
         RenderTTF("font:menu", tostring(math.floor(self.timer / 60)), x, x, y, y, color, "left")
     end
-    _hud_painter.drawPerfromanceProfile("font:hud_default")
+    _hud_painter.drawPerfromanceProfile("font:menu")
     _hud_painter.drawKeys()
 end
 

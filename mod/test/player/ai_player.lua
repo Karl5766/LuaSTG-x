@@ -4,7 +4,7 @@
 ---desc: This file defines the player class, from which all player sub-classes derive from
 ---------------------------------------------------------------------------------------------------
 
-local Prefab = require("BHElib.prefab")
+local Prefab = require("core.prefab")
 local PlayerBase = Prefab.NewX(Prefab.Object)
 
 local ClockedAnimation = require("BHElib.units.clocked_animation")

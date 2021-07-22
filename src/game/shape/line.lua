@@ -1,7 +1,7 @@
 --
 
 ---@type object
-local object = xclass()
+local object = require("core.prefab").XObject
 
 local c4f_white = { a = 1, r = 1, g = 1, b = 1 }
 local function color_to_c4f(c)
@@ -52,7 +52,7 @@ function M.setCircle(obj, r, rot, nSeg, color, lineWidth)
     if lineWidth then
         node:setLineWidth(lineWidth)
     end
-    node:drawCircle(cc.p(0, 0), r or 1, rot or 0, nSeg or 360, color_to_c4f(color))
+    node:drawCircle(cc.p(0, 0), r or 1, rot or 0, nSeg or 360, false, 1, 1, color_to_c4f(color))
     obj.node = node
 end
 
