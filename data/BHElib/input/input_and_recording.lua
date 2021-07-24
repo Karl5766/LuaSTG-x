@@ -47,9 +47,7 @@ local _is_replay_mode
 ---cache variables and functions
 
 local pairs = pairs
-local _IsDeviceKeyDown
 local _IsAnyDeviceKeyDown
-local _IsRecordedKeyDown
 
 ---------------------------------------------------------------------------------------------------
 ---categorize function keys into game keys and system keys

@@ -46,8 +46,8 @@ function GameScene:createScene()
     local scene = display.newScene("Scene")
 
     -- create an object for rendering the stage
-    local Renderer = require("BHElib.ui.renderer")
-    New(Renderer, LAYER_HUD, self, "ui")
+    local Renderer = require("BHElib.ui.renderer_prefab")
+    Renderer(LAYER_HUD, self, "ui")
 
     self.cocos_scene = scene
 

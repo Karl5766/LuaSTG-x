@@ -79,6 +79,11 @@ function M:createScene()
     --    end
     --end
 
+    --local node = cc.DrawNode:create()
+    --node:drawSolidRect(cc.p(-50, -50), cc.p(50, 50), {a = 1, r = 1, g = 1, b = 1})
+    --canvas:addChild(node, 0)
+    --self.rect = node
+
     task.New(self, function()
         PlaySound("don00", 1)
         WBG(0, 0, 10)

@@ -13,7 +13,7 @@ GROUP_NUM_OF_GROUP    = 16
 
 --层次结构
 
-LAYER_HUD                   = -800  -- for ui hud
+LAYER_HUD                   = -700  -- for ui hud
 LAYER_BG                    = -700
 LAYER_ENEMY                 = -600
 LAYER_PLAYER_BULLET         = -500
@@ -24,6 +24,8 @@ LAYER_ENEMY_BULLET          = -200
 LAYER_BULLET_CANCEL         = -150
 LAYER_BULLET_BLINK          = -100
 LAYER_BULLET_EFFECT         = -100
+LAYER_DIALOGUE_PORTRAIT     = -51
+LAYER_DIALOGUE_BOX          = -50
 LAYER_TOP                   = 0
 LAYER_MENU                  = 0
 

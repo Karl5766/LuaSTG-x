@@ -64,6 +64,7 @@ end
 ---@param x number position to render in x-coordinate
 ---@param y number position to render in y-coordinate
 function M:render(x, y)
+    ---TODO:add font size feature
     RenderTTF(
             self.font_name,
             self.text,

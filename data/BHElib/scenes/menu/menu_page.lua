@@ -17,8 +17,8 @@ function MenuPage.__create(selector)
     local self = {
         selector = selector,
     }
-    local Renderer = require("BHElib.ui.renderer")
-    self.renderer = New(Renderer, LAYER_MENU, self, "ui")
+    local Renderer = require("BHElib.ui.renderer_prefab")
+    self.renderer = Renderer(LAYER_MENU, self, "ui")
 
     return self
 end

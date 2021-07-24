@@ -4,7 +4,7 @@
 --- DateTime: 2021/6/1 23:29
 ---
 
-local BossFight = require("BHElib.units.boss.single_boss_with_spell_boss_fight")
+local BossFight = require("BHElib.units.boss.single_boss_fight")
 
 ---@class BossFight.Nue:BossFight.SingleBossWithSpell
 local M = LuaClass("boss_fight.Nue", BossFight)
@@ -21,11 +21,13 @@ local Yield = coroutine.yield
 local _Animation = require("enemy.nue_boss_animation")
 
 local _Spell1 = require("enemy.nue_spell1")
+local _Dialogue1 = require("enemy.nue_dialogue")
 
 ---------------------------------------------------------------------------------------------------
 
 function M.__create()
     local spell_class_array = {
+        _Dialogue1,
         _Spell1,
     }
     local boss = _Animation()

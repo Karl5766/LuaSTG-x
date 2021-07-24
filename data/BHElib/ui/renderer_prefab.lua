@@ -1,19 +1,14 @@
 ---------------------------------------------------------------------------------------------------
----renderer.lua
----desc: Defines the inheritance of game objects, and two base prefabs Object and Object3d for all
----     other prefabs to inherit from.
+---renderer_prefab.lua
+---desc: Defines a renderer object which is used to handle render layer for non game object classes
 ---modifier:
----     Karl, 2021.2.16, renamed the file from class.lua to game_object.lua. Removed the global
----     lists and changed to the same naming conventions as the rest of the project
----     2021.3.16, renamed Class to Prefab under zino's suggestion; moved code from
----     to this file
----     2021.4.9, re-writes the file again for require() format
+---     Karl, 2021.7.22, split from prefab.lua and named "renderer.lua"
 ---------------------------------------------------------------------------------------------------
 
 local Prefab = require("core.prefab")
 
----@class prefab.Renderer:Prefab.Object
-local M = Prefab.New(Prefab.Object)
+---@class Prefab.Renderer:Prefab.Object
+local M = Prefab.NewX(Prefab.Object)
 function M:init(layer, master, coordinates_name)
     self.group = GROUP_GHOST
     self.layer = layer
