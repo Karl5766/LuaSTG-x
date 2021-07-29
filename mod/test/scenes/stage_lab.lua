@@ -148,8 +148,8 @@ function M:render()
         x, y = 660, 440
         RenderTTF("font:menu", tostring(math.floor(self.timer / 60)), x, x, y, y, color, "left")
     end
-    _hud_painter.drawPerfromanceProfile("font:menu")
-    _hud_painter.drawKeys()
+    _hud_painter:drawPerfromanceProfile("font:menu")
+    _hud_painter:drawKeys()
 end
 
 return M

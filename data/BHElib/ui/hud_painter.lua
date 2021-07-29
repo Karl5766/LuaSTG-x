@@ -1,6 +1,7 @@
 ---------------------------------------------------------------------------------------------------
 ---hud.lua
 ---desc: Implementation of stg HUD rendering
+---references: -x/src/game/stage_ui.lua -x/src/game/after_load.lua
 ---modifier:
 ---     Karl, 2021.2.18, split from after_load.lua
 ---------------------------------------------------------------------------------------------------
@@ -82,13 +83,13 @@ end
 
 ---------------------------------------------------------------------------------------------------
 
-function M.draw(img_background, background_scale, img_border)
+function M:draw(img_background, background_scale, img_border)
     scr.setRenderView("ui")
 
     _timer = _timer + 1
 
     -- render the hud background
-    M.drawHudBackground(img_background, background_scale)
+    M:drawHudBackground(img_background, background_scale)
 
     -- render a thin rectangular border
     SetImageState(img_border, '', color.Red)
@@ -103,7 +104,7 @@ function M.draw(img_background, background_scale, img_border)
     SetImageState(img_border, '', color.White)
 end
 
-function M.drawPerfromanceProfile(font_profile)
+function M:drawPerfromanceProfile(font_profile)
     SetFontState(font_profile, '', Color(0xFFFFFFFF))
     RenderPerformanceProfile(font_profile)
 end
@@ -125,8 +126,8 @@ function M.drawKeys()
         "right",
         "up",
     }
-    local normal_pos = {500, 100}
-    local replay_pos = {500, 240}
+    local normal_pos = {-40, 100}
+    local replay_pos = {-40, 240}
     local text_color = Color(255, 60, 60, 60)
     local comment_color = Color(255, 255, 255, 255)
 
@@ -187,8 +188,67 @@ function M.drawKeys()
     end
 end
 
-function M.drawHudBackground(img_background, background_scale)
+function M:drawHudBackground(img_background, background_scale)
     Render(img_background, 320, 240, 0, background_scale, background_scale)
+end
+
+---------------------------------------------------------------------------------------------------
+---player resources
+
+---each image will be displayed with rot = 0 and hscale, vscale = 1, 1
+---@param resource_image string
+---@param resource_image_outline string
+---@param x number x coordinate position of first displayed image
+---@param y number y coordinate position of first displayed image
+---@param dx number x offset for each image afterwards
+---@param dy number y offset for each image afterwards
+---@param num_resource number
+---@param max_display_num number maximum number of images that can be displayed
+local function DisplayResource(
+        resource_image,
+        resource_image_outline,
+        x,
+        y,
+        dx,
+        dy,
+        num_resource,
+        max_display_num)
+    for i = 1, max_display_num do
+        local cur_x, cur_y = x + dx * i, y + dy * i
+        Render(resource_image_outline, cur_x, cur_y, 0, 1, 1)
+        if num_resource >= i then
+            Render(resource_image, cur_x, cur_y, 0, 1, 1)
+        end
+    end
+end
+
+---@param player Prefab.Player
+function M:drawPlayerResources(player)
+    local base_x = 520
+    local base_y = 344
+    local dx = 13
+    local dy = 0
+
+    local num_life, num_bomb = player:getPlayerResources()
+    local max_display_num = 8
+    DisplayResource(
+            "image:icon_life",
+            "image:icon_life_outline",
+            base_x,
+            base_y,
+            dx,
+            dy,
+            num_life,
+            max_display_num)
+    DisplayResource(
+            "image:icon_bomb",
+            "image:icon_bomb_outline",
+            base_x,
+            base_y - 48,
+            dx,
+            dy,
+            num_bomb,
+            max_display_num)
 end
 
 return M

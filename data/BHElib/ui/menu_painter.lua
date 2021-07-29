@@ -18,7 +18,7 @@ function M.draw(img_background, background_scale, font_profile_text, img_border)
     _timer = _timer + 1
 
     -- render the hud background
-    M.drawHudBackground(img_background, background_scale)
+    M:drawHudBackground(img_background, background_scale)
 
     -- render a thin rectangular border
     SetImageState(img_border, '', color.Red)

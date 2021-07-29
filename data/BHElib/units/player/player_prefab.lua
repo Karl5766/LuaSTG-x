@@ -1,13 +1,13 @@
 ---------------------------------------------------------------------------------------------------
----player_class.lua
+---player_prefab.lua
 ---date: 2021.4.12
 ---desc: This file defines the player class, from which all player sub-classes derive from
 ---------------------------------------------------------------------------------------------------
 
 local Prefab = require("core.prefab")
 
----@class PlayerBase
-local PlayerBase = Prefab.NewX(Prefab.Object)
+---@class Prefab.Player
+local M = Prefab.NewX(Prefab.Object)
 
 local ClockedAnimation = require("BHElib.units.clocked_animation")
 local Coordinates = require("BHElib.coordinates_and_screen")
@@ -20,7 +20,7 @@ local max = max
 ---------------------------------------------------------------------------------------------------
 ---constants
 
-PlayerBase.const = {
+M.const = {
     spawn_x = 0,
     spawn_y = -180,
     spawn_time = 80,
@@ -31,21 +31,26 @@ PlayerBase.const = {
 ---------------------------------------------------------------------------------------------------
 ---virtual methods
 
----virtual PlayerBase:loadResources()  -- for loading player sprite etc.
----virtual PlayerBase:initAnimation()  -- initialize sprite animation
+---virtual M:loadResources()  -- for loading player sprite etc.
+---virtual M:initAnimation()  -- initialize sprite animation
 
 ---------------------------------------------------------------------------------------------------
 ---init
 
+---the player will copy the number of life and bombs from the previous player object (if exists)
 ---@param player_input InputManager an object that manages recorded player input
+---@param animation_interval number integer indicating the player sprite animation interval in frames
+---@param unfocused_speed number speed when unfocused; per frame
+---@param focused_speed number speed when focused; per frame
 ---@param stage Stage the current stage this player is at
-function PlayerBase:init(
+---@param spawning_player Prefab.Player the player to inherit player resources (life, bombs etc.) from; nil if this is the first player
+function M:init(
         player_input,
         animation_interval,
         unfocused_speed,
         focused_speed,
-        stage
-)
+        stage,
+        spawning_player)
     self.layer = LAYER_PLAYER
     self.group = GROUP_PLAYER
     self.bound = false
@@ -74,27 +79,42 @@ function PlayerBase:init(
     self.invincibility_timer = 0
     self.spawn_counter = 0
     self.bomb_cooldown_timer = 0
+
+    local num_life, num_bomb
+    if spawning_player then
+        num_life = spawning_player.num_life
+        num_bomb = spawning_player.num_bomb
+    else
+        num_life, num_bomb = stage:getInitPlayerResources()
+    end
+    assert(num_life and num_bomb, "Error:Invalid player resources!")
+    self.num_life = num_life
+    self.num_bomb = num_bomb
 end
 
 ---------------------------------------------------------------------------------------------------
 ---setters and getters
 
 ---@return InputManager
-function PlayerBase:getPlayerInput()
+function M:getPlayerInput()
     return self.player_input
 end
 
 ---@param time number the time to increase to if less (in number of frames)
-function PlayerBase:increaseInvincibilityTimerTo(time)
+function M:increaseInvincibilityTimerTo(time)
     if time > self.invincibility_timer then
         self.invincibility_timer = time
     end
 end
 
+function M:getPlayerResources()
+    return self.num_life, self.num_bomb
+end
+
 ---------------------------------------------------------------------------------------------------
 ---update
 
-function PlayerBase:frame()
+function M:frame()
     task.Do(self)
 
     if self.spawn_counter == 0 then
@@ -103,8 +123,8 @@ function PlayerBase:frame()
         self:limitMovementInBound()
     else
         self:updateSpriteByMovement(false, false)
-        self.x = PlayerBase.const.spawn_x
-        self.y = PlayerBase.const.spawn_y - PlayerBase.const.spawn_speed * self.spawn_counter
+        self.x = M.const.spawn_x
+        self.y = M.const.spawn_y - M.const.spawn_speed * self.spawn_counter
         self.spawn_counter = max(0, self.spawn_counter - 1)
     end
 
@@ -114,7 +134,7 @@ function PlayerBase:frame()
     self:updateMissStatus()
 end
 
-function PlayerBase:updateMissStatus()
+function M:updateMissStatus()
     if self.miss_counter ~= nil then
         self.miss_counter = max(0, self.miss_counter - 1)
         if self.miss_counter == 0 then
@@ -124,7 +144,7 @@ function PlayerBase:updateMissStatus()
     end
 end
 
-function PlayerBase:limitMovementInBound()
+function M:limitMovementInBound()
     local l, r, b, t = Coordinates.getPlayfieldBoundaryInGame()
 
     local min_dist = 10
@@ -142,8 +162,9 @@ function PlayerBase:limitMovementInBound()
     end
 end
 
-
-function PlayerBase:render()
+local _hud_painter = require("BHElib.ui.hud_painter")
+function M:render()
+    -- render player sprite
     if self.invincibility_timer % 3 == 2 then  -- 避开初始值 counter = 0
         self.color = Color(0xFF0000FF)
     else
@@ -156,7 +177,7 @@ end
 ---input
 
 ---@param player_input InputManager
-function PlayerBase:processPlayerInput(player_input)
+function M:processPlayerInput(player_input)
     if self.miss_counter == nil then
         self:processMovementInput(player_input)
         self:processAttackInput(player_input)
@@ -164,14 +185,14 @@ function PlayerBase:processPlayerInput(player_input)
     self:processBombInput(player_input)
 end
 
-function PlayerBase:processAttackInput(player_input)
+function M:processAttackInput(player_input)
 end
 
-function PlayerBase:processBombInput(player_input)
+function M:processBombInput(player_input)
 end
 
 ---@param player_input InputManager
-function PlayerBase:processMovementInput(player_input)
+function M:processMovementInput(player_input)
     -- 2D-movement limited to 8 directions
 
     local dx = 0
@@ -203,7 +224,7 @@ end
 ---update sprite of the player by the movement performed
 ---@param is_moving_rightward boolean
 ---@param is_moving_leftward boolean
-function PlayerBase:updateSpriteByMovement(is_moving_rightward, is_moving_leftward)
+function M:updateSpriteByMovement(is_moving_rightward, is_moving_leftward)
     local cur_move_dir = 0
     if is_moving_leftward then
         cur_move_dir = -1
@@ -312,38 +333,49 @@ end
 ---------------------------------------------------------------------------------------------------
 ---other events
 
+---teleport player to a position instantly without transition effects (transition may be different for each player)
+---@param x number x coordinate of position to teleport to
+---@param y number y coordinate of position to teleport to
+function M:teleportTo(x, y)
+    self.x, self.y = x, y
+end
+
+function M:onMiss()
+    self.num_life = self.num_life - 1
+    if self.num_life < 0 then
+        self:endCurrentSession()
+    end
+end
+
 ---respawn a new player, replace the old one;
 ---update the player reference in stage object
-function PlayerBase:respawn()
+function M:respawn()
     local Player = self.class
-    local new_player = Player(self.stage)
-    local spawn_time = PlayerBase.const.spawn_time
-    local spawn_speed = PlayerBase.const.spawn_speed
-    new_player.x = PlayerBase.const.spawn_x
-    new_player.y = PlayerBase.const.spawn_y - spawn_speed * spawn_time
-    new_player.spawn_counter = PlayerBase.const.spawn_time
-    new_player.invincibility_timer = PlayerBase.const.spawn_protect_time
+    local new_player = Player(self.stage, self)
+    local spawn_time = M.const.spawn_time
+    local spawn_speed = M.const.spawn_speed
+    local x = M.const.spawn_x
+    local y = M.const.spawn_y - spawn_speed * spawn_time
+    new_player:teleportTo(x, y)
+    new_player.spawn_counter = M.const.spawn_time
+    new_player.invincibility_timer = M.const.spawn_protect_time
     self.stage:setPlayer(new_player)
 
     Del(self)
 end
 
-function PlayerBase:onMiss()
-    self:endCurrentSession()
-end
-
 ---if the player is hit but miss counter has not reached 0, cancel the miss counter
-function PlayerBase:saveFromMiss()
+function M:saveFromMiss()
     self.miss_counter = nil
 end
 
-function PlayerBase:endCurrentSession()
+function M:endCurrentSession()
     local current_stage = self.stage
     local callbacks = require("BHElib.scenes.stage.stage_transition_callbacks")
     current_stage:transitionWithCallback(callbacks.restartStageAndKeepRecording)
 end
 
-function PlayerBase:colli(other)
+function M:colli(other)
     local other_group = other.group
     if other_group == GROUP_ENEMY or other_group == GROUP_ENEMY_BULLET or other_group == GROUP_INDES then
         if other_group == GROUP_ENEMY_BULLET then
@@ -358,6 +390,6 @@ function PlayerBase:colli(other)
     end
 end
 
-Prefab.Register(PlayerBase)
+Prefab.Register(M)
 
-return PlayerBase
+return M

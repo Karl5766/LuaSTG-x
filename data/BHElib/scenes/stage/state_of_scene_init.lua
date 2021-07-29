@@ -10,7 +10,7 @@
 ---@class GameSceneInitState
 local InitState = LuaClass("scenes.GameSceneInitState")
 
-local PlayerBase = require("BHElib.units.player.player_class")
+local PlayerBase = require("BHElib.units.player.player_prefab")
 local _player_const = PlayerBase.const
 
 ---create and return a default init state
@@ -22,8 +22,8 @@ function InitState.__create()
     self.player_init_state = {
         x = _player_const.spawn_x,
         y = _player_const.spawn_y,
-        num_life = 1,
-        num_bomb = 1,
+        num_life = 0,
+        num_bomb = 0,
     }
     self.init_score = 0
 

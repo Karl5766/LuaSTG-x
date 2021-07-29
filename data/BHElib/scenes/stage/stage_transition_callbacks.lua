@@ -80,8 +80,9 @@ function _callbacks.restartStageAndKeepRecording(stage)
 
     next_init_state.random_seed = ran:Int(0, 65535)
     next_init_state.score = stage:getScore()  -- set the start score of next stage the same as the current score
-    next_init_state.player_init_state.x = player_x
-    next_init_state.player_init_state.y = player_y
+    local player_init_state = next_init_state.player_init_state
+    player_init_state.x = player_x
+    player_init_state.y = player_y
 
     -- update the scene group
     local scene_group = stage.scene_group

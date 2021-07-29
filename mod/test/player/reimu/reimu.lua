@@ -5,7 +5,7 @@
 ---------------------------------------------------------------------------------------------------
 
 local Prefab = require("core.prefab")
-local PlayerBase = require("BHElib.units.player.player_class")
+local PlayerBase = require("BHElib.units.player.player_prefab")
 
 ---@class ReimuPlayer:PlayerBase
 local M = Prefab.NewX(PlayerBase, "units.player.reimu")
@@ -15,14 +15,17 @@ local ReimuSupport = require("player.reimu.reimu_support")
 
 ---------------------------------------------------------------------------------------------------
 
-function M:init(stage)
+---@param stage Stage
+---@param spawning_player Prefab.Player
+function M:init(stage, spawning_player)
     PlayerBase.init(
             self,
             Input,
             8,
             4.5,
             2,
-            stage)
+            stage,
+            spawning_player)
     self.support = ReimuSupport(self.stage, self, "image:reimu_support")
 end
 
@@ -141,15 +144,18 @@ end
 
 function M:processBombInput(player_input)
     if self.bomb_cooldown_timer <= 0 and player_input:isAnyRecordedKeyDown("spell") then
-        self:saveFromMiss()
-        require("BHElib.screen_effect"):shakePlayfield(
-                self.stage,
-                3,
-                180,
-                3)
-        require("player.reimu.reimu_bomb"):bomb(self, self.stage)
-        self.bomb_cooldown_timer = 480
-        self:increaseInvincibilityTimerTo(510)
+        if self.num_bomb > 0 then
+            self.num_bomb = self.num_bomb - 1
+            self:saveFromMiss()
+            require("BHElib.screen_effect"):shakePlayfield(
+                    self.stage,
+                    3,
+                    180,
+                    3)
+            require("player.reimu.reimu_bomb"):bomb(self, self.stage)
+            self.bomb_cooldown_timer = 480
+            self:increaseInvincibilityTimerTo(510)
+        end
     end
 end
 
@@ -159,6 +165,13 @@ end
 function M:render()
     PlayerBase.render(self)
     self.support:render()
+end
+
+---------------------------------------------------------------------------------------------------
+
+function M:teleportTo(x, y)
+    self.support:setPosition(x, y)
+    PlayerBase.teleportTo(self, x, y)
 end
 
 

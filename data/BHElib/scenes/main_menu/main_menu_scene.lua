@@ -85,6 +85,8 @@ function M:createNextAndCleanupCurrentScene()
         -- use default settings
         group_init_state = table.deepcopy(M.default_group_init_state)
         scene_init_state = SceneInitState()
+        scene_init_state.player_init_state.num_life = 2
+        scene_init_state.player_init_state.num_bomb = 3
         scene_init_state.random_seed = ((os.time() % 65536) * 877) % 65536
     end
     -- modify status that is not the same as when the replay is recorded
@@ -120,7 +122,7 @@ end
 local hud_painter = require("BHElib.ui.hud_painter")
 function M:render()
     GameScene.render(self)
-    hud_painter.drawHudBackground(
+    hud_painter:drawHudBackground(
             "image:menu_hud_background",
             1.3
     )

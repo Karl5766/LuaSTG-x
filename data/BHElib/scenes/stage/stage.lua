@@ -74,8 +74,15 @@ function Stage:setPlayer(player)
     self.player = player
 end
 
+---@return Prefab.Player the (unique) player of the stage
 function Stage:getPlayer()
     return self.player
+end
+
+---@return number, number the number of initial player life and bombs
+function Stage:getInitPlayerResources()
+    local player_init_state = self.scene_init_state.player_init_state
+    return player_init_state.num_life, player_init_state.num_bomb
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -96,7 +103,7 @@ function Stage:createScene()
 
     -- init player
     local Player = Ustorage:getById(group_init_state.player_class_id)
-    local player = Player(self)
+    local player = Player(self, nil)
     player.x = player_init_state.x
     player.y = player_init_state.y
     self.player = player
@@ -139,11 +146,14 @@ local _hud_painter = require("BHElib.ui.hud_painter")
 ---render stage hud
 function Stage:render()
     GameScene.render(self)
-    _hud_painter.draw(
+    _hud_painter:draw(
             "image:menu_hud_background",
             1.3,
             "image:white"
     )
+
+    -- there can be multiple players exist, so use the interface that returns the unique player
+    _hud_painter:drawPlayerResources(self:getPlayer())
 end
 
 ---update recorded device input for replay

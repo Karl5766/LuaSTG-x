@@ -50,7 +50,7 @@ end
 local _hud_painter = require("BHElib.ui.hud_painter")
 function SampleStage:render()
     Stage.render(self)
-    _hud_painter.drawKeys()
+    _hud_painter:drawKeys()
 end
 
 
