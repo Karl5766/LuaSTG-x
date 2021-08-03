@@ -1,7 +1,7 @@
 ---------------------------------------------------------------------------------------------------
 ---hud.lua
 ---desc: Implementation of stg HUD rendering
----references: -x/src/game/stage_ui.lua -x/src/game/after_load.lua
+---references: -x/src/game/stage_ui.lua -x/src/game/after_load.lua THlib/ui/ui.lua
 ---modifier:
 ---     Karl, 2021.2.18, split from after_load.lua
 ---------------------------------------------------------------------------------------------------
@@ -83,7 +83,52 @@ end
 
 ---------------------------------------------------------------------------------------------------
 
-function M:draw(img_background, background_scale, img_border)
+---使用RenderText渲染分数
+---@param font_name string
+---@param score number
+---@param x number
+---@param y number
+---@param size number
+---@param align string
+local function DisplayScore(font_name, score, x, y, size, align)
+    local format_str = "%d"
+    local three_digits = {}
+    if score >= 100000000000 then
+        format_str = "99,999,999,999"
+    else
+        local i = 1
+        while score >= 1000 do
+            local cur_section = int(score % 1000)
+            three_digits[i] = cur_section
+            score = math.floor(score / 1000)
+            i = i + 1
+            format_str = format_str..",%03d"
+        end
+        three_digits[i] = int(score % 1000)
+        -- reverse the array
+        for j = 1, math.floor(i / 2) do
+            local k = i + 1 - j
+            local temp = three_digits[k]
+            three_digits[k] = three_digits[j]
+            three_digits[j] = temp
+        end
+    end
+    RenderText(font_name, string.format(format_str, unpack(three_digits)), x, y, size, align)
+end
+
+---@param stage Stage
+---@param font_name string
+function M:drawScore(stage, font_name)
+    DisplayScore(
+            font_name,
+            stage:getScore(),
+            622,
+            414,
+            0.43,
+            "right")
+end
+
+function M:drawPlayfieldOutlineWithBackground(img_background, background_scale, img_border)
     scr.setRenderView("ui")
 
     _timer = _timer + 1
@@ -112,7 +157,7 @@ end
 local _input = require("BHElib.input.input_and_recording")
 local _coordinates = require("BHElib.coordinates_and_screen")
 
-function M.drawKeys()
+function M:drawKeys()
     local distance = 50
     local offsets = {
         {0, 0},
@@ -142,11 +187,11 @@ function M.drawKeys()
             Render("image:button_normal", x, y, 0, 1, 1)
         end
         local text_y = y + 14
-        RenderTTF("font:menu", key_name, x, x, text_y, text_y, text_color, "center")
+        RenderTTF("font:test", key_name, x, x, text_y, text_y, text_color, "center")
     end
     do
         local x, text_y = normal_pos[1] + distance, normal_pos[2] - distance * 0.5
-        RenderTTF("font:menu", "device input", x, x, text_y, text_y, comment_color, "center")
+        RenderTTF("font:test", "device input", x, x, text_y, text_y, comment_color, "center")
     end
 
     for i = 1, 4 do
@@ -161,29 +206,29 @@ function M.drawKeys()
         end
         local color = Color(255, 60, 60, 60)
         local text_y = y + 14
-        RenderTTF("font:menu", key_name, x, x, text_y, text_y, text_color, "center")
+        RenderTTF("font:test", key_name, x, x, text_y, text_y, text_color, "center")
     end
     do
         local x, text_y = replay_pos[1] + distance, replay_pos[2] - distance * 0.5
-        RenderTTF("font:menu", "recorded input", x, x, text_y, text_y, comment_color, "center")
+        RenderTTF("font:test", "recorded input", x, x, text_y, text_y, comment_color, "center")
     end
 
     --mouse text
     do
         local x, y = _input:getMousePositionInUI()
         if _input:isMousePressed() then
-            RenderTTF("font:menu", "mouse pressed", x, x, y, y, comment_color, "left")
+            RenderTTF("font:test", "mouse pressed", x, x, y, y, comment_color, "left")
         else
-            RenderTTF("font:menu", "mouse", x, x, y, y, comment_color, "left")
+            RenderTTF("font:test", "mouse", x, x, y, y, comment_color, "left")
         end
     end
     do
         local x, y = _input:getRecordedMousePositionInUI()
         y = y - 20
         if _input:isRecordedMousePressed() then
-            RenderTTF("font:menu", "mouse pressed (recorded)", x, x, y, y, comment_color, "left")
+            RenderTTF("font:test", "mouse pressed (recorded)", x, x, y, y, comment_color, "left")
         else
-            RenderTTF("font:menu", "mouse (recorded)", x, x, y, y, comment_color, "left")
+            RenderTTF("font:test", "mouse (recorded)", x, x, y, y, comment_color, "left")
         end
     end
 end
@@ -223,13 +268,14 @@ local function DisplayResource(
 end
 
 ---@param player Prefab.Player
-function M:drawPlayerResources(player)
+---@param font_name string
+function M:drawPlayerResources(player, font_name)
     local base_x = 520
     local base_y = 344
     local dx = 13
     local dy = 0
 
-    local num_life, num_bomb = player:getPlayerResources()
+    local num_life, num_bomb, num_graze = player:getPlayerResources()
     local max_display_num = 8
     DisplayResource(
             "image:icon_life",
@@ -249,6 +295,13 @@ function M:drawPlayerResources(player)
             dy,
             num_bomb,
             max_display_num)
+    RenderText(
+            font_name,
+            tostring(num_graze),
+            636,
+            262,
+            0.4,
+            "right")
 end
 
 return M

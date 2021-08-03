@@ -65,8 +65,15 @@ function Stage:isReplay()
     return self.replay_io_manager:isReplay()
 end
 
+---@return number self.score
 function Stage:getScore()
     return self.score
+end
+
+---increase the score by a number
+---@param inc_score number
+function Stage:addScore(inc_score)
+    self.score = self.score + inc_score
 end
 
 ---@param player PlayerBase the player of this stage
@@ -82,7 +89,7 @@ end
 ---@return number, number the number of initial player life and bombs
 function Stage:getInitPlayerResources()
     local player_init_state = self.scene_init_state.player_init_state
-    return player_init_state.num_life, player_init_state.num_bomb
+    return player_init_state.num_life, player_init_state.num_bomb, player_init_state.num_graze
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -146,14 +153,14 @@ local _hud_painter = require("BHElib.ui.hud_painter")
 ---render stage hud
 function Stage:render()
     GameScene.render(self)
-    _hud_painter:draw(
+    _hud_painter:drawPlayfieldOutlineWithBackground(
             "image:menu_hud_background",
             1.3,
-            "image:white"
-    )
+            "image:white")
 
     -- there can be multiple players exist, so use the interface that returns the unique player
-    _hud_painter:drawPlayerResources(self:getPlayer())
+    _hud_painter:drawPlayerResources(self:getPlayer(), "font:test")
+    _hud_painter:drawScore(self, "font:test")
 end
 
 ---update recorded device input for replay

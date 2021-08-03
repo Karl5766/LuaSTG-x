@@ -98,8 +98,7 @@ function M:initAnimation()
                 image_num,
                 colli_a,
                 colli_b,
-                false
-        )
+                false)
     end
 end
 
@@ -124,7 +123,7 @@ function M:processAttackInput(player_input)
 
             local offset_x = -9
             for i = 1, 2 do
-                _shoot.createPlayerBulletS(
+                _shoot.createPlayerBullet(
                         img,
                         cancel_img,
                         attack,

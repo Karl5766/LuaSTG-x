@@ -36,14 +36,14 @@ local function MainScript(dialogue)
     coroutine.yield()
     dialogue:say("change to same state", "Nue")
     coroutine.yield()
-    dialogue:addPortrait(Nue2, "Nue2")
-    coroutine.yield()
-    for i = 1, 30 do
-        dialogue:say(
-                "multiple lines:"..i,
-                ({"Nue", "Nue2"})[ran:Int(1, 2)])
-        coroutine.yield()
-    end
+    --dialogue:addPortrait(Nue2, "Nue2")
+    --coroutine.yield()
+    --for i = 1, 30 do
+    --    dialogue:say(
+    --            "multiple lines:"..i,
+    --            ({"Nue", "Nue2"})[ran:Int(1, 2)])
+    --    coroutine.yield()
+    --end
 end
 
 function M.__create()

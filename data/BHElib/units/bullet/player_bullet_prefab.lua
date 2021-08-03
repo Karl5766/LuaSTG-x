@@ -19,8 +19,12 @@ local M = Prefab.NewX(Prefab.Object)
 function M:createCancelEffect()
 end
 
+function M:kill()
+    self:createCancelEffect()
+end
+
 ---------------------------------------------------------------------------------------------------
----player bullet prefab
+---init
 
 ---@param attack number numeric value of the damage towards enemies
 ---@param del_on_colli boolean
@@ -32,17 +36,18 @@ function M:init(attack, del_on_colli)
     self.colli_flag = false  -- deal with multiple collisions in a single frame; set to true at the first collision
 end
 
----called by enemy colli function
-function M:onEnemyCollision(enemy)
-    if self.colli_flag == false and self.del_on_colli then
-        self:createCancelEffect()
-        Kill(self)
-        self.colli_flag = true
-    end
-end
+---------------------------------------------------------------------------------------------------
+---collision events
 
-function M:getAttack()
-    return self.attack
+function M:onEnemyCollision(other)
+    if self.colli_flag == false then
+        other:receiveDamage(self.attack)
+
+        if self.del_on_colli then
+            Kill(self)
+            self.colli_flag = true
+        end
+    end
 end
 
 Prefab.Register(M)

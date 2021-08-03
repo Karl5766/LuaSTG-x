@@ -119,10 +119,10 @@ function M:update(dt)
     self.menu_manager:update(dt)
 end
 
-local hud_painter = require("BHElib.ui.hud_painter")
+local _hud_painter = require("BHElib.ui.hud_painter")
 function M:render()
     GameScene.render(self)
-    hud_painter:drawHudBackground(
+    _hud_painter:drawHudBackground(
             "image:menu_hud_background",
             1.3
     )

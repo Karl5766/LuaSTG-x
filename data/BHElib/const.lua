@@ -5,8 +5,7 @@ GROUP_ENEMY_BULLET    = 1
 GROUP_ENEMY           = 2
 GROUP_PLAYER_BULLET   = 3
 GROUP_PLAYER          = 4
-GROUP_INDES           = 5
-GROUP_ITEM            = 6
+GROUP_ITEM            = 5
 GROUP_ALL             = 16
 GROUP_NUM_OF_GROUP    = 16
 

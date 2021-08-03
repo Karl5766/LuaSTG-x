@@ -37,15 +37,14 @@ local Render = Render  -- render arbitrary images
 
 ---initial x, y position are not included in the parameter list since sometimes it is more
 ---convenient to use tools like tasks to initialize the position
+---@param bullet_type_name string E.g. "ball"
 ---@param color_index number indicate color of the bullet
 function M:init(bullet_type_name, color_index, group, blink_time, size)
-
-    self.group = GROUP_GHOST
-
     self.group = group
     self.bullet_type_name = bullet_type_name
     self.color_index = color_index
     self.effect_size = size
+    self.grazed = false
 
     if blink_time then
         self.img = color_index_to_blink_effects[color_index]
@@ -93,7 +92,7 @@ function M:changeSpriteTo(bullet_type_name, color_index)
     self.img = bullet_type_to_info[bullet_type_name].color_to_sprite_name[color_index]
 end
 
-local function CreateCancelEffect(bullet)
+function M:createCancelEffect()
     local exist_time = 23
     local cancel = BulletCancelEffect(exist_time)
     cancel.x = self.x
@@ -108,8 +107,28 @@ local function CreateCancelEffect(bullet)
     cancel.vscale = size
 end
 
-M.del = CreateCancelEffect
-M.kill = CreateCancelEffect
+function M:del()
+    self:createCancelEffect()
+end
+function M:kill()
+    self:createCancelEffect()
+end
+
+---------------------------------------------------------------------------------------------------
+---collision events
+
+function M:onPlayerCollision(other)
+    if self.destroyable then
+        Del(self)
+    end
+end
+
+function M:onPlayerGrazeObjectCollision(other)
+    if self.grazed == false then
+        other:graze(self)
+        self.grazed = true
+    end
+end
 
 Prefab.Register(M)
 

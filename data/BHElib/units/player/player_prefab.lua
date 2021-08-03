@@ -11,6 +11,7 @@ local M = Prefab.NewX(Prefab.Object)
 
 local ClockedAnimation = require("BHElib.units.clocked_animation")
 local Coordinates = require("BHElib.coordinates_and_screen")
+local PlayerGrazeObject = require("BHElib.units.player.player_graze_object_prefab")
 
 ---------------------------------------------------------------------------------------------------
 ---cache variables and functions
@@ -73,6 +74,8 @@ function M:init(
 
     self.player_input = player_input
     self.stage = stage
+    self.graze_object = PlayerGrazeObject(100, self)
+    print("init:"..tostring(self.graze_object.group))
 
     self.unfocused_speed = unfocused_speed
     self.focused_speed = focused_speed
@@ -80,17 +83,28 @@ function M:init(
     self.spawn_counter = 0
     self.bomb_cooldown_timer = 0
 
-    local num_life, num_bomb
+    local num_life, num_bomb, num_graze
     if spawning_player then
-        num_life = spawning_player.num_life
-        num_bomb = spawning_player.num_bomb
+        num_life, num_bomb, num_graze = spawning_player:getPlayerResources()
     else
-        num_life, num_bomb = stage:getInitPlayerResources()
+        num_life, num_bomb, num_graze = stage:getInitPlayerResources()
     end
     assert(num_life and num_bomb, "Error:Invalid player resources!")
+
     self.num_life = num_life
     self.num_bomb = num_bomb
+    self.num_graze = num_graze
 end
+
+---------------------------------------------------------------------------------------------------
+---deletion
+
+local function Cleanup(self)
+    Del(self.graze_object)
+end
+
+M.del = Cleanup
+M.kill = Cleanup
 
 ---------------------------------------------------------------------------------------------------
 ---setters and getters
@@ -100,6 +114,10 @@ function M:getPlayerInput()
     return self.player_input
 end
 
+function M:getStage()
+    return self.stage
+end
+
 ---@param time number the time to increase to if less (in number of frames)
 function M:increaseInvincibilityTimerTo(time)
     if time > self.invincibility_timer then
@@ -107,8 +125,18 @@ function M:increaseInvincibilityTimerTo(time)
     end
 end
 
+---@param inc_graze number the number of graze to increase
+function M:addGraze(inc_graze)
+    self.num_graze = self.num_graze + inc_graze
+end
+
+function M:getGraze()
+    return self.num_graze
+end
+
+---@return number,number,number number of life, bomb and graze
 function M:getPlayerResources()
-    return self.num_life, self.num_bomb
+    return self.num_life, self.num_bomb, self.num_graze
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -128,13 +156,18 @@ function M:frame()
         self.spawn_counter = max(0, self.spawn_counter - 1)
     end
 
+    local graze_object = self.graze_object
+    print(graze_object.group)
+    graze_object.x = self.x
+    graze_object.y = self.y
+
     self.invincibility_timer = max(0, self.invincibility_timer - 1)
     self.bomb_cooldown_timer = max(0, self.bomb_cooldown_timer - 1)
 
-    self:updateMissStatus()
+    self:updateDeathStatus()
 end
 
-function M:updateMissStatus()
+function M:updateDeathStatus()
     if self.miss_counter ~= nil then
         self.miss_counter = max(0, self.miss_counter - 1)
         if self.miss_counter == 0 then
@@ -331,6 +364,26 @@ function M:updateSpriteByMovement(is_moving_rightward, is_moving_leftward)
 end
 
 ---------------------------------------------------------------------------------------------------
+---collision events
+
+---trigger player miss if the player is not invincible and if the miss is not already triggered;
+---the miss takes place with a time offset (in which mechanics like deathbombing can be activated)
+function M:getHit()
+    if self.invincibility_timer == 0 and self.miss_counter == nil then
+        PlaySound("pldead00", 0.5, 0, true)
+        self.miss_counter = 12
+    end
+end
+
+function M:colli(other)
+    local on_player_collision = other.onPlayerCollision
+    if on_player_collision then
+        on_player_collision(other, self)
+    end
+    self:getHit()
+end
+
+---------------------------------------------------------------------------------------------------
 ---other events
 
 ---teleport player to a position instantly without transition effects (transition may be different for each player)
@@ -373,21 +426,6 @@ function M:endCurrentSession()
     local current_stage = self.stage
     local callbacks = require("BHElib.scenes.stage.stage_transition_callbacks")
     current_stage:transitionWithCallback(callbacks.restartStageAndKeepRecording)
-end
-
-function M:colli(other)
-    local other_group = other.group
-    if other_group == GROUP_ENEMY or other_group == GROUP_ENEMY_BULLET or other_group == GROUP_INDES then
-        if other_group == GROUP_ENEMY_BULLET then
-            Del(other)
-        end
-
-        -- player miss
-        if self.invincibility_timer == 0 and self.miss_counter == nil then
-            PlaySound("pldead00", 0.5, 0, true)
-            self.miss_counter = 12
-        end
-    end
 end
 
 Prefab.Register(M)

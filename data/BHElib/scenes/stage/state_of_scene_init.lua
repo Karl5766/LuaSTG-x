@@ -24,6 +24,7 @@ function InitState.__create()
         y = _player_const.spawn_y,
         num_life = 0,
         num_bomb = 0,
+        num_graze = 0,
     }
     self.init_score = 0
 
@@ -38,6 +39,7 @@ local _player_init_state_float_fields = {
     "y",
     "num_life",
     "num_bomb",
+    "num_graze",
 }
 local _player_init_state_string_fields = {}
 

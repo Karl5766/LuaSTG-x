@@ -139,7 +139,6 @@ function DrawCollider()
     local x, y = 0, 0
     DrawGroupCollider(GROUP_ENEMY_BULLET, Color(150, 163, 73, 164), x, y)
     DrawGroupCollider(GROUP_ENEMY, Color(150, 163, 73, 164), x, y)
-    DrawGroupCollider(GROUP_INDES, Color(150, 163, 73, 20), x, y)
     DrawGroupCollider(GROUP_PLAYER, Color(100, 175, 15, 20), x, y)
 
     --DrawGroupCollider(GROUP_ITEM, Color(100, 175, 175, 175), x, y)

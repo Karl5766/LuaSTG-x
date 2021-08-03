@@ -39,7 +39,8 @@ function Orb:init(ix, iy, scale, circle_radius, circle_time, init_angle, slide_a
     self.img = "image:yinyang_orb"
     self.x, self.y = ix, iy
     self.layer = LAYER_ENEMY_BULLET - scale * 0.01
-    self.group = GROUP_INDES
+    self.group = GROUP_ENEMY_BULLET
+    self.bound = true
     self.hscale = scale
     self.vscale = scale
     self.a = scale * 6.15
@@ -114,6 +115,20 @@ function Spell:ctor()
 
     local boss_y = boss.y
 
+    task.New(self, function()
+        local a = 0
+        while true do
+            local Bullet = require("BHElib.units.bullet.bullet_prefab")
+            local bullet = Bullet("ball", COLOR_BLUE, GROUP_ENEMY_BULLET, 12, 1)
+            bullet.x = boss.x
+            bullet.y = boss.y
+            local r = 3
+            bullet.vx = r * cos(a)
+            bullet.vy = r * sin(a)
+            a = a + 3
+            task.Wait(1)
+        end
+    end)
     task.New(self, function()
         boss:move(60, -boss.x, 120 - boss.y, boss.x > 0, self)
         task.Wait(120)

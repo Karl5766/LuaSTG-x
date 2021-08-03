@@ -9,11 +9,11 @@
 local Prefab = require("core.prefab")
 
 ---@class Prefab.EnemyHitbox:Prefab.Object
-local EnemyHitbox = Prefab.NewX(Prefab.Object)
+local M = Prefab.NewX(Prefab.Object)
 
 ---------------------------------------------------------------------------------------------------
 
-function EnemyHitbox:init(radius, hp)
+function M:init(radius, hp)
     self.group = GROUP_ENEMY
     self.bound = false
     self.a = radius
@@ -23,26 +23,35 @@ function EnemyHitbox:init(radius, hp)
     self.damage_multiplier = 1
 end
 
-function EnemyHitbox:setDamageMultiplier(damage_multiplier)
-    self.damage_multiplier = damage_multiplier
-end
-
-function EnemyHitbox:getDamageMultiplier()
-    return self.damage_multiplier
-end
-
-function EnemyHitbox:colli(other)
-    if other.onEnemyCollision then
-        other:onEnemyCollision(self)
-
-        self.hp = self.hp - other:getAttack() * self.damage_multiplier
-    end
-
+function M:frame()
     if self.hp <= 0 then
         Kill(self)
     end
 end
 
-Prefab.Register(EnemyHitbox)
+function M:setDamageMultiplier(damage_multiplier)
+    self.damage_multiplier = damage_multiplier
+end
 
-return EnemyHitbox
+function M:getDamageMultiplier()
+    return self.damage_multiplier
+end
+
+---@param attack number value of damage received
+function M:receiveDamage(attack)
+    self.hp = self.hp - attack * self.damage_multiplier
+end
+
+---------------------------------------------------------------------------------------------------
+---collision events
+
+function M:colli(other)
+    local on_enemy_collision = other.onEnemyCollision
+    if on_enemy_collision then
+        on_enemy_collision(other, self)
+    end
+end
+
+Prefab.Register(M)
+
+return M
