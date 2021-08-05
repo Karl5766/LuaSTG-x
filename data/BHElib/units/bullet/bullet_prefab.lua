@@ -39,12 +39,17 @@ local Render = Render  -- render arbitrary images
 ---convenient to use tools like tasks to initialize the position
 ---@param bullet_type_name string E.g. "ball"
 ---@param color_index number indicate color of the bullet
-function M:init(bullet_type_name, color_index, group, blink_time, size)
+---@param group number
+---@param blink_time number persist time of blinking effect
+---@param destroyable boolean whether this bullet is destroyable in collision with a player
+function M:init(bullet_type_name, color_index, group, blink_time, size, destroyable)
+    self.bound = true
     self.group = group
     self.bullet_type_name = bullet_type_name
     self.color_index = color_index
     self.effect_size = size
     self.grazed = false
+    self.destroyable = destroyable
 
     if blink_time then
         self.img = color_index_to_blink_effects[color_index]
@@ -98,7 +103,7 @@ function M:createCancelEffect()
     cancel.x = self.x
     cancel.y = self.y
     cancel.layer = LAYER_BULLET_CANCEL
-    self.img = color_index_to_cancel_effects[self.color_index]
+    cancel.img = color_index_to_cancel_effects[self.color_index]
 
     -- randomizing size and rotation of the cancel effect
     cancel.rot = ran:Float(0, 360)

@@ -119,9 +119,10 @@ function Spell:ctor()
         local a = 0
         while true do
             local Bullet = require("BHElib.units.bullet.bullet_prefab")
-            local bullet = Bullet("ball", COLOR_BLUE, GROUP_ENEMY_BULLET, 12, 1)
+            local bullet = Bullet("ball", COLOR_BLUE, GROUP_ENEMY_BULLET, 12, 1, true)
             bullet.x = boss.x
             bullet.y = boss.y
+            bullet.bound = true
             local r = 3
             bullet.vx = r * cos(a)
             bullet.vy = r * sin(a)

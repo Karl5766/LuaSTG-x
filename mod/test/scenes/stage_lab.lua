@@ -142,13 +142,12 @@ local _hud_painter = require("BHElib.ui.hud_painter")
 function M:render()
     Stage.render(self)
     do
-        local color = Color(255, 255, 255, 255)
-        local x, y = 620, 440
-        RenderTTF("font:menu", "Time", x, x, y, y, color, "center")
-        x, y = 660, 440
-        RenderTTF("font:menu", tostring(math.floor(self.timer / 60)), x, x, y, y, color, "left")
+        local x, y = 720, 160
+        RenderText("font:test",
+                string.format("Time:%d", tostring(math.floor(self.timer / 60))),
+                x, y, 0.4, "right")
     end
-    _hud_painter:drawPerfromanceProfile("font:menu")
+    --_hud_painter:drawPerfromanceProfile("font:menu")
     _hud_painter:drawKeys()
 end
 

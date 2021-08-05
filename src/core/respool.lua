@@ -1088,18 +1088,32 @@ end
 ---
 ---@~english Render an image. Will be affected by the global scale factor.
 ---
----@param name string 图像资源名
+---@param name string 图像资源名 | name of the image
 ---@param x number
 ---@param y number 图像中心位置 | specifies center position.
 ---@param rot number 旋转角度（角度），默认为`0` | specifies rotation in radians. Default is `0`.
 ---@param hscale number 水平缩放，默认为`1` | specifies horizontal scale.
 ---@param vscale number 垂直缩放，默认为`hscale` | specifies verticle scale. Will be same as `hscale` if only `hscale` is assigned.
----@param z number Z值，默认为0.5 | specifies z position.
+---@param z number Z值，默认为0.5 | specifies z position, default to 0.5.
 function Render(name, x, y, rot, hscale, vscale, z)
     hscale = hscale or 1
     vscale = vscale or hscale
     local factor = GetImageScale()
     FindResSprite(name):render(x, y, rot or 0, hscale * factor, vscale * factor, z or 0.5)
+end
+
+---Render() function but with rot omitted to 0
+---@param name string 图像资源名 | name of the image
+---@param x number
+---@param y number 图像中心位置 | specifies center position.
+---@param hscale number 水平缩放，默认为`1` | specifies horizontal scale.
+---@param vscale number 垂直缩放，默认为`hscale` | specifies verticle scale. Will be same as `hscale` if only `hscale` is assigned.
+---@param z number Z值，默认为0.5 | specifies z position, default to 0.5.
+function AlignedRender(name, x, y, hscale, vscale, z)
+    hscale = hscale or 1
+    vscale = vscale or hscale
+    local factor = GetImageScale()
+    FindResSprite(name):render(x, y, 0, hscale * factor, vscale * factor, z or 0.5)
 end
 
 ---@~chinese 在一个矩形范围渲染图像资源。此时z为`0.5`。

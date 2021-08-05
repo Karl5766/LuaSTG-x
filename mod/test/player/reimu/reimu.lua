@@ -103,6 +103,14 @@ function M:initAnimation()
 end
 
 ---------------------------------------------------------------------------------------------------
+---setters and getters
+
+---@return number
+function M:getPower()
+    return self.support:getPower()
+end
+
+---------------------------------------------------------------------------------------------------
 
 function M:frame()
     PlayerBase.frame(self)

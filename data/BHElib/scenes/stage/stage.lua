@@ -153,14 +153,10 @@ local _hud_painter = require("BHElib.ui.hud_painter")
 ---render stage hud
 function Stage:render()
     GameScene.render(self)
-    _hud_painter:drawPlayfieldOutlineWithBackground(
-            "image:menu_hud_background",
-            1.3,
-            "image:white")
+    _hud_painter:drawHudBackground("image:menu_hud_background", 1.3)
 
     -- there can be multiple players exist, so use the interface that returns the unique player
-    _hud_painter:drawPlayerResources(self:getPlayer(), "font:test")
-    _hud_painter:drawScore(self, "font:test")
+    _hud_painter:drawResources(self, "font:test")
 end
 
 ---update recorded device input for replay

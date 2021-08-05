@@ -83,58 +83,10 @@ end
 
 ---------------------------------------------------------------------------------------------------
 
----使用RenderText渲染分数
----@param font_name string
----@param score number
----@param x number
----@param y number
----@param size number
----@param align string
-local function DisplayScore(font_name, score, x, y, size, align)
-    local format_str = "%d"
-    local three_digits = {}
-    if score >= 100000000000 then
-        format_str = "99,999,999,999"
-    else
-        local i = 1
-        while score >= 1000 do
-            local cur_section = int(score % 1000)
-            three_digits[i] = cur_section
-            score = math.floor(score / 1000)
-            i = i + 1
-            format_str = format_str..",%03d"
-        end
-        three_digits[i] = int(score % 1000)
-        -- reverse the array
-        for j = 1, math.floor(i / 2) do
-            local k = i + 1 - j
-            local temp = three_digits[k]
-            three_digits[k] = three_digits[j]
-            three_digits[j] = temp
-        end
-    end
-    RenderText(font_name, string.format(format_str, unpack(three_digits)), x, y, size, align)
-end
-
----@param stage Stage
----@param font_name string
-function M:drawScore(stage, font_name)
-    DisplayScore(
-            font_name,
-            stage:getScore(),
-            622,
-            414,
-            0.43,
-            "right")
-end
-
-function M:drawPlayfieldOutlineWithBackground(img_background, background_scale, img_border)
+function M:drawPlayfieldOutline(img_border)
     scr.setRenderView("ui")
 
     _timer = _timer + 1
-
-    -- render the hud background
-    M:drawHudBackground(img_background, background_scale)
 
     -- render a thin rectangular border
     SetImageState(img_border, '', color.Red)
@@ -142,10 +94,10 @@ function M:drawPlayfieldOutlineWithBackground(img_background, background_scale, 
 
     local sprite_size = FindResSprite(img_border):getSprite():getContentSize()
     local ww, hh = sprite_size.width, sprite_size.height
-    Render(img_border, (l + r) / 2, t, 0, (r - l + 1) / ww, 2 / hh)
-    Render(img_border, (l + r) / 2, b, 0, (r - l + 1) / ww, 2 / hh)
-    Render(img_border, l, (t + b) / 2, 0, 2 / ww, (t - b + 1) / hh)
-    Render(img_border, r, (t + b) / 2, 0, 2 / ww, (t - b + 1) / hh)
+    AlignedRender(img_border, (l + r) / 2, t, (r - l + 1) / ww, 2 / hh)
+    AlignedRender(img_border, (l + r) / 2, b, (r - l + 1) / ww, 2 / hh)
+    AlignedRender(img_border, l, (t + b) / 2, 2 / ww, (t - b + 1) / hh)
+    AlignedRender(img_border, r, (t + b) / 2, 2 / ww, (t - b + 1) / hh)
     SetImageState(img_border, '', color.White)
 end
 
@@ -182,9 +134,9 @@ function M:drawKeys()
         local key_name = function_keys[i]
         local x, y = offset[1] + normal_pos[1], offset[2] + normal_pos[2]
         if _input:isAnyDeviceKeyDown(key_name) then
-            Render("image:button_pressed", x, y, 0, 1, 1)
+            AlignedRender("image:button_pressed", x, y)
         else
-            Render("image:button_normal", x, y, 0, 1, 1)
+            AlignedRender("image:button_normal", x, y)
         end
         local text_y = y + 14
         RenderTTF("font:test", key_name, x, x, text_y, text_y, text_color, "center")
@@ -200,9 +152,9 @@ function M:drawKeys()
         local key_name = function_keys[i]
         local x, y = offset[1] + replay_pos[1], offset[2] + replay_pos[2]
         if _input:isAnyRecordedKeyDown(key_name) then
-            Render("image:button_pressed", x, y, 0, 1, 1)
+            AlignedRender("image:button_pressed", x, y)
         else
-            Render("image:button_normal", x, y, 0, 1, 1)
+            AlignedRender("image:button_normal", x, y)
         end
         local color = Color(255, 60, 60, 60)
         local text_y = y + 14
@@ -234,7 +186,7 @@ function M:drawKeys()
 end
 
 function M:drawHudBackground(img_background, background_scale)
-    Render(img_background, 320, 240, 0, background_scale, background_scale)
+    AlignedRender(img_background, 320, 240, background_scale, background_scale)
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -249,6 +201,7 @@ end
 ---@param dy number y offset for each image afterwards
 ---@param num_resource number
 ---@param max_display_num number maximum number of images that can be displayed
+---@param scale number scale of the images
 local function DisplayResource(
         resource_image,
         resource_image_outline,
@@ -257,51 +210,163 @@ local function DisplayResource(
         dx,
         dy,
         num_resource,
-        max_display_num)
+        max_display_num,
+        scale)
     for i = 1, max_display_num do
         local cur_x, cur_y = x + dx * i, y + dy * i
-        Render(resource_image_outline, cur_x, cur_y, 0, 1, 1)
+        AlignedRender(resource_image_outline, cur_x, cur_y, scale)
         if num_resource >= i then
-            Render(resource_image, cur_x, cur_y, 0, 1, 1)
+            AlignedRender(resource_image, cur_x, cur_y, scale)
         end
     end
 end
 
----@param player Prefab.Player
+---add commas every three digits to separators large numbers
+---@param integer number a non-negative integer
+---@return string the number in string representation after adding separators
+local function AddThousandSeparator(integer)
+    local format_str = "%d"
+    local three_digits = {}
+    if integer >= 100000000000 then
+        format_str = "99,999,999,999"
+    else
+        local i = 1
+        while integer >= 1000 do
+            local cur_section = int(integer % 1000)
+            three_digits[i] = cur_section
+            integer = math.floor(integer / 1000)
+            i = i + 1
+            format_str = format_str..",%03d"
+        end
+        three_digits[i] = int(integer % 1000)
+        -- reverse the array
+        for j = 1, math.floor(i / 2) do
+            local k = i + 1 - j
+            local temp = three_digits[k]
+            three_digits[k] = three_digits[j]
+            three_digits[j] = temp
+        end
+    end
+    return string.format(format_str, unpack(three_digits))
+end
+
+---separate n% to its integer part and decimal part
+---@param n number a non-negative integer
+---@return string, string string representations of their integer and decimal parts
+local function GetPercentRepresentation(n)
+    local int_repr = tostring(int(n / 100))
+    local mant_repr = tostring(int(n % 100))  -- mantissa
+    if #mant_repr == 1 then
+        mant_repr = "0"..mant_repr
+    end
+    return int_repr, mant_repr
+end
+
+---display num%/max_num%
+---@param num number
+local function DisplayPercent(num, x, y)
+    local num_i, num_m = GetPercentRepresentation(num)
+
+    local font_name = "font:test"
+
+    -- render different sized fonts
+    RenderText(font_name,
+            string.format(" %s.", num_i),
+            x - 16, y, 0.4, "right")
+    RenderText(font_name,
+            string.format("        %s", num_m),
+            x, y - 3.5, 0.3, "right")
+end
+
+---@param stage Stage
 ---@param font_name string
-function M:drawPlayerResources(player, font_name)
-    local base_x = 520
-    local base_y = 344
+function M:drawResources(stage, font_name)
+    -- left and right boundaries
+    local left_x = 515
+    local right_x = 720
+    local middle_x = 620  -- where the lines are centered
+
+    local base_y = 434  -- base y position
+    local relative_y = base_y  -- descend this number as drawing goes on from top to bottom
+
     local dx = 13
     local dy = 0
+    local player = stage:getPlayer()
 
     local num_life, num_bomb, num_graze = player:getPlayerResources()
     local max_display_num = 8
+
+    AlignedRender("image:icon_normal_title", middle_x, relative_y, 0.7)
+
+    relative_y = relative_y - 40
+
+    AlignedRender("image:icon_hiscore_title", left_x, relative_y, 1.05)
+    RenderText(font_name,
+            AddThousandSeparator(stage:getScore()),
+            right_x,
+            relative_y,
+            0.43,
+            "right")
+    AlignedRender("image_array:icon_line1", middle_x, relative_y - 20, 1.05)
+
+    relative_y = relative_y - 40
+
+    AlignedRender("image:icon_score_title", left_x, relative_y, 1.05)
+    RenderText(font_name,
+            AddThousandSeparator(stage:getScore()),
+            right_x,
+            relative_y,
+            0.43,
+            "right")
+    AlignedRender("image_array:icon_line2", middle_x, relative_y - 20, 1.05)
+
+    relative_y = relative_y - 45
+
+    AlignedRender("image:icon_life_title", left_x, relative_y, 1)
     DisplayResource(
             "image:icon_life",
             "image:icon_life_outline",
-            base_x,
-            base_y,
+            left_x + 90,
+            relative_y - 4,
             dx,
             dy,
             num_life,
-            max_display_num)
+            max_display_num,
+            1.1)
+    AlignedRender("image_array:icon_line3", middle_x, relative_y - 20, 1.05)
+
+    relative_y = relative_y - 36
+
+    AlignedRender("image:icon_bomb_title", left_x, relative_y, 1.05)
     DisplayResource(
             "image:icon_bomb",
             "image:icon_bomb_outline",
-            base_x,
-            base_y - 48,
+            left_x + 90,
+            relative_y - 4,
             dx,
             dy,
             num_bomb,
-            max_display_num)
+            max_display_num,
+            1.1)
+    AlignedRender("image_array:icon_line4", middle_x, relative_y - 20, 1.05)
+
+    relative_y = relative_y - 50
+
+    AlignedRender("image:icon_power_title", left_x + 2, relative_y - 5, 0.85)
+    DisplayPercent(player:getPower(), right_x, relative_y)
+    AlignedRender("image_array:icon_line5", middle_x, relative_y - 20, 1.05)
+
+    relative_y = relative_y - 30
+
+    AlignedRender("image:icon_graze_title", left_x + 27, relative_y - 5, 0.85)
     RenderText(
             font_name,
             tostring(num_graze),
-            636,
-            262,
+            right_x,
+            relative_y,
             0.4,
             "right")
+    AlignedRender("image_array:icon_line7", middle_x, relative_y - 20, 1.05)
 end
 
 return M

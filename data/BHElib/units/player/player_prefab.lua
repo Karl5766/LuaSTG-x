@@ -74,8 +74,7 @@ function M:init(
 
     self.player_input = player_input
     self.stage = stage
-    self.graze_object = PlayerGrazeObject(100, self)
-    print("init:"..tostring(self.graze_object.group))
+    self.graze_object = PlayerGrazeObject(40, self)
 
     self.unfocused_speed = unfocused_speed
     self.focused_speed = focused_speed
@@ -99,12 +98,24 @@ end
 ---------------------------------------------------------------------------------------------------
 ---deletion
 
-local function Cleanup(self)
+---current only way for player to be deleted is through a respawn
+local function CleanupForRespawn(self)
+    self.cleanup_completed = true
+    Del(self)
+    self.graze_object.colli = false
     Del(self.graze_object)
 end
 
-M.del = Cleanup
-M.kill = Cleanup
+function M:del()
+    if not self.cleanup_completed then
+        error("Error: Attempt to call del() on player without cleanup!")
+    end
+end
+function M:kill()
+    if not self.cleanup_completed then
+        error("Error: Attempt to call kill() on player without cleanup!")
+    end
+end
 
 ---------------------------------------------------------------------------------------------------
 ---setters and getters
@@ -134,6 +145,11 @@ function M:getGraze()
     return self.num_graze
 end
 
+---@return number
+function M:getPower()
+    error("Error: getPower() called in base class!")
+end
+
 ---@return number,number,number number of life, bomb and graze
 function M:getPlayerResources()
     return self.num_life, self.num_bomb, self.num_graze
@@ -157,7 +173,6 @@ function M:frame()
     end
 
     local graze_object = self.graze_object
-    print(graze_object.group)
     graze_object.x = self.x
     graze_object.y = self.y
 
@@ -414,7 +429,7 @@ function M:respawn()
     new_player.invincibility_timer = M.const.spawn_protect_time
     self.stage:setPlayer(new_player)
 
-    Del(self)
+    CleanupForRespawn(self)
 end
 
 ---if the player is hit but miss counter has not reached 0, cancel the miss counter
