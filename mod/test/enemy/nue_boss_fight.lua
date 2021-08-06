@@ -4,10 +4,10 @@
 --- DateTime: 2021/6/1 23:29
 ---
 
-local BossFight = require("BHElib.units.boss.single_boss_fight")
+local SingleBossSession = require("BHElib.sessions.boss.single_boss_session")
 
----@class BossFight.Nue:BossFight.SingleBossWithSpell
-local M = LuaClass("boss_fight.Nue", BossFight)
+---@class BossSession.Nue:SingleBossSession
+local M = LuaClass("boss_fight.Nue", SingleBossSession)
 
 ---------------------------------------------------------------------------------------------------
 ---cache variables and functions
@@ -25,15 +25,24 @@ local _Dialogue1 = require("enemy.nue_dialogue")
 
 ---------------------------------------------------------------------------------------------------
 
+---@param self BossSession.Nue
+local function Script(self)
+    local boss = self.boss
+
+    self:setSession(_Dialogue1())
+    coroutine.yield()
+    self:setSession(_Spell1(boss))
+    coroutine.yield()
+end
+
 function M.__create()
     local spell_class_array = {
-        _Dialogue1,
         _Spell1,
     }
     local boss = _Animation()
     boss.x = -100
     boss.y = 300
-    local self = BossFight.__create(boss, spell_class_array)
+    local self = SingleBossSession.__create(boss, spell_class_array, Script)
     return self
 end
 

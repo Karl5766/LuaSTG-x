@@ -6,7 +6,7 @@
 ---     main menus
 ---------------------------------------------------------------------------------------------------
 
-local MenuManager = require("BHElib.scenes.menu.menu_manager")
+local MenuManager = require("BHElib.ui.menu.menu_manager")
 
 ---@class MainMenuManager:MenuManager
 local M = LuaClass("menu.MainMenuManager", MenuManager)

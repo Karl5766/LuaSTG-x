@@ -24,12 +24,12 @@
 local M = LuaClass("menu.MenuManager")
 
 -- require modules
-require("BHElib.scenes.menu.menu_page")
+require("BHElib.ui.menu.menu_page")
 
-local MenuPageArray = require("BHElib.scenes.menu.menu_page_array")
-local MenuPagePool = require("BHElib.scenes.menu.menu_page_pool")
+local MenuPageArray = require("BHElib.ui.menu.menu_page_array")
+local MenuPagePool = require("BHElib.ui.menu.menu_page_pool")
 
-local MenuConst = require("BHElib.scenes.menu.menu_const")
+local MenuConst = require("BHElib.ui.menu.menu_const")
 
 ---------------------------------------------------------------------------------------------------
 

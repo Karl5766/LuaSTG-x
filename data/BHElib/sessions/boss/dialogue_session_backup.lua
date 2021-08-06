@@ -5,7 +5,6 @@
 ---desc: Defines the in-game dialogue
 ---------------------------------------------------------------------------------------------------
 
----@class DialogueSession
 local M = LuaClass("session.Dialogue")
 
 local Renderer = require("BHElib.ui.renderer_prefab")

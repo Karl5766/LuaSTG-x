@@ -15,7 +15,7 @@ local SceneInitState = require("BHElib.scenes.stage.state_of_scene_init")
 local ReplayFileReader = require("BHElib.input.replay_file_reader")
 local FileStream = require("util.file_stream")
 
-local MenuConst = require("BHElib.scenes.menu.menu_const")
+local MenuConst = require("BHElib.ui.menu.menu_const")
 local Ustorage = require("util.universal_id")
 
 ---------------------------------------------------------------------------------------------------

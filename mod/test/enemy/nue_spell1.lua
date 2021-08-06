@@ -5,9 +5,9 @@
 ---
 
 local Prefab = require("core.prefab")
-local SpellBase = assert(require("BHElib.units.boss.spell_session"))
+local AttackSession = assert(require("BHElib.sessions.boss.attack_session"))
 
-local Spell = LuaClass("Nue.spell1", SpellBase)
+local M = LuaClass("Nue.spell1", AttackSession)
 
 local EnemyHitbox = require("BHElib.units.enemy.enemy_hitbox")
 
@@ -101,15 +101,15 @@ Prefab.Register(Orb)
 
 ---------------------------------------------------------------------------------------------------
 
-function Spell.__create(boss)
+function M.__create(boss)
     local hp = 720
     local hitbox = EnemyHitbox(16, hp)
-    local self = SpellBase.__create(boss, hitbox, 1500)
+    local self = AttackSession.__create(boss, hitbox, 1500)
 
     return self
 end
 
-function Spell:ctor()
+function M:ctor()
     ---@type RumiaAnimation
     local boss = self.boss
 
@@ -151,7 +151,7 @@ function Spell:ctor()
     end)
 end
 
-function Spell:fire(x, y, side)
+function M:fire(x, y, side)
 
     PlaySound("explode", 0.1, 0, true)
     local density = 1.2
@@ -186,7 +186,7 @@ function Spell:fire(x, y, side)
     end
 end
 
-function Spell:mouseFire(x, y, side)
+function M:mouseFire(x, y, side)
 
     PlaySound("explode", 0.1, 0, true)
     local density = 1.5
@@ -221,7 +221,7 @@ function Spell:mouseFire(x, y, side)
     end
 end
 
-function Spell:frame()
+function M:frame()
     task.Do(self)
 
     local Input = require("BHElib.input.input_and_recording")
@@ -234,7 +234,7 @@ function Spell:frame()
     end
 end
 
-function Spell:autoMove(l, r, b, t)
+function M:autoMove(l, r, b, t)
     ---@type RumiaAnimation
     local boss = self.boss
     local x_dir = ran:Sign()
@@ -254,4 +254,4 @@ function Spell:autoMove(l, r, b, t)
     boss:move(60, dx, dy, x_dir == -1, self)
 end
 
-return Spell
+return M

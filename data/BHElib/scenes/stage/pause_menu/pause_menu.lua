@@ -6,7 +6,7 @@
 ---desc: implements pause menu for stages
 ---------------------------------------------------------------------------------------------------
 
-local MenuManager = require("BHElib.scenes.menu.menu_manager")
+local MenuManager = require("BHElib.ui.menu.menu_manager")
 
 ---@class PauseMenuManager:MenuManager
 local M = LuaClass("menu.PauseMenuManager", MenuManager)

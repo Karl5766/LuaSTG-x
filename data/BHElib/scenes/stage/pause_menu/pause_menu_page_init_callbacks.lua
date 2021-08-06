@@ -8,12 +8,12 @@
 ---@class PauseMenuPageInitCallbacks
 local _callbacks = {}
 
-local MenuConst = require("BHElib.scenes.menu.menu_const")
+local MenuConst = require("BHElib.ui.menu.menu_const")
 local ShakeEffListingSelector = require("BHElib.ui.selectors.shake_eff_listing_selector")
 local Selectable = ShakeEffListingSelector.Selectable
 local Coordinates = require("BHElib.coordinates_and_screen")
 local SimpleMenuSelector = require("BHElib.ui.selectors.simple_menu_selector")
-local MenuPage = require("BHElib.scenes.menu.menu_page")
+local MenuPage = require("BHElib.ui.menu.menu_page")
 
 ---------------------------------------------------------------------------------------------------
 ---cache variables and functions

@@ -22,7 +22,6 @@ local _include_list = {
 
     "BHElib.global",  -- defines some in-game global variables
     "BHElib.corefunc",
-    "BHElib.after_load",
 }
 
 for _, file_path in ipairs(_include_list) do

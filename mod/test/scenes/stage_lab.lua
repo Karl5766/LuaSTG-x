@@ -91,7 +91,7 @@ function M:createScene()
         local Nue = require("enemy.nue_boss_fight")
 
         local boss_fight = Nue()
-        while boss_fight:continueBossFight() do
+        while boss_fight:isContinuing() do
             boss_fight:update(1)
             task.Wait(1)
         end

@@ -5,13 +5,13 @@
 ---desc: implements the title screen; specifically the menu selection part
 ---------------------------------------------------------------------------------------------------
 
-local MenuPage = require("BHElib.scenes.menu.menu_page")
+local MenuPage = require("BHElib.ui.menu.menu_page")
 
 local M = LuaClass("menu.TitleMenuPage", MenuPage)
 
 local SimpleMenuSelector = require("BHElib.ui.selectors.simple_menu_selector")
 local ShakeEffListingSelector = require("BHElib.ui.selectors.shake_eff_listing_selector")
-local MenuConst = require("BHElib.scenes.menu.menu_const")
+local MenuConst = require("BHElib.ui.menu.menu_const")
 local Coordinates = require("BHElib.coordinates_and_screen")
 local FS = require("file_system")
 local _init_callbacks = require("BHElib.scenes.main_menu.main_menu_page_init_callbacks")

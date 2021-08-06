@@ -47,6 +47,22 @@ end
 ---------------------------------------------------------------------------------------------------
 ---from stage to stage
 
+---@param stage Stage the stage to go from
+---@param next_init_state GameSceneInitState
+local function InheritGameplayResources(stage, next_init_state)
+    next_init_state.score = stage:getScore()
+
+    local next_player_init_state = next_init_state.player_init_state
+    local cur_player = stage:getPlayer()
+
+    next_player_init_state.x = cur_player.x
+    next_player_init_state.y = cur_player.y
+
+    next_player_init_state.num_life,
+        next_player_init_state.num_bomb,
+        next_player_init_state.num_graze = cur_player:getPlayerResources()
+end
+
 ---create a menu scene while saving replay
 ---@param stage Stage the stage to go from
 ---@return GameScene the next scene to go to
@@ -71,18 +87,14 @@ end
 ---@param stage Stage the stage to go from
 ---@return GameScene the next scene to go to
 function _callbacks.restartStageAndKeepRecording(stage)
-    local player_x, player_y = stage.player.x, stage.player.y  -- save object attributes before cleanup
+    local next_init_state = SceneInitState()
+    InheritGameplayResources(stage, next_init_state)
     stage:cleanup(true)
 
     -- create scene init state for next stage
     local cur_init_state = stage.scene_init_state
-    local next_init_state = SceneInitState()
 
     next_init_state.random_seed = ran:Int(0, 65535)
-    next_init_state.score = stage:getScore()  -- set the start score of next stage the same as the current score
-    local player_init_state = next_init_state.player_init_state
-    player_init_state.x = player_x
-    player_init_state.y = player_y
 
     -- update the scene group
     local scene_group = stage.scene_group
@@ -100,17 +112,14 @@ end
 ---@param stage Stage the stage to go from
 ---@return GameScene the next scene to go to
 function _callbacks.goToNextStage(stage)
-    local player_x, player_y = stage.player.x, stage.player.y  -- save object attributes before cleanup
+    local next_init_state = SceneInitState()
+    InheritGameplayResources(stage, next_init_state)
     stage:cleanup(true)
 
     -- create scene init state for next stage
     local cur_init_state = stage.scene_init_state
-    local next_init_state = SceneInitState()
 
     next_init_state.random_seed = ran:Int(0, 65535)
-    next_init_state.score = stage:getScore()  -- set the start score of next stage the same as the current score
-    next_init_state.player_init_state.x = player_x
-    next_init_state.player_init_state.y = player_y
 
     -- update the scene group
     local scene_group = stage.scene_group

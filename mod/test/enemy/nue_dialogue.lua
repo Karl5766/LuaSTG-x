@@ -4,9 +4,9 @@
 --- DateTime: 2021/7/24 0:13
 ---
 
-local Dialogue = require("BHElib.units.boss.dialogue_session")
+local Dialogue = require("BHElib.sessions.dialogue.dialogue_session")
 local TextObject = require("BHElib.ui.text_object")
-local Portrait = require("BHElib.units.boss.dialogue_portrait")
+local Portrait = require("BHElib.sessions.dialogue.dialogue_portrait")
 local Vec2 = math.vec2
 
 local M = LuaClass("Nue.dialogue", Dialogue)
@@ -50,8 +50,7 @@ function M.__create()
     return Dialogue.__create(
             require("BHElib.input.input_and_recording"),
             TextObject("", Color(255, 255, 255, 255), "font:test", 40, {"left", "top"}),
-            MainScript
-    )
+            MainScript)
 end
 
 return M
