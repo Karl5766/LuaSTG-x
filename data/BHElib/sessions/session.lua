@@ -16,8 +16,6 @@ local M
 ---Session(...) -> Session object
 ---update() : frame update
 ---isContinuing() -> (boolean) whether the session is going or has reached an end
----endSession() : end the session if it is still going
-
----isSpell() -> (boolean) whether the session is a spell card
+---endSession() : end the session if it is still going; must be called for proper deletion of the object
 
 ---------------------------------------------------------------------------------------------------

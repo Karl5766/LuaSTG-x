@@ -19,7 +19,6 @@ LoadImageFromFile("image:test", "data_assets/THlib/bullet/Magic1.png")
 LoadImageFromFile("image:button_normal", "creator/image/default_btn_normal.png")
 LoadImageFromFile("image:button_pressed", "creator/image/default_btn_pressed.png")
 
--- hud, icons and hints
 LoadImageFromFile("image:menu_hud_background", "THlib\\UI\\menu_bg.png")
 
 -- hint.png, line.png and rank.png
@@ -79,6 +78,9 @@ do
     LoadTexture("tex:line", "THlib\\UI\\line.png", true)
     LoadImageGroup("image_array:icon_line", "tex:line", 0, 0, 200, 8, 1, 7)
 end
+
+-- boss fight and spell
+LoadImageFromFile("image:boss_spell_left", "THlib\\enemy\\boss_cardleft.png")
 
 
 -- bullets

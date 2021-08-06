@@ -5,9 +5,9 @@
 ---
 
 local Prefab = require("core.prefab")
-local AttackSession = assert(require("BHElib.sessions.boss.attack_session"))
+local SpellSession = assert(require("BHElib.sessions.boss.spell_session"))
 
-local M = LuaClass("Nue.spell1", AttackSession)
+local M = LuaClass("Nue.spell1", SpellSession)
 
 local EnemyHitbox = require("BHElib.units.enemy.enemy_hitbox")
 
@@ -104,7 +104,7 @@ Prefab.Register(Orb)
 function M.__create(boss)
     local hp = 720
     local hitbox = EnemyHitbox(16, hp)
-    local self = AttackSession.__create(boss, hitbox, 1500)
+    local self = SpellSession.__create(boss, hitbox, 1500)
 
     return self
 end

@@ -28,6 +28,11 @@ function M.__create(script)
     return self
 end
 
+---run coroutine once at creation
+function M:ctor()
+    self:resumeCoroutine()
+end
+
 ---run every available tasks and session
 ---@return boolean true if anything is run in this function; false if nothing is run (in the case there are no children)
 function M:updateChildren()
@@ -88,7 +93,13 @@ end
 ---end the session
 function M:endSession()
     self.is_continuing = false
+    if self.session then
+        self.session:endSession()
+    end
 end
+
+---------------------------------------------------------------------------------------------------
+---coroutine and coroutine functions
 
 ---resume the script
 function M:resumeCoroutine()
@@ -96,6 +107,18 @@ function M:resumeCoroutine()
     if errmsg then
         error(errmsg)
     end
+end
+
+---@param session Session the session to run
+function M:playSession(session)
+    self:setSession(session)
+    coroutine.yield()
+end
+
+---@param task_func function task function
+function M:playTask(task_func)
+    task.New(self, task_func)
+    coroutine.yield()
 end
 
 return M

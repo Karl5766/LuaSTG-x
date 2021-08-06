@@ -32,11 +32,6 @@ function M.__create(player_input, dialogue_text_object, script)
     return self
 end
 
----run coroutine once at creation
-function M:ctor()
-    self:resumeCoroutine()
-end
-
 ---------------------------------------------------------------------------------------------------
 ---modifiers and getters
 

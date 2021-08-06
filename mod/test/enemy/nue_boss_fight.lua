@@ -29,10 +29,11 @@ local _Dialogue1 = require("enemy.nue_dialogue")
 local function Script(self)
     local boss = self.boss
 
-    self:setSession(_Dialogue1())
-    coroutine.yield()
-    self:setSession(_Spell1(boss))
-    coroutine.yield()
+    boss.x = -100
+    boss.y = 300
+
+    self:playSession(_Dialogue1())
+    self:playAttackSessionByIndex(1)
 end
 
 function M.__create()
@@ -40,8 +41,6 @@ function M.__create()
         _Spell1,
     }
     local boss = _Animation()
-    boss.x = -100
-    boss.y = 300
     local self = SingleBossSession.__create(boss, spell_class_array, Script)
     return self
 end
