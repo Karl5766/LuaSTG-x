@@ -11,7 +11,7 @@ local ShakeEffListingSelector = require("BHElib.ui.selectors.shake_eff_listing_s
 local M = LuaClass("selectors.SimpleMenuSelector", ShakeEffListingSelector)
 
 local InteractiveSelector = require("BHElib.ui.selectors.interactive_selector")
-local MenuConst = require("BHElib.ui.menu.menu_const")
+local MenuConst = require("BHElib.ui.menu.menu_global")
 
 ---------------------------------------------------------------------------------------------------
 ---cache variables and functions

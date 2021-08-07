@@ -21,12 +21,12 @@ local max = max
 ---------------------------------------------------------------------------------------------------
 ---constants
 
-M.const = {
+M.global = {
     spawn_x = 0,
     spawn_y = -180,
     spawn_time = 80,
     spawn_speed = 1,
-    spawn_protect_time = 180
+    spawn_protect_time = 240
 }
 
 ---------------------------------------------------------------------------------------------------
@@ -44,14 +44,12 @@ M.const = {
 ---@param unfocused_speed number speed when unfocused; per frame
 ---@param focused_speed number speed when focused; per frame
 ---@param stage Stage the current stage this player is at
----@param spawning_player Prefab.Player the player to inherit player resources (life, bombs etc.) from; nil if this is the first player
 function M:init(
         player_input,
         animation_interval,
         unfocused_speed,
         focused_speed,
-        stage,
-        spawning_player)
+        stage)
     self.layer = LAYER_PLAYER
     self.group = GROUP_PLAYER
     self.bound = false
@@ -81,18 +79,25 @@ function M:init(
     self.invincibility_timer = 0
     self.spawn_counter = 0
     self.bomb_cooldown_timer = 0
+    self.item_collect_border_y = 112
+end
 
-    local num_life, num_bomb, num_graze
-    if spawning_player then
-        num_life, num_bomb, num_graze = spawning_player:getPlayerResources()
-    else
-        num_life, num_bomb, num_graze = stage:getInitPlayerResources()
-    end
-    assert(num_life and num_bomb, "Error:Invalid player resources!")
-
+function M:initResourcesFromStage(stage)
+    local num_life, num_bomb, num_graze, power = stage:getInitPlayerResources()
+    assert(num_life and num_bomb and num_graze and power, "Error:Invalid player resources!")
     self.num_life = num_life
     self.num_bomb = num_bomb
     self.num_graze = num_graze
+    self:setPower(power)
+end
+
+function M:initResourcesFromSpawningPlayer(spawning_player)
+    local num_life, num_bomb, num_graze, power = spawning_player:getPlayerResources()
+    assert(num_life and num_bomb and num_graze and power, "Error:Invalid player resources!")
+    self.num_life = num_life
+    self.num_bomb = num_bomb
+    self.num_graze = num_graze
+    self:setPower(power)
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -129,6 +134,11 @@ function M:getStage()
     return self.stage
 end
 
+---@return player_support
+function M:getSupport()
+    return self.support
+end
+
 ---@param time number the time to increase to if less (in number of frames)
 function M:increaseInvincibilityTimerTo(time)
     if time > self.invincibility_timer then
@@ -145,14 +155,34 @@ function M:getGraze()
     return self.num_graze
 end
 
+function M:setPower()
+    error("Error: setPower() called in base class!")
+end
+
 ---@return number
 function M:getPower()
     error("Error: getPower() called in base class!")
 end
 
+function M:setLife(num_life)
+    self.num_life = num_life
+end
+
+function M:getLife()
+    return self.num_life
+end
+
+function M:setBomb(num_bomb)
+    self.num_bomb = num_bomb
+end
+
+function M:getBomb()
+    return self.num_bomb
+end
+
 ---@return number,number,number number of life, bomb and graze
 function M:getPlayerResources()
-    return self.num_life, self.num_bomb, self.num_graze
+    return self.num_life, self.num_bomb, self.num_graze, self:getPower()
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -167,14 +197,18 @@ function M:frame()
         self:limitMovementInBound()
     else
         self:updateSpriteByMovement(false, false)
-        self.x = M.const.spawn_x
-        self.y = M.const.spawn_y - M.const.spawn_speed * self.spawn_counter
+        self.x = M.global.spawn_x
+        self.y = M.global.spawn_y - M.global.spawn_speed * self.spawn_counter
         self.spawn_counter = max(0, self.spawn_counter - 1)
     end
 
     local graze_object = self.graze_object
     graze_object.x = self.x
     graze_object.y = self.y
+
+    if self.y > self.item_collect_border_y then
+        self.stage:borderCollectAllItems(self)
+    end
 
     self.invincibility_timer = max(0, self.invincibility_timer - 1)
     self.bomb_cooldown_timer = max(0, self.bomb_cooldown_timer - 1)
@@ -398,6 +432,12 @@ function M:colli(other)
     self:getHit()
 end
 
+function M:onEnemyBulletCollision(other)
+    if other.destroyable then
+        Del(other)
+    end
+end
+
 ---------------------------------------------------------------------------------------------------
 ---other events
 
@@ -410,6 +450,8 @@ end
 
 function M:onMiss()
     self.num_life = self.num_life - 1
+    self.num_bomb = 3
+    self:setPower(self:getPower() - 50)
     if self.num_life < 0 then
         self:endCurrentSession()
     end
@@ -420,13 +462,13 @@ end
 function M:respawn()
     local Player = self.class
     local new_player = Player(self.stage, self)
-    local spawn_time = M.const.spawn_time
-    local spawn_speed = M.const.spawn_speed
-    local x = M.const.spawn_x
-    local y = M.const.spawn_y - spawn_speed * spawn_time
+    local spawn_time = M.global.spawn_time
+    local spawn_speed = M.global.spawn_speed
+    local x = M.global.spawn_x
+    local y = M.global.spawn_y - spawn_speed * spawn_time
     new_player:teleportTo(x, y)
-    new_player.spawn_counter = M.const.spawn_time
-    new_player.invincibility_timer = M.const.spawn_protect_time
+    new_player.spawn_counter = M.global.spawn_time
+    new_player.invincibility_timer = M.global.spawn_protect_time
     self.stage:setPlayer(new_player)
 
     CleanupForRespawn(self)

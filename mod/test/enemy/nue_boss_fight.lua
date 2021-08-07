@@ -36,12 +36,12 @@ local function Script(self)
     self:playAttackSessionByIndex(1)
 end
 
-function M.__create()
+function M.__create(stage)
     local spell_class_array = {
         _Spell1,
     }
     local boss = _Animation()
-    local self = SingleBossSession.__create(boss, spell_class_array, Script)
+    local self = SingleBossSession.__create(boss, spell_class_array, Script, stage)
     return self
 end
 

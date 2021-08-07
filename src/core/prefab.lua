@@ -189,6 +189,8 @@ Prefab.Object = {
 }
 Prefab.Register(Prefab.Object)
 
+-- for direct use in case you don't want to define new object
+-- -x classes can be directly inherited from Object instead of XObject
 Prefab.XObject = Prefab.NewX(Prefab.Object)
 Prefab.Register(Prefab.XObject)
 

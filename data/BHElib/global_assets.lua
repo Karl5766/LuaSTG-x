@@ -21,7 +21,7 @@ LoadImageFromFile("image:button_pressed", "creator/image/default_btn_pressed.png
 
 LoadImageFromFile("image:menu_hud_background", "THlib\\UI\\menu_bg.png")
 
--- hint.png, line.png and rank.png
+-- hint.png, line.png, rank.png and item.png
 do
     local function LoadImageAndSetCenter(tex_name, img_name, x, y, w, h, center_x, center_y)
         LoadImage(img_name, tex_name, x, y, w, h)
@@ -71,6 +71,31 @@ do
     }
     LoadTextureAndImages("tex:rank", images, "THlib\\UI\\rank.png")
 
+    --item.png
+    images = {
+        {"image:item_power", 0, 0, 32, 32},
+        {"image:item_point", 32, 0, 32, 32},
+        {"image:item_hint_power", 64, 0, 32, 32},
+        {"image:item_hint_point", 96, 0, 32, 32},
+        {"image:item_life_piece", 0, 32, 32, 32},
+        {"image:item_full_power", 32, 32, 32, 32},
+        {"image:item_hint_life_piece", 64, 32, 32, 32},
+        {"image:item_hint_full_power", 96, 32, 32, 32},
+        {"image:item_faith", 0, 64, 32, 32},
+        {"image:item_big_power", 32, 64, 32, 32},
+        {"image:item_hint_faith", 64, 64, 32, 32},
+        {"image:item_hint_big_power", 96, 64, 32, 32},
+        {"image:item_extend", 0, 96, 32, 32},
+        {"image:item_small_faith", 32, 96, 32, 32},
+        {"image:item_hint_extend", 64, 96, 32, 32},
+        {"image:item_hint_small_faith", 96, 96, 32, 32},
+        {"image:item_bomb_piece", 0, 128, 32, 32},
+        {"image:item_bomb", 32, 128, 32, 32},
+        {"image:item_hint_bomb_piece", 64, 128, 32, 32},
+        {"image:item_hint_bomb", 96, 128, 32, 32},
+    }
+    LoadTextureAndImages("tex:item", images, "THlib\\item\\item.png")
+
     LoadImageGroup('lifechip', "tex:hint", 288, 16, 16, 15, 4, 1)
     LoadImageGroup('bombchip', "tex:hint", 288, 32, 16, 16, 4, 1)
 
@@ -97,5 +122,3 @@ LoadTexture("tex:bullet_music_note", bullet_path.."bullet_music.png")
 LoadTexture("tex:bullet_fireball", bullet_path.."bullet_water_drop.png")
 
 LoadTexture("tex:bullet_cancel", bullet_path.."etbreak.png")
-
-LoadImageGroup('img:ball_mid', 'tex:bullet_sprite_1', 176, 0, 32, 32, 1, 8, 4, 4)

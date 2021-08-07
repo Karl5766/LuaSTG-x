@@ -195,7 +195,7 @@ end
 ---------------------------------------------------------------------------------------------------
 ---shorter init parameter list
 
-local MenuConst = require("BHElib.ui.menu.menu_const")
+local MenuConst = require("BHElib.ui.menu.menu_global")
 local InteractiveSelector = require("BHElib.ui.selectors.interactive_selector")
 local Input = require("BHElib.input.input_and_recording")
 local TextObject = require("BHElib.ui.text_object")

@@ -17,11 +17,13 @@ local Renderer = require("BHElib.ui.renderer_prefab")
 ---@param boss Prefab.Animation the boss sprite
 ---@param attack_session_class_array table an array of classes of the attack sessions to play
 ---@param script function a coroutine function that takes self as first parameter
-function M.__create(boss, attack_session_class_array, script)
+---@param stage Stage
+function M.__create(boss, attack_session_class_array, script, stage)
     local self = ScriptableSession.__create(script)
     self.boss = boss
     self.attack_session_class_array = attack_session_class_array
     self.renderer = Renderer(LAYER_TOP, self, "game")
+    self.stage = stage
     return self
 end
 
@@ -35,7 +37,6 @@ function M:getBoss()
 end
 
 function M:setNumStar(num_star)
-    print(num_star)
     self.num_star = num_star
 end
 
@@ -52,7 +53,7 @@ end
 ---@param index number the index of the attack session in the array
 function M:playAttackSessionByIndex(index)
     local Class = self.attack_session_class_array[index]
-    local session = Class(self.boss)
+    local session = Class(self.boss, self.stage)
     self:setSession(session)
     self:setNumStar(self:getNumSpellLeft(index))
     coroutine.yield()

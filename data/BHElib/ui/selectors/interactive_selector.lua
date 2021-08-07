@@ -22,7 +22,7 @@ end
 
 ---------------------------------------------------------------------------------------------------
 
-local MenuConst = require("BHElib.ui.menu.menu_const")
+local MenuConst = require("BHElib.ui.menu.menu_global")
 ---@param selection_input InputManager the object for this selector to receive input from
 function M.__create(selection_input)
     local self = {}

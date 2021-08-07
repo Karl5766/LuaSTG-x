@@ -147,8 +147,8 @@ function GameScene:updateSceneAndObjects(dt)
     --碰撞检查
     CollisionCheck(GROUP_PLAYER, GROUP_ENEMY_BULLET)
     CollisionCheck(GROUP_PLAYER, GROUP_ENEMY)
-    CollisionCheck(GROUP_ENEMY, GROUP_PLAYER_BULLET)
-    CollisionCheck(GROUP_ITEM, GROUP_PLAYER)
+    CollisionCheck(GROUP_PLAYER_BULLET, GROUP_ENEMY)
+    CollisionCheck(GROUP_PLAYER, GROUP_ITEM)
     profiler.toc('CollisionCheck')
 
     profiler.tic('UpdateXY')

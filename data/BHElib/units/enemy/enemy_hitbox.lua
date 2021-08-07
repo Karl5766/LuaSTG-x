@@ -45,11 +45,8 @@ end
 ---------------------------------------------------------------------------------------------------
 ---collision events
 
-function M:colli(other)
-    local on_enemy_collision = other.onEnemyCollision
-    if on_enemy_collision then
-        on_enemy_collision(other, self)
-    end
+function M:onPlayerBulletCollision(other)
+    other:onEnemyCollision(self)
 end
 
 Prefab.Register(M)

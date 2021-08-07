@@ -39,6 +39,13 @@ end
 ---------------------------------------------------------------------------------------------------
 ---collision events
 
+function M:colli(other)
+    local on_player_bullet_collision = other.onPlayerBulletCollision
+    if on_player_bullet_collision then
+        on_player_bullet_collision(other, self)
+    end
+end
+
 function M:onEnemyCollision(other)
     if self.colli_flag == false then
         other:receiveDamage(self.attack)

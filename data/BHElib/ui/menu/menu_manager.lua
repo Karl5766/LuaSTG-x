@@ -29,7 +29,7 @@ require("BHElib.ui.menu.menu_page")
 local MenuPageArray = require("BHElib.ui.menu.menu_page_array")
 local MenuPagePool = require("BHElib.ui.menu.menu_page_pool")
 
-local MenuConst = require("BHElib.ui.menu.menu_const")
+local MenuConst = require("BHElib.ui.menu.menu_global")
 
 ---------------------------------------------------------------------------------------------------
 
@@ -127,7 +127,7 @@ function M:handleChoices(choices, menu_page_pos)
     local cascade_flag = false
     for i = 1, #choices do
         local choice = choices[i]
-        local label = choice[1]  -- see menu_const.lua
+        local label = choice[1]  -- see menu_global.lua
         if label == MenuConst.CHOICE_SPECIFY then
             menu_page_array:setChoice(menu_page_pos, choice[2], choice[3])
         elseif label == MenuConst.CHOICE_CASCADE then

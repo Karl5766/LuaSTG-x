@@ -87,12 +87,13 @@ end
 ---------------------------------------------------------------------------------------------------
 ---setters and getters
 
-function M:getPower(power_point)
+function M:getPower()
     return self.power
 end
 
-function M:setPower(power_point)
-    self.power = power_point
+---@param power number the power to set to; this value will be clamped between 0 and max_power
+function M:setPower(power)
+    self.power = max(0, min(power, self.max_power))
 end
 
 function M:setPosition(x, y)

@@ -1,8 +1,9 @@
 ---------------------------------------------------------------------------------------------------
----menu_actions.lua
+---menu_global.lua
 ---author: Karl
 ---date: 2021.5.1
----desc: defines constants values in menus; menus abide to using them by default
+---desc: defines parameters in menus; menus should abide to use them by default when nothing is
+---     specified
 ---------------------------------------------------------------------------------------------------
 ---cache variables and functions
 

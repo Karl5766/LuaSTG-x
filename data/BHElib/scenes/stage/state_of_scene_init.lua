@@ -11,7 +11,7 @@
 local InitState = LuaClass("scenes.GameSceneInitState")
 
 local PlayerBase = require("BHElib.units.player.player_prefab")
-local _player_const = PlayerBase.const
+local _player_global = PlayerBase.global
 
 ---create and return a default init state
 ---the attributes of an object of this class should not be modified more than once,
@@ -20,11 +20,12 @@ function InitState.__create()
     local self = {}
     self.random_seed = 0
     self.player_init_state = {
-        x = _player_const.spawn_x,
-        y = _player_const.spawn_y,
+        x = _player_global.spawn_x,
+        y = _player_global.spawn_y,
         num_life = 0,
         num_bomb = 0,
         num_graze = 0,
+        power = 0,
     }
     self.init_score = 0
 
@@ -40,6 +41,7 @@ local _player_init_state_float_fields = {
     "num_life",
     "num_bomb",
     "num_graze",
+    "power",
 }
 local _player_init_state_string_fields = {}
 

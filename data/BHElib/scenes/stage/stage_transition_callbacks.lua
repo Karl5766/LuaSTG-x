@@ -60,7 +60,8 @@ local function InheritGameplayResources(stage, next_init_state)
 
     next_player_init_state.num_life,
         next_player_init_state.num_bomb,
-        next_player_init_state.num_graze = cur_player:getPlayerResources()
+        next_player_init_state.num_graze,
+        next_player_init_state.power = cur_player:getPlayerResources()
 end
 
 ---create a menu scene while saving replay

@@ -15,17 +15,19 @@ local PlayerBullet = require("BHElib.units.bullet.player_bullet_prefab")
 local DamageCircle = Prefab.NewX(PlayerBullet)
 
 ---@param stage Stage if not nil; the circle will follow the enemy target returned by stage api
-function DamageCircle:init(stage, x, y, init_radius, attack)
+function DamageCircle:init(stage, x, y, init_radius, attack, is_follow)
     PlayerBullet.init(self, attack, false)
+    self.group = GROUP_PLAYER
     self.hide = true
     self.bound = false
     self.x, self.y = x, y
     self.radius = init_radius
+    self.stage = stage
 
     task.New(self, function()
         while true do
             self.a = self.radius + 32
-            if stage then
+            if is_follow then
                 local target = stage:getEnemyTargetFrom(self)
                 if IsValid(target) then
                     local c = 860 / (self.radius + 20) ^ 2
@@ -36,6 +38,18 @@ function DamageCircle:init(stage, x, y, init_radius, attack)
             coroutine.yield()
         end
     end)
+end
+
+function DamageCircle:colli(other)
+    PlayerBullet.colli(self, other)
+    local on_bullet_clear = other.onBulletCancel
+    if on_bullet_clear then
+        on_bullet_clear(other, self.stage)
+    end
+end
+
+function DamageCircle:onEnemyBulletCollision()
+
 end
 
 DamageCircle.frame = task.Do
@@ -107,8 +121,8 @@ Prefab.Register(BombSquare)
 ---------------------------------------------------------------------------------------------------
 
 ---@return DamageCircle the damage circle of the wave just created
-local function CreateWave(stage, init_radius, init_x, init_y, attack, num_square, square_size)
-    local circle_object = DamageCircle(stage, init_x, init_y, init_radius, attack)
+local function CreateWave(stage, init_radius, init_x, init_y, attack, num_square, square_size, is_follow)
+    local circle_object = DamageCircle(stage, init_x, init_y, init_radius, attack, is_follow)
     for i = 1, num_square do
         local inc_angle = 360 / num_square
         BombSquare(circle_object, inc_angle * i, 2, ran:Float(0, 360), 3, square_size)
@@ -136,13 +150,14 @@ function M:bomb(player, stage)
                 square_size = 1
             end
             local circle1 = CreateWave(
-                    nil,
+                    stage,
                     0,
                     player.x,
                     player.y,
                     attack,
                     15,
-                    square_size)
+                    square_size,
+                    false)
             task.New(circle1, function()
                 local acc_time = 60
                 local max_speed = 3
@@ -185,7 +200,8 @@ function M:bomb(player, stage)
                     player.y + ran:Float(-220, 220),
                     attack,
                     10,
-                    square_size)
+                    square_size,
+                    true)
             task.New(circle, function()
                 local max_speed = -10
                 for i = 1, 75 do

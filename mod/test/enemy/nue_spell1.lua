@@ -101,10 +101,10 @@ Prefab.Register(Orb)
 
 ---------------------------------------------------------------------------------------------------
 
-function M.__create(boss)
-    local hp = 720
+function M.__create(boss, stage)
+    local hp = 14400
     local hitbox = EnemyHitbox(16, hp)
-    local self = SpellSession.__create(boss, hitbox, 1500)
+    local self = SpellSession.__create(boss, hitbox, 12000, stage)
 
     return self
 end
@@ -113,26 +113,25 @@ function M:ctor()
     ---@type RumiaAnimation
     local boss = self.boss
 
-    local boss_y = boss.y
-
-    task.New(self, function()
-        local a = 0
-        while true do
-            local Bullet = require("BHElib.units.bullet.bullet_prefab")
-            local bullet = Bullet("ball", COLOR_BLUE, GROUP_ENEMY_BULLET, 12, 1, true)
-            bullet.x = boss.x
-            bullet.y = boss.y
-            bullet.bound = true
-            local r = 3
-            bullet.vx = r * cos(a)
-            bullet.vy = r * sin(a)
-            a = a + 3
-            task.Wait(1)
-        end
-    end)
+    --task.New(self, function()
+    --    local a = 0
+    --    while true do
+    --        local Bullet = require("BHElib.units.bullet.bullet_prefab")
+    --        local bullet = Bullet("ball", COLOR_BLUE, GROUP_ENEMY_BULLET, 12, 1, true)
+    --        bullet.x = boss.x
+    --        bullet.y = boss.y
+    --        bullet.bound = true
+    --        local r = 3
+    --        bullet.vx = r * cos(a)
+    --        bullet.vy = r * sin(a)
+    --        a = a + 3
+    --        task.Wait(1)
+    --    end
+    --end)
     task.New(self, function()
         boss:move(60, -boss.x, 120 - boss.y, boss.x > 0, self)
         task.Wait(120)
+        local boss_y = boss.y
         while true do
             task.Wait(24)
             --boss:playAnimation("cast", true, false, true)
@@ -221,8 +220,31 @@ function M:mouseFire(x, y, side)
     end
 end
 
-function M:frame()
-    task.Do(self)
+function M:update(dt)
+    SpellSession.update(self, dt)
+
+    if ran:Float(0, 1) < 0.1 then
+        local Items = require("BHElib.units.item.items")
+        local p
+        local rng = ran:Float(0, 1)
+        if rng < 0.001 then
+            p = Items.Extend(self.stage)
+        elseif rng < 0.004 then
+            p = Items.Bomb(self.stage)
+        elseif rng < 0.005 then
+            p = Items.FullPower(self.stage)
+        elseif rng < 0.008 then
+            p = Items.BigPower(self.stage)
+        elseif rng < 0.009 then
+            p = Items.SmallFaith(self.stage)
+        elseif rng < 0.5 then
+            p = Items.Point(self.stage)
+        else
+            p = Items.Power(self.stage)
+        end
+        p.x = ran:Float(-192, 192)
+        p.y = self.boss.y
+    end
 
     local Input = require("BHElib.input.input_and_recording")
     local Coordinates = require("BHElib.coordinates_and_screen")

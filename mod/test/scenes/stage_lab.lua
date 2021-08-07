@@ -60,6 +60,15 @@ function M.__create(...)
     return self
 end
 
+---@param player Prefab.Player the player that is collecting the items
+function M:borderCollectAllItems(player)
+    for i, object in ObjList(GROUP_ITEM) do
+        if IsValid(object) and object.onBorderCollect then
+            object:onBorderCollect(player)
+        end
+    end
+end
+
 function M:createScene()
     local scene = Stage.createScene(self)
 
@@ -90,7 +99,8 @@ function M:createScene()
         BBG(0, 0, 10)
         local Nue = require("enemy.nue_boss_fight")
 
-        local boss_fight = Nue()
+        local boss_fight = Nue(self)
+        self.boss_fight = boss_fight
         while boss_fight:isContinuing() do
             boss_fight:update(1)
             task.Wait(1)
@@ -144,8 +154,16 @@ function M:render()
     do
         local x, y = 720, 160
         RenderText("font:test",
-                string.format("Time:%d", tostring(math.floor(self.timer / 60))),
+                string.format("Time:%d/200", tostring(math.floor(self.timer / 60))),
                 x, y, 0.4, "right")
+
+        local session = self.boss_fight.session
+        if session ~= nil then
+            local boss = session.hitbox
+            if IsValid(boss) then
+                RenderText("font:test", "Boss hp:"..tostring(int(boss.hp)), 720, 130, 0.4, "right")
+            end
+        end
     end
     --_hud_painter:drawPerfromanceProfile("font:menu")
     _hud_painter:drawKeys()

@@ -13,13 +13,15 @@ local M = LuaClass("AttackSession")
 ---@param boss Prefab.Animation
 ---@param hitbox Prefab.EnemyHitbox
 ---@param duration number spell time in frames
-function M.__create(boss, hitbox, duration)
+---@param stage Stage
+function M.__create(boss, hitbox, duration, stage)
     local self = {}
     self.boss = boss
     self.hitbox = hitbox
     self.duration = duration
     self.timer = 0
     self.timeout_flag = false
+    self.stage = stage
     return self
 end
 

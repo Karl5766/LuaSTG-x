@@ -116,22 +116,30 @@ function M:del()
     self:createCancelEffect()
 end
 function M:kill()
-    self:createCancelEffect()
+    error("Error: Attempt to kill a bullet!")
 end
 
 ---------------------------------------------------------------------------------------------------
----collision events
+---events
 
 function M:onPlayerCollision(other)
-    if self.destroyable then
-        Del(self)
-    end
+    other:onEnemyBulletCollision(self)
 end
 
 function M:onPlayerGrazeObjectCollision(other)
     if self.grazed == false then
         other:graze(self)
         self.grazed = true
+    end
+end
+
+function M:onBulletCancel(stage)
+    if self.destroyable then
+        local SmallFaith = require("BHElib.units.item.items").SmallFaith
+        local object = SmallFaith(stage)
+        object.x = self.x
+        object.y = self.y
+        Del(self)
     end
 end
 

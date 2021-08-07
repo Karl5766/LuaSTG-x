@@ -16,7 +16,7 @@ local ReimuSupport = require("player.reimu.reimu_support")
 ---------------------------------------------------------------------------------------------------
 
 ---@param stage Stage
----@param spawning_player Prefab.Player
+---@param spawning_player Prefab.Player the player to inherit player resources (life, bombs etc.) from; nil if this is the first player
 function M:init(stage, spawning_player)
     PlayerBase.init(
             self,
@@ -24,9 +24,13 @@ function M:init(stage, spawning_player)
             8,
             4.5,
             2,
-            stage,
-            spawning_player)
+            stage)
     self.support = ReimuSupport(self.stage, self, "image:reimu_support")
+    if spawning_player then
+        self:initResourcesFromSpawningPlayer(spawning_player)
+    else
+        self:initResourcesFromStage(stage)
+    end
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -105,6 +109,16 @@ end
 ---------------------------------------------------------------------------------------------------
 ---setters and getters
 
+---@return player_support.Reimu
+function M:getSupport()
+    return self.support
+end
+
+---@param power number
+function M:setPower(power)
+    return self.support:setPower(power)
+end
+
 ---@return number
 function M:getPower()
     return self.support:getPower()
@@ -115,7 +129,6 @@ end
 function M:frame()
     PlayerBase.frame(self)
 
-    self.support:setPower(400)
     self.support:update(1)
 end
 

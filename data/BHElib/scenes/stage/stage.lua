@@ -21,14 +21,6 @@ local SceneGroup = require("BHElib.scenes.stage.scene_group")
 local Ustorage = require("util.universal_id")
 
 ---------------------------------------------------------------------------------------------------
----const
-
-Stage.BACK_TO_MENU = 1
-Stage.GO_TO_NEXT_STAGE = 2
-Stage.RESTART_SCENE_GROUP = 3
-Stage.RESTART_AND_KEEP_RECORDING = 4
-
----------------------------------------------------------------------------------------------------
 ---virtual methods
 
 ---virtual Stage:getDisplayName()
@@ -89,7 +81,10 @@ end
 ---@return number, number the number of initial player life and bombs
 function Stage:getInitPlayerResources()
     local player_init_state = self.scene_init_state.player_init_state
-    return player_init_state.num_life, player_init_state.num_bomb, player_init_state.num_graze
+    return player_init_state.num_life,
+        player_init_state.num_bomb,
+        player_init_state.num_graze,
+        player_init_state.power
 end
 
 ---------------------------------------------------------------------------------------------------

@@ -88,7 +88,7 @@ function MenuPage:getChoice()
     return self.selector:getChoice()
 end
 
-local MenuConst = require("BHElib.ui.menu.menu_const")
+local MenuConst = require("BHElib.ui.menu.menu_global")
 ---set a menu page to entering state; can be set on an already entering menu
 ---@param transition_speed number a positive number indicating the rate of transition per frame
 function MenuPage:setPageEnter(is_forward, transition_speed)
