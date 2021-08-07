@@ -78,9 +78,6 @@ if _ARGS and #_ARGS >= 2 then
     assert(loadstring(_ARGS[2]))()
 end
 
---skip the launchers
-require('app.views.MainScene').setSkip(true, true)
-
 --SetResLoadInfo(true)
 --require("jit.opt").start("sizemcode=1024", "maxmcode=1024")
 

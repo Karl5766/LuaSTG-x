@@ -12,9 +12,6 @@ function M:ctor(...)
             wi.TreeNode('Game Resource'),
             require('imgui.lstg.GameResInfo')())
     self:addChildChain(
-            wi.TreeNode('THlib Info'),
-            require('imgui.lstg.THlibInfo')())
-    self:addChildChain(
             wi.TreeNode('Performance'),
             require('imgui.lstg.PerformanceInfo')())
 

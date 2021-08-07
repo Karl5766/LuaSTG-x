@@ -25,37 +25,6 @@ function M.stopAudios()
     M.stopSounds()
 end
 
-local content = require('game.content')
-function M.getSlotStrings()
-    local ret = {}
-    for i = 1, ext.replay.GetSlotCount() do
-        ret[i] = string.format(
-                'No.%02d %s %s %s %s %s %s',
-                i,
-                '--------',
-                '--/--/--',
-                '--:--',
-                '--------',
-                '-------',
-                '---'
-        )
-    end
-    local replays = content.enumReplays()
-    for _, rep in ipairs(replays) do
-        local str = string.format(
-                'No.%02d %s %s %s %s %s %s',
-                rep.index,
-                rep.user_str,
-                rep.date_str,
-                rep.time_str,
-                rep.player_str,
-                rep.rank_str,
-                rep.stage_str
-        )
-        ret[rep.index] = str
-    end
-end
-
 local resTypeNames = {
     [1] = 'Texture',
     [2] = 'Sprite',
