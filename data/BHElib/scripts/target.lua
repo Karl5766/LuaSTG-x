@@ -16,6 +16,7 @@ local Abs = math.abs
 ---------------------------------------------------------------------------------------------------
 
 function M.findTargetByAngleWithVerticalLine(source, dest_objects)
+    assert(dest_objects, "Error: parameter dest_objects is nil!")
     local target = nil
     local source_x, source_y = source.x, source.y
 

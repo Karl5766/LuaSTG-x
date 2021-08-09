@@ -59,14 +59,14 @@ end
 ---@~english execute all the tasks under self.task
 ---@param self Object tasks under this object will be executed
 function task.Do(self)
-    local task_list = rawget(self, 'task')  -- get self.task
+    local task_list = rawget(self, "task")  -- get self.task
     if task_list then
         local j = 0
 
         -- loop through every task under self.task table
         for i = 1, #task_list do
             local cur_task = task_list[i]
-            if status(cur_task) ~= 'dead' then
+            if status(cur_task) ~= "dead" then
                 -- push into the stack before executing the task
                 insert(_object_stack, self)
                 insert(_task_stack, cur_task)

@@ -181,6 +181,11 @@ function M.getPlayfieldBoundaryInRes()
     return game_res_l, game_res_r, game_res_b, game_res_t
 end
 
+---@return number, number, number, number l, r, b, t
+function M.getOutOfBoundDeletionBoundaryInGame()
+    return _bound_game_l, _bound_game_r, _bound_game_b, _bound_game_t
+end
+
 ---return the viewport in "res" coordinates;
 ---@return number, number, number, number l, r, b, t
 local function GetGameViewport()

@@ -41,6 +41,7 @@ local Render = Render  -- render arbitrary images
 ---@param color_index number indicate color of the bullet
 ---@param group number
 ---@param blink_time number persist time of blinking effect
+---@param size number size of the effects
 ---@param destroyable boolean whether this bullet is destroyable in collision with a player
 function M:init(bullet_type_name, color_index, group, blink_time, size, destroyable)
     self.bound = true
@@ -122,8 +123,8 @@ end
 ---------------------------------------------------------------------------------------------------
 ---events
 
-function M:onPlayerCollision(other)
-    other:onEnemyBulletCollision(self)
+function M:onPlayerCollision(player)
+    player:onEnemyBulletCollision(self)
 end
 
 function M:onPlayerGrazeObjectCollision(other)

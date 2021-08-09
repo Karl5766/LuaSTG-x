@@ -78,13 +78,9 @@ function Stage:getPlayer()
     return self.player
 end
 
----@return number, number the number of initial player life and bombs
-function Stage:getInitPlayerResources()
-    local player_init_state = self.scene_init_state.player_init_state
-    return player_init_state.num_life,
-        player_init_state.num_bomb,
-        player_init_state.num_graze,
-        player_init_state.power
+---@return gameplay_resources.Player resources that player initially holds
+function Stage:getInitPlayerResource()
+    return self.scene_init_state.player_resource
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -94,20 +90,20 @@ end
 function Stage:createScene()
     ---@type GameSceneInitState
     local scene_init_state = self.scene_init_state
-    local player_init_state = scene_init_state.player_init_state
+    local player_pos = scene_init_state.player_pos
     local group_init_state = self.scene_group:getSceneGroupInitState()
 
     -- set random seed
     ran:Seed(scene_init_state.random_seed)
 
     -- init score
-    self.score = scene_init_state.init_score
+    self.score = scene_init_state.score
 
     -- init player
     local Player = Ustorage:getById(group_init_state.player_class_id)
-    local player = Player(self, nil)
-    player.x = player_init_state.x
-    player.y = player_init_state.y
+    local player = Player(self, nil, scene_init_state.player_resource)
+    player.x = player_pos.x
+    player.y = player_pos.y
     self.player = player
 
     self.replay_io_manager:startNewScene()  -- clear input from last scene, setup replay reader/writer

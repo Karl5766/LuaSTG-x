@@ -60,8 +60,7 @@ end
 
 M.Power = DefineSimpleItem("image:item_power", function(self, player)
     CollectableItem.onCollect(self, player)
-    local support = player:getSupport()
-    support:setPower(support:getPower() + 1)
+    player:addPower(1)
 end)
 
 M.Point = DefineSimpleItem("image:item_point", function(self, player)
@@ -71,24 +70,24 @@ end)
 
 M.FullPower = DefineSimpleItem("image:item_full_power", function(self, player)
     CollectableItem.onCollect(self, player)
-    local support = player:getSupport()
-    support:setPower(support:getPower() + 400)
+    player:addPower(400)
 end)
 
 M.BigPower = DefineSimpleItem("image:item_big_power", function(self, player)
     CollectableItem.onCollect(self, player)
-    local support = player:getSupport()
-    support:setPower(support:getPower() + 100)
+    player:addPower(100)
 end)
 
 M.Extend = DefineSimpleItem("image:item_extend", function(self, player)
     CollectableItem.onCollect(self, player)
-    player:setLife(player:getLife() + 1)
+    local player_resource = player:getPlayerResource()
+    player_resource.num_life = player_resource.num_life + 1
 end)
 
 M.Bomb = DefineSimpleItem("image:item_bomb", function(self, player)
     CollectableItem.onCollect(self, player)
-    player:setBomb(player:getBomb() + 1)
+    local player_resource = player:getPlayerResource()
+    player_resource.num_bomb = player_resource.num_bomb + 1
 end)
 
 ---------------------------------------------------------------------------------------------------

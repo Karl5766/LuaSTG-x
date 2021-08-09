@@ -24,8 +24,10 @@ end
 ---@param bullet Prefab.Object the bullet that is grazed
 function M:graze(bullet)
     PlaySound("graze", 0.3, 0, true)
-    self.player:addGraze(1)
-    self.player:getStage():addScore(10000)
+    local player = self.player
+    local player_resource = player.player_resource
+    player_resource.num_graze = player_resource.num_graze + 1
+    player:getStage():addScore(10000)
 end
 
 function M:colli(other)

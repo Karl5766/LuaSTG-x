@@ -125,13 +125,12 @@ end
 
 ---update objects and call the scene update() function;
 ---advance the time by 1 frame
----can be re-written in sub-classes
 function GameScene:updateSceneAndObjects(dt)
     UpdateObjList()
     self:updateUserInput()
 
     profiler.tic('ObjFrame')
-    ObjFrame()--LPOOL.DoFrame() 执行对象的Frame函数
+    ObjFrame()  -- LPOOL.DoFrame() 执行对象的Frame函数
     profiler.toc('ObjFrame')
 
     -- update current scene
@@ -141,7 +140,7 @@ function GameScene:updateSceneAndObjects(dt)
     UserSystemOperation()  --用于lua层模拟内核级操作
     profiler.toc('UserSystemOperation')
 
-    BoundCheck()--执行边界检查
+    BoundCheck()  -- 执行边界检查
 
     profiler.tic('CollisionCheck')
     --碰撞检查
@@ -152,11 +151,11 @@ function GameScene:updateSceneAndObjects(dt)
     profiler.toc('CollisionCheck')
 
     profiler.tic('UpdateXY')
-    UpdateXY()--更新对象的XY坐标偏移量
+    UpdateXY()  -- 更新对象的XY坐标偏移量
     profiler.toc('UpdateXY')
 
     profiler.tic('AfterFrame')
-    AfterFrame()--帧末更新函数
+    AfterFrame()  -- 帧末更新函数
     profiler.toc('AfterFrame')
 end
 

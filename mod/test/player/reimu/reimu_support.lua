@@ -25,7 +25,6 @@ function M.__create(stage, player, img)
     local self = {}
     self.min_power = 0
     self.max_power = 400
-    self.power = self.min_power
 
     self.scale = 1
     self.focused_coeff = 0  -- 0 = non-focused; 1 = focused
@@ -87,13 +86,9 @@ end
 ---------------------------------------------------------------------------------------------------
 ---setters and getters
 
-function M:getPower()
-    return self.power
-end
-
----@param power number the power to set to; this value will be clamped between 0 and max_power
-function M:setPower(power)
-    self.power = max(0, min(power, self.max_power))
+---@return number, number minimum/maximum power
+function M:getPowerRange()
+    return self.min_power, self.max_power
 end
 
 function M:setPosition(x, y)
@@ -106,7 +101,8 @@ end
 
 ---@return number positive integer indicating the power level to go to
 function M:getTargetPowerLevel()
-    return floor(self.power / 100) + 1
+    local player_resource = self.player:getPlayerResource()
+    return floor(player_resource.num_power / 100) + 1
 end
 
 ---@return number positive integer indicating the current effective power level

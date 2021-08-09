@@ -52,16 +52,13 @@ end
 local function InheritGameplayResources(stage, next_init_state)
     next_init_state.score = stage:getScore()
 
-    local next_player_init_state = next_init_state.player_init_state
+    local next_player_pos = next_init_state.player_pos
     local cur_player = stage:getPlayer()
 
-    next_player_init_state.x = cur_player.x
-    next_player_init_state.y = cur_player.y
+    next_player_pos.x = cur_player.x
+    next_player_pos.y = cur_player.y
 
-    next_player_init_state.num_life,
-        next_player_init_state.num_bomb,
-        next_player_init_state.num_graze,
-        next_player_init_state.power = cur_player:getPlayerResources()
+    next_init_state.player_resource = cur_player:getPlayerResource():copy()
 end
 
 ---create a menu scene while saving replay

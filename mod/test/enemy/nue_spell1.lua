@@ -128,6 +128,36 @@ function M:ctor()
     --        task.Wait(1)
     --    end
     --end)
+
+    task.New(self, function()
+        local a = 0
+        while true do
+            local Laser = require("BHElib.units.bullet.laser_prefab")
+            local LaserTypes = require("BHElib.units.bullet.laser_types")
+            local bullet = Laser(self.stage, LaserTypes.default_laser, 4, 0.8, 0.5, 4, false)
+            bullet:turnOn(30)
+            bullet:setLength(60, 120, 60)
+            bullet:setFullWidth(50)
+            bullet.x = boss.x
+            bullet.y = boss.y
+            bullet.bound = true
+            local r = 3
+            bullet.vx = r * cos(a)
+            bullet.vy = r * sin(a)
+            bullet.rot = a
+            task.New(bullet, function()
+                while true do
+                    task.Wait(1)
+                    if bullet.y < 0 then
+                        Del(bullet)
+                    end
+                end
+            end)
+            a = a + 30
+            task.Wait(10)
+        end
+    end)
+
     task.New(self, function()
         boss:move(60, -boss.x, 120 - boss.y, boss.x > 0, self)
         task.Wait(120)

@@ -122,3 +122,6 @@ LoadTexture("tex:bullet_music_note", bullet_path.."bullet_music.png")
 LoadTexture("tex:bullet_fireball", bullet_path.."bullet_water_drop.png")
 
 LoadTexture("tex:bullet_cancel", bullet_path.."etbreak.png")
+
+--lasers
+LoadTexture("tex:laser_default", "THlib\\laser\\laser1.png")

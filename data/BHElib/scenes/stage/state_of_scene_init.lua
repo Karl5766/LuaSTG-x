@@ -4,30 +4,27 @@
 ---date: 2021.3.10
 ---desc: Defines the GameSceneInitState object, which is created and used for initialization of
 ---     the initial state of a level.
----modifier:
 ---------------------------------------------------------------------------------------------------
 
 ---@class GameSceneInitState
-local InitState = LuaClass("scenes.GameSceneInitState")
+local M = LuaClass("scenes.GameSceneInitState")
 
+local PlayerResource = require("BHElib.units.player.player_resource")
 local PlayerBase = require("BHElib.units.player.player_prefab")
 local _player_global = PlayerBase.global
 
 ---create and return a default init state
 ---the attributes of an object of this class should not be modified more than once,
 ---except for initialization immediately following creating the object
-function InitState.__create()
+function M.__create()
     local self = {}
     self.random_seed = 0
-    self.player_init_state = {
+    self.player_pos = {
         x = _player_global.spawn_x,
         y = _player_global.spawn_y,
-        num_life = 0,
-        num_bomb = 0,
-        num_graze = 0,
-        power = 0,
     }
-    self.init_score = 0
+    self.player_resource = PlayerResource()
+    self.score = 0
 
     return self
 end
@@ -35,32 +32,28 @@ end
 ---------------------------------------------------------------------------------------------------
 ---save to/load from file
 
-local _player_init_state_float_fields = {
-    "x",
-    "y",
-    "num_life",
-    "num_bomb",
-    "num_graze",
-    "power",
-}
-local _player_init_state_string_fields = {}
-
 ---manages saving the object to file at the current file cursor position
 ---@param file_writer SequentialFileWriter the object for writing to file
-function InitState:writeToFile(file_writer)
+function M:writeToFile(file_writer)
     file_writer:writeUInt(self.random_seed)
-    file_writer:writeUInt(self.init_score)
+    file_writer:writeUInt(self.score)
 
-    file_writer:writeFieldsOfTable(self.player_init_state, _player_init_state_float_fields, _player_init_state_string_fields)
+    file_writer:writeDouble(self.player_pos.x)
+    file_writer:writeDouble(self.player_pos.y)
+
+    self.player_resource:writeToFile(file_writer)
 end
 
 ---manages reading the object from file at the current file cursor position
 ---@param file_reader SequentialFileReader the object for reading from file
-function InitState:readFromFile(file_reader)
+function M:readFromFile(file_reader)
     self.random_seed = file_reader:readUInt()
-    self.init_score = file_reader:readUInt()
+    self.score = file_reader:readUInt()
 
-    file_reader:readFieldsOfTable(self.player_init_state, _player_init_state_float_fields, _player_init_state_string_fields)
+    self.player_pos.x = file_reader:readDouble()
+    self.player_pos.y = file_reader:readDouble()
+
+    self.player_resource:readFromFile(file_reader)
 end
 
-return InitState
+return M

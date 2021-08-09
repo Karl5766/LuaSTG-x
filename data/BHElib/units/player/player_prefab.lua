@@ -43,13 +43,16 @@ M.global = {
 ---@param animation_interval number integer indicating the player sprite animation interval in frames
 ---@param unfocused_speed number speed when unfocused; per frame
 ---@param focused_speed number speed when focused; per frame
+---@param player_resource gameplay_resources.Player specifies the initial resources this player holds
 ---@param stage Stage the current stage this player is at
 function M:init(
         player_input,
         animation_interval,
         unfocused_speed,
         focused_speed,
+        player_resource,
         stage)
+    assert(player_resource, "Error: PlayerResource does not exist")
     self.layer = LAYER_PLAYER
     self.group = GROUP_PLAYER
     self.bound = false
@@ -80,24 +83,7 @@ function M:init(
     self.spawn_counter = 0
     self.bomb_cooldown_timer = 0
     self.item_collect_border_y = 112
-end
-
-function M:initResourcesFromStage(stage)
-    local num_life, num_bomb, num_graze, power = stage:getInitPlayerResources()
-    assert(num_life and num_bomb and num_graze and power, "Error:Invalid player resources!")
-    self.num_life = num_life
-    self.num_bomb = num_bomb
-    self.num_graze = num_graze
-    self:setPower(power)
-end
-
-function M:initResourcesFromSpawningPlayer(spawning_player)
-    local num_life, num_bomb, num_graze, power = spawning_player:getPlayerResources()
-    assert(num_life and num_bomb and num_graze and power, "Error:Invalid player resources!")
-    self.num_life = num_life
-    self.num_bomb = num_bomb
-    self.num_graze = num_graze
-    self:setPower(power)
+    self.player_resource = player_resource:copy()
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -136,7 +122,7 @@ end
 
 ---@return player_support
 function M:getSupport()
-    return self.support
+    error("Error: Attempt to call getSupport() in base player class!")
 end
 
 ---@param time number the time to increase to if less (in number of frames)
@@ -146,43 +132,14 @@ function M:increaseInvincibilityTimerTo(time)
     end
 end
 
----@param inc_graze number the number of graze to increase
-function M:addGraze(inc_graze)
-    self.num_graze = self.num_graze + inc_graze
+---@param inc_power number the power to add; can be negative
+function M:addPower(inc_power)
+    error("Error: addPower() called in base class!")
 end
 
-function M:getGraze()
-    return self.num_graze
-end
-
-function M:setPower()
-    error("Error: setPower() called in base class!")
-end
-
----@return number
-function M:getPower()
-    error("Error: getPower() called in base class!")
-end
-
-function M:setLife(num_life)
-    self.num_life = num_life
-end
-
-function M:getLife()
-    return self.num_life
-end
-
-function M:setBomb(num_bomb)
-    self.num_bomb = num_bomb
-end
-
-function M:getBomb()
-    return self.num_bomb
-end
-
----@return number,number,number number of life, bomb and graze
-function M:getPlayerResources()
-    return self.num_life, self.num_bomb, self.num_graze, self:getPower()
+---@return gameplay_resources.Player resources that player initially holds
+function M:getPlayerResource()
+    return self.player_resource
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -449,10 +406,11 @@ function M:teleportTo(x, y)
 end
 
 function M:onMiss()
-    self.num_life = self.num_life - 1
-    self.num_bomb = 3
-    self:setPower(self:getPower() - 50)
-    if self.num_life < 0 then
+    local player_resource = self.player_resource
+    player_resource.num_life = player_resource.num_life - 1
+    player_resource.num_bomb = 3
+    self:addPower(-50)
+    if player_resource.num_life < 0 then
         self:endCurrentSession()
     end
 end
@@ -461,7 +419,7 @@ end
 ---update the player reference in stage object
 function M:respawn()
     local Player = self.class
-    local new_player = Player(self.stage, self)
+    local new_player = Player(self.stage, self, self.player_resource)
     local spawn_time = M.global.spawn_time
     local spawn_speed = M.global.spawn_speed
     local x = M.global.spawn_x

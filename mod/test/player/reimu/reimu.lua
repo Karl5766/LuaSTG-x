@@ -17,20 +17,17 @@ local ReimuSupport = require("player.reimu.reimu_support")
 
 ---@param stage Stage
 ---@param spawning_player Prefab.Player the player to inherit player resources (life, bombs etc.) from; nil if this is the first player
-function M:init(stage, spawning_player)
+---@param player_resource gameplay_resources.Player specifies the initial resources this player holds
+function M:init(stage, spawning_player, player_resource)
     PlayerBase.init(
             self,
             Input,
             8,
             4.5,
             2,
+            player_resource,
             stage)
     self.support = ReimuSupport(self.stage, self, "image:reimu_support")
-    if spawning_player then
-        self:initResourcesFromSpawningPlayer(spawning_player)
-    else
-        self:initResourcesFromStage(stage)
-    end
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -114,14 +111,11 @@ function M:getSupport()
     return self.support
 end
 
----@param power number
-function M:setPower(power)
-    return self.support:setPower(power)
-end
-
----@return number
-function M:getPower()
-    return self.support:getPower()
+---@param inc_power number the power to add; can be negative
+function M:addPower(inc_power)
+    local min_power, max_power = self.support:getPowerRange()
+    local player_resource = self.player_resource
+    player_resource.num_power = max(min_power, min(player_resource.num_power + inc_power, max_power))
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -164,8 +158,9 @@ end
 
 function M:processBombInput(player_input)
     if self.bomb_cooldown_timer <= 0 and player_input:isAnyRecordedKeyDown("spell") then
-        if self.num_bomb > 0 then
-            self.num_bomb = self.num_bomb - 1
+        local player_resource = self.player_resource
+        if player_resource.num_bomb > 0 then
+            player_resource.num_bomb = player_resource.num_bomb - 1
             self:saveFromMiss()
             require("BHElib.screen_effect"):shakePlayfield(
                     self.stage,

@@ -57,6 +57,7 @@ Prefab.Register(WBG)
 
 function M.__create(...)
     local self = Stage.__create(...)
+    self.targets = {}
     return self
 end
 

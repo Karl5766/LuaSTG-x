@@ -293,7 +293,7 @@ function M:drawResources(stage, font_name)
     local dy = 0
     local player = stage:getPlayer()
 
-    local num_life, num_bomb, num_graze = player:getPlayerResources()
+    local player_resource = player:getPlayerResource()
     local max_display_num = 8
 
     AlignedRender("image:icon_normal_title", middle_x, relative_y, 0.7)
@@ -330,7 +330,7 @@ function M:drawResources(stage, font_name)
             relative_y - 4,
             dx,
             dy,
-            num_life,
+            player_resource.num_life,
             max_display_num,
             1.1)
     AlignedRender("image_array:icon_line3", middle_x, relative_y - 20, 1.05)
@@ -345,7 +345,7 @@ function M:drawResources(stage, font_name)
             relative_y - 4,
             dx,
             dy,
-            num_bomb,
+            player_resource.num_bomb,
             max_display_num,
             1.1)
     AlignedRender("image_array:icon_line4", middle_x, relative_y - 20, 1.05)
@@ -353,7 +353,7 @@ function M:drawResources(stage, font_name)
     relative_y = relative_y - 50
 
     AlignedRender("image:icon_power_title", left_x + 2, relative_y - 5, 0.85)
-    DisplayPercent(player:getPower(), right_x, relative_y)
+    DisplayPercent(player_resource.num_power, right_x, relative_y)
     AlignedRender("image_array:icon_line5", middle_x, relative_y - 20, 1.05)
 
     relative_y = relative_y - 30
@@ -361,7 +361,7 @@ function M:drawResources(stage, font_name)
     AlignedRender("image:icon_graze_title", left_x + 27, relative_y - 5, 0.85)
     RenderText(
             font_name,
-            tostring(num_graze),
+            tostring(player_resource.num_graze),
             right_x,
             relative_y,
             0.4,

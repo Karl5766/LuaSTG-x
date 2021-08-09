@@ -14,6 +14,7 @@ local M = {
 local _scene_from
 ---set to true on the frame the next scene starts
 local _replace_flag
+local _transition_tasks = {}
 
 ---------------------------------------------------------------------------------------------------
 ---cache variables and functions
@@ -79,7 +80,7 @@ end
 ---@param self SceneTransition
 ---@param scene_from GameScene the current game scene
 function M.instantTransition(self, scene_from)
-    TaskNew(self, function()
+    TaskNew(_transition_tasks, function()
         GoToNextScene(scene_from)
     end)
 end
@@ -92,7 +93,7 @@ end
 ---handling transition visual effect at other frames
 function M.update()
     local scene = _scene_from
-    TaskDo(M)
+    TaskDo(_transition_tasks)
     _replace_flag = scene ~= nil and _scene_from == nil
 end
 

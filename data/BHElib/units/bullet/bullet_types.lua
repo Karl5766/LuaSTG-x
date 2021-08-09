@@ -83,7 +83,9 @@ local animated_bullets = {
 ---------------------------------------------------------------------------------------------------
 ---bullet type & color related mappings
 
-local NUM_COLORS = 16
+---total number of colors of enemy bullets; NUM_ENEMY_BULLET_COLOR = 16
+NUM_ENEMY_BULLET_COLOR = 16
+local NUM_COLORS = NUM_ENEMY_BULLET_COLOR
 
 COLOR_DEEP_RED = 1
 COLOR_RED = 2
@@ -302,8 +304,7 @@ function M.loadColumnAnimation(animation_array_name,
             width,
             interval,
             tex_name,
-            blend_mode
-    )
+            blend_mode)
 end
 
 ---------------------------------------------------------------------------------------------------
