@@ -91,6 +91,7 @@ end
 ---@param full_width number render width when fully appeared, completely solid
 function M:setFullWidth(full_width)
     self.full_width = full_width
+    self.cur_width = self.phase_coeff * full_width
     self.b = full_width * self.width_mul * 0.5
 end
 
@@ -166,6 +167,7 @@ function M:frame()
 end
 
 function M:render()
+
     local render_mode = "mul+add"
     if self.cur_width > 0 then
         local c = Color(255 * self.phase_coeff, 255, 255, 255)
@@ -355,25 +357,23 @@ function M:grow(time, l1, l2, l3)
 
     TaskNew(self, function()
         while cur_length < l3 do
-            self.l3 = cur_length
+            self:setLength(0, 0, cur_length)
             TaskWait(1)
             cur_length = cur_length + inc
         end
-        self.l3 = l3
         cur_length = cur_length - l3
         while cur_length < l2 do
-            self.l2 = cur_length
+            self:setLength(0, cur_length, l3)
             TaskWait(1)
             cur_length = cur_length + inc
         end
-        self.l2 = l2
         cur_length = cur_length - l2
         while cur_length < l1 do
-            self.l1 = cur_length
+            self:setLength(cur_length, l2, l3)
             TaskWait(1)
             cur_length = cur_length + inc
         end
-        self.l1 = l3
+        self:setLength(l1, l2, l3)
     end)
 end
 

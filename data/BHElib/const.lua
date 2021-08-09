@@ -7,7 +7,6 @@ GROUP_PLAYER_BULLET   = 3
 GROUP_PLAYER          = 4
 GROUP_ITEM            = 5
 GROUP_ALL             = 16
-GROUP_NUM_OF_GROUP    = 16
 
 
 --层次结构

@@ -130,6 +130,7 @@ function M:ctor()
     --end)
 
     task.New(self, function()
+        task.Wait(60)
         local a = 0
         while true do
             local Laser = require("BHElib.units.bullet.laser_prefab")
@@ -153,8 +154,8 @@ function M:ctor()
                     end
                 end
             end)
-            a = a + 30
-            task.Wait(10)
+            --a = a + 30
+            task.Wait(60)
         end
     end)
 
