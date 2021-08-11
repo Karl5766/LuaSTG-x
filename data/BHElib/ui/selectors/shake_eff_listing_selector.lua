@@ -113,7 +113,7 @@ function M:renderSelectable(index)
     else
         color_vec = self.normal_color
     end
-    body_text_obj:setColor(Color(color_vec.w, color_vec.x, color_vec.y, color_vec.z))
+    body_text_obj:setFontColor(Color(color_vec.w, color_vec.x, color_vec.y, color_vec.z))
 
     body_text_obj:setText(self.selectable_array[index].text)
     body_text_obj:render(item_pos.x, item_pos.y)

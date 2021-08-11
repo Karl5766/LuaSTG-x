@@ -24,8 +24,8 @@ local M = LuaClass("selectors.MultiPageMenuSelector", SimpleMenuSelector)
 ---@param blink_color_b math.vec4 blinking color; of form {r, g, b, a}
 ---@param normal_color math.vec4 color of the text when they are not blinking; of form {r, g, b, a}
 ---@param title_pos_offset math.vec2 title position relative to the body of the menu
----@param title_text_obj ui.TextObject text object describing how the title text should look; require everything
----@param body_text_obj ui.TextObject text object describing how the body text should look; require everything except text and color
+---@param title_text_obj ui.TextClass text object describing how the title text should look; require everything
+---@param body_text_obj ui.TextClass text object describing how the body text should look; require everything except text and color
 ---@param pos_increment math.vec2 increment in position between each two menu selectables
 ---@param all_selectable table an array of all selectables in this menu
 ---@param transition_fly_directions table an array of numbers specifying the transition flying direction in degrees
@@ -132,7 +132,7 @@ function M:renderDummySelectable(index)
     else
         color_vec = self.normal_color
     end
-    body_text_obj:setColor(Color(color_vec.w, color_vec.x, color_vec.y, color_vec.z))
+    body_text_obj:setFontColor(Color(color_vec.w, color_vec.x, color_vec.y, color_vec.z))
 
     body_text_obj:setText(self.selectable_array[index].text)
     body_text_obj:render(item_pos.x, item_pos.y)
@@ -198,7 +198,7 @@ end
 local MenuConst = require("BHElib.ui.menu.menu_global")
 local InteractiveSelector = require("BHElib.ui.selectors.interactive_selector")
 local Input = require("BHElib.input.input_and_recording")
-local TextObject = require("BHElib.ui.text_object")
+local TextClass = require("BHElib.ui.text_class")
 local Vec2 = math.vec2
 
 ---@param init_global_focused_index number
@@ -223,14 +223,14 @@ function M.shortInit(init_global_focused_index,
     local text_line_height = MenuConst.line_height * scale
     local text_align = {"center"}
     local title_color = MenuConst.title_color
-    local title_text_object = TextObject(
+    local title_text_object = TextClass(
             menu_page_title,
             Color(title_color.w, title_color.x, title_color.y, title_color.z),
             MenuConst.font_name,
             MenuConst.font_size * scale,
             text_align
     )
-    local body_text_object = TextObject(
+    local body_text_object = TextClass(
             nil,
             nil,
             MenuConst.font_name,

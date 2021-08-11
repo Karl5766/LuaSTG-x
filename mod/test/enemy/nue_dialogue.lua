@@ -5,7 +5,7 @@
 ---
 
 local Dialogue = require("BHElib.sessions.dialogue.dialogue_session")
-local TextObject = require("BHElib.ui.text_object")
+local TextClass = require("BHElib.ui.text_class")
 local Portrait = require("BHElib.sessions.dialogue.dialogue_portrait")
 local Vec2 = math.vec2
 
@@ -50,7 +50,7 @@ function M.__create(stage)
     return Dialogue.__create(
             stage,
             require("BHElib.input.input_and_recording"),
-            TextObject("", Color(255, 255, 255, 255), "font:test", 40, {"left", "top"}),
+            TextClass("", Color(255, 255, 255, 255), "font:noto_sans_sc", 0.5, {"left", "top"}),
             MainScript)
 end
 

@@ -1,4 +1,4 @@
----------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------
 ---text_object.lua
 ---author: Karl
 ---date: 2021.4.30
@@ -6,13 +6,13 @@
 ---     text according to the states
 ---------------------------------------------------------------------------------------------------
 
----@class ui.TextObject
-local M = LuaClass("ui.TextObject")
+---@class ui.TextClass
+local M = LuaClass("ui.TextClass")
 
 ---------------------------------------------------------------------------------------------------
 ---cache variables and functions
 
-local RenderTTF = RenderTTF
+local RenderText = RenderText
 local unpack = unpack
 
 ---------------------------------------------------------------------------------------------------
@@ -29,6 +29,7 @@ function M.__create(text, text_color, font_name, font_size, font_align)
     self.text = text
     self.text_color = text_color
     self.font_name = font_name
+    self.font = FindResFont(font_name)
     self.font_size = font_size
     self.font_align = font_align
     return self
@@ -42,13 +43,14 @@ function M:setText(text)
 end
 
 ---@param text_color lstg.Color color of the text
-function M:setColor(text_color)
+function M:setFontColor(text_color)
     self.text_color = text_color
 end
 
 ---@param font_name string name of the font to use
 function M:setFontName(font_name)
     self.font_name = font_name
+    self.font = FindResFont(font_size)
 end
 
 ---@param font_size number size of the text to display
@@ -56,23 +58,31 @@ function M:setFontSize(font_size)
     self.font_size = font_size
 end
 
----@param font_align table an array of strings specifying optional formats, see resources.lua
-function M:setFontAlign(font_align)
-    self.font_align = font_align
+---@param ... string an array of strings specifying optional formats, see resources.lua
+function M:setFontAlign(...)
+    self.font_align = {...}
 end
 
 ---@param x number position to render in x-coordinate
 ---@param y number position to render in y-coordinate
 function M:render(x, y)
     ---TODO:add font size feature
-    RenderTTF(
-            self.font_name,
-            self.text,
-            x, x,
-            y, y,
-            self.text_color,
-            unpack(self.font_align)
-    )
+
+    local font = self.font
+    local color = self.text_color
+    local blend_mode = nil
+    if blend_mode then
+        font:setRenderMode(blend_mode)
+    end
+    if color then
+        font:setColor(color)
+    end
+    RenderText(self.font_name,
+        self.text,
+        x,
+        y,
+        self.font_size,
+        unpack(self.font_align))
 end
 
 return M

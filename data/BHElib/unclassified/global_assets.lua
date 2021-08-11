@@ -22,7 +22,7 @@ LoadImageFromFile("image:button_pressed", "creator/image/default_btn_pressed.png
 
 LoadImageFromFile("image:menu_hud_background", "THlib\\UI\\menu_bg.png")
 
--- hint.png, line.png, rank.png and item.png
+-- hint.png, line.png, rank.png and item.png etc.
 do
     local function LoadImageAndSetCenter(tex_name, img_name, x, y, w, h, center_x, center_y)
         LoadImage(img_name, tex_name, x, y, w, h)
@@ -103,10 +103,28 @@ do
     -- line.png
     LoadTexture("tex:line", "THlib\\UI\\line.png", true)
     LoadImageGroup("image_array:icon_line", "tex:line", 0, 0, 200, 8, 1, 7)
-end
 
--- boss fight and spell
-LoadImageFromFile("image:boss_spell_left", "THlib\\enemy\\boss_cardleft.png")
+    ---boss fight and spell
+    LoadImageFromFile("image:hint_spell_card_left", "THlib\\enemy\\boss_cardleft.png")
+    -- sc_his_stage.png
+    images = {
+        {"image:boss_ui_spell_bonus_failed", 0, 0, 128, 32, 0, 16},
+        {"image:boss_ui_spell_master", 0, 32, 128, 32, 0, 16},
+    }
+    LoadTextureAndImages("tex:boss_ui_status", images, "THlib\\enemy\\sc_his_stage.png")
+    -- scname_sign.png
+    images = {
+        {"image:boss_ui_spell_bonus", 0, 0, 64, 32, 0, 16},
+        {"image:boss_ui_spell_capture_rate", 0, 32, 64, 32, 0, 16},
+    }
+    LoadTextureAndImages("tex:boss_ui_icon", images, "THlib\\enemy\\scname_sign.png")
+    -- boss_ui.png
+    images = {
+        {"image:boss_ui_spell_name_decoration", 0, 0, 256, 64},
+        {"image:boss_ui_position_indicator", 0, 64, 48, 16},
+    }
+    LoadTextureAndImages("tex:boss_ui", images, "THlib\\ui\\boss_ui.png")
+end
 
 
 -- bullets

@@ -1119,11 +1119,11 @@ end
 ---@param hscale number 水平缩放，默认为`1` | specifies horizontal scale.
 ---@param vscale number 垂直缩放，默认为`hscale` | specifies verticle scale. Will be same as `hscale` if only `hscale` is assigned.
 ---@param z number Z值，默认为0.5 | specifies z position, default to 0.5.
-function AlignedRender(name, x, y, hscale, vscale, z)
-    hscale = hscale or 1
-    vscale = vscale or hscale
+function AlignedRender(name, x, y, scale, vscale, z)
+    scale = scale or 1
+    vscale = vscale or scale
     local factor = GetImageScale()
-    FindResSprite(name):render(x, y, 0, hscale * factor, vscale * factor, z or 0.5)
+    FindResSprite(name):render(x, y, 0, scale * factor, vscale * factor, z or 0.5)
 end
 
 ---@~chinese 在一个矩形范围渲染图像资源。此时z为`0.5`。

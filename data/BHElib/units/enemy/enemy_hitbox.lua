@@ -13,20 +13,27 @@ local M = Prefab.NewX(Prefab.Object)
 
 ---------------------------------------------------------------------------------------------------
 
-function M:init(radius, hp)
+function M:init(radius, max_hp)
     self.group = GROUP_ENEMY
     self.bound = false
     self.a = radius
     self.b = radius
     self.rect = false
-    self.hp = hp
+    self.max_hp = max_hp
+    self.hp = max_hp
     self.damage_multiplier = 1
 end
 
-function M:frame()
-    if self.hp <= 0 then
-        Kill(self)
-    end
+---------------------------------------------------------------------------------------------------
+
+---@return number
+function M:getMaxHp()
+    return self.max_hp
+end
+
+---@return hp
+function M:getHp()
+    return self.hp
 end
 
 function M:setDamageMultiplier(damage_multiplier)
@@ -40,6 +47,15 @@ end
 ---@param attack number value of damage received
 function M:receiveDamage(attack)
     self.hp = self.hp - attack * self.damage_multiplier
+end
+
+---------------------------------------------------------------------------------------------------
+---update
+
+function M:frame()
+    if self.hp <= 0 then
+        Kill(self)
+    end
 end
 
 ---------------------------------------------------------------------------------------------------

@@ -14,7 +14,7 @@ local Vec4 = math.vec4
 
 local M = {
     font_name           = "font:menu",
-    font_size           = 0.625,
+    font_size           = 0.5,
     line_height         = 24,
     char_width          = 20,
     num_width           = 12.5,

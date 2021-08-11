@@ -18,13 +18,13 @@ local Renderer = require("BHElib.ui.renderer_prefab")
 ---@param duration number spell time in frames
 ---@param stage Stage
 ---@param attack_id string unique id of the attack
-function M.__create(stage, boss, duration, attack_id)
+---@param countdown_pos math.Vec2 position for the time to display
+function M.__create(stage, boss, duration, attack_id, countdown_pos)
     local self = Session.__create(stage)
     self.boss = boss
     ---@type Prefab.BossHitbox
     self.hitbox = nil
     self.duration = duration
-    self.timer = 0
     self.attack_id = attack_id
 
     self.timeout_flag = false
@@ -42,6 +42,10 @@ function M.__create(stage, boss, duration, attack_id)
     end
 
     self.renderer = Renderer(LAYER_TOP, self, "game")
+
+    local TextClass = require("BHElib.ui.text_class")
+    self.countdown_text_object = TextClass(nil, color.WhiteSmoke, "font:noto_sans_sc", nil, nil)
+    self.countdown_pos = math.Vec2(0, 164)
 
     return self
 end
@@ -85,8 +89,6 @@ function M:update(dt)
     if self.timer >= self.duration then
         self.timeout_flag = true
     end
-
-    self.timer = self.timer + 1
 end
 
 function M:syncHitboxPosition()
@@ -96,6 +98,29 @@ function M:syncHitboxPosition()
 end
 
 function M:render()
+    local pos = self.countdown_pos
+    local text_object = self.countdown_text_object
+
+    local scale = 0.6
+
+    local time_remain = (self.duration - self.timer) / 60
+    local integer = int(time_remain)
+    local mantissa = int(time_remain * 100) % 100
+
+    text_object:setText(tostring(integer).." ")
+    text_object:setFontAlign("right", "bottom")
+    text_object:setFontSize(0.7 * scale)
+    text_object:render(pos.x, pos.y)
+
+    if mantissa ~= 0 then
+        text_object:setText(".")
+        text_object:render(pos.x, pos.y)
+
+        text_object:setText(tostring(mantissa))
+        text_object:setFontAlign("left", "bottom")
+        text_object:setFontSize(0.6 * scale)
+        text_object:render(pos.x + 10 * scale, pos.y)
+    end
 end
 
 ---------------------------------------------------------------------------------------------------

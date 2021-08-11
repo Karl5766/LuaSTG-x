@@ -15,11 +15,9 @@ local Renderer = require("BHElib.ui.renderer_prefab")
 
 ---------------------------------------------------------------------------------------------------
 
-M.DEBUG_DISPLAY_NAME = "dialogue_session"
-
 ---@param stage Stage the stage this dialogue takes place
 ---@param player_input InputManager
----@param dialogue_text_object ui.TextObject
+---@param dialogue_text_object ui.TextClass
 ---@param script function a coroutine function that takes self as first parameter
 function M.__create(stage, player_input, dialogue_text_object, script)
     local self = ScriptableSession.__create(stage, script)
@@ -55,7 +53,7 @@ function M:getPortrait(pid)
     return self.portraits[pid]
 end
 
----@return ui.TextObject
+---@return ui.TextClass
 function M:getTextObject()
     return self.text_object
 end
@@ -139,6 +137,7 @@ function M:render()
     local image = "image:white"
     SetImageState(image, "", Color(255, 255, 200, 200))
     Render(image, 0, -145, 0, 5, 2, 0)
+
     self.text_object:render(-160, -100)
 end
 

@@ -153,11 +153,6 @@ local _hud_painter = require("BHElib.ui.hud_painter")
 function M:render()
     Stage.render(self)
     do
-        local x, y = 720, 160
-        RenderText("font:test",
-                string.format("Time:%d/200", tostring(math.floor(self.timer / 60))),
-                x, y, 0.4, "right")
-
         local session = self.boss_fight.session
         if session ~= nil then
             local boss = session.hitbox

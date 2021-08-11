@@ -7,9 +7,12 @@
 local Prefab = require("core.prefab")
 local SpellSession = assert(require("BHElib.sessions.boss.spell_session"))
 
+---@class Nue.spell1:SpellSession
 local M = LuaClass("Nue.spell1", SpellSession)
 
 local BossHitbox = require("BHElib.sessions.boss.boss_hitbox")
+
+M.SPELL_DISPLAY_NAME = "test spell \"测试符卡\""
 
 ---------------------------------------------------------------------------------------------------
 ---bullet

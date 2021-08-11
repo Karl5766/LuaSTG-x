@@ -90,7 +90,7 @@ function M:render()
     end
     for i = 0, num_star - 1 do
         local xi, yi = i % max_width, int(i / max_width)
-        AlignedRender("image:boss_spell_left", -176 + xi * star_width, 186 - yi * star_height, 0.75)
+        AlignedRender("image:hint_spell_card_left", -176 + xi * star_width, 186 - yi * star_height, 0.75)
     end
 end
 

@@ -12,6 +12,8 @@
 ---of the origin and the relative scale of the coordinates are calculated based on the other coordinate
 ---system when they are needed
 
+require("BHElib.unclassified.const")
+
 ---@class Coordinates
 local M = {}
 
@@ -553,7 +555,7 @@ local function WriteToLog()
         game_vp     = game_viewport,    world_ortho = game_ortho,
         screen_scale = _ui_x_unit
     }
-    SystemLog('view params:\n' .. stringify(t))
+    SystemLog("view params:\n" .. stringify(t))
 
     local scale = _glv:getDesignResolutionSize().height / 480
     SystemLog(string.format(
