@@ -18,12 +18,11 @@ local Renderer = require("BHElib.ui.renderer_prefab")
 ---@param attack_session_class_array table an array of classes of the attack sessions to play
 ---@param script function a coroutine function that takes self as first parameter
 ---@param stage Stage
-function M.__create(boss, attack_session_class_array, script, stage)
-    local self = ScriptableSession.__create(script)
+function M.__create(stage, boss, attack_session_class_array, script)
+    local self = ScriptableSession.__create(stage, script)
     self.boss = boss
     self.attack_session_class_array = attack_session_class_array
     self.renderer = Renderer(LAYER_TOP, self, "game")
-    self.stage = stage
     return self
 end
 
@@ -76,8 +75,8 @@ function M:getNumSpellLeft(index)
 end
 
 function M:endSession()
-    Del(self.renderer)
     ScriptableSession.endSession(self)
+    Del(self.renderer)
 end
 
 function M:render()

@@ -5,6 +5,7 @@
 ---desc: Defines the in-game dialogue
 ---------------------------------------------------------------------------------------------------
 
+local Session = require("BHElib.sessions.session")
 local ScriptableSession = require("BHElib.sessions.scriptable_session")
 
 ---@class DialogueSession:ScriptableSession
@@ -14,11 +15,14 @@ local Renderer = require("BHElib.ui.renderer_prefab")
 
 ---------------------------------------------------------------------------------------------------
 
+M.DEBUG_DISPLAY_NAME = "dialogue_session"
+
+---@param stage Stage the stage this dialogue takes place
 ---@param player_input InputManager
 ---@param dialogue_text_object ui.TextObject
 ---@param script function a coroutine function that takes self as first parameter
-function M.__create(player_input, dialogue_text_object, script)
-    local self = ScriptableSession.__create(script)
+function M.__create(stage, player_input, dialogue_text_object, script)
+    local self = ScriptableSession.__create(stage, script)
 
     self.portraits = {}  -- a map from portrait id to portraits; includes all existing portrait
     self.portrait_renderers = {}  -- renderer for each portrait
@@ -93,19 +97,20 @@ end
 ---------------------------------------------------------------------------------------------------
 
 function M:endSession()
+    Session.endSession(self)
+
     -- delete all renderers, so no dangling object remains
     Del(self.renderer)
     for pid, renderer in pairs(self.portrait_renderers) do
         Del(renderer)
     end
-    ScriptableSession.endSession(self)
 end
 
 ---------------------------------------------------------------------------------------------------
 ---update
 
 function M:update(dt)
-    assert(self:isContinuing(), "Error: Attempt to update a session that has ended!")
+    Session.update(self, dt)
 
     local is_updated = self:updateChildren()  -- run children
 

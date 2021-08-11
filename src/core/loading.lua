@@ -6,7 +6,7 @@
 --------------------------------------------------------------------------
 
 local FU = cc.FileUtils:getInstance()
-local FS = require("file_system")
+local FS = require("file_system.file_system")
 
 ---If the directory exists, add directory path to the default paths;
 ---otherwise the function will load the zip files with LoadPack() function.
@@ -57,9 +57,12 @@ local _setting_util = require("setting.setting_util")
 ---call lstg.loadSetting();
 ---call SetTitle() and
 ---set the resource pool to stage afterwards
-function lstg.loadMod()
+---@param mod_name string
+---@param sevolume number
+---@param bgmvolume number
+function lstg.loadMod(mod_name, sevolume, bgmvolume)
     local writable_path = FS.getWritablePath()
-    local mod_path = string.format('%s/mod/%s', writable_path, setting.mod)
+    local mod_path = string.format('%s/mod/%s', writable_path, mod_name)
     mod_path = mod_path:gsub('//', '/')  -- replace '//' with '/'
 
     local dir, zip = true, true  -- whether or not try to load directory and zip
@@ -67,10 +70,10 @@ function lstg.loadMod()
     -- look for /root.lua or .zip
     if dir and FS.isFileExist(mod_path .. '/root.lua') then
         FU:addSearchPath(mod_path)
-        SystemLog(string.format(i18n 'load mod %q from local path', setting.mod))
+        SystemLog(string.format(i18n 'load mod %q from local path', mod_name))
     elseif zip and FS.isFileExists(mod_path .. '.zip') then
-        SystemLog(string.format(i18n 'load mod %q from zip file', setting.mod))
-        LoadPack(path .. '.zip')
+        SystemLog(string.format(i18n 'load mod %q from zip file', mod_name))
+        LoadPack(mod_path .. '.zip')
     else
         SystemLog(string.format('%s: %s', "ERROR"..i18n "can't find mod", path))
     end
@@ -81,9 +84,12 @@ function lstg.loadMod()
 
     ---update the screen and sound settings according to the values set in global setting table
     local _scr_metrics = require("setting.screen_metrics")
-    _scr_metrics.setWindowTitle(setting.mod)
-    SetSEVolume(setting.sevolume / 100)
-    SetBGMVolume(setting.bgmvolume / 100)
+
+    local setting_file_mirror = require("setting.setting_file_mirror")
+    local setting_content = setting_file_mirror:getContent()
+    _scr_metrics.setWindowTitle(setting_content.mod)
+    SetSEVolume(sevolume / 100)
+    SetBGMVolume(bgmvolume / 100)
 
     SetResourceStatus('stage')
     return scene

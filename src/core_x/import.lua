@@ -5,7 +5,7 @@
 ---
 
 ---@type x.FileSystem
-local FS = require("file_system")
+local FS = require("file_system.file_system")
 
 local function GetExtension(str)
     return str:match(".+%.(%w+)$")

@@ -233,12 +233,19 @@ end
 
 function Stage:cleanup_sessions()
     local session_array = {}
+
+    ---important to implement the sessions so that:
+    ---order of deletion doesn't matter (even though some sessions are others' child sessions)
     for session, v in pairs(self.sessions) do
         session_array[#session_array + 1] = session
     end
     for i = 1, #session_array do
-        session_array[i]:endSession()
+        local session = session_array[i]
+        if session:isContinuing() then
+            session:endSession()
+        end
     end
+    assert(#self.sessions == 0, "Error: Some sessions are not ended properly on stage cleanup!")
 end
 
 ---construct the object for the next scene and return it

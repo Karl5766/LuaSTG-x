@@ -46,8 +46,9 @@ local function MainScript(dialogue)
     --end
 end
 
-function M.__create()
+function M.__create(stage)
     return Dialogue.__create(
+            stage,
             require("BHElib.input.input_and_recording"),
             TextObject("", Color(255, 255, 255, 255), "font:test", 40, {"left", "top"}),
             MainScript)

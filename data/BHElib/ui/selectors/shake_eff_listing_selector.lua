@@ -16,7 +16,6 @@ local M = LuaClass("selectors.ShakeEffListingSelector", ListingSelector)
 M.Selectable = LuaClass("ShakeEffListingSelector.Selectable")
 local Selectable = M.Selectable
 
----@param init_timer_value number the initial time value of the shaking timer
 ---@param text string text to display
 ---@param choices any describes result of selecting the item
 function Selectable.__create(text, choices)

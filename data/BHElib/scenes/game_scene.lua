@@ -13,6 +13,7 @@ local _raw_input = require("setting.key_mapping")
 local _input = require("BHElib.input.input_and_recording")
 local Prefab = require("core.prefab")
 local Director = cc.Director:getInstance()
+local _setting_file_mirror = require("setting.setting_file_mirror")
 
 ---------------------------------------------------------------------------------------------------
 ---cache variables and functions
@@ -175,7 +176,10 @@ local _process_one_task = async.processOneTask
 ---
 function GameScene:doUpdatesBetweenRender(dt)
     profiler.tic('FrameFunc')
-    if _raw_input:isAnyDeviceKeyDown("snapshot") and setting.allowsnapshot then
+
+    local setting_content = _setting_file_mirror:getContent()
+
+    if _raw_input:isAnyDeviceKeyDown("snapshot") and setting_content.allowsnapshot then
         Screenshot()
     end
     _process_one_task()  -- async load of resources etc.
@@ -183,10 +187,10 @@ function GameScene:doUpdatesBetweenRender(dt)
     e:dispatchEvent('onFrameFunc')  -- in case any event is registered
 
     -- update game state k times, k depending on the value given by
-    -- (setting.render_skip + 1) * self.playback_speed
+    -- (setting_content.render_skip + 1) * self.playback_speed
     local factor = self.playback_speed
-    if setting.render_skip then
-        factor = factor * (int(setting.render_skip) + 1)
+    if setting_content.render_skip then
+        factor = factor * (int(setting_content.render_skip) + 1)
     end
     local cur_playback_timer = self.playback_timer + factor
     for _ = 1, floor(cur_playback_timer) - floor(self.playback_timer) do

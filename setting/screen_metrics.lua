@@ -9,7 +9,8 @@
 ---@class ScreenMetrics
 local M = {}
 
--- local _default_setting  --the setting table that serves as default init values
+---@type JsonFileMirror
+local _setting_file_mirror
 local _setting_screen  -- a table under the setting table that stores screen information
 
 ---screen resolution in pixels
@@ -22,7 +23,7 @@ local _windowsize_w, _windowsize_h
 local _splash
 
 ---window title
-local _title = "LuaSTG-x"  -- later set to default_setting.mod manually
+local _title = "LuaSTG-x"  -- later set to mod name manually
 
 ---other window settings
 local _windowed, _vsync
@@ -34,9 +35,10 @@ local _windowed, _vsync
 ---screen initialization functions can take this object and use its getters to help init the screen.
 ---
 ---this function should only be called on application startup
----@param default_setting table the default setting table
-function M.init(default_setting)
-    _setting_screen = default_setting.screen
+---@param setting_file_mirror JsonFileMirror the setting table that specifies the default init values
+function M.init(setting_file_mirror)
+    _setting_file_mirror = setting_file_mirror
+    _setting_screen = _setting_file_mirror:getContent().screen
 
     _resx = _setting_screen.resx
     _resy = _setting_screen.resy
@@ -78,6 +80,7 @@ end
 function M.rememberScreenResolution(res_width, res_height)
     _setting_screen.resx = res_width
     _setting_screen.resy = res_height
+    _setting_file_mirror:syncToFile()
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -108,6 +111,7 @@ end
 function M.rememberScreenSize(screen_width, screen_height)
     _setting_screen.resx = screen_width
     _setting_screen.resy = screen_height
+    _setting_file_mirror:syncToFile()
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -136,6 +140,7 @@ end
 ---the termination of the application.
 function M.rememberWindowed(is_windowed)
     _setting_screen.windowed = is_windowed
+    _setting_file_mirror:syncToFile()
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -155,6 +160,7 @@ end
 ---the termination of the application.
 function M.rememberVsync(is_vsync)
     _setting_screen.vsync = is_vsync
+    _setting_file_mirror:syncToFile()
 end
 
 ---------------------------------------------------------------------------------------------------

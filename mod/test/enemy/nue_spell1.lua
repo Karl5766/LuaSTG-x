@@ -9,7 +9,7 @@ local SpellSession = assert(require("BHElib.sessions.boss.spell_session"))
 
 local M = LuaClass("Nue.spell1", SpellSession)
 
-local EnemyHitbox = require("BHElib.units.enemy.enemy_hitbox")
+local BossHitbox = require("BHElib.sessions.boss.boss_hitbox")
 
 ---------------------------------------------------------------------------------------------------
 ---bullet
@@ -101,14 +101,15 @@ Prefab.Register(Orb)
 ---------------------------------------------------------------------------------------------------
 
 function M.__create(boss, stage)
-    local hp = 14400
-    local hitbox = EnemyHitbox(16, hp)
-    local self = SpellSession.__create(stage, boss, hitbox, 12000, "test_attack")
+    local self = SpellSession.__create(stage, boss, 12000, "test_attack")
 
     return self
 end
 
 function M:ctor()
+    local hp = 360
+    local hitbox = BossHitbox(16, hp, self)
+
     ---@type RumiaAnimation
     local boss = self.boss
 

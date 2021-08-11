@@ -19,7 +19,9 @@ local function CreateControllerUI(parent)
     local scale_size = screen.scale * 0.65
     local fontsize = scale_size * 18
 
-    local xx = setting.resx / scale_pos
+    local setting_file_mirror = require("setting.setting_file_mirror")
+    local setting_content = setting_file_mirror:getContent()
+    local xx = setting_content.resx / scale_pos
     local pESCAPE = cc.pMul(cc.p(xx - 135, 135), scale_pos)
     local pSHIFT = cc.pMul(cc.p(xx - 56, 56), scale_pos)
     local pX = cc.pMul(cc.p(xx - 56, 160), scale_pos)
@@ -27,8 +29,8 @@ local function CreateControllerUI(parent)
 
     local tk_sc = 0.8 * scale_size
     local k5, k6, k7, k8 = KEY.ESCAPE, KEY.SHIFT, KEY.X, KEY.Z
-    if setting then
-        k5, k6, k7, k8 = setting.keysys.menu, setting.keys.slow, setting.keys.spell, setting.keys.shoot
+    if setting_content then
+        k5, k6, k7, k8 = setting_content.keysys.menu, setting_content.keys.slow, setting_content.keys.spell, setting_content.keys.shoot
     end
 
     local bt5 = cc.SetNode(TouchKey:create(tex, k5), parent, pESCAPE, tk_sc * 0.9)

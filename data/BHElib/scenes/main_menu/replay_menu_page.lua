@@ -14,7 +14,7 @@ local MultiPageMenuSelector = require("BHElib.ui.selectors.multi_page_menu_selec
 local ShakeEffListingSelector = require("BHElib.ui.selectors.shake_eff_listing_selector")
 local MenuConst = require("BHElib.ui.menu.menu_global")
 local Coordinates = require("BHElib.unclassified.coordinates_and_screen")
-local FS = require("file_system")
+local FS = require("file_system.file_system")
 
 ---------------------------------------------------------------------------------------------------
 ---cache variables and functions

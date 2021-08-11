@@ -29,9 +29,9 @@ local json = cjson or json
 ---@type ScreenMetrics
 local _scr_metrics
 local function InitSetting()
-    require("setting.setting_util").loadSettingFile()
+    local setting_file_mirror = require("setting.setting_file_mirror")
     _scr_metrics = require("setting.screen_metrics")
-    _scr_metrics.init(setting)
+    _scr_metrics.init(setting_file_mirror)
 end
 InitSetting()
 
@@ -79,7 +79,8 @@ local function InitGLView()
     _scr_metrics.setVsync(_scr_metrics.getVsync())  -- init set vsync after making sure glv is created
     _scr_metrics.setSplash(_scr_metrics.getSplash())  -- show cursor
 
-    if setting.render_skip == 1 then
+    local setting_file_mirror = require("setting.setting_file_mirror")
+    if setting_file_mirror:getContent().render_skip == 1 then
         lstg.SetFPS(30)
     else
         lstg.SetFPS(60)

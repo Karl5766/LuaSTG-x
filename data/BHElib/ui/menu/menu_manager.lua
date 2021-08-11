@@ -45,8 +45,8 @@ end
 ---init
 
 ---create and return a new Menu instance
----@param current_task table specifies a task that the menu should carry out; format {string, table}
----@return Menu a menu object
+---@param transition_speed number a transition speed coefficient
+---@return MenuManager
 function M.__create(transition_speed)
     local self = {}
 

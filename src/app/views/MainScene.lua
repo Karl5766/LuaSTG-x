@@ -7,16 +7,6 @@ for _, v in ipairs({ 'FocusLoseFunc', 'FocusGainFunc' }) do
     end
 end
 
-local _is_mod_loaded = false
-
----call lstg.loadMod only if it has not been called by this method
-local function _safe_load_mod()
-    if not _is_mod_loaded then
-        _is_mod_loaded = true
-        return lstg.loadMod()
-    end
-end
-
 ---Start one of the two launcher uis or start the game,
 ---depending on the value of local skip_setting and skip_selection
 function MainScene:onEnter()
@@ -26,7 +16,9 @@ end
 ---run/switch to the game scene
 function MainScene:runGameScene()
     -- in game
-    local scene = _safe_load_mod()
+    local setting_file_mirror = require("setting.setting_file_mirror")
+    local setting_content = setting_file_mirror:getContent()
+    local scene = lstg.loadMod(setting_content.mod_info.name, setting_content.sevolume, setting_content.bgmvolume)
 
     if director:getRunningScene() then
         director:pushScene(scene)

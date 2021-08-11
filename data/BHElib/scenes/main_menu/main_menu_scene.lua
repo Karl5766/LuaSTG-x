@@ -13,7 +13,7 @@ local M = LuaClass("scenes.Menu", GameScene)
 -- require modules
 local SceneInitState = require("BHElib.scenes.stage.state_of_scene_init")
 local ReplayFileReader = require("BHElib.input.replay_file_reader")
-local FileStream = require("util.file_stream")
+local FileStream = require("file_system.file_stream")
 
 local MenuConst = require("BHElib.ui.menu.menu_global")
 local Ustorage = require("util.universal_id")
@@ -31,7 +31,7 @@ end
 
 ---create and return a new menu scene
 ---@param menu_manager MainMenuManager an object that manages the menu pages
----@return Menu a menu object
+---@return MenuManager
 function M.__create(menu_manager)
     local self = GameScene.__create()
 
@@ -64,11 +64,11 @@ function M:createNextAndCleanupCurrentScene()
     end
 
     local start_stage_in_replay = 1
-    local replay_path_for_read = nil
+    local replay_path_for_read
 
     -- create init states for stage and the scene group
-    local scene_init_state = nil
-    local group_init_state = nil
+    local scene_init_state
+    local group_init_state
     if is_replay then
         ---replay mode
         -- read from file

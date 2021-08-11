@@ -5,31 +5,31 @@
 ---desc: Defines the attacks for the boss
 ---------------------------------------------------------------------------------------------------
 
----@class AttackSession
-local M = LuaClass("AttackSession")
+local Session = require("BHElib.sessions.session")
+
+---@class AttackSession:Session
+local M = LuaClass("AttackSession", Session)
 
 local Renderer = require("BHElib.ui.renderer_prefab")
 
 ---------------------------------------------------------------------------------------------------
 
 ---@param boss Prefab.Animation
----@param hitbox Prefab.EnemyHitbox
 ---@param duration number spell time in frames
 ---@param stage Stage
 ---@param attack_id string unique id of the attack
-function M.__create(stage, boss, hitbox, duration, attack_id)
-    local self = {}
+function M.__create(stage, boss, duration, attack_id)
+    local self = Session.__create(stage)
     self.boss = boss
-    self.hitbox = hitbox
+    ---@type Prefab.BossHitbox
+    self.hitbox = nil
     self.duration = duration
     self.timer = 0
-
-    ---@type Stage
-    self.stage = stage
     self.attack_id = attack_id
 
     self.timeout_flag = false
     self.fail_flag = false  -- if the player has made a mistake
+    self.kill_flag = false  -- true only if the boss' hitbox was shot down
 
     local enable_capture = not stage:isReplay()
     self.enable_capture = enable_capture
@@ -42,8 +42,6 @@ function M.__create(stage, boss, hitbox, duration, attack_id)
     end
 
     self.renderer = Renderer(LAYER_TOP, self, "game")
-
-    stage:addSession(self)
 
     return self
 end
@@ -61,14 +59,15 @@ function M:isTimeOut()
     return self.timeout_flag
 end
 
----return true if the spell has not ended
-function M:isContinuing()
-    return IsValid(self.hitbox) and not self.timeout_flag
-end
-
 ---@return string
 function M:getAttackId()
     return self.attack_id
+end
+
+---@param hitbox Prefab.BossHitbox
+function M:addHitbox(hitbox)
+    assert(self.hitbox == nil, "Error: (SingleBoss) Attack session does not support multiple hitbox!")
+    self.hitbox = hitbox
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -76,6 +75,8 @@ end
 
 ---@param dt number
 function M:update(dt)
+    Session.update(self, dt)
+
     task.Do(self)
 
     -- sync the position of hitbox to that of the boss
@@ -104,17 +105,26 @@ function M:onPlayerMissOrBomb()
     self.fail_flag = true
 end
 
+function M:onHitboxKill()
+    self.kill_flag = true
+    if not self.endSessionFlag then
+        self:endSession()
+    end
+end
+
+function M:onHitboxDel()
+    if not self.endSessionFlag then
+        self:endSession()
+    end
+end
+
 function M:endSession()
+    Session.endSession(self)
+
     local stage = self.stage
-    print("ending session")
     if self.enable_capture then
-        print("capture enabled")
-        print(self:isFail())
-        print(self:isTimeOut())
-        print(IsValid(self.hitbox))
-        local is_captured = not (self:isFail() or self:isTimeOut() or IsValid(self.hitbox))
+        local is_captured = self.kill_flag and not (self:isFail() or self:isTimeOut())
         if is_captured then
-            print("captured")
             require("BHElib.sessions.boss.capture_rate"):incCaptureNum(
                     stage:getDifficulty(),
                     self.attack_id,
@@ -126,8 +136,6 @@ function M:endSession()
         Del(self.hitbox)
     end
     Del(self.renderer)
-
-    stage:removeSession(self)
 end
 
 return M

@@ -2,6 +2,8 @@
 --lstg.DoFile('jit_test.lua')
 local fu = cc.FileUtils:getInstance()
 fu:setPopupNotify(true)
+require("cocos.cocos2d.functions")
+
 -- note: GLView is opened in display.lua
 -- it's necessary for FrameInit
 require('config')

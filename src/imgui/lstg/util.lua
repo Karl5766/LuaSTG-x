@@ -57,8 +57,11 @@ function M.load(target, docking, no_tool, no_font)
     end
     -- disable navigation
     im.configFlagDisable(im.ConfigFlags.NavEnableKeyboard, im.ConfigFlags.NavEnableGamepad)
-    --im.setVisible(setting.imgui_visible)
-    la:setVisible(setting.imgui_visible)
+
+
+    local setting_file_mirror = require("setting.setting_file_mirror")
+    local setting_content = setting_file_mirror:getContent()
+    la:setVisible(setting_content.imgui_visible)
 end
 
 function M.loadFont()

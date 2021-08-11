@@ -11,7 +11,6 @@
 local M = {}
 
 local _save_file_mirror = require("BHElib.unclassified.save_file_mirror")
-local _capture_rate_table = _save_file_mirror:getContent().capture_rate
 
 ---------------------------------------------------------------------------------------------------
 ---cache variables and functions
@@ -52,9 +51,11 @@ end
 ---@return number,number num_capture, num_attempt
 function M:getCaptureRate(difficulty, attack_id, player_id)
 
+	local capture_rate_table = _save_file_mirror:getContent().capture_rate
+
 	if difficulty == nil then
 		local total_capture, total_attempt = 0, 0
-		for k, v in pairs(_capture_rate_table) do
+		for k, v in pairs(capture_rate_table) do
 			local num_capture, num_attempt = self:getCaptureRate(v, attack_id, player_id)
 			total_capture = total_capture + num_capture
 			total_attempt = total_attempt + num_attempt
@@ -62,7 +63,7 @@ function M:getCaptureRate(difficulty, attack_id, player_id)
 		return total_capture, total_attempt
 	end
 
-	local records = _capture_rate_table[difficulty]
+	local records = capture_rate_table[difficulty]
 	if not records then return 0, 0 end
 
 	if attack_id == nil then
@@ -104,8 +105,11 @@ end
 ---@param capture_rate table an ordered pair {num_capture, num_attempt}
 function M:setCaptureRate(difficulty, attack_id, player_id, capture_rate)
 	CheckInputNonNil(difficulty, attack_id, player_id)
-	local difficulty_table = _capture_rate_table[difficulty] or {}
-	_capture_rate_table[difficulty] = difficulty_table
+
+	local capture_rate_table = _save_file_mirror:getContent().capture_rate
+
+	local difficulty_table = capture_rate_table[difficulty] or {}
+	capture_rate_table[difficulty] = difficulty_table
 	local attack_table = difficulty_table[attack_id] or {}
 	difficulty_table[attack_id] = attack_table
 	attack_table[player_id] = {capture_rate[1], capture_rate[2]}
@@ -115,11 +119,9 @@ end
 
 ---increment the capture number for the attack by 1
 function M:incCaptureNum(difficulty, attack_id, player_id)
-	print("incing capture")
 	CheckInputNonNil(difficulty, attack_id, player_id)
 	local num_capture, num_attempt = self:getCaptureRate(difficulty, attack_id, player_id)
 	self:setCaptureRate(difficulty, attack_id, player_id, {num_capture + 1, num_attempt})
-	_save_file_mirror:syncToFile()
 end
 
 ---increment the attempt number for the attack by 1
@@ -127,7 +129,6 @@ function M:incAttemptNum(difficulty, attack_id, player_id)
 	CheckInputNonNil(difficulty, attack_id, player_id)
 	local num_capture, num_attempt = self:getCaptureRate(difficulty, attack_id, player_id)
 	self:setCaptureRate(difficulty, attack_id, player_id, {num_capture, num_attempt + 1})
-	_save_file_mirror:syncToFile()
 end
 
 return M

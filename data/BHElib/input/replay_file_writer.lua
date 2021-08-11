@@ -9,7 +9,7 @@
 ---@class ReplayFileWriter
 local ReplayFileWriter = LuaClass("input.ReplayFileWriter")
 
-local SequentialFileWriter = require("util.sequential_file_writer")  -- for write to replay
+local SequentialFileWriter = require("file_system.sequential_file_writer")  -- for write to replay
 
 ---------------------------------------------------------------------------------------------------
 ---init

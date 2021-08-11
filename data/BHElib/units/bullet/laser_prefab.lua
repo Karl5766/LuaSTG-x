@@ -336,9 +336,9 @@ function M:onBulletCancel(stage)
             end
         end
     end
-    for l = start, finish, 12 do
+    for length = start, finish, 12 do
         local item = Items.SmallFaith(stage)
-        item.x, item.y = x0 + l * cos_rot, y0 + l * sin_rot
+        item.x, item.y = x0 + length * cos_rot, y0 + length * sin_rot
     end
 
     Del(self, false)

@@ -43,7 +43,7 @@ function M.format_json(str)
 end
 
 local FU = cc.FileUtils:getInstance()
-local FS = require("file_system")
+local FS = require("file_system.file_system")
 
 local _setting_path = FS.getWritablePath() .. 'setting/setting.ini'  -- setting file is at the main directory
 
@@ -65,6 +65,9 @@ function M.saveSettingFile()
     FU:writeStringToFile(str, _setting_path)
 end
 
+---------------------------------------------------------------------------------------------------
+---debugging
+
 ---check if decode(format_json(encode(o))) is the same as o;
 ---if so, the result copy of o is returned; if not, an error will be thrown
 ---@param o any the object to test
@@ -79,8 +82,6 @@ function M.encodeTest(o)
     end
     return str, result
 end
-
----------------------------------------------------------------------------------------------------
 
 local function IsVal(s)
     return s == 'boolean' or s == 'number' or s == 'string'

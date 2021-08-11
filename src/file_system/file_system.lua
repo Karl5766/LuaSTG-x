@@ -41,7 +41,7 @@ end
 ---@param path_from string 原文件路径
 ---@param path_to string 副本的完整路径
 function M.copyFile(path_from, path_to)
-    local FileStream = require("util.file_stream")
+    local FileStream = require("file_system.file_stream")
     local file_from = FileStream(path_from, "rb")
     local file_to = FileStream(path_to, "wb")
     while true do

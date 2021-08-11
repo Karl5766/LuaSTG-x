@@ -9,7 +9,7 @@
 ---@class ReplayFileReader
 local ReplayFileReader = LuaClass("input.ReplayFileReader")
 
-local SequentialFileReader = require("util.sequential_file_reader")  -- for read from replay
+local SequentialFileReader = require("file_system.sequential_file_reader")  -- for read from replay
 
 ---------------------------------------------------------------------------------------------------
 ---init

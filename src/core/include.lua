@@ -1,5 +1,5 @@
 local FU = cc.FileUtils:getInstance()
-local FS = require("file_system")
+local FS = require("file_system.file_system")
 
 ---已包含的脚本
 local _all_included_files = {}

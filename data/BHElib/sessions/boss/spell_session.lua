@@ -18,13 +18,11 @@ M.IS_SPELL_CLASS = true
 ---init
 
 ---@param boss Prefab.Animation
----@param hitbox Prefab.EnemyHitbox
 ---@param duration number spell time in frames
 ---@param stage Stage
 ---@param attack_id string unique id of the attack
----@param enable_capture boolean if true, the global capture history will be modified at start and end of the spell
-function M.__create(stage, boss, hitbox, duration, attack_id)
-    local self = AttackSession.__create(stage, boss, hitbox, duration, attack_id)
+function M.__create(stage, boss, duration, attack_id)
+    local self = AttackSession.__create(stage, boss, duration, attack_id)
 
     local num_capture, num_attempt = require("BHElib.sessions.boss.capture_rate"):getCaptureRate(
             stage:getDifficulty(),

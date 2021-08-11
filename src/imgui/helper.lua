@@ -2,7 +2,7 @@
 local cc = cc
 local dir = cc.Director:getInstance()
 local fu = cc.FileUtils:getInstance()
-local FS = require("file_system")
+local FS = require("file_system.file_system")
 local _iniFile = 'imgui.ini'
 local _globalSchedule
 local _canToggle = true
@@ -134,7 +134,10 @@ function imgui.setVisible(b)
     if la then
         la:setVisible(b)
     end
-    setting.imgui_visible = b
+
+    local setting_file_mirror = require("setting.setting_file_mirror")
+    local setting_content = setting_file_mirror:getContent()
+    setting_content.imgui_visible = b
 end
 
 function imgui.hide()

@@ -220,8 +220,8 @@ end
 -------------------------------------------------------------------------------------------------
 ---unit test
 
-local FileStream = require("util.file_stream")
-local SequentialFileWriter = require("util.sequential_file_writer")
+local FileStream = require("file_system.file_stream")
+local SequentialFileWriter = require("file_system.sequential_file_writer")
 local function Test()
     local input = FileStream("mod/test/test_file.txt", "w")
     local writer = SequentialFileWriter(input)

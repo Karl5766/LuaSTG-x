@@ -6,23 +6,29 @@
 ---     its children
 ---------------------------------------------------------------------------------------------------
 
----@class ScriptableSession:Session
-local M = LuaClass("ScriptableSession")
+local Session = require("BHElib.sessions.session")
 
+---@class ScriptableSession:Session
+local M = LuaClass("ScriptableSession", Session)
+
+---------------------------------------------------------------------------------------------------
+---init
+
+---@param stage Stage
 ---@param script function a coroutine function that takes self as first parameter
-function M.__create(script)
+function M.__create(stage, script)
     assert(script and type(script) == "function", "Error: Incorrect parameter type for script!")
 
-    local self = {
-        task = {},
-        session = nil,  -- child session
-        is_continuing = true,  -- set to false to end the boss fight
-    }
+    local self = Session.__create(stage)
 
+    self.task = {}
+    ---@type Session
+    self.session = nil  -- can hold one child session
+
+    -- following coroutine is resumed whenever there are no more tasks and session to execute
     local function func()
         script(self)
     end
-    -- this coroutine is resumed whenever there are no more tasks and session to execute
     self.coroutine = coroutine.create(func)
 
     return self
@@ -32,6 +38,9 @@ end
 function M:ctor()
     self:resumeCoroutine()
 end
+
+---------------------------------------------------------------------------------------------------
+---update
 
 ---run every available tasks and session
 ---@return boolean true if anything is run in this function; false if nothing is run (in the case there are no children)
@@ -46,9 +55,10 @@ function M:updateChildren()
 
     -- session
     local session = self.session
-    if session then
-        session:update(dt)
-        if session:isContinuing() then
+    if session and not session.endSessionFlag then
+        session:update(1)
+
+        if not session.endSessionFlag then
             flag = true
         else
             self.session = nil
@@ -59,7 +69,7 @@ function M:updateChildren()
 end
 
 function M:update(dt)
-    assert(self:isContinuing(), "Error: Attempt to update a session that has ended!")
+    Session.update(self, dt)
 
     local is_updated = false
 
@@ -85,16 +95,15 @@ function M:setSession(session)
     self.session = session
 end
 
----@return boolean true if the session has not ended
-function M:isContinuing()
-    return self.is_continuing
-end
+---------------------------------------------------------------------------------------------------
+---deletion
 
 ---end the session
 function M:endSession()
-    self.is_continuing = false
-    if self.session then
-        self.session:endSession()
+    Session.endSession(self)
+    local child_session = self.session
+    if child_session and not child_session.endSessionFlag then
+        child_session:endSession()
     end
 end
 

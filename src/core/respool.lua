@@ -577,6 +577,16 @@ function LoadTTF(name, path, size)
     return _LoadTTF(name, path, size, false)
 end
 
+---@~chinese 加载OTF字体资源。
+---
+---@~english Load an OTF font resource.
+---
+---@param name string
+---@param path string 加载路径 | specifies path of font file.
+---@param size number 字形大小 | specifies size of font.
+---@return lstg.ResFont
+LoadFontOTF = LoadTTF
+
 function LoadTTFAsync(name, path, size, callback)
     return _LoadTTF(name, path, size, true, callback)
 end

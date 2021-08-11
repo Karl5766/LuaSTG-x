@@ -79,7 +79,7 @@ local function CreateSelectableArrayForUserPauseMenu()
     return ret
 end
 
----@param init_focused_index number initial position index of focused selectable
+---@param menu_manager MenuManager
 function _callbacks.UserPauseMenuTitle(menu_manager)
     -- create simple menu selector
 

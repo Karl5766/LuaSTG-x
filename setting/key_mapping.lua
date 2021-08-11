@@ -26,6 +26,8 @@ local _keyboard_keymap
 local _controller_keymap
 
 ---initial key mapping setting tables
+---@type JsonFileMirror
+local _setting_file_mirror
 local _keyboard_setting
 local _controller_setting
 
@@ -76,6 +78,7 @@ end
 ---@param function_key_name string name of the function key
 function M:rememberKeyboardKeyMapping(function_key_name, keyboard_keycode)
     _keyboard_setting[function_key_name] = keyboard_keycode
+    _setting_file_mirror:syncToFile()
 end
 
 ---@param function_key_name string name of the function key
@@ -86,6 +89,7 @@ end
 ---@param function_key_name string name of the function key
 function M:rememberControllerGameKey(function_key_name, controller_key)
     _controller_setting[function_key_name] = controller_key
+    _setting_file_mirror:syncToFile()
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -189,17 +193,6 @@ function M:isSameDevice(device_label1, device_label2)
 end
 
 ---------------------------------------------------------------------------------------------------
-
----load key mapping from one table to another
----@param mapping_table_from table table to load from
----@param mapping_table_to table table to load into
-local function CopyMapping(mapping_table_from, mapping_table_to)
-    for function_key_name, device_key in pairs(mapping_table_from) do
-        mapping_table_to[function_key_name] = device_key
-    end
-end
-
----------------------------------------------------------------------------------------------------
 ---insertions and deletions
 
 ---Add a device to the active device table
@@ -258,19 +251,21 @@ end
 
 ---initialize keyboard and controller key mappings from the setting;
 ---this function should only be called on application startup
-local function KeyMappingInit(keyboard_keys, controller_keys)
-    _keyboard_keymap = {}
-    _keyboard_setting = keyboard_keys
-    CopyMapping(keyboard_keys, _keyboard_keymap)
+local function KeyMappingInit(setting_file_mirror, keyboard_keys, controller_keys)
+    _setting_file_mirror = setting_file_mirror
 
-    _controller_keymap = {}
+    _keyboard_setting = keyboard_keys
+    _keyboard_keymap = table.deepcopy(keyboard_keys)
+
     _controller_setting = controller_keys
-    CopyMapping(controller_keys, _controller_keymap)
+    _controller_keymap = table.deepcopy(controller_keys)
 end
 
 ---this function should only be called on application startup
 function M:init()
-    KeyMappingInit(setting.keyboard_keys, setting.controller_keys)
+    local setting_file_mirror = require("setting.setting_file_mirror")
+    local file_content = setting_file_mirror:getContent()
+    KeyMappingInit(setting_file_mirror, file_content.keyboard_keys, file_content.controller_keys)
 
     InputDeviceInit()
 end

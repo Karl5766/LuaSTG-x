@@ -52,7 +52,7 @@
 local ReplayIOManager = LuaClass("input.ReplayIOManager")
 
 local _input = require("BHElib.input.input_and_recording")
-local FileStream = require("util.file_stream")
+local FileStream = require("file_system.file_stream")
 local ReplayFileReader = require("BHElib.input.replay_file_reader")
 local ReplayFileWriter = require("BHElib.input.replay_file_writer")
 

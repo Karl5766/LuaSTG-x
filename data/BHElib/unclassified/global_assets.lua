@@ -11,7 +11,7 @@
 assert(LoadFont("font:hud_default","THlib\\enemy\\bonus2.fnt"))
 assert(LoadTTF("font:menu", "fonts/averia/Averia-Regular.ttf", 40))
 assert(LoadTTF("font:test", "fonts/averia/Averia-Regular.ttf", 40))
-assert(LoadTTF("font:noto_sans_sc", "fonts/Noto_Sans_SC/NotoSansSC-Medium.otf", 40))
+assert(LoadFontOTF("font:noto_sans_sc", "fonts/Noto_Sans_SC/NotoSansSC-Medium.otf", 40))
 
 LoadImageFromFile('image:white', 'THlib\\misc\\white.png')
 
@@ -55,10 +55,10 @@ do
         {"image:icon_life_title", 352, 8, 56, 20, 0, 10},
         {"image:icon_bomb_title", 352, 30, 72, 20, 0, 10},
 
+        {"image:hint_extend_life", 0, 192, 160, 64},
         {"image:hint_spell_bonus_failed", 0, 64, 256, 64},
         {"image:hint_get_spell_bonus", 0, 128, 396, 64},
-        {"image:hint_extend_life", 0, 192, 160, 64},
-        {"image:hint_capture_time", 232, 200, 152, 56},
+        {"image:hint_total_spell_time", 232, 200, 152, 56},
     }
     LoadTextureAndImages("tex:hint", images, "THlib\\UI\\hint.png")
 

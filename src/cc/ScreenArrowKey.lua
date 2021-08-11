@@ -40,17 +40,21 @@ function M.start()
             local dx, dy = loc_end.x - loc_begin.x, loc_end.y - loc_begin.y
             local adx, ady = math.abs(dx), math.abs(dy)
             if adx > 10 or ady > 10 then
+
+                local setting_file_mirror = require("setting.setting_file_mirror")
+                local setting_content = setting_file_mirror:getContent()
+                local keys = setting_content.keys
                 if adx > ady then
                     if dx > 0 then
-                        sendKey(setting.keys.right)
+                        sendKey(keys.right)
                     else
-                        sendKey(setting.keys.left)
+                        sendKey(keys.left)
                     end
                 else
                     if dy > 0 then
-                        sendKey(setting.keys.up)
+                        sendKey(keys.up)
                     else
-                        sendKey(setting.keys.down)
+                        sendKey(keys.down)
                     end
                 end
             end

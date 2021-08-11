@@ -64,7 +64,8 @@ function M:loadRowImages(row_id, images)
 end
 
 ---@param row_id string id of the sequence of images
----@param images table an array of name of the images in the sequence
+---@param tex_name string name of the texture to load from
+---@param image_name string name to give to the newly loaded images
 function M:loadRowImagesFromTexture(row_id, tex_name, image_name, x, y, dx, dy, width, height, image_num, a, b, is_rect)
     local image_array = {}
     local flag = CheckRes("img", image_name..1)

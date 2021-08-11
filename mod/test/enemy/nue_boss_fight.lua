@@ -32,7 +32,7 @@ local function Script(self)
     boss.x = -100
     boss.y = 300
 
-    self:playSession(_Dialogue1())
+    self:playSession(_Dialogue1(self.stage))
     self:playAttackSessionByIndex(1)
 end
 
@@ -41,7 +41,7 @@ function M.__create(stage)
         _Spell1,
     }
     local boss = _Animation()
-    local self = SingleBossSession.__create(boss, spell_class_array, Script, stage)
+    local self = SingleBossSession.__create(stage, boss, spell_class_array, Script)
     return self
 end
 

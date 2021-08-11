@@ -124,7 +124,7 @@ end
 local Director = cc.Director:getInstance()
 function GameExit()
     --require('jit.p').stop()
-    require("setting.setting_util").saveSettingFile()
+    require("setting.setting_file_mirror"):syncToFile()
     lstg.FrameEnd()
 
     local platform_info = require("platform.platform_info")

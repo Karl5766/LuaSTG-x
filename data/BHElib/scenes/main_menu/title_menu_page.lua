@@ -13,7 +13,7 @@ local SimpleMenuSelector = require("BHElib.ui.selectors.simple_menu_selector")
 local ShakeEffListingSelector = require("BHElib.ui.selectors.shake_eff_listing_selector")
 local MenuConst = require("BHElib.ui.menu.menu_global")
 local Coordinates = require("BHElib.unclassified.coordinates_and_screen")
-local FS = require("file_system")
+local FS = require("file_system.file_system")
 local _init_callbacks = require("BHElib.scenes.main_menu.main_menu_page_init_callbacks")
 
 ---------------------------------------------------------------------------------------------------
