@@ -8,7 +8,7 @@ local Prefab = require("core.prefab")
 local PlayerBase = Prefab.NewX(Prefab.Object)
 
 local ClockedAnimation = require("BHElib.units.clocked_animation")
-local Coordinates = require("BHElib.coordinates_and_screen")
+local Coordinates = require("BHElib.unclassified.coordinates_and_screen")
 
 ---------------------------------------------------------------------------------------------------
 ---cache variables and functions

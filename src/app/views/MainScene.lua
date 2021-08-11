@@ -28,9 +28,6 @@ function MainScene:runGameScene()
     -- in game
     local scene = _safe_load_mod()
 
-    --local scene = require('app.views.GameScene'):create(nil, setting.mod)
-    --scene:showWithScene()
-
     if director:getRunningScene() then
         director:pushScene(scene)
     else

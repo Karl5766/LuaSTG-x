@@ -196,7 +196,7 @@ end
 ---return the ortho in "game" coordinates;
 ---@return number, number, number, number l, r, b, t
 local function GetGameOrtho()
-    local screen_effect = require("BHElib.screen_effect")
+    local screen_effect = require("BHElib.unclassified.screen_effect")
     local dx, dy = screen_effect:getPlayfieldDisplayOffset()
     return _playfield_game_l + dx, _playfield_game_r + dx, _playfield_game_b + dy, _playfield_game_t + dy
 end

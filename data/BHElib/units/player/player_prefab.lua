@@ -10,7 +10,7 @@ local Prefab = require("core.prefab")
 local M = Prefab.NewX(Prefab.Object)
 
 local ClockedAnimation = require("BHElib.units.clocked_animation")
-local Coordinates = require("BHElib.coordinates_and_screen")
+local Coordinates = require("BHElib.unclassified.coordinates_and_screen")
 local PlayerGrazeObject = require("BHElib.units.player.player_graze_object_prefab")
 
 ---------------------------------------------------------------------------------------------------
@@ -32,8 +32,21 @@ M.global = {
 ---------------------------------------------------------------------------------------------------
 ---virtual methods
 
----virtual M:loadResources()  -- for loading player sprite etc.
----virtual M:initAnimation()  -- initialize sprite animation
+---a unique string that identifies the player shot type
+---@type string
+M.SHOT_TYPE_ID = nil
+
+---shot type name displayed in ui or menu
+---@type string
+M.SHOT_TYPE_DISPLAY_NAME = nil
+
+---loading player sprite etc.
+---@type function
+M.loadResources = nil
+
+---initialize sprite animation
+---@type function
+M.initAnimation = nil
 
 ---------------------------------------------------------------------------------------------------
 ---init
@@ -406,6 +419,7 @@ function M:teleportTo(x, y)
 end
 
 function M:onMiss()
+    self.stage:onPlayerMissOrBomb()
     local player_resource = self.player_resource
     player_resource.num_life = player_resource.num_life - 1
     player_resource.num_bomb = 3

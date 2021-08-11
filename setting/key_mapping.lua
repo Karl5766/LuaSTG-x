@@ -159,7 +159,7 @@ function M:getMousePosition()
     y = res.height - y
     x = x + rect.x / _glv:getScaleX()
     y = y + rect.y / _glv:getScaleY()
-    --local ui_scale_x, ui_scale_y = require("BHElib.coordinates_and_screen").getUIScale()
+    --local ui_scale_x, ui_scale_y = require("BHElib.unclassified.coordinates_and_screen").getUIScale()
     --x = x / ui_scale_x
     --y = y / ui_scale_y
     return x, y

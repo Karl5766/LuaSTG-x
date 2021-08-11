@@ -25,6 +25,7 @@ function M.__create()
     }
     self.player_resource = PlayerResource()
     self.score = 0
+    self.difficulty = 1
 
     return self
 end
@@ -41,6 +42,8 @@ function M:writeToFile(file_writer)
     file_writer:writeDouble(self.player_pos.x)
     file_writer:writeDouble(self.player_pos.y)
 
+    file_writer:writeUInt(self.difficulty)
+
     self.player_resource:writeToFile(file_writer)
 end
 
@@ -52,6 +55,8 @@ function M:readFromFile(file_reader)
 
     self.player_pos.x = file_reader:readDouble()
     self.player_pos.y = file_reader:readDouble()
+
+    self.difficulty = file_reader:readUInt()
 
     self.player_resource:readFromFile(file_reader)
 end

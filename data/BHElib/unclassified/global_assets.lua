@@ -9,8 +9,9 @@
 --}
 
 assert(LoadFont("font:hud_default","THlib\\enemy\\bonus2.fnt"))
-assert(LoadTTF("font:menu", "averia/Averia-Regular.ttf", 40))
-assert(LoadTTF("font:test", "averia/Averia-Regular.ttf", 40))
+assert(LoadTTF("font:menu", "fonts/averia/Averia-Regular.ttf", 40))
+assert(LoadTTF("font:test", "fonts/averia/Averia-Regular.ttf", 40))
+assert(LoadTTF("font:noto_sans_sc", "fonts/Noto_Sans_SC/NotoSansSC-Medium.otf", 40))
 
 LoadImageFromFile('image:white', 'THlib\\misc\\white.png')
 

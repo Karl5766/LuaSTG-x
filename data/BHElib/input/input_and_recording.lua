@@ -17,7 +17,7 @@
 local M = {}
 
 local RawInput = require("setting.key_mapping")
-local Coordinates = require("BHElib.coordinates_and_screen")
+local Coordinates = require("BHElib.unclassified.coordinates_and_screen")
 
 ---maps from device id to input key states;
 local _device_states

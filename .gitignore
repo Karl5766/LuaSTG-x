@@ -1,6 +1,6 @@
 # ignore the assets folder under current directory
 /data_assets/
-!/data_assets/averia/
+!/data_assets/fonts/
 
 # ignore idea files
 /.idea/

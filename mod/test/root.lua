@@ -52,14 +52,17 @@ local function Init()
     --    end
     --end
     --zip:close()
-    require("BHElib.coordinates_and_screen").initGameCoordinates()  -- setup the coordinates
+    require("BHElib.unclassified.coordinates_and_screen").initGameCoordinates()  -- setup the coordinates
     require("BHElib.input.input_and_recording"):init()  -- initialize player input
 
     -- initialize the entire library
-    require("BHElib_init")
+    require("BHElib.bhelib_init")
 
     -- initialize units
     require("BHElib.units.bullet.bullet_types"):init()  -- load resources & init local variables
+
+    -- initialize save file
+    require("BHElib.unclassified.save_file_mirror")
 
     -- initialize all stage classes
     require("scenes.game_stage_sample")
@@ -72,7 +75,7 @@ local function Init()
     local Prefab = require("core.prefab")
     local SceneTransition = require("BHElib.scenes.scene_transition")
 
-    require("BHElib.coordinates_and_screen").setResolution(1600, 900)
+    require("BHElib.unclassified.coordinates_and_screen").setResolution(1600, 900)
 
     -- register object classes
     Prefab.RegisterAllDefinedPrefabs()

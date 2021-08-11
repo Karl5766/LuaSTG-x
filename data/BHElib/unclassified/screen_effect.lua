@@ -12,7 +12,7 @@
 ---@class ScreenEffect
 local M = {}
 
-local _screen = require("BHElib.coordinates_and_screen")
+local _screen = require("BHElib.unclassified.coordinates_and_screen")
 
 ---------------------------------------------------------------------------------------------------
 ---cache functions and variables
@@ -41,7 +41,7 @@ local _capture = {}
 ---@param h number height of the screen
 function CaptureScreen(obj, x, y, w, h)
     ---@type Coordinates
-    local coordinates = require("BHElib.coordinates_and_screen")
+    local coordinates = require("BHElib.unclassified.coordinates_and_screen")
     local ui_origin_x, ui_origin_y = coordinates.getUIOriginInRes()
     local ui_scale_x, ui_scale_y = coordinates.getUIScale()
 

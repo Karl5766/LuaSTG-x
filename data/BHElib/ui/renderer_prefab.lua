@@ -16,7 +16,7 @@ function M:init(layer, master, coordinates_name)
     self.coordinates_name = coordinates_name
 end
 
-local SetRenderView = require("BHElib.coordinates_and_screen").setRenderView
+local SetRenderView = require("BHElib.unclassified.coordinates_and_screen").setRenderView
 function M:render()
     local master = self.master
     SetRenderView(self.coordinates_name)

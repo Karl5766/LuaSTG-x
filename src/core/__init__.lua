@@ -7,7 +7,6 @@ local _include_list = {
     'core/file.lua',
     'core/loading.lua',
     'core/async.lua',
-    'core/score.lua',
     'core/prefab.lua',
 }
 

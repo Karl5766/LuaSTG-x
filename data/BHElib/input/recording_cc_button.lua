@@ -10,7 +10,7 @@
 local M = class("input.RecordingCCButton")
 
 local Input = require("BHElib.input.input_and_recording")
-local Coordinates = require("BHElib.coordinates_and_screen")
+local Coordinates = require("BHElib.unclassified.coordinates_and_screen")
 
 ---------------------------------------------------------------------------------------------------
 

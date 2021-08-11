@@ -4,7 +4,7 @@
 ---------------------------------------------------------------------------------------------------
 
 ---@type Coordinates
-local _scr = require("BHElib.coordinates_and_screen")
+local _scr = require("BHElib.unclassified.coordinates_and_screen")
 
 ---@class MenuPainter
 local M = {}

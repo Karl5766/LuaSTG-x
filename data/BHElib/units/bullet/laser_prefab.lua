@@ -12,7 +12,7 @@ require("BHElib.units.bullet.bullet_types")  -- for bullet colors
 ---@class Prefab.Laser
 local M = Prefab.NewX(Prefab.Object)
 
-local Coordinates = require("BHElib.coordinates_and_screen")
+local Coordinates = require("BHElib.unclassified.coordinates_and_screen")
 local Items = require("BHElib.units.item.items")
 
 ---------------------------------------------------------------------------------------------------

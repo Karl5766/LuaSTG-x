@@ -8,7 +8,7 @@
 
 local profiler = profiler
 local e = lstg.eventDispatcher
-local coordinates = require("BHElib.coordinates_and_screen")
+local coordinates = require("BHElib.unclassified.coordinates_and_screen")
 
 local abs = abs
 local cos = cos

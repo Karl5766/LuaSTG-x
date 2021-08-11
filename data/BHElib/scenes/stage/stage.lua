@@ -46,6 +46,8 @@ function Stage.__create(scene_init_state, scene_group)
     self.transition_type = nil  -- for scene transition
     self.end_replay = false
 
+    self.sessions = {}
+
     return self
 end
 
@@ -57,6 +59,11 @@ function Stage:isReplay()
     return self.replay_io_manager:isReplay()
 end
 
+---@return number difficulty
+function Stage:getDifficulty()
+    return self.scene_init_state.difficulty
+end
+
 ---@return number self.score
 function Stage:getScore()
     return self.score
@@ -66,6 +73,30 @@ end
 ---@param inc_score number
 function Stage:addScore(inc_score)
     self.score = self.score + inc_score
+end
+
+---add a session to the stage sessions table
+---@param session Session
+function Stage:addSession(session)
+    local sessions = self.sessions
+    sessions[session] = true
+end
+
+---@param session Session
+function Stage:removeSession(session)
+    local sessions = self.sessions
+    assert(sessions[session], "Error: The session to be removed does not exist")
+    sessions[session] = nil
+end
+
+---triggered when a player misses or bombs
+function Stage:onPlayerMissOrBomb()
+    for session, v in pairs(self.sessions) do
+        local on_player_miss_or_bomb = session.onPlayerMissOrBomb
+        if on_player_miss_or_bomb then
+            on_player_miss_or_bomb(session)
+        end
+    end
 end
 
 ---@param player PlayerBase the player of this stage
@@ -117,7 +148,7 @@ end
 ---modify the game loop in GameScene:frameUpdate for pause menu
 function Stage:frameUpdate(dt)
     -- update screen effects if any
-    require("BHElib.screen_effect"):update(dt)
+    require("BHElib.unclassified.screen_effect"):update(dt)
 
     -- check if pause menu should be created
     if Input:isAnyDeviceKeyJustChanged("escape", false, true) and
@@ -191,10 +222,22 @@ end
 function Stage:cleanup(continue_scene_group)
     GameScene.cleanup(self)
 
+    self:cleanup_sessions()
+
     self.replay_io_manager:finishCurrentScene(self)
     if not continue_scene_group then
         self.replay_io_manager:finishCurrentSceneGroup(self)
         self.replay_io_manager:cleanup()
+    end
+end
+
+function Stage:cleanup_sessions()
+    local session_array = {}
+    for session, v in pairs(self.sessions) do
+        session_array[#session_array + 1] = session
+    end
+    for i = 1, #session_array do
+        session_array[i]:endSession()
     end
 end
 

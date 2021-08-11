@@ -7,7 +7,7 @@
 ---------------------------------------------------------------------------------------------------
 
 ---@type Coordinates
-local scr = require("BHElib.coordinates_and_screen")
+local scr = require("BHElib.unclassified.coordinates_and_screen")
 
 local M = {}
 
@@ -107,7 +107,7 @@ function M:drawPerfromanceProfile(font_profile)
 end
 
 local _input = require("BHElib.input.input_and_recording")
-local _coordinates = require("BHElib.coordinates_and_screen")
+local _coordinates = require("BHElib.unclassified.coordinates_and_screen")
 
 function M:drawKeys()
     local distance = 50

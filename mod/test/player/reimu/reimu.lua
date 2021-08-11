@@ -15,6 +15,11 @@ local ReimuSupport = require("player.reimu.reimu_support")
 
 ---------------------------------------------------------------------------------------------------
 
+M.SHOT_TYPE_ID = "shot_type:reimu"
+M.SHOT_TYPE_DISPLAY_NAME = "Reimu"
+
+---------------------------------------------------------------------------------------------------
+
 ---@param stage Stage
 ---@param spawning_player Prefab.Player the player to inherit player resources (life, bombs etc.) from; nil if this is the first player
 ---@param player_resource gameplay_resources.Player specifies the initial resources this player holds
@@ -160,9 +165,10 @@ function M:processBombInput(player_input)
     if self.bomb_cooldown_timer <= 0 and player_input:isAnyRecordedKeyDown("spell") then
         local player_resource = self.player_resource
         if player_resource.num_bomb > 0 then
+            self.stage:onPlayerMissOrBomb()
             player_resource.num_bomb = player_resource.num_bomb - 1
             self:saveFromMiss()
-            require("BHElib.screen_effect"):shakePlayfield(
+            require("BHElib.unclassified.screen_effect"):shakePlayfield(
                     self.stage,
                     3,
                     180,

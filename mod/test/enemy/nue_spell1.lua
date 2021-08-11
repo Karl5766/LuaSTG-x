@@ -21,7 +21,7 @@ do
     if not CheckRes("tex", "tex:reimu_sprite") then
         LoadTexture("tex:reimu_sprite", "THlib\\player\\reimu\\reimu.png")
     end
-    local colli_radius = 6.15
+    local colli_radius = 5.95
     LoadImage(
             "image:yinyang_orb",
             "tex:reimu_sprite",
@@ -31,8 +31,7 @@ do
             14,
             colli_radius,
             colli_radius,
-            false
-    )
+            false)
 end
 
 function Orb:init(ix, iy, scale, circle_radius, circle_time, init_angle, slide_angle, acc, acc_time, img_angular_velocity, final_velocity)
@@ -43,7 +42,7 @@ function Orb:init(ix, iy, scale, circle_radius, circle_time, init_angle, slide_a
     self.bound = true
     self.hscale = scale
     self.vscale = scale
-    self.a = scale * 6.15
+    self.a = scale * 5.95
     self.omiga = img_angular_velocity
     self.opaque = 0
     self.color = Color(0, 255, 255, 255)
@@ -104,7 +103,7 @@ Prefab.Register(Orb)
 function M.__create(boss, stage)
     local hp = 14400
     local hitbox = EnemyHitbox(16, hp)
-    local self = SpellSession.__create(boss, hitbox, 12000, stage)
+    local self = SpellSession.__create(stage, boss, hitbox, 12000, "test_attack")
 
     return self
 end
@@ -129,35 +128,35 @@ function M:ctor()
     --    end
     --end)
 
-    task.New(self, function()
-        task.Wait(60)
-        local a = 0
-        while true do
-            local Laser = require("BHElib.units.bullet.laser_prefab")
-            local LaserTypes = require("BHElib.units.bullet.laser_types")
-            local bullet = Laser(self.stage, LaserTypes.default_laser, 4, 0.8, 0.5, 4, false)
-            bullet:turnOn(30)
-            bullet:setLength(60, 120, 60)
-            bullet:setFullWidth(50)
-            bullet.x = boss.x
-            bullet.y = boss.y
-            bullet.bound = true
-            local r = 3
-            bullet.vx = r * cos(a)
-            bullet.vy = r * sin(a)
-            bullet.rot = a
-            task.New(bullet, function()
-                while true do
-                    task.Wait(1)
-                    if bullet.y < 0 then
-                        Del(bullet)
-                    end
-                end
-            end)
-            --a = a + 30
-            task.Wait(60)
-        end
-    end)
+    --task.New(self, function()
+    --    task.Wait(60)
+    --    local a = 0
+    --    while true do
+    --        local Laser = require("BHElib.units.bullet.laser_prefab")
+    --        local LaserTypes = require("BHElib.units.bullet.laser_types")
+    --        local bullet = Laser(self.stage, LaserTypes.default_laser, 4, 0.8, 0.5, 4, false)
+    --        bullet:turnOn(30)
+    --        bullet:setLength(60, 120, 60)
+    --        bullet:setFullWidth(50)
+    --        bullet.x = boss.x
+    --        bullet.y = boss.y
+    --        bullet.bound = true
+    --        local r = 3
+    --        bullet.vx = r * cos(a)
+    --        bullet.vy = r * sin(a)
+    --        bullet.rot = a
+    --        task.New(bullet, function()
+    --            while true do
+    --                task.Wait(1)
+    --                if bullet.y < 0 then
+    --                    Del(bullet)
+    --                end
+    --            end
+    --        end)
+    --        --a = a + 30
+    --        task.Wait(60)
+    --    end
+    --end)
 
     task.New(self, function()
         boss:move(60, -boss.x, 120 - boss.y, boss.x > 0, self)
@@ -278,7 +277,7 @@ function M:update(dt)
     end
 
     local Input = require("BHElib.input.input_and_recording")
-    local Coordinates = require("BHElib.coordinates_and_screen")
+    local Coordinates = require("BHElib.unclassified.coordinates_and_screen")
     if Input:isMouseButtonJustChanged(true, true) then
         local x, y = Input:getRecordedMousePositionInUI()
         x, y = Coordinates.uiToGame(x, y)

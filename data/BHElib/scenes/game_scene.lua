@@ -207,7 +207,7 @@ end
 ---------------------------------------------------------------------------------------------------
 ---frame render
 
-local coordinates = require("BHElib.coordinates_and_screen")
+local coordinates = require("BHElib.unclassified.coordinates_and_screen")
 
 ---@~chinese 将被每帧调用以执行渲染指令。
 ---

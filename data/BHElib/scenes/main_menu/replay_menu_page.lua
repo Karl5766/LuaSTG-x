@@ -13,7 +13,7 @@ local M = LuaClass("menu.ReplayMenuPage", MenuPage)
 local MultiPageMenuSelector = require("BHElib.ui.selectors.multi_page_menu_selector")
 local ShakeEffListingSelector = require("BHElib.ui.selectors.shake_eff_listing_selector")
 local MenuConst = require("BHElib.ui.menu.menu_global")
-local Coordinates = require("BHElib.coordinates_and_screen")
+local Coordinates = require("BHElib.unclassified.coordinates_and_screen")
 local FS = require("file_system")
 
 ---------------------------------------------------------------------------------------------------

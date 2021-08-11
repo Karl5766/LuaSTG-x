@@ -11,7 +11,7 @@ local _callbacks = {}
 local MenuConst = require("BHElib.ui.menu.menu_global")
 local ShakeEffListingSelector = require("BHElib.ui.selectors.shake_eff_listing_selector")
 local Selectable = ShakeEffListingSelector.Selectable
-local Coordinates = require("BHElib.coordinates_and_screen")
+local Coordinates = require("BHElib.unclassified.coordinates_and_screen")
 local SimpleMenuSelector = require("BHElib.ui.selectors.simple_menu_selector")
 local MenuPage = require("BHElib.ui.menu.menu_page")
 
