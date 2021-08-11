@@ -124,6 +124,13 @@ do
         {"image:boss_ui_position_indicator", 0, 64, 48, 16},
     }
     LoadTextureAndImages("tex:boss_ui", images, "THlib\\ui\\boss_ui.png")
+    -- lifebar.png  -- why is the image rotated???
+    images = {
+        {"image:boss_ui_hp_bar_full", 0, 0, 10, 32, 5, 0},
+        {"image:boss_ui_hp_bar_empty", 10, 0, 8, 32, 5, 0},
+        {"image:boss_ui_hp_bar_tip", 18, 0, 10, 16},
+    }
+    LoadTextureAndImages("tex:boss_ui_hp_bar", images, "THlib\\enemy\\lifebar.png")
 end
 
 

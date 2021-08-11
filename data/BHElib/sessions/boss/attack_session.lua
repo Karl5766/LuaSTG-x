@@ -47,6 +47,8 @@ function M.__create(stage, boss, duration, attack_id, countdown_pos)
     self.countdown_text_object = TextClass(nil, color.WhiteSmoke, "font:noto_sans_sc", nil, nil)
     self.countdown_pos = math.Vec2(0, 164)
 
+    self.hp_bar_pos = math.Vec2(-180, 212)
+
     return self
 end
 
@@ -98,7 +100,28 @@ function M:syncHitboxPosition()
 end
 
 function M:render()
-    local pos = self.countdown_pos
+    self:renderHpBar()
+    self:renderCountdownTimer()
+end
+
+function M:renderHpBar()
+    local scale = 1
+
+    local hp_bar_pos = self.hp_bar_pos
+    local base_x, base_y = hp_bar_pos.x, hp_bar_pos.y
+    local height = 32  -- image height is 32 pixels
+
+    local hp_ratio = self.hitbox:getHp() / self.hitbox:getMaxHp()
+    local hp_bar_total_length = 360
+    local hp_bar_remain_length = hp_bar_total_length * hp_ratio
+
+    Render("image:boss_ui_hp_bar_empty", base_x, base_y, 90, scale, hp_bar_total_length / height)
+    Render("image:boss_ui_hp_bar_full", base_x, base_y, 90, scale, hp_bar_remain_length / height)
+    Render("image:boss_ui_hp_bar_tip", base_x + hp_bar_remain_length, base_y - 2 * scale, 0, scale)
+end
+
+function M:renderCountdownTimer()
+    local countdown_pos = self.countdown_pos
     local text_object = self.countdown_text_object
 
     local scale = 0.6
@@ -110,16 +133,16 @@ function M:render()
     text_object:setText(tostring(integer).." ")
     text_object:setFontAlign("right", "bottom")
     text_object:setFontSize(0.7 * scale)
-    text_object:render(pos.x, pos.y)
+    text_object:render(countdown_pos.x, countdown_pos.y)
 
     if mantissa ~= 0 then
         text_object:setText(".")
-        text_object:render(pos.x, pos.y)
+        text_object:render(countdown_pos.x, countdown_pos.y)
 
         text_object:setText(tostring(mantissa))
         text_object:setFontAlign("left", "bottom")
         text_object:setFontSize(0.6 * scale)
-        text_object:render(pos.x + 10 * scale, pos.y)
+        text_object:render(countdown_pos.x + 10 * scale, countdown_pos.y)
     end
 end
 
