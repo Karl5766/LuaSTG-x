@@ -20,7 +20,6 @@ local _include_list = {
 
     "BHElib.unclassified.task",
 
-    "BHElib.unclassified.global",  -- defines some in-game global variables
     "BHElib.unclassified.corefunc",
 }
 

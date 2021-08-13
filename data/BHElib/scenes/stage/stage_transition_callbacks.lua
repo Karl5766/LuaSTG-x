@@ -65,8 +65,6 @@ end
 ---@param stage Stage the stage to go from
 ---@return GameScene the next scene to go to
 function _callbacks.restartSceneGroup(stage)
-    SystemLog("restartSceneGroup called!!!!!!!!!!!!!!!!!!!!!")
-
     stage:cleanup(false)
 
     -- start the game again, with the same scene init state and the scene group init state
@@ -87,8 +85,6 @@ end
 ---@param stage Stage the stage to go from
 ---@return GameScene the next scene to go to
 function _callbacks.restartStageAndKeepRecording(stage)
-    SystemLog("restartStageAndKeepRecording called!!!!!!!!!!!!!!!!!!!!!")
-
     local next_init_state = SceneInitState()
     InheritGameplayResources(stage, next_init_state)
     stage:cleanup(true)

@@ -1126,6 +1126,29 @@ function AlignedRender(name, x, y, scale, vscale, z)
     FindResSprite(name):render(x, y, 0, scale * factor, vscale * factor, z or 0.5)
 end
 
+---equivalent to SetImageState() followed by a Render()
+---@param name string 图像资源名 | name of the image
+---@param blendMode string 混合模式
+---@param color1 lstg.Color 混合颜色
+---@param x number
+---@param y number 图像中心位置 | specifies center position.
+---@param hscale number 水平缩放，默认为`1` | specifies horizontal scale.
+---@param vscale number 垂直缩放，默认为`hscale` | specifies verticle scale. Will be same as `hscale` if only `hscale` is assigned.
+---@param z number Z值，默认为0.5 | specifies z position, default to 0.5.
+function SetImageStateAndRender(name, blendMode, color, x, y, scale, vscale, rot, z)
+    local sp = FindResSprite(name)
+    if not sp then
+        error(string.format("can't find image %q", name))
+    end
+    sp:setRenderMode(blendMode)
+    sp:setColor(color)
+
+    scale = scale or 1
+    vscale = vscale or scale
+    local factor = GetImageScale()
+    sp:render(x, y, rot or 0, scale * factor, vscale * factor, z or 0.5)
+end
+
 ---@~chinese 在一个矩形范围渲染图像资源。此时z为`0.5`。
 ---
 ---@~english Render an image in the specified rectangle. Z position will be `0.5`.
@@ -1208,7 +1231,6 @@ local _RenderSector = lstg.RenderSector
 function RenderSector(name, x, y, start, end_, r1, r2, seg)
     _RenderSector(FindResSprite(name), x, y, start, end_, r1, r2, seg)
 end
-lstg.RenderSector = RenderSector
 
 ------------------------------------------------------------
 -- particle api

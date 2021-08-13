@@ -23,15 +23,18 @@ local unpack = unpack
 ---@param text_color lstg.Color color of the text
 ---@param font_name string name of the font to use
 ---@param font_size number size of the text to display
----@param font_align table an array of strings specifying optional formats, see resources.lua
-function M.__create(text, text_color, font_name, font_size, font_align)
+---@param ... table an array of strings specifying optional formats, see resources.lua
+function M.__create(text, text_color, font_name, font_size, ...)
     local self = {}
     self.text = text
+    self.render_mode = "mul+alpha"  -- uncommon to have other render modes, therefore default to "mul+alpha"
     self.text_color = text_color
     self.font_name = font_name
     self.font = FindResFont(font_name)
     self.font_size = font_size
-    self.font_align = font_align
+
+    self.font_align = {...}
+
     return self
 end
 
@@ -40,6 +43,11 @@ end
 ---@param text string text string to display
 function M:setText(text)
     self.text = text
+end
+
+---@param render_mode string specifies a render mode of lstg E.g. "mul+alpha"
+function M:setFontRenderMode(render_mode)
+    self.render_mode = render_mode
 end
 
 ---@param text_color lstg.Color color of the text
@@ -70,7 +78,7 @@ function M:render(x, y)
 
     local font = self.font
     local color = self.text_color
-    local blend_mode = nil
+    local blend_mode = self.render_mode
     if blend_mode then
         font:setRenderMode(blend_mode)
     end

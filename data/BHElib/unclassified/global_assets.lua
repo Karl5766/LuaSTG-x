@@ -151,3 +151,22 @@ LoadTexture("tex:bullet_cancel", bullet_path.."etbreak.png")
 
 --lasers
 LoadTexture("tex:laser_default", "THlib\\laser\\laser1.png")
+
+
+-- background
+do
+    -- boss distortion effect (unused)
+    local RENDER_BUFFER_NAME = "rt:boss_distortion"
+    local WARP_EFFECT_NAME = "fx:boss_distortion"
+    LoadFX(WARP_EFFECT_NAME, "shader/boss_distortion.fx")
+    CreateRenderTarget(RENDER_BUFFER_NAME)
+    SetShaderUniform("fx:boss_distortion", {
+        centerX   = 100.0,
+        centerY   = 100.0,
+        size      = 50.0,
+        arg       = 25.0,
+        color     = Color(255, 163, 73, 164),
+        colorsize = 80.0,
+        timer     = 0.0,
+    })
+end

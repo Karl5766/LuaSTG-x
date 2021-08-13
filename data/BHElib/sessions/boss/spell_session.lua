@@ -67,9 +67,9 @@ function M:render()
 
     text_object:setFontAlign("right")
     -- spell bonus
-    AlignedRender("image:boss_ui_spell_bonus", ref_x - 160 * scale, spell_status_y, scale)
+    SetImageStateAndRender("image:boss_ui_spell_bonus", "mul+alpha", color.White, ref_x - 160 * scale, spell_status_y, scale)
     if self:isFail() then
-        AlignedRender("image:boss_ui_spell_bonus_failed", ref_x - 96 * scale, spell_status_y, 0.9 * scale)
+        SetImageStateAndRender("image:boss_ui_spell_bonus_failed", "mul+alpha", color.White, ref_x - 96 * scale, spell_status_y, 0.9 * scale)
     else
         local spell_bonus = 20000000
         text_object:setText(tostring(spell_bonus))
@@ -77,10 +77,10 @@ function M:render()
     end
 
     -- capture rate
-    AlignedRender("image:boss_ui_spell_capture_rate", ref_x, spell_status_y + 1 * scale, scale)
+    SetImageStateAndRender("image:boss_ui_spell_capture_rate", "mul+alpha", color.White, ref_x, spell_status_y + 1 * scale, scale)
     local capture_rate = self.display_capture_rate
     if capture_rate[1] > 999 then
-        AlignedRender("image:boss_ui_spell_master", ref_x + 64 * scale, spell_status_y, 0.9 * scale)
+        SetImageStateAndRender("image:boss_ui_spell_master", "mul+alpha", color.White, ref_x + 64 * scale, spell_status_y, 0.9 * scale)
     else
         local capture_rate_str = tostring(capture_rate[1]).."/"..tostring(capture_rate[2])
         text_object:setText(capture_rate_str)
@@ -88,7 +88,7 @@ function M:render()
     end
 
     -- spell name
-    AlignedRender("image:boss_ui_spell_name_decoration", pos.x - 50 * scale, pos.y - 17 * scale, 1.5 * scale)
+    SetImageStateAndRender("image:boss_ui_spell_name_decoration", "mul+alpha", color.White, pos.x - 50 * scale, pos.y - 17 * scale, 1.5 * scale)
     text_object:setFontAlign("right")
     text_object:setText(self.SPELL_DISPLAY_NAME)
     text_object:render(pos.x + 66 * scale, pos.y + 15 * scale)

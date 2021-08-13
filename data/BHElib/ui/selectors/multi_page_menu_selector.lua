@@ -228,15 +228,13 @@ function M.shortInit(init_global_focused_index,
             Color(title_color.w, title_color.x, title_color.y, title_color.z),
             MenuConst.font_name,
             MenuConst.font_size * scale,
-            text_align
-    )
+            unpack(text_align))
     local body_text_object = TextClass(
             nil,
             nil,
             MenuConst.font_name,
             MenuConst.font_size * scale,
-            text_align
-    )
+            unpack(text_align))
     local transition_fly_directions = {
         [MenuConst.IN_FORWARD] = enter_dir or -180,
         [MenuConst.IN_BACKWARD] = exit_dir or 0,
@@ -269,8 +267,7 @@ function M.shortInit(init_global_focused_index,
             num_selectable_in_page,
             num_pages,
             transition_fly_directions,
-            transition_fly_distances
-    )
+            transition_fly_distances)
     selector:globalMoveFocus(init_global_focused_index)
 
     return selector

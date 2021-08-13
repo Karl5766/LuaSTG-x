@@ -176,6 +176,7 @@ local _hud_painter = require("BHElib.ui.hud_painter")
 function Stage:render()
     GameScene.render(self)
     _hud_painter:drawHudBackground("image:menu_hud_background", 1.3)
+    _hud_painter:drawPlayfieldOutline("image:white")
 
     -- there can be multiple players exist, so use the interface that returns the unique player
     _hud_painter:drawResources(self, "font:test")
@@ -189,7 +190,6 @@ function Stage:updateUserInput()
     -- update recorded input
     local replay_io_manager = self.replay_io_manager
     if replay_io_manager:isReplay() and replay_io_manager:isStageEndReached() then
-        SystemLog("end of replay reached!!!!!!!!!!!!!!!!!!!!!!!!!")
         -- end of replay reached
 
         self.is_paused = true

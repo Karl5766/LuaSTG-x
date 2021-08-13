@@ -26,11 +26,13 @@ local _game_ui_x, _game_ui_y, _game_ui_x_unit, _game_ui_y_unit                  
 local _game_x, _game_y, _game_x_unit, _game_y_unit                                  -- expressed in "res" coordinates
 ---"ui": coordinates of the hud
 local _ui_x, _ui_y, _ui_x_unit, _ui_y_unit                                          -- expressed in "res" coordinates
----"3d": coordinates of the 3d background
-local _view3d = {}
+
+---"3d": camera of the 3d background
+---@type View3d
+local _view3d
 
 ---dirty bit for setRenderView
-local _dirty  -- true if viewport or ortho has changed after the last setRenderView call
+local _dirty = true  -- true if viewport or ortho has changed after the last setRenderView call
 local _current_render_view
 
 ---------------------------------------------------------------------------------------------------
@@ -122,6 +124,17 @@ function M.getResolution()
     return _scr_metrics.getScreenResolution()
 end
 GetResolution = M.getResolution
+
+---initialize view3d
+---@param view3d View3d specifies the initial parameters for 3d camera
+function M.initView3d(view3d)
+    _view3d = view3d
+end
+
+---@return View3d the 3d camera parameters
+function M.getView3d()
+    return _view3d
+end
 
 ---modify screen resolution by setting the design resolution of GLView
 ---update "game" and "ui" coordinates since the they depend on the resolution
@@ -246,44 +259,6 @@ function M.setOutOfBoundDeletionBoundary(left, right, bottom, top)
     SetBound(left, right, bottom, top)  -- call engine api
 end
 
----重置_view3d的值
-function M.resetView3d()
-    _view3d.eye = { 0, 0, -1 }                  -- camera position
-    _view3d.at = { 0, 0, 0 }                    -- camera target position
-    _view3d.up = { 0, 1, 0 }                    -- camera up, used for determining the orientation of the camera
-    _view3d.fovy = PI_2                         -- controls size of spherical view field in vertical direction (in radians)
-    _view3d.z = { 1, 2 }                        -- clipping plane, {near, far}
-    _view3d.fog = { 0, 0, Color(0x00000000) }   -- fog param, {start, end, color}
-
-    _dirty = true
-end
-
----设置_view3d的值
-function M.set3D(key, a, b, c)
-    if key == "fog" then
-        a = tonumber(a or 0)
-        b = tonumber(b or 0)
-        _view3d.fog = { a, b, c }
-        return
-    end
-    a = tonumber(a or 0)
-    b = tonumber(b or 0)
-    c = tonumber(c or 0)
-    if key == "eye" then
-        _view3d.eye = { a, b, c }
-    elseif key == "at" then
-        _view3d.at = { a, b, c }
-    elseif key == "up" then
-        _view3d.up = { a, b, c }
-    elseif key == "fovy" then
-        _view3d.fovy = a
-    elseif key == "z" then
-        _view3d.z = { a, b }
-    end
-
-    _dirty = true
-end
-
 ---@~chinese 切换渲染使用的坐标系。可选的三个坐标系为"game", "ui"或"3d"；
 ---
 ---@~chinese 改变模式后，所有对坐标系的改动才会应用在实际渲染上；Render，ObjRender等函数都受此函数影响
@@ -295,8 +270,12 @@ end
 ---@~english functions like Render or ObjRender are affected by this function
 ---aram mode string specifies the mode to set; can be "game", "ui" or "3d"
 function M.setRenderView(coordinates_name)
-    if _dirty or coordinates_name ~= _current_render_view then
+    local is_dirty = _dirty or _view3d.dirty
+
+    if is_dirty or coordinates_name ~= _current_render_view then
         _dirty = false
+        _view3d.dirty = false
+
         _current_render_view = coordinates_name
 
         lstg.viewmode = coordinates_name
@@ -486,24 +465,10 @@ function M.getViewModeInfo(mode)
     if mode == "3d" then
         local game_vp_l, game_vp_r, game_vp_b, game_vp_t = GetGameViewport()
 
-        local vp = string.format(
+        local vp_str = string.format(
                 'vp: (%.1f, %.1f, %.1f, %.1f)',
                 game_vp_l, game_vp_r, game_vp_b, game_vp_t)
-        local eye = string.format(
-                'eye: (%.1f, %.1f, %.1f)',
-                _view3d.eye[1], _view3d.eye[2], _view3d.eye[3])
-        local at = string.format(
-                'at: (%.1f, %.1f, %.1f)',
-                _view3d.at[1], _view3d.at[2], _view3d.at[3])
-        local up = string.format(
-                'up: (%.1f, %.1f, %.1f)',
-                _view3d.up[1], _view3d.up[2], _view3d.up[3])
-        local others = string.format(
-                'fovy: %.2f z: (%.1f, %.1f)',
-                _view3d.fovy, _view3d.z[1], _view3d.z[2])
-        ret = string.format(
-                '%s\n%s\n%s\n%s\n%s',
-                vp, eye, at, up, others)
+        ret = string.format("%s\n%s", vp_str, _view3d:getStringRepr())
     elseif mode == "game" then
         local game_vp_l, game_vp_r, game_vp_b, game_vp_t = GetGameViewport()
         local game_or_l, game_or_r, game_or_b, game_or_t = GetGameOrtho()
@@ -565,7 +530,7 @@ end
 ---initialize coordinate systems;
 ---the design resolution of GLView should be set when is function is called
 function M.initGameCoordinates()
-    -- the "game" coordinates depends on "ui", "3d" depends on "game", so the order of setup is important
+    -- the "game" coordinates depends on "ui"; "3d" depends on "game", so the order of setup is important
 
     -- setup "ui" coordinates
     local res_width, res_height = M.getResolution()
@@ -579,11 +544,10 @@ function M.initGameCoordinates()
     M.setOutOfBoundDeletionBoundary(-224, 224, -256, 256)
 
     -- setup "3d" coordinates
-    M.resetView3d()
+    local View3d = require("BHElib.background.view3d")
+    M.initView3d(View3d())
 
     -- previous changes are enforced by setting the render view
-    _current_render_view = "ui"
-    _dirty = true
     M.setRenderView("ui")
 
     WriteToLog()

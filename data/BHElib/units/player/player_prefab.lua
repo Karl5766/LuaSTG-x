@@ -452,7 +452,6 @@ function M:saveFromMiss()
 end
 
 function M:endStage()
-    print("end stage")
     local current_stage = self.stage
     local callbacks = require("BHElib.scenes.stage.stage_transition_callbacks")
     current_stage:transitionWithCallback(callbacks.restartStageAndKeepRecording)

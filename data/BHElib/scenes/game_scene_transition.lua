@@ -13,6 +13,7 @@ local M = {
 
 local _scene = nil  -- the scene to transition from
 local _replace_flag = false  -- set to true on the frame the next scene starts
+local _quit_flag = false  -- set to true when the game is about to quit (via normally closing the game)
 
 ---------------------------------------------------------------------------------------------------
 ---go to next scene
@@ -24,18 +25,17 @@ local director = cc.Director:getInstance()
 ---and call cocos director's replaceScene() to replace the next scene with the current scene
 ---@return GameScene a new game scene created by scene from
 local function GoToNextScene()
-    SystemLog("GoToNextScene called!!!!!!!!!!!!!!!!!!!!!")
-    -- start the next scene
-
+    -- the creation of next scene is managed completely by the current scene that is running
+    -- if this function call returns nil, then the game will close
     local scene_to = _scene:createNextAndCleanupCurrentScene()
 
-    if scene_to == nil then -- no scene to go to; end the current scene and quit the game in this case
+    if scene_to == nil then
         -- create an empty scene as dummy scene
         local GameScene = require("BHElib.scenes.game_scene")
         scene_to = GameScene()
 
-        -- set quit flag as true
-        lstg.quit_flag = true
+        -- quit the game later in the frame
+        _quit_flag = true
     end
     local cocos_scene = scene_to:createScene()
     assert(cocos_scene, "Error: Cocos scene expected, got nil!")
@@ -64,6 +64,10 @@ function M.updateAtStartOfFrame()
     else
         _replace_flag = false
     end
+end
+
+function M.isQuitFlagSet()
+    return _quit_flag
 end
 
 function M.sceneReplacedInPreviousUpdate()

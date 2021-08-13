@@ -9,6 +9,8 @@ local SingleBossSession = require("BHElib.sessions.boss.single_boss_session")
 ---@class BossSession.Nue:SingleBossSession
 local M = LuaClass("boss_fight.Nue", SingleBossSession)
 
+M.BOSS_DISPLAY_NAME = "Houjuu Nue"
+
 ---------------------------------------------------------------------------------------------------
 ---cache variables and functions
 

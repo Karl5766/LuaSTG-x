@@ -152,7 +152,7 @@ end
 local _hud_painter = require("BHElib.ui.hud_painter")
 function M:render()
     Stage.render(self)
-    --_hud_painter:drawPerfromanceProfile("font:menu")
+    -- _hud_painter:drawPerformanceProfile("font:menu")
     _hud_painter:drawKeys()
 end
 

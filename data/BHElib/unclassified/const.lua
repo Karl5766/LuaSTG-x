@@ -1,4 +1,5 @@
---碰撞组
+-- 碰撞组
+-- collision groups
 
 GROUP_GHOST           = 0
 GROUP_ENEMY_BULLET    = 1
@@ -9,10 +10,12 @@ GROUP_ITEM            = 5
 GROUP_ALL             = 16
 
 
---层次结构
+-- 层次结构
+-- layer ordering
 
 LAYER_HUD                   = -700  -- for ui hud
 LAYER_BG                    = -700
+LAYER_SPELL_BG              = -699.9
 LAYER_ENEMY                 = -600
 LAYER_PLAYER_BULLET         = -500
 LAYER_PLAYER_BULLET_CANCEL  = -450
@@ -28,7 +31,8 @@ LAYER_TOP                   = 0
 LAYER_MENU                  = 0
 
 
---常量
+-- 常量
+-- math constants
 
 ---π
 ---@type number

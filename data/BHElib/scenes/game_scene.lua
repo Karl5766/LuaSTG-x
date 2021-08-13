@@ -198,7 +198,7 @@ function GameScene:doUpdatesBetweenRender(dt)
     end
     self.playback_timer = cur_playback_timer
 
-    if lstg.quit_flag then
+    if SceneTransition.isQuitFlagSet() then
         GameExit()
     end
 

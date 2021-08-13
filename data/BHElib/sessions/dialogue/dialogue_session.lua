@@ -135,7 +135,7 @@ end
 local Coordinates = require("BHElib.unclassified.coordinates_and_screen")
 function M:render()
     local image = "image:white"
-    SetImageState(image, "", Color(255, 255, 200, 200))
+    SetImageState(image, "mul+alpha", Color(255, 255, 200, 200))
     Render(image, 0, -145, 0, 5, 2, 0)
 
     self.text_object:render(-160, -100)

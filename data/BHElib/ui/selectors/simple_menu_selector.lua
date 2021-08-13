@@ -184,15 +184,13 @@ function M.shortInit(init_focused_index,
             Color(title_color.w, title_color.x, title_color.y, title_color.z),
             MenuConst.font_name,
             MenuConst.font_size * scale,
-            text_align
-    )
+            unpack(text_align))
     local body_text_object = TextClass(
             nil,
             nil,
             MenuConst.font_name,
             MenuConst.font_size * scale,
-            text_align
-    )
+            unpack(text_align))
     local transition_fly_directions = {
         [MenuConst.IN_FORWARD] = enter_dir or -180,
         [MenuConst.IN_BACKWARD] = exit_dir or 0,

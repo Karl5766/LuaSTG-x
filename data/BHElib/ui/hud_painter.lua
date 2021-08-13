@@ -73,6 +73,7 @@ local function RenderPerformanceProfile(font_display)
         str = string.format('%s%s %.2f\n', str, v, _times[i])
     end
 
+    SetFontState(font_display, "mul+alpha", color.White)
     RenderText(font_display, str, 730, 50, 0.5, 'right', 'bottom')
     --]]
     str = string.format('%.1f fps', fps)
@@ -89,20 +90,19 @@ function M:drawPlayfieldOutline(img_border)
     _timer = _timer + 1
 
     -- render a thin rectangular border
-    SetImageState(img_border, '', color.Red)
     local l, r, b, t = scr.getPlayfieldBoundaryInUI()
 
-    local sprite_size = FindResSprite(img_border):getSprite():getContentSize()
+    local sprite = FindResSprite(img_border)
+    local sprite_size = sprite:getSprite():getContentSize()
     local ww, hh = sprite_size.width, sprite_size.height
+    SetImageState(img_border, "mul+alpha", color.Red)
     AlignedRender(img_border, (l + r) / 2, t, (r - l + 1) / ww, 2 / hh)
     AlignedRender(img_border, (l + r) / 2, b, (r - l + 1) / ww, 2 / hh)
     AlignedRender(img_border, l, (t + b) / 2, 2 / ww, (t - b + 1) / hh)
     AlignedRender(img_border, r, (t + b) / 2, 2 / ww, (t - b + 1) / hh)
-    SetImageState(img_border, '', color.White)
 end
 
-function M:drawPerfromanceProfile(font_profile)
-    SetFontState(font_profile, '', Color(0xFFFFFFFF))
+function M:drawPerformanceProfile(font_profile)
     RenderPerformanceProfile(font_profile)
 end
 
@@ -186,7 +186,14 @@ function M:drawKeys()
 end
 
 function M:drawHudBackground(img_background, background_scale)
-    AlignedRender(img_background, 320, 240, background_scale, background_scale)
+    SetImageStateAndRender(
+            img_background,
+            "mul+alpha",
+            color.White,
+            320,
+            240,
+            background_scale,
+            background_scale)
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -296,33 +303,33 @@ function M:drawResources(stage, font_name)
     local player_resource = player:getPlayerResource()
     local max_display_num = 8
 
-    AlignedRender("image:icon_normal_title", middle_x, relative_y, 0.7)
+    SetImageStateAndRender("image:icon_normal_title", "mul+alpha", color.White, middle_x, relative_y, 0.7)
 
     relative_y = relative_y - 40
 
-    AlignedRender("image:icon_hiscore_title", left_x, relative_y, 1.05)
+    SetImageStateAndRender("image:icon_hiscore_title", "mul+alpha", color.White, left_x, relative_y, 1.05)
     RenderText(font_name,
             AddThousandSeparator(stage:getScore()),
             right_x,
             relative_y,
             0.43,
             "right")
-    AlignedRender("image_array:icon_line1", middle_x, relative_y - 20, 1.05)
+    SetImageStateAndRender("image_array:icon_line1", "mul+alpha", color.White, middle_x, relative_y - 20, 1.05)
 
     relative_y = relative_y - 40
 
-    AlignedRender("image:icon_score_title", left_x, relative_y, 1.05)
+    SetImageStateAndRender("image:icon_score_title", "mul+alpha", color.White, left_x, relative_y, 1.05)
     RenderText(font_name,
             AddThousandSeparator(stage:getScore()),
             right_x,
             relative_y,
             0.43,
             "right")
-    AlignedRender("image_array:icon_line2", middle_x, relative_y - 20, 1.05)
+    SetImageStateAndRender("image_array:icon_line2", "mul+alpha", color.White, middle_x, relative_y - 20, 1.05)
 
     relative_y = relative_y - 45
 
-    AlignedRender("image:icon_life_title", left_x, relative_y, 1)
+    SetImageStateAndRender("image:icon_life_title", "mul+alpha", color.White, left_x, relative_y, 1)
     DisplayResource(
             "image:icon_life",
             "image:icon_life_outline",
@@ -333,11 +340,11 @@ function M:drawResources(stage, font_name)
             player_resource.num_life,
             max_display_num,
             1.1)
-    AlignedRender("image_array:icon_line3", middle_x, relative_y - 20, 1.05)
+    SetImageStateAndRender("image_array:icon_line3", "mul+alpha", color.White, middle_x, relative_y - 20, 1.05)
 
     relative_y = relative_y - 36
 
-    AlignedRender("image:icon_bomb_title", left_x, relative_y, 1.05)
+    SetImageStateAndRender("image:icon_bomb_title", "mul+alpha", color.White, left_x, relative_y, 1.05)
     DisplayResource(
             "image:icon_bomb",
             "image:icon_bomb_outline",
@@ -348,17 +355,17 @@ function M:drawResources(stage, font_name)
             player_resource.num_bomb,
             max_display_num,
             1.1)
-    AlignedRender("image_array:icon_line4", middle_x, relative_y - 20, 1.05)
+    SetImageStateAndRender("image_array:icon_line4", "mul+alpha", color.White, middle_x, relative_y - 20, 1.05)
 
     relative_y = relative_y - 50
 
-    AlignedRender("image:icon_power_title", left_x + 2, relative_y - 5, 0.85)
+    SetImageStateAndRender("image:icon_power_title", "mul+alpha", color.White, left_x + 2, relative_y - 5, 0.85)
     DisplayPercent(player_resource.num_power, right_x, relative_y)
-    AlignedRender("image_array:icon_line5", middle_x, relative_y - 20, 1.05)
+    SetImageStateAndRender("image_array:icon_line5", "mul+alpha", color.White, middle_x, relative_y - 20, 1.05)
 
     relative_y = relative_y - 30
 
-    AlignedRender("image:icon_graze_title", left_x + 27, relative_y - 5, 0.85)
+    SetImageStateAndRender("image:icon_graze_title", "mul+alpha", color.White, left_x + 27, relative_y - 5, 0.85)
     RenderText(
             font_name,
             tostring(player_resource.num_graze),
@@ -366,7 +373,7 @@ function M:drawResources(stage, font_name)
             relative_y,
             0.4,
             "right")
-    AlignedRender("image_array:icon_line7", middle_x, relative_y - 20, 1.05)
+    SetImageStateAndRender("image_array:icon_line7", "mul+alpha", color.White, middle_x, relative_y - 20, 1.05)
 end
 
 return M

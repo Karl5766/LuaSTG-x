@@ -14,6 +14,12 @@ local Renderer = require("BHElib.ui.renderer_prefab")
 
 --------------------------------------------------------------------------------------------------
 
+---name of the boss displayed at the upper right corner
+---@type string
+M.BOSS_DISPLAY_NAME = nil
+
+--------------------------------------------------------------------------------------------------
+
 ---@param boss Prefab.Animation the boss sprite
 ---@param attack_session_class_array table an array of classes of the attack sessions to play
 ---@param script function a coroutine function that takes self as first parameter
@@ -23,11 +29,20 @@ function M.__create(stage, boss, attack_session_class_array, script)
     self.boss = boss
     self.attack_session_class_array = attack_session_class_array
     self.renderer = Renderer(LAYER_TOP, self, "game")
+
     return self
 end
 
 function M:ctor()
     self.num_star = self:getNumSpellLeft(1)
+
+    local TextClass = require("BHElib.ui.text_class")
+    self.boss_name_text_object = TextClass(
+            self.BOSS_DISPLAY_NAME,
+            color.White,
+            "font:noto_sans_sc",
+            0.34,
+            "left")
 end
 
 ---@return Prefab.Animation the boss sprite
@@ -80,7 +95,7 @@ function M:endSession()
 end
 
 function M:render()
-    RenderText("font:test", "boss name", -180, 210, 0.34, "left")
+    self.boss_name_text_object:render(-180, 210)
     local max_width = 100
     local num_star = self.num_star
     local star_width = 13
@@ -90,7 +105,8 @@ function M:render()
     end
     for i = 0, num_star - 1 do
         local xi, yi = i % max_width, int(i / max_width)
-        AlignedRender("image:hint_spell_card_left", -176 + xi * star_width, 186 - yi * star_height, 0.75)
+        local x, y = -176 + xi * star_width, 186 - yi * star_height
+        SetImageStateAndRender("image:hint_spell_card_left", "mul+add", color.White, x, y, 0.75)
     end
 end
 

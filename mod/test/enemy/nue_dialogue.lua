@@ -50,7 +50,7 @@ function M.__create(stage)
     return Dialogue.__create(
             stage,
             require("BHElib.input.input_and_recording"),
-            TextClass("", Color(255, 255, 255, 255), "font:noto_sans_sc", 0.5, {"left", "top"}),
+            TextClass("mul+alpha", color.White, "font:noto_sans_sc", 0.5, "left", "top"),
             MainScript)
 end
 
