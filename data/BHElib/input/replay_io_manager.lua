@@ -10,7 +10,7 @@
 ---of data
 ---
 ---nScene (UInt): number of scenes in this replay, should be 6 in this case
----(the following 3 integers form an index of the scene 1 replay data)
+---(the following 3 integers form an INDEX of the scene 1 replay data)
 ---initDataStart 1(UInt): cursor position after writing scene 1 index
 ---summaryStart 1(UInt): cursor position after writing scene 1 replay input data
 ---nextIndexStart 1(UInt): cursor position after writing scene 1 summary
@@ -101,12 +101,10 @@ function ReplayIOManager:updateUserInput()
         -- so this can be written in a more flexible way
         _input:updateRecordedInputInReplayMode(
                 self.replay_file_reader:getFileReader(),
-                self.replay_file_writer:getFileWriter()
-        )
+                self.replay_file_writer:getFileWriter())
     else
         _input:updateRecordedInputInNonReplayMode(
-                self.replay_file_writer:getFileWriter()
-        )
+                self.replay_file_writer:getFileWriter())
     end
 end
 
@@ -115,7 +113,7 @@ end
 
 ---start a new scene
 function ReplayIOManager:startNewScene()
-    local is_replay = self.is_replay
+    local is_replay = self:isReplay()
     _input:resetRecording(is_replay)  -- clear the current input states
 
     if is_replay then

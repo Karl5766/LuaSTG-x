@@ -425,7 +425,7 @@ function M:onMiss()
     player_resource.num_bomb = 3
     self:addPower(-50)
     if player_resource.num_life < 0 then
-        self:endCurrentSession()
+        self:endStage()
     end
 end
 
@@ -451,7 +451,8 @@ function M:saveFromMiss()
     self.miss_counter = nil
 end
 
-function M:endCurrentSession()
+function M:endStage()
+    print("end stage")
     local current_stage = self.stage
     local callbacks = require("BHElib.scenes.stage.stage_transition_callbacks")
     current_stage:transitionWithCallback(callbacks.restartStageAndKeepRecording)

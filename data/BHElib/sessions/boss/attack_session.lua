@@ -47,7 +47,7 @@ function M.__create(stage, boss, duration, attack_id, countdown_pos)
     self.countdown_text_object = TextClass(nil, color.WhiteSmoke, "font:noto_sans_sc", nil, nil)
     self.countdown_pos = math.Vec2(0, 164)
 
-    self.hp_bar_pos = math.Vec2(-180, 212)
+    self.hp_bar_pos = math.Vec2(-400, 230)
 
     return self
 end
@@ -104,20 +104,25 @@ function M:render()
     self:renderCountdownTimer()
 end
 
+local Coordinates = require("BHElib.unclassified.coordinates_and_screen")
+
 function M:renderHpBar()
-    local scale = 1
+    local scale = 1.2
 
     local hp_bar_pos = self.hp_bar_pos
     local base_x, base_y = hp_bar_pos.x, hp_bar_pos.y
     local height = 32  -- image height is 32 pixels
 
     local hp_ratio = self.hitbox:getHp() / self.hitbox:getMaxHp()
-    local hp_bar_total_length = 360
+    local hp_bar_total_length = 800
     local hp_bar_remain_length = hp_bar_total_length * hp_ratio
 
+    Coordinates.setRenderView("ui")
+    base_x, base_y = Coordinates.gameToUI(base_x, base_y)
     Render("image:boss_ui_hp_bar_empty", base_x, base_y, 90, scale, hp_bar_total_length / height)
     Render("image:boss_ui_hp_bar_full", base_x, base_y, 90, scale, hp_bar_remain_length / height)
     Render("image:boss_ui_hp_bar_tip", base_x + hp_bar_remain_length, base_y - 2 * scale, 0, scale)
+    Coordinates.setRenderView("game")
 end
 
 function M:renderCountdownTimer()

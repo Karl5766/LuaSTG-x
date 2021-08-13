@@ -12,6 +12,17 @@ local ReplayFileReader = LuaClass("input.ReplayFileReader")
 local SequentialFileReader = require("file_system.sequential_file_reader")  -- for read from replay
 
 ---------------------------------------------------------------------------------------------------
+---debug
+
+local function PrintLoadedSceneIndex(scene_index, scene_num)
+    print("Loaded scene index for stage "..scene_num..":")
+    print("index_start"..scene_index.index_start)
+    print("input_data_start"..scene_index.input_data_start)
+    print("summary_start"..scene_index.summary_start)
+    print("next_index_start"..scene_index.next_index_start)
+end
+
+---------------------------------------------------------------------------------------------------
 ---init
 
 ---@param stream FileStream the file stream to read from; should be in "rb" mode
@@ -72,10 +83,13 @@ function ReplayFileReader:isStageEndReached()
 
     -- compare the file cursor position to the end of stage input
     local current_cursor_position = stream:getCursorPosition()
-    assert(
-            current_cursor_position >= scene_index.input_data_start,
-            "Error: Unexpected replay cursor position!"
-    )
+    assert(current_cursor_position >= scene_index.input_data_start,
+            "Error: Unexpected replay cursor position!")
+
+    if current_cursor_position >= scene_index.summary_start then
+        SystemLog("stage end reached at position "..current_cursor_position.."against summary start "..scene_index.summary_start)
+    end
+
     return current_cursor_position >= scene_index.summary_start
 end
 

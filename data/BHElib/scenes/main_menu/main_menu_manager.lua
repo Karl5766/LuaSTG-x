@@ -11,7 +11,7 @@ local MenuManager = require("BHElib.ui.menu.menu_manager")
 ---@class MainMenuManager:MenuManager
 local M = LuaClass("menu.MainMenuManager", MenuManager)
 
-local SceneTransition = require("BHElib.scenes.scene_transition")
+local SceneTransition = require("BHElib.scenes.game_scene_transition")
 local _init_callbacks = require("BHElib.scenes.main_menu.main_menu_page_init_callbacks")
 
 ---------------------------------------------------------------------------------------------------
@@ -107,7 +107,7 @@ function M:onMenuExit()
         TaskWait(math.ceil(1 / self.transition_speed))
 
         -- start stage or exit game, depending on the state set by createNextGameScene
-        SceneTransition.transitionFrom(self.scene, SceneTransition.instantTransition)
+        SceneTransition.transitionAtStartOfNextFrame(self.scene)
     end)
 end
 

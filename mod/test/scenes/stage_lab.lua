@@ -152,15 +152,6 @@ end
 local _hud_painter = require("BHElib.ui.hud_painter")
 function M:render()
     Stage.render(self)
-    do
-        local session = self.boss_fight.session
-        if session ~= nil then
-            local boss = session.hitbox
-            if IsValid(boss) then
-                RenderText("font:test", "Boss hp:"..tostring(int(boss.hp)), 720, 130, 0.4, "right")
-            end
-        end
-    end
     --_hud_painter:drawPerfromanceProfile("font:menu")
     _hud_painter:drawKeys()
 end

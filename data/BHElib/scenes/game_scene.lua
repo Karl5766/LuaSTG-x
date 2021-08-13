@@ -30,12 +30,11 @@ function GameScene.__create()
         -- for varying playback speed in replay mode
         playback_speed = 1,
         playback_timer = 0,
-        continue_scene = true,
     }
     return self
 end
 
-local SceneTransition = require("BHElib.scenes.scene_transition")
+local SceneTransition = require("BHElib.scenes.game_scene_transition")
 
 ---create a scene for replacing the currently running scene;
 ---the new scene should be scheduled for update before returning the scene;
@@ -59,9 +58,9 @@ function GameScene:createScene()
         -- 1) objects created in the next scene will not be rendered before they are updated at least once
         -- 2) objects in the previous scene will be rendered before GameScene:cleanup() is called (after which their states become not render-able)
         -- 3) somehow the engine breaks if ResetPool is followed by director:replaceScene in the same frame, so replacing scene has to be put here
-        SceneTransition.update()
+        SceneTransition.updateAtStartOfFrame()
 
-        if not SceneTransition.sceneReplacedInCurrentUpdate() then
+        if not SceneTransition.sceneReplacedInPreviousUpdate() then
             self:doUpdatesBetweenRender(dt)
 
             self:gameRender()
@@ -79,8 +78,6 @@ end
 function GameScene:cleanup()
     -- at the end of menu or stages, clean all objects created by this scene
     ResetPool() -- clear all game objects
-
-    self.continue_scene = false
 end
 
 ---set the current replay playback speed
@@ -195,7 +192,7 @@ function GameScene:doUpdatesBetweenRender(dt)
     local cur_playback_timer = self.playback_timer + factor
     for _ = 1, floor(cur_playback_timer) - floor(self.playback_timer) do
         -- currently multiple updates do not wait at all
-        if self.continue_scene then
+        if not SceneTransition.isTransitionReady() then
             self:frameUpdate(dt)
         end
     end

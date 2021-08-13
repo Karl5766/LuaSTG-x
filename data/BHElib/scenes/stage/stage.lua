@@ -15,7 +15,7 @@ local Stage = LuaClass("scenes.Stage", GameScene)
 
 ---------------------------------------------------------------------------------------------------
 
-local SceneTransition = require("BHElib.scenes.scene_transition")
+local SceneTransition = require("BHElib.scenes.game_scene_transition")
 local Input = require("BHElib.input.input_and_recording")
 local SceneGroup = require("BHElib.scenes.stage.scene_group")
 local Ustorage = require("util.universal_id")
@@ -26,7 +26,7 @@ local Ustorage = require("util.universal_id")
 ---virtual Stage:getDisplayName()
 
 ---------------------------------------------------------------------------------------------------
----class method
+---init
 
 ---create and return a new stage instance, representing an actual play-through;
 ---the init state parameters should not be modified by the Stage object
@@ -49,6 +49,34 @@ function Stage.__create(scene_init_state, scene_group)
     self.sessions = {}
 
     return self
+end
+
+---------------------------------------------------------------------------------------------------
+---create scene
+
+---@return cc.Scene a new cocos scene
+function Stage:createScene()
+    ---@type GameSceneInitState
+    local scene_init_state = self.scene_init_state
+    local player_pos = scene_init_state.player_pos
+    local group_init_state = self.scene_group:getSceneGroupInitState()
+
+    -- set random seed
+    ran:Seed(scene_init_state.random_seed)
+
+    -- init score
+    self.score = scene_init_state.score
+
+    -- init player
+    local Player = Ustorage:getById(group_init_state.player_class_id)
+    local player = Player(self, nil, scene_init_state.player_resource)
+    player.x = player_pos.x
+    player.y = player_pos.y
+    self.player = player
+
+    self.replay_io_manager:startNewScene()  -- clear input from last scene, setup replay reader/writer
+
+    return GameScene.createScene(self)
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -115,34 +143,6 @@ function Stage:getInitPlayerResource()
 end
 
 ---------------------------------------------------------------------------------------------------
----create scene
-
----@return cc.Scene a new cocos scene
-function Stage:createScene()
-    ---@type GameSceneInitState
-    local scene_init_state = self.scene_init_state
-    local player_pos = scene_init_state.player_pos
-    local group_init_state = self.scene_group:getSceneGroupInitState()
-
-    -- set random seed
-    ran:Seed(scene_init_state.random_seed)
-
-    -- init score
-    self.score = scene_init_state.score
-
-    -- init player
-    local Player = Ustorage:getById(group_init_state.player_class_id)
-    local player = Player(self, nil, scene_init_state.player_resource)
-    player.x = player_pos.x
-    player.y = player_pos.y
-    self.player = player
-
-    self.replay_io_manager:startNewScene()  -- clear input from last scene, setup replay reader/writer
-
-    return GameScene.createScene(self)
-end
-
----------------------------------------------------------------------------------------------------
 ---scene update
 
 ---modify the game loop in GameScene:frameUpdate for pause menu
@@ -189,6 +189,7 @@ function Stage:updateUserInput()
     -- update recorded input
     local replay_io_manager = self.replay_io_manager
     if replay_io_manager:isReplay() and replay_io_manager:isStageEndReached() then
+        SystemLog("end of replay reached!!!!!!!!!!!!!!!!!!!!!!!!!")
         -- end of replay reached
 
         self.is_paused = true
@@ -265,7 +266,7 @@ end
 function Stage:transitionWithCallback(transition_callback)
     assert(type(transition_callback) == "function", "Error: Invalid transition callback!")
     self.transition_callback = transition_callback
-    SceneTransition.transitionFrom(self, SceneTransition.instantTransition)
+    SceneTransition.transitionAtStartOfNextFrame(self)
 end
 
 ---go to next stage or end play-through depending on the progress in the scene group

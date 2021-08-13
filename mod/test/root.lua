@@ -72,10 +72,10 @@ local function Init()
     -- initialize all player classes
     require("player.reimu.reimu")
 
-    local Prefab = require("core.prefab")
-    local SceneTransition = require("BHElib.scenes.scene_transition")
-
     require("BHElib.unclassified.coordinates_and_screen").setResolution(1600, 900)
+
+    local Prefab = require("core.prefab")
+    require("BHElib.scenes.game_scene_transition")
 
     -- register object classes
     Prefab.RegisterAllDefinedPrefabs()
@@ -83,7 +83,6 @@ local function Init()
     -- create the menu
     SetupGroupInitState()
     local menu = CreateMenu()
-    SceneTransition.init(menu)  -- initialize scene transition
     return menu:createScene()
 end
 
