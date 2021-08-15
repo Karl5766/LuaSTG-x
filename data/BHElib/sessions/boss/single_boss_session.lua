@@ -43,7 +43,7 @@ function M:ctor()
             self.BOSS_DISPLAY_NAME,
             color.White,
             "font:noto_sans_sc",
-            0.34,
+            0.28,
             "left")
 end
 
