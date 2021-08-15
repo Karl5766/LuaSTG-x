@@ -29,13 +29,15 @@ M.SPELL_DISPLAY_NAME = nil
 ---------------------------------------------------------------------------------------------------
 ---init
 
+---@param parent ParentSession the parent session of this session
 ---@param boss Prefab.Animation
 ---@param duration number spell time in frames
----@param stage Stage
 ---@param attack_id string unique id of the attack
-function M.__create(stage, boss, duration, attack_id)
-    local self = AttackSession.__create(stage, boss, duration, attack_id)
+function M.__create(parent, boss, duration, attack_id)
+    local self = AttackSession.__create(parent, boss, duration, attack_id)
 
+    ---@type Stage
+    local stage = self.game_scene
     local num_capture, num_attempt = require("BHElib.sessions.boss.capture_rate"):getCaptureRate(
             stage:getDifficulty(),
             attack_id,

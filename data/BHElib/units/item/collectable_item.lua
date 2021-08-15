@@ -1,5 +1,5 @@
 ---------------------------------------------------------------------------------------------------
----scriptable_session.lua
+---collectable_item.lua
 ---author: Karl
 ---date created: 2021.8.6
 ---desc: Defines items that can be collected when the player comes near them; items have a downward
@@ -36,7 +36,7 @@ function M:init(
     self.acc_y = acc_y
     self.max_descend_speed = max_descend_speed
     self.flying_speed = flying_speed
-    self.stage = stage
+    self.stage = assert(stage, "Error: Stage is not provided for collectable item!")
     self.collect_radius = collect_radius
     self.collect_time = collect_time
     self.del_y = del_y

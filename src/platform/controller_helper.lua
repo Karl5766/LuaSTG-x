@@ -2,7 +2,7 @@
 ---controller_helper.lua
 ---desc: Provides basic apis for checking the key states of controllers
 ---modifier:
----     Karl, 2021.3.3, cleanup of the code
+---     Karl, 2021.3.3, clean up of the code
 ---------------------------------------------------------------------------------------------------
 
 local M = {}

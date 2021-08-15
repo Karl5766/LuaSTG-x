@@ -11,21 +11,6 @@ require("se")
 ---------------------------------------------------------------------------------------------------
 ---BG
 
-local BBG = Prefab.NewX(Prefab.Object, "background.black")
-
-function BBG:init(ix, iy, scale)
-    self.img = "image:white"
-    self.layer = LAYER_BG
-    self.group = GROUP_GHOST
-    self.hscale = scale
-    self.vscale = scale
-    self.color = Color(255, 0, 0, 0)
-    self.x = ix
-    self.y = iy
-end
-
-Prefab.Register(BBG)
-
 local WBG = Prefab.NewX(Prefab.Object, "background.white")
 
 function WBG:init(ix, iy, scale)
@@ -95,15 +80,17 @@ function M:createScene()
     --self.rect = node
 
     task.New(self, function()
-        PlaySound("don00", 1)
+        PlaySound("se:don00", 1)
+
+        local NightPassage = require("backgrounds.night_passage.night_passage")
+        NightPassage(self)
+
         WBG(0, 0, 10)
-        BBG(0, 0, 10)
         local Nue = require("enemy.nue_boss_fight")
 
         local boss_fight = Nue(self)
         self.boss_fight = boss_fight
         while boss_fight:isContinuing() do
-            boss_fight:update(1)
             task.Wait(1)
         end
         local callbacks = require("BHElib.scenes.stage.stage_transition_callbacks")
@@ -111,10 +98,6 @@ function M:createScene()
     end)
 
     return scene
-end
-
-function M:getDisplayName()
-    return "sample stage"
 end
 
 local FindTarget = require("BHElib.scripts.target").findTargetByAngleWithVerticalLine
@@ -137,8 +120,6 @@ function M:getEnemyTargetFrom(source)
     return FindTarget(source, self.targets)
 end
 
-local function IsIntersected()  end
-
 function M:update(dt)
     for i, button in ipairs(self.exit_button) do
         button:update(1)
@@ -152,7 +133,7 @@ end
 local _hud_painter = require("BHElib.ui.hud_painter")
 function M:render()
     Stage.render(self)
-    -- _hud_painter:drawPerformanceProfile("font:menu")
+    _hud_painter:drawPerformanceProfile("font:menu")
     _hud_painter:drawKeys()
 end
 

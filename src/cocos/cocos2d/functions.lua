@@ -253,6 +253,7 @@ function class(classname, ...)
         local instance
         if cls.__create then
             instance = cls.__create(...)
+            assert(instance, "Error: Got nil from __create() method of class "..classname.."! A table is expected.")
         else
             instance = {}
         end

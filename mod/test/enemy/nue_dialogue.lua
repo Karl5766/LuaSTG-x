@@ -46,9 +46,9 @@ local function MainScript(dialogue)
     --end
 end
 
-function M.__create(stage)
+function M.__create(parent)
     return Dialogue.__create(
-            stage,
+            parent,
             require("BHElib.input.input_and_recording"),
             TextClass("mul+alpha", color.White, "font:noto_sans_sc", 0.5, "left", "top"),
             MainScript)

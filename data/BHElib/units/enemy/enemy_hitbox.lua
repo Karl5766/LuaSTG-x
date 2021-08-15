@@ -63,6 +63,7 @@ end
 
 function M:onPlayerBulletCollision(other)
     other:onEnemyCollision(self)
+    other:playNormalHitSound()
 end
 
 Prefab.Register(M)

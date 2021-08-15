@@ -95,7 +95,7 @@ end
 ---------------------------------------------------------------------------------------------------
 
 function M:endSession()
-    Session.endSession(self)
+    ScriptableSession.endSession(self)
 
     -- delete all renderers, so no dangling object remains
     Del(self.renderer)
@@ -107,10 +107,11 @@ end
 ---------------------------------------------------------------------------------------------------
 ---update
 
+---rewrite the update of the children sessions
 function M:update(dt)
     Session.update(self, dt)
 
-    local is_updated = self:updateChildren()  -- run children
+    self:updateChildren()  -- run children
 
     if coroutine.status(self.coroutine) == "dead" then
         self:endSession()

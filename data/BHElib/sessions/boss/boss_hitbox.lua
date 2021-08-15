@@ -13,6 +13,7 @@ local EnemyHitbox = require("BHElib.units.enemy.enemy_hitbox")
 local M = Prefab.NewX(EnemyHitbox)
 
 ---------------------------------------------------------------------------------------------------
+---init
 
 ---@param radius number
 ---@param hp number initial hp
@@ -25,6 +26,9 @@ function M:init(radius, hp, session)
 
     self.is_del = false
 end
+
+---------------------------------------------------------------------------------------------------
+---deletion
 
 function M:del()
     if not self.is_del then
@@ -40,6 +44,19 @@ function M:kill()
     end
 
     self.is_del = true
+end
+
+---------------------------------------------------------------------------------------------------
+---collision events
+
+---@param other Prefab.PlayerBullet
+function M:onPlayerBulletCollision(other)
+    other:onEnemyCollision(self)
+    if self.hp < self.max_hp * 0.1 then
+        other:playLowHpHitSound()
+    else
+        other:playNormalHitSound()
+    end
 end
 
 Prefab.Register(M)

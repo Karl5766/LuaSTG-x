@@ -22,7 +22,7 @@ local Ustorage = require("util.universal_id")
 ---@param task_spec any specifies the tasks to perform on the menu
 ---@return GameScene the next scene to go to
 local function CreateMenuWithTaskSpec(stage, task_spec)
-    stage:cleanup(false)
+    stage:endSession(false)
 
     -- go back to menu
     local MenuSceneClass = require("BHElib.scenes.main_menu.main_menu_scene")
@@ -65,7 +65,7 @@ end
 ---@param stage Stage the stage to go from
 ---@return GameScene the next scene to go to
 function _callbacks.restartSceneGroup(stage)
-    stage:cleanup(false)
+    stage:endSession(false)
 
     -- start the game again, with the same scene init state and the scene group init state
     local scene_group = stage.scene_group
@@ -87,7 +87,7 @@ end
 function _callbacks.restartStageAndKeepRecording(stage)
     local next_init_state = SceneInitState()
     InheritGameplayResources(stage, next_init_state)
-    stage:cleanup(true)
+    stage:endSession(true)
 
     -- create scene init state for next stage
     local cur_init_state = stage.scene_init_state
@@ -112,7 +112,7 @@ end
 function _callbacks.goToNextStage(stage)
     local next_init_state = SceneInitState()
     InheritGameplayResources(stage, next_init_state)
-    stage:cleanup(true)
+    stage:endSession(true)
 
     -- create scene init state for next stage
     local cur_init_state = stage.scene_init_state

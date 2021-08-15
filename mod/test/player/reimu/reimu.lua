@@ -136,7 +136,7 @@ local _shoot = require("BHElib.scripts.shoot")
 function M:processAttackInput(player_input)
     if self.timer % 4 == 0 then
         if player_input:isAnyRecordedKeyDown("shoot") then
-            PlaySound('plst00', 0.2, self.x / 1024, true)
+            PlaySound("se:plst00", 0.2, self.x / 1024, true)
             local attack = 1
             local img = "image:reimu_bullet"
             local cancel_img = "image:reimu_bullet_cancel_effect"

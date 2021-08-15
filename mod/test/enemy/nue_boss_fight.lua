@@ -34,16 +34,19 @@ local function Script(self)
     boss.x = -100
     boss.y = 300
 
-    self:playSession(_Dialogue1(self.stage))
+    _Dialogue1(self)
+    coroutine.yield()
     self:playAttackSessionByIndex(1)
+    coroutine.yield()
 end
 
-function M.__create(stage)
+---@param parent ParentSession the parent session of this session
+function M.__create(parent)
     local spell_class_array = {
         _Spell1,
     }
     local boss = _Animation()
-    local self = SingleBossSession.__create(stage, boss, spell_class_array, Script)
+    local self = SingleBossSession.__create(parent, boss, spell_class_array, Script)
     return self
 end
 

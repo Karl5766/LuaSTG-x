@@ -6,13 +6,13 @@
 ---desc: Defines the GameScene class. A base class for all in-game scenes
 ---------------------------------------------------------------------------------------------------
 
----@class GameScene
-local GameScene = LuaClass("scenes.GameScene")
+local ParentSession = require("BHElib.sessions.parent_session")
+
+---@class GameScene:ParentSession
+local M = LuaClass("scenes.GameScene", ParentSession)
 
 local _raw_input = require("setting.key_mapping")
 local _input = require("BHElib.input.input_and_recording")
-local Prefab = require("core.prefab")
-local Director = cc.Director:getInstance()
 local _setting_file_mirror = require("setting.setting_file_mirror")
 
 ---------------------------------------------------------------------------------------------------
@@ -24,13 +24,24 @@ local floor = math.floor
 
 ---GameScene object constructor
 ---@return GameScene a GameScene object
-function GameScene.__create()
+function M.__create()
     local self = {
+        ---@type boolean
+        sessionHasEnded = false,
+        ---@type number
         timer = 0,
-        -- for varying playback speed in replay mode
+        ---@type number
         playback_speed = 1,
+        ---@type number
         playback_timer = 0,
     }
+    ---@type GameScene
+    self.game_scene = self  -- so that self:getGameScene() will return self
+    ---@type table
+    self.sessions = {}
+    ---@type table
+    self.task = {}
+
     return self
 end
 
@@ -42,7 +53,7 @@ local SceneTransition = require("BHElib.scenes.game_scene_transition")
 ---the idea is to reuse frameFunc and renderFunc for all game scenes, but allow update and render
 ---methods to be defined in the sub-classes
 ---@return cc.Scene a new cocos scene
-function GameScene:createScene()
+function M:createScene()
     local scene = display.newScene("Scene")
 
     -- create an object for rendering the stage
@@ -56,7 +67,7 @@ function GameScene:createScene()
     local main_loop_function = function(dt)
         -- put this here so on the frame of transition
         -- 1) objects created in the next scene will not be rendered before they are updated at least once
-        -- 2) objects in the previous scene will be rendered before GameScene:cleanup() is called (after which their states become not render-able)
+        -- 2) objects in the previous scene will be rendered before GameScene:endSession() is called (after which their states become not render-able)
         -- 3) somehow the engine breaks if ResetPool is followed by director:replaceScene in the same frame, so replacing scene has to be put here
         SceneTransition.updateAtStartOfFrame()
 
@@ -75,19 +86,23 @@ end
 ---for game scene transition;
 ---cleanup before exiting the scene; overwritten in case anything is changed during the scene of
 ---subclasses
-function GameScene:cleanup()
+function M:endSession()
+    assert(self.sessionHasEnded == false, "Error: Attempt to call endSession() on a session twice!")
+    self.sessionHasEnded = true
+    self:deleteAllChildrenSessions()
+
     -- at the end of menu or stages, clean all objects created by this scene
     ResetPool() -- clear all game objects
 end
 
 ---set the current replay playback speed
 ---@param speed_coeff number playback_speed multiplier; default as 1
-function GameScene:setPlaybackSpeed(speed_coeff)
+function M:setPlaybackSpeed(speed_coeff)
     self.playback_speed = speed_coeff
 end
 
 ---add touch key to the current scene
-function GameScene:addTouchKeyToScene()
+function M:addTouchKeyToScene()
     local scene = self.cocos_scene
     local ui_layer = cc.Layer:create()
     ui_layer:setAnchorPoint(0, 0)
@@ -97,23 +112,12 @@ end
 
 local profiler = profiler
 
----for cocos scheduler;
 ---can be overridden in subclasses
----@param dt number time step (currently not very useful)
-function GameScene:update(dt)
-    task.PropagateDo(self)
-
-    self.timer = self.timer + dt
-end
-
----for cocos scheduler;
----can be overridden in subclasses
----@param dt number time step (currently not very useful)
-function GameScene:render()
+function M:render()
 end
 
 ---dispatch "onUserInputUpdate" event; overridden in Stage class for replay input update
-function GameScene:updateUserInput()
+function M:updateUserInput()
     _input:updateInputSnapshot()  -- only update non-replay input
     lstg.eventDispatcher:dispatchEvent("onUserInputUpdate")
 end
@@ -123,7 +127,7 @@ end
 
 ---update objects and call the scene update() function;
 ---advance the time by 1 frame
-function GameScene:updateSceneAndObjects(dt)
+function M:updateSceneAndObjects(dt)
     UpdateObjList()
     self:updateUserInput()
 
@@ -160,7 +164,7 @@ end
 ---update the game by one time step;
 ---advance the time by 1 frame
 ---@return boolean true if the current scene has ended
-function GameScene:frameUpdate(dt)
+function M:frameUpdate(dt)
     self:updateSceneAndObjects(dt)
 end
 
@@ -171,7 +175,7 @@ local _process_one_task = async.processOneTask
 ---
 ---@~english Will be invoked every frame to process all frame logic. Game will exit if it returns `true`.
 ---
-function GameScene:doUpdatesBetweenRender(dt)
+function M:doUpdatesBetweenRender(dt)
     profiler.tic('FrameFunc')
 
     local setting_content = _setting_file_mirror:getContent()
@@ -214,7 +218,7 @@ local coordinates = require("BHElib.unclassified.coordinates_and_screen")
 ---
 ---@~english Will be invoked every frame to process all render instructions.
 ---
-function GameScene:gameRender()
+function M:gameRender()
     -- begin scene
     profiler.tic('RenderFunc')
 
@@ -244,4 +248,4 @@ function GameScene:gameRender()
 end
 
 
-return GameScene
+return M

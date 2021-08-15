@@ -11,7 +11,7 @@ local GameScene = require("BHElib.scenes.game_scene")  -- superclass
 
 ---@class Stage:GameScene
 ---@comment an instance of this class represents a shmup stage.
-local Stage = LuaClass("scenes.Stage", GameScene)
+local M = LuaClass("scenes.Stage", GameScene)
 
 ---------------------------------------------------------------------------------------------------
 
@@ -21,11 +21,6 @@ local SceneGroup = require("BHElib.scenes.stage.scene_group")
 local Ustorage = require("util.universal_id")
 
 ---------------------------------------------------------------------------------------------------
----virtual methods
-
----virtual Stage:getDisplayName()
-
----------------------------------------------------------------------------------------------------
 ---init
 
 ---create and return a new stage instance, representing an actual play-through;
@@ -33,7 +28,7 @@ local Ustorage = require("util.universal_id")
 ---@param scene_init_state GameSceneInitState specifies the initial state of this stage
 ---@param scene_group SceneGroup current scene group, includes the global states of the play-through
 ---@return Stage a stage object
-function Stage.__create(scene_init_state, scene_group)
+function M.__create(scene_init_state, scene_group)
     local self = GameScene.__create()
 
     self.scene_group = scene_group
@@ -46,8 +41,6 @@ function Stage.__create(scene_init_state, scene_group)
     self.transition_type = nil  -- for scene transition
     self.end_replay = false
 
-    self.sessions = {}
-
     return self
 end
 
@@ -55,7 +48,7 @@ end
 ---create scene
 
 ---@return cc.Scene a new cocos scene
-function Stage:createScene()
+function M:createScene()
     ---@type GameSceneInitState
     local scene_init_state = self.scene_init_state
     local player_pos = scene_init_state.player_pos
@@ -83,43 +76,29 @@ end
 ---setters and getters
 
 ---@return boolean if the state is entered in replay mode
-function Stage:isReplay()
+function M:isReplay()
     return self.replay_io_manager:isReplay()
 end
 
 ---@return number difficulty
-function Stage:getDifficulty()
+function M:getDifficulty()
     return self.scene_init_state.difficulty
 end
 
 ---@return number self.score
-function Stage:getScore()
+function M:getScore()
     return self.score
 end
 
 ---increase the score by a number
 ---@param inc_score number
-function Stage:addScore(inc_score)
+function M:addScore(inc_score)
     self.score = self.score + inc_score
 end
 
----add a session to the stage sessions table
----@param session Session
-function Stage:addSession(session)
-    local sessions = self.sessions
-    sessions[session] = true
-end
-
----@param session Session
-function Stage:removeSession(session)
-    local sessions = self.sessions
-    assert(sessions[session], "Error: The session to be removed does not exist")
-    sessions[session] = nil
-end
-
 ---triggered when a player misses or bombs
-function Stage:onPlayerMissOrBomb()
-    for session, v in pairs(self.sessions) do
+function M:onPlayerMissOrBomb()
+    for session, _ in pairs(self.sessions) do
         local on_player_miss_or_bomb = session.onPlayerMissOrBomb
         if on_player_miss_or_bomb then
             on_player_miss_or_bomb(session)
@@ -128,17 +107,17 @@ function Stage:onPlayerMissOrBomb()
 end
 
 ---@param player PlayerBase the player of this stage
-function Stage:setPlayer(player)
+function M:setPlayer(player)
     self.player = player
 end
 
 ---@return Prefab.Player the (unique) player of the stage
-function Stage:getPlayer()
+function M:getPlayer()
     return self.player
 end
 
 ---@return gameplay_resources.Player resources that player initially holds
-function Stage:getInitPlayerResource()
+function M:getInitPlayerResource()
     return self.scene_init_state.player_resource
 end
 
@@ -146,7 +125,7 @@ end
 ---scene update
 
 ---modify the game loop in GameScene:frameUpdate for pause menu
-function Stage:frameUpdate(dt)
+function M:frameUpdate(dt)
     -- update screen effects if any
     require("BHElib.unclassified.screen_effect"):update(dt)
 
@@ -173,7 +152,7 @@ end
 
 local _hud_painter = require("BHElib.ui.hud_painter")
 ---render stage hud
-function Stage:render()
+function M:render()
     GameScene.render(self)
     _hud_painter:drawHudBackground("image:menu_hud_background", 1.3)
     _hud_painter:drawPlayfieldOutline("image:white")
@@ -183,7 +162,7 @@ function Stage:render()
 end
 
 ---update recorded device input for replay
-function Stage:updateUserInput()
+function M:updateUserInput()
     -- update device input
     GameScene.updateUserInput(self)
 
@@ -220,10 +199,8 @@ end
 ---for game scene transition;
 ---for cleaning up before exiting the scene;
 ---@param continue_scene_group boolean if true, continue replay; if false, stop and finish up replay io
-function Stage:cleanup(continue_scene_group)
-    GameScene.cleanup(self)
-
-    self:cleanup_sessions()
+function M:endSession(continue_scene_group)
+    GameScene.endSession(self)
 
     self.replay_io_manager:finishCurrentScene(self)
     if not continue_scene_group then
@@ -232,26 +209,9 @@ function Stage:cleanup(continue_scene_group)
     end
 end
 
-function Stage:cleanup_sessions()
-    local session_array = {}
-
-    ---important to implement the sessions so that:
-    ---order of deletion doesn't matter (even though some sessions are others' child sessions)
-    for session, v in pairs(self.sessions) do
-        session_array[#session_array + 1] = session
-    end
-    for i = 1, #session_array do
-        local session = session_array[i]
-        if session:isContinuing() then
-            session:endSession()
-        end
-    end
-    assert(#self.sessions == 0, "Error: Some sessions are not ended properly on stage cleanup!")
-end
-
 ---construct the object for the next scene and return it
 ---@return GameScene the next game scene
-function Stage:createNextAndCleanupCurrentScene()
+function M:createNextAndCleanupCurrentScene()
     local callback = self.transition_callback
     assert(callback, "Error: Stage transition callback does not exist!")
     return callback(self)
@@ -263,14 +223,14 @@ end
 
 ---terminate current scene and transition to a new one
 ---@param transition_callback function a function creates new scene and cleanup current scene
-function Stage:transitionWithCallback(transition_callback)
+function M:transitionWithCallback(transition_callback)
     assert(type(transition_callback) == "function", "Error: Invalid transition callback!")
     self.transition_callback = transition_callback
     SceneTransition.transitionAtStartOfNextFrame(self)
 end
 
 ---go to next stage or end play-through depending on the progress in the scene group
-function Stage:goToNextScene()
+function M:goToNextScene()
     local callbacks = require("BHElib.scenes.stage.stage_transition_callbacks")
     if self.scene_group:isFinalScene() then
         self:transitionWithCallback(callbacks.createMenuAndSaveReplay)
@@ -279,4 +239,4 @@ function Stage:goToNextScene()
     end
 end
 
-return Stage
+return M

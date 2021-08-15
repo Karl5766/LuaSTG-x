@@ -33,7 +33,7 @@ function M:init(attack, del_on_colli)
     self.layer = LAYER_PLAYER_BULLET
     self.group = GROUP_PLAYER_BULLET
     self.del_on_colli = del_on_colli
-    self.colli_flag = false  -- deal with multiple collisions in a single frame; set to true at the first collision
+    self.has_collided = false  -- deal with multiple collisions in a single frame; set to true at the first collision
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -46,13 +46,21 @@ function M:colli(other)
     end
 end
 
+function M:playNormalHitSound()
+    PlaySound("se:damage00", 0.1, 0, true)
+end
+
+function M:playLowHpHitSound()
+    PlaySound("se:damage01", 0.1, 0, true)
+end
+
 function M:onEnemyCollision(other)
-    if self.colli_flag == false then
+    if self.has_collided == false then
         other:receiveDamage(self.attack)
 
         if self.del_on_colli then
             Kill(self)
-            self.colli_flag = true
+            self.has_collided = true
         end
     end
 end

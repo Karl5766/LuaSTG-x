@@ -103,8 +103,8 @@ Prefab.Register(Orb)
 
 ---------------------------------------------------------------------------------------------------
 
-function M.__create(boss, stage)
-    local self = SpellSession.__create(stage, boss, 12000, "test_attack")
+function M.__create(parent, boss)
+    local self = SpellSession.__create(parent, boss, 12000, "test_attack")
 
     return self
 end
@@ -138,7 +138,7 @@ function M:ctor()
     --    while true do
     --        local Laser = require("BHElib.units.bullet.laser_prefab")
     --        local LaserTypes = require("BHElib.units.bullet.laser_types")
-    --        local bullet = Laser(self.stage, LaserTypes.default_laser, 4, 0.8, 0.5, 4, false)
+    --        local bullet = Laser(self.game_scene, LaserTypes.default_laser, 4, 0.8, 0.5, 4, false)
     --        bullet:turnOn(30)
     --        bullet:setLength(60, 120, 60)
     --        bullet:setFullWidth(50)
@@ -186,7 +186,7 @@ end
 
 function M:fire(x, y, side)
 
-    PlaySound("explode", 0.1, 0, true)
+    PlaySound("se:explode", 0.1, 0, true)
     local density = 1.2
     local speed = 2
 
@@ -221,7 +221,7 @@ end
 
 function M:mouseFire(x, y, side)
 
-    PlaySound("explode", 0.1, 0, true)
+    PlaySound("se:explode", 0.1, 0, true)
     local density = 1.5
     local speed = 1.8
 
@@ -262,19 +262,19 @@ function M:update(dt)
         local p
         local rng = ran:Float(0, 1)
         if rng < 0.001 then
-            p = Items.Extend(self.stage)
+            p = Items.Extend(self.game_scene)
         elseif rng < 0.004 then
-            p = Items.Bomb(self.stage)
+            p = Items.Bomb(self.game_scene)
         elseif rng < 0.005 then
-            p = Items.FullPower(self.stage)
+            p = Items.FullPower(self.game_scene)
         elseif rng < 0.008 then
-            p = Items.BigPower(self.stage)
+            p = Items.BigPower(self.game_scene)
         elseif rng < 0.009 then
-            p = Items.SmallFaith(self.stage)
+            p = Items.SmallFaith(self.game_scene)
         elseif rng < 0.5 then
-            p = Items.Point(self.stage)
+            p = Items.Point(self.game_scene)
         else
-            p = Items.Power(self.stage)
+            p = Items.Power(self.game_scene)
         end
         p.x = ran:Float(-192, 192)
         p.y = self.boss.y

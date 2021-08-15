@@ -33,14 +33,14 @@ end
 function M:frame()
     if GetLastKey() == setting.keys.shoot then
         self.edit = true
-        PlaySound('select00', 0.3)
+        PlaySound("se:select00", 0.3)
         if not self.edit then
             self.posx = 1
         end
     end
     if GetLastKey() == setting.keys.spell then
         self.edit = false
-        PlaySound('cancel00', 0.3)
+        PlaySound("se:cancel00", 0.3)
     end
     if self.pos_changed > 0 then
         self.pos_changed = self.pos_changed - 1
@@ -52,11 +52,11 @@ function M:frame()
         end
         if GetLastKey() == setting.keys.left then
             self.posx = self.posx - 1
-            PlaySound('select00', 0.3)
+            PlaySound("se:select00", 0.3)
         end
         if GetLastKey() == setting.keys.right then
             self.posx = self.posx + 1
-            PlaySound('select00', 0.3)
+            PlaySound("se:select00", 0.3)
         end
         self.posx = (self.posx - 1 + self.nitem[self.pos]) % self.nitem[self.pos] + 1
         if self.pos <= 3 or self.pos == 5 then

@@ -52,7 +52,7 @@ end
 function M:createNextAndCleanupCurrentScene()
     -- for all stages
 
-    self:cleanup()
+    self:endSession()
 
     local menu_manager = self.menu_manager
 
@@ -108,10 +108,10 @@ function M:createNextAndCleanupCurrentScene()
     return next_stage
 end
 
-function M:cleanup()
+function M:endSession()
     self.menu_manager:cleanup()  -- order doesn't matter
 
-    GameScene.cleanup(self)
+    GameScene.endSession(self)
 end
 
 ---@param dt number elapsed time

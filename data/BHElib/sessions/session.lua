@@ -11,19 +11,22 @@
 local M = LuaClass("Session")
 
 ---------------------------------------------------------------------------------------------------
+---init
 
----@param stage Stage the stage that this session runs in
-function M.__create(stage)
+---@param parent ParentSession the parent session of this session
+function M.__create(parent)
     local self = {
         ---@type boolean
-        endSessionFlag = false,
+        sessionHasEnded = false,
         ---@type number
         timer = 0,
+        ---@type ParentSession
+        parent = parent,
     }
 
-    ---@type Stage
-    self.stage = stage
-    stage:addSession(self)
+    ---@type GameScene
+    self.game_scene = assert(parent:getGameScene(), "Error: Game scene does not exist for class "..parent[".classname"].."!")
+    parent:addSession(self)
 
     return self
 end
@@ -31,18 +34,18 @@ end
 ---------------------------------------------------------------------------------------------------
 
 ---@return Stage
-function M:getStage()
-    return self.stage
+function M:getGameScene()
+    return self.game_scene
 end
 
 ---@return boolean true if endSession() has not been called
 function M:isContinuing()
-    return not self.endSessionFlag
+    return not self.sessionHasEnded
 end
 
 ---@return boolean true if endSession() has been called
 function M:isEnded()
-    return self.endSessionFlag
+    return self.sessionHasEnded
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -50,7 +53,7 @@ end
 
 ---@param dt number
 function M:update(dt)
-    assert(self.endSessionFlag == false, "Error: Attempt to update a session that has ended!")
+    assert(self.sessionHasEnded == false, "Error: Attempt to update a session that has ended!")
     self.timer = self.timer + (dt or 1)
 end
 
@@ -59,9 +62,9 @@ end
 
 ---end the session if it is still going; must be called exactly once for proper deletion of the object
 function M:endSession()
-    assert(self.endSessionFlag == false, "Error: Attempt to call endSession() on a session twice!")
-    self.endSessionFlag = true
-    self.stage:removeSession(self)
+    assert(self.sessionHasEnded == false, "Error: Attempt to call endSession() on a session twice!")
+    self.sessionHasEnded = true
+    self.parent:removeSession(self)
 end
 
 return M

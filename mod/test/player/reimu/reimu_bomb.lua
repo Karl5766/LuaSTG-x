@@ -140,9 +140,9 @@ function M:bomb(player, stage)
         player.unfocused_speed = reduced_speed
         player.focused_speed = reduced_speed
 
-        local cancel_sound = "enep00"
+        local cancel_sound = "se:enep00"
         for i = 1, 5 do
-            PlaySound("power1", 0.8, 0, true)
+            PlaySound("se:power1", 0.8, 0, true)
             local attack = 0.26
             local square_size = 0.6
             if i == 1 then
@@ -176,15 +176,6 @@ function M:bomb(player, stage)
 
         player.unfocused_speed = unfocused_speed
         player.focused_speed = focused_speed
-
-        task.New(player, function()
-            task.Wait(30)
-            --PlaySound("border", 0.8, 0, true)
-            for i = 1, 5 do
-                --PlaySound("boon00", 0.8, 0, true)
-                task.Wait(30)
-            end
-        end)
 
         for i = 1, 5 do
             local attack = 0.38

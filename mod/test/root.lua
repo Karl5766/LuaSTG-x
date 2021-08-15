@@ -65,8 +65,6 @@ local function Init()
     require("BHElib.unclassified.save_file_mirror")
 
     -- initialize all stage classes
-    require("scenes.game_stage_sample")
-    require("scenes.game_stage_second_sample")
     require("scenes.stage_lab")
 
     -- initialize all player classes

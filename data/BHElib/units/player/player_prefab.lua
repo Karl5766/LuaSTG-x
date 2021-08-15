@@ -389,7 +389,7 @@ end
 ---the miss takes place with a time offset (in which mechanics like deathbombing can be activated)
 function M:getHit()
     if self.invincibility_timer == 0 and self.miss_counter == nil then
-        PlaySound("pldead00", 0.5, 0, true)
+        PlaySound("se:pldead00", 0.5, 0, true)
         self.miss_counter = 12
     end
 end

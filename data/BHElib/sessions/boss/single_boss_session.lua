@@ -5,6 +5,7 @@
 ---desc: Defines the base objects for a single boss, non/spell format boss fight
 ---------------------------------------------------------------------------------------------------
 
+local Session = require("BHElib.sessions.session")
 local ScriptableSession = require("BHElib.sessions.scriptable_session")
 
 ---@class SingleBossSession:ScriptableSession
@@ -19,13 +20,14 @@ local Renderer = require("BHElib.ui.renderer_prefab")
 M.BOSS_DISPLAY_NAME = nil
 
 --------------------------------------------------------------------------------------------------
+---init
 
+---@param parent ParentSession the parent session of this session
 ---@param boss Prefab.Animation the boss sprite
 ---@param attack_session_class_array table an array of classes of the attack sessions to play
 ---@param script function a coroutine function that takes self as first parameter
----@param stage Stage
-function M.__create(stage, boss, attack_session_class_array, script)
-    local self = ScriptableSession.__create(stage, script)
+function M.__create(parent, boss, attack_session_class_array, script)
+    local self = ScriptableSession.__create(parent, script)
     self.boss = boss
     self.attack_session_class_array = attack_session_class_array
     self.renderer = Renderer(LAYER_TOP, self, "game")
@@ -44,6 +46,9 @@ function M:ctor()
             0.34,
             "left")
 end
+
+--------------------------------------------------------------------------------------------------
+---setters and getters
 
 ---@return Prefab.Animation the boss sprite
 function M:getBoss()
@@ -64,15 +69,6 @@ function M:getAttackSessionArray()
     return self.attack_session_class_array
 end
 
----@param index number the index of the attack session in the array
-function M:playAttackSessionByIndex(index)
-    local Class = self.attack_session_class_array[index]
-    local session = Class(self.boss, self.stage)
-    self:setSession(session)
-    self:setNumStar(self:getNumSpellLeft(index))
-    coroutine.yield()
-end
-
 ---@param index number index of the current attack that is on-going; enter 0 if at the start
 ---@return number of spell left
 function M:getNumSpellLeft(index)
@@ -89,9 +85,28 @@ function M:getNumSpellLeft(index)
     return count
 end
 
-function M:endSession()
-    ScriptableSession.endSession(self)
-    Del(self.renderer)
+--------------------------------------------------------------------------------------------------
+---update
+
+function M:update(dt)
+    ---rewriting the update of the children by calling the base Session class method
+    Session.update(self, dt)
+
+    local is_updated = false
+
+    while not is_updated do
+        is_updated = self:updateChildren()  -- run children
+
+        if is_updated == false then
+            -- resume the script to find something to update
+            if coroutine.status(self.coroutine) == "dead" then
+                self:endSession()
+                is_updated = true
+            else
+                self:resumeCoroutine()
+            end
+        end
+    end
 end
 
 function M:render()
@@ -108,6 +123,24 @@ function M:render()
         local x, y = -176 + xi * star_width, 186 - yi * star_height
         SetImageStateAndRender("image:hint_spell_card_left", "mul+add", color.White, x, y, 0.75)
     end
+end
+
+--------------------------------------------------------------------------------------------------
+---couroutine
+
+---@param index number the index of the attack session in the array
+function M:playAttackSessionByIndex(index)
+    local Class = self.attack_session_class_array[index]
+    Class(self, self.boss)  -- add as a child of self
+    self:setNumStar(self:getNumSpellLeft(index))
+end
+
+--------------------------------------------------------------------------------------------------
+---deletion
+
+function M:endSession()
+    ScriptableSession.endSession(self)
+    Del(self.renderer)
 end
 
 return M

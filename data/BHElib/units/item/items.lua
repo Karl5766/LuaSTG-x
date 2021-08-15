@@ -58,36 +58,45 @@ end
 
 ---------------------------------------------------------------------------------------------------
 
+local _sound_name = "se:item00"
+local _vol = 0.3
+
 M.Power = DefineSimpleItem("image:item_power", function(self, player)
     CollectableItem.onCollect(self, player)
     player:addPower(1)
+    PlaySound(_sound_name, _vol, 0, true)
 end)
 
 M.Point = DefineSimpleItem("image:item_point", function(self, player)
     CollectableItem.onCollect(self, player)
     self.stage:addScore(12800)
+    PlaySound(_sound_name, _vol, 0, true)
 end)
 
 M.FullPower = DefineSimpleItem("image:item_full_power", function(self, player)
     CollectableItem.onCollect(self, player)
     player:addPower(400)
+    PlaySound(_sound_name, _vol, 0, true)
 end)
 
 M.BigPower = DefineSimpleItem("image:item_big_power", function(self, player)
     CollectableItem.onCollect(self, player)
     player:addPower(100)
+    PlaySound(_sound_name, _vol, 0, true)
 end)
 
 M.Extend = DefineSimpleItem("image:item_extend", function(self, player)
     CollectableItem.onCollect(self, player)
     local player_resource = player:getPlayerResource()
     player_resource.num_life = player_resource.num_life + 1
+    PlaySound(_sound_name, _vol, 0, true)
 end)
 
 M.Bomb = DefineSimpleItem("image:item_bomb", function(self, player)
     CollectableItem.onCollect(self, player)
     local player_resource = player:getPlayerResource()
     player_resource.num_bomb = player_resource.num_bomb + 1
+    PlaySound(_sound_name, _vol, 0, true)
 end)
 
 ---------------------------------------------------------------------------------------------------
@@ -113,6 +122,7 @@ do
     function Item:onCollect(player)
         CollectableItem.onCollect(self, player)
         self.stage:addScore(3200)
+        PlaySound(_sound_name, _vol, 0, true)
     end
 
     function Item:frame()

@@ -16,11 +16,10 @@ local Renderer = require("BHElib.ui.renderer_prefab")
 
 ---@param boss Prefab.Animation
 ---@param duration number spell time in frames
----@param stage Stage
+---@param parent ParentSession the parent session of this session
 ---@param attack_id string unique id of the attack
----@param countdown_pos math.Vec2 position for the time to display
-function M.__create(stage, boss, duration, attack_id, countdown_pos)
-    local self = Session.__create(stage)
+function M.__create(parent, boss, duration, attack_id)
+    local self = Session.__create(parent)
     self.boss = boss
     ---@type Prefab.BossHitbox
     self.hitbox = nil
@@ -31,6 +30,8 @@ function M.__create(stage, boss, duration, attack_id, countdown_pos)
     self.fail_flag = false  -- if the player has made a mistake
     self.kill_flag = false  -- true only if the boss' hitbox was shot down
 
+    ---@type Stage
+    local stage = self.game_scene
     local enable_capture = not stage:isReplay()
     self.enable_capture = enable_capture
 
@@ -109,9 +110,12 @@ local Coordinates = require("BHElib.unclassified.coordinates_and_screen")
 function M:renderHpBar()
     local scale = 1.2
 
+    local sp = FindResSprite("image:boss_ui_hp_bar_empty")
+    local size_spec = sp:getSprite():getContentSize()
+    local height = size_spec.height
+
     local hp_bar_pos = self.hp_bar_pos
     local base_x, base_y = hp_bar_pos.x, hp_bar_pos.y
-    local height = 32  -- image height is 32 pixels
 
     local hp_ratio = self.hitbox:getHp() / self.hitbox:getMaxHp()
     local hp_bar_total_length = 800
@@ -160,13 +164,13 @@ end
 
 function M:onHitboxKill()
     self.kill_flag = true
-    if not self.endSessionFlag then
+    if not self.sessionHasEnded then
         self:endSession()
     end
 end
 
 function M:onHitboxDel()
-    if not self.endSessionFlag then
+    if not self.sessionHasEnded then
         self:endSession()
     end
 end
@@ -174,7 +178,7 @@ end
 function M:endSession()
     Session.endSession(self)
 
-    local stage = self.stage
+    local stage = self.game_scene
     if self.enable_capture then
         local is_captured = self.kill_flag and not (self:isFail() or self:isTimeOut())
         if is_captured then
