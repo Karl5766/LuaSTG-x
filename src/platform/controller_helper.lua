@@ -96,6 +96,9 @@ end
 ---------------------------------------------------------------------------------------------------
 ---On Key Down/Up
 
+
+--local _unpressed = {}
+
 ---@param controller_id number
 ---@param keycode number controller keycode
 ---@param value any
@@ -105,6 +108,10 @@ local function onKeyDown(controller_id, keycode, value, isPressed, isAnalog)
     if keycode >= 1000 then
         keycode = keycode - 1000
     end
+    --if not _unpressed[keycode] then
+    --    print(keycode)
+    --    _unpressed[keycode] = true
+    --end
     CheckAndConnect(controller_id)
     status_button[controller_id][keycode] = true
 
@@ -134,7 +141,7 @@ end
 ---------------------------------------------------------------------------------------------------
 ---On Axis Change
 
----_axis_t[cur_level][prev_level] = {set_positive, set_negative}
+---_axis_t[cur_level][prev_level] = {(boolean)set_positive, (boolean)set_negative}
 local _axis_t = {
     { nil, { nil, true }, { false, true }, },
     { { nil, false }, nil, { false, nil }, },
@@ -243,7 +250,7 @@ function M.getAllControllerLabels()
     for _, controller in ipairs(controllers) do
         local info = {
             device_type = "controller",
-            device = controller
+            device = controller:getDeviceId()
         }
         table.insert(result, info)
     end
@@ -251,17 +258,17 @@ function M.getAllControllerLabels()
 end
 
 ---test if a controller key is pressed
----@param controller cc.Controller the controller to check on
+---@param controller number id of the controller to check on
 ---@param key number the key value of the key to check; for non-axis keys, the next parameter axis_direction is nil
 ---@param axis_direction boolean if not nil, return the if the axis passes the threshold value at the specified direction;
 ---@return boolean
-function M.getKeyState(controller, key, axis_direction)
+function M.getKeyState(controller_id, key, axis_direction)
     if axis_direction == nil then
-        return status_button[controller][key] == true
+        return status_button[controller_id][key] == true
     elseif axis_direction == true then
-        return status_axis_positive[controller][key]
+        return status_axis_positive[controller_id][key]
     else
-        return status_axis_negative[controller][key]
+        return status_axis_negative[controller_id][key]
     end
 end
 

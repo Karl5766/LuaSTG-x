@@ -108,15 +108,15 @@ end
 _IsKeyboardKeyDown = M.isKeyboardKeyDown
 
 ---return false if the given key does not have a corresponding mapping
----@param controller cc.Controller the controller to check
+---@param controller_id number id of the controller to check
 ---@param function_key_name string name of the function key
 ---@return boolean if the corresponding controller key is down
-function M.isControllerKeyDown(controller, function_key_name)
+function M.isControllerKeyDown(controller_id, function_key_name)
     local controller_keycode = _controller_keymap[function_key_name]
     if controller_keycode == nil then
         return false
     else
-        return controller_helper.getKeyState(controller, controller_keycode[1], controller_keycode[2])
+        return controller_helper.getKeyState(controller_id, controller_keycode[1], controller_keycode[2])
     end
 end
 _IsControllerKeyDown = M.isControllerKeyDown
