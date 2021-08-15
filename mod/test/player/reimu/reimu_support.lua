@@ -19,7 +19,7 @@ local floor = math.floor
 ---init
 
 ---@param stage Stage
----@param player PlayerBase
+---@param player Prefab.Player
 ---@param img string
 function M.__create(stage, player, img)
     local self = {}

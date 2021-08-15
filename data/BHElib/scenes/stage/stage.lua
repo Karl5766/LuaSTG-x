@@ -65,7 +65,7 @@ function M:createScene()
     local player = Player(self, nil, scene_init_state.player_resource)
     player.x = player_pos.x
     player.y = player_pos.y
-    self.player = player
+    self:setPlayer(player)
 
     self.replay_io_manager:startNewScene()  -- clear input from last scene, setup replay reader/writer
 
@@ -106,13 +106,14 @@ function M:onPlayerMissOrBomb()
     end
 end
 
----@param player PlayerBase the player of this stage
+---@param player Prefab.Player the player of this stage
 function M:setPlayer(player)
     self.player = player
 end
 
 ---@return Prefab.Player the (unique) player of the stage
 function M:getPlayer()
+    assert(self.player, "Error: Player does not exist!")
     return self.player
 end
 

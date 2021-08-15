@@ -78,6 +78,8 @@ local function Init()
     -- register object classes
     Prefab.RegisterAllDefinedPrefabs()
 
+    require("BHElib.scripts.the_jar")
+
     -- create the menu
     SetupGroupInitState()
     local menu = CreateMenu()
