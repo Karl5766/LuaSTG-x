@@ -47,11 +47,11 @@ function M:colli(other)
 end
 
 function M:playNormalHitSound()
-    PlaySound("se:damage00", 0.1, 0, true)
+    PlaySound("se:damage00", 0.07, 0, true)
 end
 
 function M:playLowHpHitSound()
-    PlaySound("se:damage01", 0.1, 0, true)
+    PlaySound("se:damage01", 0.07, 0, true)
 end
 
 function M:onEnemyCollision(other)

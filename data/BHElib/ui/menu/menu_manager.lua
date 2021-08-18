@@ -32,14 +32,13 @@ local MenuPagePool = require("BHElib.ui.menu.menu_page_pool")
 local MenuConst = require("BHElib.ui.menu.menu_global")
 
 ---------------------------------------------------------------------------------------------------
+---virtual functions
 
 ---this function needs to initialize menu pages for menu_page_array and menu_page_pool
-function M:initMenuPages()
-end
+M.initMenuPages = nil
 
 ---this function needs to terminate the menu; call scene transition if needed
-function M:onMenuExit()
-end
+M.onMenuExit = nil
 
 ---------------------------------------------------------------------------------------------------
 ---init
@@ -64,19 +63,92 @@ function M:ctor()
     self:initMenuPages()
 end
 
+---------------------------------------------------------------------------------------------------
+
 ---add a menu page to the menu page array and menu page pool
 function M:registerPage(init_callback, menu_page_id, menu_page, menu_pos)
     self.menu_page_array:setMenu(menu_pos, init_callback, menu_page_id)
     self.menu_page_pool:setMenuInPool(menu_page_id, menu_page, menu_pos)
 end
 
-function M:cleanup()
-    local menu_page_pool = self.menu_page_pool
-    for _, info_array in menu_page_pool:getIter() do
-        local menu_page = info_array[2]
-        menu_page:cleanup()
+function M:queryChoice(choice_key)
+    return self.menu_page_array:queryChoice(choice_key)
+end
+
+---@param menu_page_pos number the index from which the cascading starts
+function M:cascade(menu_page_pos)
+    assert(menu_page_pos, "Error: Attempt to cascade menu page at a nil index!")
+    while menu_page_pos ~= nil do
+        local menu_page_init_callback, menu_page_id
+        menu_page_init_callback, menu_page_id, menu_page_pos = self.menu_page_array:findPrevMenuOf(menu_page_pos, "go_to_menus", "num_finished_menus")
+        if menu_page_pos then
+            local menu_page = self.menu_page_pool:getMenuFromPool(menu_page_id)
+            menu_page:onCascade(self.menu_page_array)
+        end
     end
 end
+
+---setup a menu page at the given position; can be used to append new menu page to the end of array
+---will update the menu page in the page array and page pool;
+---it should be guaranteed that the new menu has no choices recorded in the array
+---@param menu_page_init_callback function a function that creates a new menu page
+---@param menu_id string a unique id that identifies the menu page
+---@param menu_pos number position in the array to setup menu page at
+---@return MenuPage a menu page that has been setup in the given index of the array
+function M:setupMenuPageAtPos(menu_page_init_callback, menu_id, menu_pos)
+    -- check if menu already exist, if not, create a new one
+    local menu_page_pool = self.menu_page_pool
+
+    local queried_menu_pos = menu_page_pool:getMenuPosFromPool(menu_id)
+    local menu_page
+    local create_flag = (queried_menu_pos == nil and not menu_page_pool:isMenuExists(menu_id))
+
+    if create_flag then
+        menu_page = self:createMenuPage(menu_page_init_callback, menu_id)
+
+        -- add/set the menu page in the array
+        self:registerPage(menu_page_init_callback, menu_id, menu_page, menu_pos)
+    else
+        menu_page = menu_page_pool:getMenuFromPool(menu_id)
+
+        self:registerPage(menu_page_init_callback, menu_id, menu_page, menu_pos)
+
+        self.menu_page_array:clearChoices(menu_pos)
+    end
+
+    return menu_page
+end
+
+---@param menu_page_init_callback function a function that takes first parameter as menu manager, creates a new menu page
+function M:createMenuPage(menu_page_init_callback)
+    return menu_page_init_callback(self)
+end
+
+---set the top menu page to enter, in forward mode
+function M:setTopMenuPageToEnter()
+    local menu_page_array = self.menu_page_array
+    local menu_id = menu_page_array:getMenuId(menu_page_array:getSize())
+    local cur_menu_page = self.menu_page_pool:getMenuFromPool(menu_id)
+    cur_menu_page:setPageEnter(true, self.transition_speed)
+end
+
+---setup menu pages
+---@param menu_page_info_array table an array in which each element contains information for initializing each menu page
+---@param coordinates_name string name of the render view to render in E.g. "ui" "game" "3d"
+---@param init_layer number (if non-nil) set the initial layer of the menu pages to this value
+function M:setupMenuPagesFromInfoArray(menu_page_info_array, coordinates_name, init_layer)
+    for i = 1, #menu_page_info_array do
+        local class_id, menu_id = unpack(menu_page_info_array[i])
+        local menu_page = self:setupMenuPageAtPos(class_id, menu_id, i)
+        if init_layer then
+            menu_page:setLayer(init_layer)
+        end
+        menu_page:setRenderView(coordinates_name)
+    end
+end
+
+---------------------------------------------------------------------------------------------------
+---update
 
 ---@param dt number elapsed time
 function M:update(dt)
@@ -214,6 +286,9 @@ function M:goToNextMenuPage()
     end
 end
 
+---------------------------------------------------------------------------------------------------
+---exiting
+
 function M:setAllPageExit()
     -- set all menu pages to exit state
     local menu_page_pool = self.menu_page_pool
@@ -223,57 +298,12 @@ function M:setAllPageExit()
     end
 end
 
-function M:queryChoice(choice_key)
-    return self.menu_page_array:queryChoice(choice_key)
-end
-
----@param menu_page_pos number the index from which the cascading starts
-function M:cascade(menu_page_pos)
-    assert(menu_page_pos, "Error: Attempt to cascade menu page at a nil index!")
-    while menu_page_pos ~= nil do
-        local menu_page_init_callback, menu_page_id
-        menu_page_init_callback, menu_page_id, menu_page_pos = self.menu_page_array:findPrevMenuOf(menu_page_pos, "go_to_menus", "num_finished_menus")
-        if menu_page_pos then
-            local menu_page = self.menu_page_pool:getMenuFromPool(menu_page_id)
-            menu_page:onCascade(self.menu_page_array)
-        end
-    end
-end
-
----setup a menu page at the given position; can be used to append new menu page to the end of array
----will update the menu page in the page array and page pool;
----it should be guaranteed that the new menu has no choices recorded in the array
----@param menu_page_init_callback function a function that creates a new menu page
----@param menu_id string a unique id that identifies the menu page
----@param menu_pos number position in the array to setup menu page at
----@return MenuPage a menu page that has been setup in the given index of the array
-function M:setupMenuPageAtPos(menu_page_init_callback, menu_id, menu_pos)
-    -- check if menu already exist, if not, create a new one
+function M:cleanup()
     local menu_page_pool = self.menu_page_pool
-
-    local queried_menu_pos = menu_page_pool:getMenuPosFromPool(menu_id)
-    local menu_page
-    local create_flag = (queried_menu_pos == nil and not menu_page_pool:isMenuExists(menu_id))
-
-    if create_flag then
-        menu_page = self:createMenuPage(menu_page_init_callback, menu_id)
-
-        -- add/set the menu page in the array
-        self:registerPage(menu_page_init_callback, menu_id, menu_page, menu_pos)
-    else
-        menu_page = menu_page_pool:getMenuFromPool(menu_id)
-
-        self:registerPage(menu_page_init_callback, menu_id, menu_page, menu_pos)
-
-        self.menu_page_array:clearChoices(menu_pos)
+    for _, info_array in menu_page_pool:getIter() do
+        local menu_page = info_array[2]
+        menu_page:cleanup()
     end
-
-    return menu_page
-end
-
----@param menu_page_init_callback function a function that takes first parameter as menu manager, creates a new menu page
-function M:createMenuPage(menu_page_init_callback)
-    return menu_page_init_callback(self)
 end
 
 return M

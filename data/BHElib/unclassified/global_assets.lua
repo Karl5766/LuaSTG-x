@@ -97,12 +97,12 @@ do
     }
     LoadTextureAndImages("tex:item", images, "THlib\\item\\item.png")
 
-    LoadImageGroup('lifechip', "tex:hint", 288, 16, 16, 15, 4, 1)
-    LoadImageGroup('bombchip', "tex:hint", 288, 32, 16, 16, 4, 1)
+    LoadImageArray('lifechip', "tex:hint", 288, 16, 16, 15, 4, 1)
+    LoadImageArray('bombchip', "tex:hint", 288, 32, 16, 16, 4, 1)
 
     -- line.png
     LoadTexture("tex:line", "THlib\\UI\\line.png", true)
-    LoadImageGroup("image_array:icon_line", "tex:line", 0, 0, 200, 8, 1, 7)
+    LoadImageArray("image_array:icon_line", "tex:line", 0, 0, 200, 8, 1, 7)
 
     ---boss fight and spell
     LoadImageFromFile("image:hint_spell_card_left", "THlib\\enemy\\boss_cardleft.png")

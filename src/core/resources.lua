@@ -36,24 +36,32 @@ function PlaySound(name, vol, pan, sndflag)
     _PlaySound(name, v, (pan or 0) / 1024)
 end
 
+local _image_group_size = {}
+
 ---
 --- 从纹理资源载入图像组
----@param prefix string 资源名前缀
----@param texname string 纹理资源名
+---@param image_array_name string 资源名前缀
+---@param tex_name string 纹理资源名
 ---@param x number
 ---@param y number 起始坐标
----@param w number
----@param h number 单个图像尺寸
+---@param width number
+---@param height number 单个图像尺寸
 ---@param cols number
 ---@param rows number 行列数
 ---@param a number
 ---@param b number 碰撞半径 省略为0
 ---@param rect boolean 是否为矩形碰撞盒 省略为false
-function LoadImageGroup(prefix, texname, x, y, w, h, cols, rows, a, b, rect)
+function LoadImageArray(image_array_name, tex_name, x, y, width, height, cols, rows, a, b, rect)
     for i = 0, cols * rows - 1 do
-        LoadImage(prefix .. (i + 1), texname,
-                  x + w * (i % cols), y + h * (int(i / cols)), w, h, a or 0, b or 0, rect or false)
+        local cur_x, cur_y = x + width * (i % cols), y + height * (int(i / cols))
+        LoadImage(image_array_name .. (i + 1), tex_name,
+                  cur_x, cur_y, width, height, a or 0, b or 0, rect or false)
     end
+    _image_group_size[image_array_name] = cols * rows
+end
+
+function GetImageArraySize(image_array_name)
+    return _image_group_size[image_array_name]
 end
 
 ---
@@ -87,23 +95,6 @@ function LoadAniFromFile(texaniname, filename, mipmap, n, m, intv, a, b, rect)
     LoadTexture(texaniname, filename, mipmap)
     local w, h = GetTextureSize(texaniname)
     return LoadAnimation(texaniname, texaniname, 0, 0, w / n, h / m, n, m, intv, a, b, rect)
-end
-
----
---- 从文件载入图像组
---- 通常使用_LoadImageGroupFromFile代替
----@param texaniname string 资源名
----@param filename string 文件名
----@param mipmap boolean
----@param n number 行数
----@param m number 列数
----@param a number 横向碰撞大小的一半
----@param b number 纵向碰撞大小的一半
----@param rect boolean 是否为矩形碰撞盒
-function LoadImageGroupFromFile(texaniname, filename, mipmap, n, m, a, b, rect)
-    LoadTexture(texaniname, filename, mipmap)
-    local w, h = GetTextureSize(texaniname)
-    return LoadImageGroup(texaniname, texaniname, 0, 0, w / n, h / m, n, m, a, b, rect)
 end
 
 local ENUM_TTF_FMT = {

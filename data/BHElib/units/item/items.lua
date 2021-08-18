@@ -16,10 +16,10 @@ local M = {}
 local _item_global = {
     init_y = 1,
     acc_y = -0.01,
-    max_descend_speed = -1,
+    max_descend_speed = -1.5,
     flying_speed = 10,
-    collect_radius = 30,
-    collect_time = 15,
+    collect_radius = 20,
+    collect_time = 0,
     del_y = -244
 }
 
@@ -59,7 +59,7 @@ end
 ---------------------------------------------------------------------------------------------------
 
 local _sound_name = "se:item00"
-local _vol = 0.3
+local _vol = 0.15
 
 M.Power = DefineSimpleItem("image:item_power", function(self, player)
     CollectableItem.onCollect(self, player)

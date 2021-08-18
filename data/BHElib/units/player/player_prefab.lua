@@ -5,11 +5,12 @@
 ---------------------------------------------------------------------------------------------------
 
 local Prefab = require("core.prefab")
+local AnimatedUnit = require("BHElib.units.animation.animated_unit_prefab")
 
----@class Prefab.Player
+---@class Prefab.Player:Prefab.Object
 local M = Prefab.NewX(Prefab.Object)
 
-local ClockedAnimation = require("BHElib.units.clocked_animation")
+local EndCallbacks = require("BHElib.units.animation.animation_end_callbacks")
 local Coordinates = require("BHElib.unclassified.coordinates_and_screen")
 local PlayerGrazeObject = require("BHElib.units.player.player_graze_object_prefab")
 
@@ -44,47 +45,30 @@ M.SHOT_TYPE_DISPLAY_NAME = nil
 ---@type function
 M.loadResources = nil
 
----initialize sprite animation
----@type function
-M.initAnimation = nil
-
 ---------------------------------------------------------------------------------------------------
 ---init
 
 ---the player will copy the number of life and bombs from the previous player object (if exists)
 ---@param player_input InputManager an object that manages recorded player input
----@param animation_interval number integer indicating the player sprite animation interval in frames
+---@param animation MovableAnimation controls the update of player sprite
 ---@param unfocused_speed number speed when unfocused; per frame
 ---@param focused_speed number speed when focused; per frame
 ---@param player_resource gameplay_resources.Player specifies the initial resources this player holds
 ---@param stage Stage the current stage this player is at
 function M:init(
         player_input,
-        animation_interval,
+        animation,
         unfocused_speed,
         focused_speed,
         player_resource,
         stage)
-    assert(player_resource, "Error: PlayerResource does not exist")
-    self.layer = LAYER_PLAYER
     self.group = GROUP_PLAYER
+    self.layer = LAYER_PLAYER
     self.bound = false
 
-    self:loadResources()
+    self.animation = animation
 
-    -- player object properties
-    self.sprite_animation_interval = animation_interval  -- in frames
-    self.sprite_animation_transition_interval = 4
-    self.sprite_animation = ClockedAnimation()
-    self:initAnimation()
     self.sprite_movement_state = 0  -- -2, -1 for left, 0 for idle, 1, 2 for right
-    self.sprite_animation:playAnimation(
-            "idle",
-            self.sprite_animation_interval,
-            0,
-            true,
-            true
-    )
 
     self.player_input = player_input
     self.stage = stage
@@ -96,29 +80,8 @@ function M:init(
     self.spawn_counter = 0
     self.bomb_cooldown_timer = 0
     self.item_collect_border_y = 112
-    self.player_resource = player_resource:copy()
-end
 
----------------------------------------------------------------------------------------------------
----deletion
-
----current only way for player to be deleted is through a respawn
-local function CleanupForRespawn(self)
-    self.cleanup_completed = true
-    Del(self)
-    self.graze_object.colli = false
-    Del(self.graze_object)
-end
-
-function M:del()
-    if not self.cleanup_completed then
-        error("Error: Attempt to call del() on player without cleanup!")
-    end
-end
-function M:kill()
-    if not self.cleanup_completed then
-        error("Error: Attempt to call kill() on player without cleanup!")
-    end
+    self:setPlayerResource(player_resource)
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -155,11 +118,17 @@ function M:getPlayerResource()
     return self.player_resource
 end
 
+---@param player_resource gameplay_resources.Player
+function M:setPlayerResource(player_resource)
+    assert(player_resource, "Error: PlayerResource does not exist")
+    self.player_resource = player_resource:copy()
+end
+
 ---------------------------------------------------------------------------------------------------
 ---update
 
 function M:frame()
-    task.Do(self)
+    self.animation:update(1)
 
     if self.spawn_counter == 0 then
         -- receive input not in spawning
@@ -214,7 +183,6 @@ function M:limitMovementInBound()
     end
 end
 
-local _hud_painter = require("BHElib.ui.hud_painter")
 function M:render()
     -- render player sprite
     if self.invincibility_timer % 3 == 2 then  -- 避开初始值 counter = 0
@@ -284,102 +252,43 @@ function M:updateSpriteByMovement(is_moving_rightward, is_moving_leftward)
         cur_move_dir = 1
     end
 
-    local interval = self.sprite_animation_interval
-    local transition_interval = self.sprite_animation_transition_interval
-    local prev_state = self.sprite_movement_state
-    local product = cur_move_dir * prev_state
+    ---@type MovableAnimation
+    local animation = self.animation
 
-    if (cur_move_dir == 0 and prev_state == 0) or product == 2 then  -- idle/continuous moving
-        -- do nothing but update the animation
-        self.sprite_animation:update(1)
-    elseif cur_move_dir ~= 0 and prev_state == 0 then  -- from idle to moving
-        local row_id
-        if cur_move_dir > 0 then
-            row_id = "move_right_loop"
-        else
-            row_id = "move_left_loop"
-        end
-        self.sprite_animation:playAnimation(
-                row_id,
+    local interval = self.animation_interval
+    local transition_interval = self.transition_interval
+    local total_image_num = 8
+    local moving_repeat_image_num = 4
+    local prev_state = self.sprite_movement_state
+
+    if cur_move_dir * prev_state > 0 or (cur_move_dir == 0 and prev_state == 0) then  -- no change
+
+    elseif cur_move_dir ~= 0 and cur_move_dir ~= prev_state then  -- from idle to moving/sudden turn to opposite direction
+        local _repeat_moving = EndCallbacks.repeatFromImageIndex(total_image_num - moving_repeat_image_num + 1)  -- playing 5th to 8th images repeatingly
+        animation:playMovementAnimation(
+                cur_move_dir < 0,
                 interval,
-                0,
                 true,
-                true
-        )
-        self.sprite_movement_state = cur_move_dir * 2
-    elseif prev_state == -2 or prev_state == 2 then  -- from continuous moving to moving
-        local row_id
-        if prev_state == -2 then
-            row_id = "move_left"
-            self.sprite_movement_state = -1
-        else
-            row_id = "move_right"
-            self.sprite_movement_state = 1
-        end
-        self.sprite_animation:playAnimation(
-                row_id,
-                transition_interval,
+                transition_interval * (total_image_num - moving_repeat_image_num),
+                _repeat_moving)
+    else  -- from moving to idle
+        local _idle = EndCallbacks.playAnotherAnimation(
+                animation:getIdleImageArray(),
+                interval,
+                true,
                 0,
-                false,
-                false
-        )
-    else  -- from moving to idle, moving (the direction may be opposite) or continuous moving
-        -- prev_state should be -1 or 1;
-        if prev_state == cur_move_dir then  -- going in the same direction
-            self.sprite_animation:setAnimationDirection(true)
-            local t = self.sprite_animation:update(1)
-            if t then  -- transition animation has ended
-                local row_id
-                if cur_move_dir == -1 then
-                    row_id = "move_left_loop"
-                else
-                    row_id = "move_right_loop"
-                end
-                self.sprite_animation:playAnimation(
-                        row_id,
-                        interval,
-                        self.timer,
-                        true,
-                        true
-                )
-                self.sprite_movement_state = 2 * cur_move_dir
-            end
-        else  -- going in the opposite direction or from moving to idle
-            if cur_move_dir ~= 0 then
-                local row_id
-                if cur_move_dir == 1 then
-                    row_id = "move_right_loop"
-                else
-                    row_id = "move_left_loop"
-                end
-                self.sprite_animation:playAnimation(
-                        row_id,
-                        transition_interval,
-                        0,
-                        true,
-                        true
-                )
-                self.sprite_movement_state = cur_move_dir * 2
-            else
-                self.sprite_animation:setAnimationDirection(false)
-                local t = self.sprite_animation:update(1)
-                if t then  -- transition animation has ended
-                    if cur_move_dir == 0 then
-                        self.sprite_animation:playAnimation(
-                                "idle",
-                                interval,
-                                0,
-                                true,
-                                true
-                        )
-                        self.sprite_movement_state = 0
-                    end
-                end
-            end
-        end
+                EndCallbacks.repeatAgain)
+        animation:playMovementAnimation(
+            prev_state < 0,
+            transition_interval,
+            false,
+            transition_interval * moving_repeat_image_num,
+            _idle)
     end
 
-    self.img = self.sprite_animation:getImage()
+    self.sprite_movement_state = cur_move_dir
+    self.img = animation:getSprite()
+    self.hscale = animation:getHscale()
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -424,8 +333,8 @@ function M:onMiss()
     player_resource.num_life = player_resource.num_life - 1
     player_resource.num_bomb = 3
     self:addPower(-50)
-    if player_resource.num_life < 0 then
-        self:endStage()
+    if player_resource.num_life < 0 then  -- if player continue game here, the game will overwrite the life and bomb numbers
+        self.stage:createGameOverMenu()
     end
 end
 
@@ -443,7 +352,7 @@ function M:respawn()
     new_player.invincibility_timer = M.global.spawn_protect_time
     self.stage:setPlayer(new_player)
 
-    CleanupForRespawn(self)
+    Del(self)
 end
 
 ---if the player is hit but miss counter has not reached 0, cancel the miss counter
@@ -451,10 +360,16 @@ function M:saveFromMiss()
     self.miss_counter = nil
 end
 
-function M:endStage()
-    local current_stage = self.stage
-    local callbacks = require("BHElib.scenes.stage.stage_transition_callbacks")
-    current_stage:transitionWithCallback(callbacks.restartStageAndKeepRecording)
+---------------------------------------------------------------------------------------------------
+---deletion
+
+function M:del()
+    self.graze_object.colli = false
+    Del(self.graze_object)
+end
+
+function M:kill()
+    error("Error: Attempt to call kill() on player!")
 end
 
 Prefab.Register(M)

@@ -117,9 +117,35 @@ function M:getPlayer()
     return self.player
 end
 
----@return gameplay_resources.Player resources that player initially holds
-function M:getInitPlayerResource()
-    return self.scene_init_state.player_resource
+---------------------------------------------------------------------------------------------------
+---pause menus
+
+function M:createUserPauseMenu()
+    self.is_paused = true
+    local PauseMenu = require("BHElib.scenes.stage.pause_menu.user_pause_menu")
+    self.pause_menu = PauseMenu(self)
+    return self.pause_menu
+end
+
+function M:createReplayEndMenu()
+    self.is_paused = true
+    local PauseMenu = require("BHElib.scenes.stage.pause_menu.replay_end_menu")
+    self.pause_menu = PauseMenu(self)
+end
+
+function M:createGameOverMenu()
+    self.is_paused = true
+    local PauseMenu = require("BHElib.scenes.stage.pause_menu.game_over_menu")
+    self.pause_menu = PauseMenu(self)
+    return self.pause_menu
+end
+
+function M:onGameOverContinue()
+    local player = self:getPlayer()
+    player:setPlayerResource(self.scene_init_state.player_resource)
+    local Items = require("BHElib.units.item.items")
+    local item = Items.FullPower(self)
+    item.x, item.y = 0, 0
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -133,11 +159,7 @@ function M:frameUpdate(dt)
     -- check if pause menu should be created
     if Input:isAnyDeviceKeyJustChanged("escape", false, true) and
             not self.is_paused then
-
-        -- create pause menu
-        self.is_paused = true
-        local PauseMenu = require("BHElib.scenes.stage.pause_menu.user_pause_menu")
-        self.pause_menu = PauseMenu(self, self.replay_io_manager:isReplay())
+        self:createUserPauseMenu()
     end
 
     if self.is_paused then
@@ -171,10 +193,7 @@ function M:updateUserInput()
     local replay_io_manager = self.replay_io_manager
     if replay_io_manager:isReplay() and replay_io_manager:isStageEndReached() then
         -- end of replay reached
-
-        self.is_paused = true
-        local PauseMenu = require("BHElib.scenes.stage.pause_menu.replay_end_menu")
-        self.pause_menu = PauseMenu(self)
+        self:createReplayEndMenu()
     else
         replay_io_manager:updateUserInput()
     end
@@ -219,7 +238,7 @@ function M:createNextAndCleanupCurrentScene()
 end
 
 ---------------------------------------------------------------------------------------------------
----direct transitions
+---transition apis
 ---these transitions can be called almost anywhere through the current stage object
 
 ---terminate current scene and transition to a new one

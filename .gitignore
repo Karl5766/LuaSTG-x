@@ -12,5 +12,8 @@
 /replay/
 /data/BHElib/input/current
 
+# ignore score change
+/score/
+
 # ignore lstg_log change
 /lstg_log.txt

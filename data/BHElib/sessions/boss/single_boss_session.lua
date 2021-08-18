@@ -23,7 +23,7 @@ M.BOSS_DISPLAY_NAME = nil
 ---init
 
 ---@param parent ParentSession the parent session of this session
----@param boss Prefab.Animation the boss sprite
+---@param boss Prefab.BossHitbox the boss sprite
 ---@param attack_session_class_array table an array of classes of the attack sessions to play
 ---@param script function a coroutine function that takes self as first parameter
 function M.__create(parent, boss, attack_session_class_array, script)

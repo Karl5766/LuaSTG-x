@@ -151,8 +151,7 @@ function M.init()
                 image_array_name,
                 item[1], item[2], item[3], item[4], item[5],
                 item[7], item[8], item[9], item[10], item[11],
-                item[12], center_x, center_y
-        )
+                item[12], center_x, center_y)
 
         local total_image_num = item[7] * item[8]  -- nImg = nRow * nCol
         local bullet_info = {
@@ -169,8 +168,7 @@ function M.init()
         M.loadColumnAnimation(
                 ani_array_name,
                 item[1], item[2], item[3], item[4], item[5],
-                item[7], item[8], item[9], item[10], item[11]
-        )
+                item[7], item[8], item[9], item[10], item[11])
         local total_image_num = item[8]
         local bullet_info = {
             color_to_sprite_name = CreateColorToSpriteNameMapFromImageNum(ani_array_name, total_image_num),
@@ -255,7 +253,7 @@ function M.loadAnimationArray(animation_array_name,
             local cur_x, cur_y = x + (m - 1) * animation_col_dx, y + (l - 1) * animation_row_dy
 
             local animation_name = animation_array_name..counter
-            local resAnimation = LoadAnimation(
+            local res_animation = LoadAnimation(
                     animation_name,
                     tex_name,
                     cur_x,
@@ -266,11 +264,11 @@ function M.loadAnimationArray(animation_array_name,
                     num_image_row,
                     interval,
                     collision_radius,
-                    collision_radius
-            )
+                    collision_radius)
+
 
             if blend_mode then
-                resAnimation:setRenderMode(blend_mode)
+                res_animation:setRenderMode(blend_mode)
             end
             counter = counter + 1
         end
@@ -357,8 +355,7 @@ function M.initBulletEffects()
                 2,
                 3,
                 nil,
-                nil
-        )
+                nil)
 
         -- compute color
         local index = math.ceil(i / 2)

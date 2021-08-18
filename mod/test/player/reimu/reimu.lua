@@ -12,6 +12,7 @@ local M = Prefab.NewX(PlayerBase, "units.player.reimu")
 
 local Input = require("BHElib.input.input_and_recording")
 local ReimuSupport = require("player.reimu.reimu_support")
+local MovableAnimation = require("BHElib.units.animation.movable_animation")
 
 ---------------------------------------------------------------------------------------------------
 
@@ -24,10 +25,22 @@ M.SHOT_TYPE_DISPLAY_NAME = "Reimu"
 ---@param spawning_player Prefab.Player the player to inherit player resources (life, bombs etc.) from; nil if this is the first player
 ---@param player_resource gameplay_resources.Player specifies the initial resources this player holds
 function M:init(stage, spawning_player, player_resource)
+    self:loadResources()
+
+    local base_hscale = 1
+    self.animation_interval = 8
+    self.transition_interval = 4
+    local animation = MovableAnimation(
+            base_hscale,
+            "image_array:reimu_idle",
+            "image_array:reimu_move_left",
+            "image_array:reimu_move_right")
+    animation:playIdleAnimation(self.animation_interval)
+
     PlayerBase.init(
             self,
             Input,
-            8,
+            animation,
             4.5,
             2,
             player_resource,
@@ -43,6 +56,29 @@ function M:loadResources()
     end
     --sprite
     LoadTexture("tex:reimu_sprite", "THlib\\player\\reimu\\reimu.png")
+    local image_rows = {
+        {0, 0, 32, 48, 8, "image_array:reimu_idle"},
+        {0, 48, 32, 48, 8, "image_array:reimu_move_left"},
+        {0, 96, 32, 48, 8, "image_array:reimu_move_right"},
+    }
+    local tex_name = "tex:reimu_sprite"
+    local colli_a, colli_b = 0, 0
+
+    for i, row in ipairs(image_rows) do
+        local x, y, dx, ani_name = row[1], row[2], row[3], row[6]
+        local width, height, image_num = dx, row[4], row[5]
+        LoadImageArray(
+                ani_name,
+                tex_name,
+                x,
+                y,
+                width,
+                height,
+                image_num,
+                1,
+                colli_a,
+                colli_b)
+    end
 
     --main shot
     LoadImage("image:reimu_bullet", "tex:reimu_sprite", 192, 160, 64, 16, 16, 16)
@@ -71,41 +107,6 @@ function M:loadResources()
     SetImageState("image:reimu_kekkai", "mul+add", Color(0x804040FF))
 
     LoadImage("image:reimu_bomb_square", "tex:reimu_sprite", 0, 192, 64, 64, 0, 0)
-end
-
----------------------------------------------------------------------------------------------------
-
----setup sprite animation
-function M:initAnimation()
-    -- row_id, (top left)x, y, (single image)width, height, image_num, image_name
-    local image_rows = {
-        {"idle", 0, 0, 32, 48, 8, "image_array:reimu_idle"},
-        {"move_left", 0, 48, 32, 48, 4, "image_array:reimu_move_left"},
-        {"move_right", 0, 96, 32, 48, 4, "image_array:reimu_move_right"},
-        {"move_left_loop", 128, 48, 32, 48, 4, "image_array:reimu_move_left_loop"},
-        {"move_right_loop", 128, 96, 32, 48, 4, "image_array:reimu_move_right_loop"},
-    }
-    local tex_name = "tex:reimu_sprite"
-    local colli_a, colli_b = 0, 0
-
-    for i, row in ipairs(image_rows) do
-        local row_id, x, dx, y, dy, image_name = row[1], row[2], row[4], row[3], 0, row[7]
-        local width, height, image_num = row[4], row[5], row[6]
-        self.sprite_animation:loadRowImagesFromTexture(
-                row_id,
-                tex_name,
-                image_name,
-                x,
-                y,
-                dx,
-                dy,
-                width,
-                height,
-                image_num,
-                colli_a,
-                colli_b,
-                false)
-    end
 end
 
 ---------------------------------------------------------------------------------------------------

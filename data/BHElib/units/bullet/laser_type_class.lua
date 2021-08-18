@@ -47,9 +47,9 @@ function M.declareTypeFromTexture(tex_name, image_name_prefix, num_row, row_heig
     local body_image_array_prefix = image_name_prefix.."_body"
     local tail_image_array_prefix = image_name_prefix.."_tail"
 
-    LoadImageGroup(head_image_array_prefix, tex_name, 0, 0, l1, row_height, 1, num_row)
-    LoadImageGroup(body_image_array_prefix, tex_name, l1, 0, l2, row_height, 1, num_row)
-    LoadImageGroup(tail_image_array_prefix, tex_name, l1 + l2, 0, l3, row_height, 1, num_row)
+    LoadImageArray(head_image_array_prefix, tex_name, 0, 0, l1, row_height, 1, num_row)
+    LoadImageArray(body_image_array_prefix, tex_name, l1, 0, l2, row_height, 1, num_row)
+    LoadImageArray(tail_image_array_prefix, tex_name, l1 + l2, 0, l3, row_height, 1, num_row)
     local center_y = row_height * 0.5
     for i = 1, num_row do
         SetImageCenter(head_image_array_prefix..i, 0, center_y)

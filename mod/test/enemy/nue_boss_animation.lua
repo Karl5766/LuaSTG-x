@@ -1,25 +1,27 @@
 local Prefab = require("core.prefab")
-local Animation = require("BHElib.units.animation_prefab")
 
----@class Prefab.Animation.Nue:Prefab.Animation
-local BossAnimation = Prefab.NewX(Animation)
+local AnimatedUnit = require("BHElib.units.animation.animated_unit_prefab")
 
-function BossAnimation:init()
-    Animation.init(self, LAYER_ENEMY)
+---@class Prefab.AnimatedUnit.Nue:Prefab.AnimatedUnit
+local M = Prefab.NewX(AnimatedUnit)
+
+function M:init()
+    self:loadResources()
+    AnimatedUnit.init(self)
 
     self.animation_timer = 0
 end
 
-function BossAnimation:loadResources()
-    LoadTexture('tex:nue_ball', 'THlib\\enemy\\undefined.png')
-    LoadImage('image:nue_ball', 'tex:nue_ball', 0, 0, 128, 128, 16, 16)
+function M:loadResources()
+    LoadTexture("tex:nue_ball", "THlib\\enemy\\undefined.png")
+    LoadImage("image:nue_ball", "tex:nue_ball", 0, 0, 128, 128, 16, 16)
 end
 
-function BossAnimation:frame()
+function M:frame()
     self.animation_timer = self.animation_timer + 1
 end
 
-function BossAnimation:render()
+function M:render()
     for i = 1, 2 do
         local rotation_coeff = self.animation_timer * 10 * i
         for side = -1, 1, 2 do
@@ -39,8 +41,15 @@ function BossAnimation:render()
     end
 end
 
+function M:playIdleAnimation()
+    self.img = "image:nue_ball"
+end
+
+function M:playMovementAnimation()
+end
+
 ---@param is_left boolean true to play move left animation; false to play move right animation; nil to not play anything
-function BossAnimation:move(time, dx, dy, is_left, task_host)
+function M:move(time, dx, dy, is_left, task_host)
     task.New(task_host, function()
         local base_x, base_y = self.x, self.y
         for i = 1, time do
@@ -53,6 +62,6 @@ function BossAnimation:move(time, dx, dy, is_left, task_host)
     end)
 end
 
-Prefab.Register(BossAnimation)
+Prefab.Register(M)
 
-return BossAnimation
+return M

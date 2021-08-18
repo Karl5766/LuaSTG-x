@@ -9,15 +9,17 @@
 local Prefab = require("core.prefab")
 
 ---@class Prefab.EnemyHitbox:Prefab.Object
-local M = Prefab.NewX(Prefab.Object)
+local M = Prefab.NewX(Prefab.Object, "Prefab.EnemyHitbox")
 
 ---------------------------------------------------------------------------------------------------
+---@param colli_radius number will set .a and .b to this value; radius of the hitbox by default
+---@param max_hp number maximum hp value
+function M:init(colli_radius, max_hp)
 
-function M:init(radius, max_hp)
     self.group = GROUP_ENEMY
     self.bound = false
-    self.a = radius
-    self.b = radius
+    self.a = colli_radius
+    self.b = colli_radius
     self.rect = false
     self.max_hp = max_hp
     self.hp = max_hp
@@ -26,20 +28,22 @@ end
 
 ---------------------------------------------------------------------------------------------------
 
----@return number
+---@return number maximum hp of the enemy
 function M:getMaxHp()
     return self.max_hp
 end
 
----@return hp
+---@return number remaining hp of the enemy
 function M:getHp()
     return self.hp
 end
 
+---@param damage_multiplier number specifies the multiplier of the damage
 function M:setDamageMultiplier(damage_multiplier)
     self.damage_multiplier = damage_multiplier
 end
 
+---@return number
 function M:getDamageMultiplier()
     return self.damage_multiplier
 end

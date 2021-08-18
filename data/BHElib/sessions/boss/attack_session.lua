@@ -95,9 +95,9 @@ function M:update(dt)
 end
 
 function M:syncHitboxPosition()
-    local x, y = self.boss:getPosition()
+    local boss = self.boss
     local hitbox = self.hitbox
-    hitbox.x, hitbox.y = x, y
+    hitbox.x, hitbox.y = boss.x, boss.y
 end
 
 function M:render()

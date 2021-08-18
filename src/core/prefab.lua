@@ -87,7 +87,6 @@ local RawNew = lstg.RawNew
 ---@param class_id string if exists, this is the unique string id for referencing the class
 ---@return object
 function Prefab.NewX(base, class_id)
-
     local ret = Prefab.New(base, base)
     ret['.x'] = true
     if base['.3d'] then
@@ -121,8 +120,49 @@ function Prefab.NewX(base, class_id)
 
     return setmetatable(ret, mt)
 end
-
 xclass = Prefab.NewX
+
+---inherit the default luastg callbacks from the first class;
+---and the rest of member functions from all the classes
+function Prefab.MultipleBases(bases, class_id)
+    local first_base = bases[1]
+    local ret = Prefab.New(first_base, first_base)
+    ret['.x'] = true
+    if first_base['.3d'] then
+        ret['.3d'] = true
+    end
+
+    local methods
+    local function get_methods()
+        methods = {}
+        for i = 1, #bases do
+            local base = bases[i]
+            for k, v in pairs(base) do
+                if type(v) == 'function' and type(k) == 'string' and not callbacks_lookup_table[k] then
+                    methods[k] = v
+                end
+            end
+        end
+    end
+    local mt = { __call = function(t, ...)
+        local obj = RawNew(ret)
+        if not methods then
+            get_methods()
+        end
+        for k, v in pairs(methods) do
+            obj[k] = v
+        end
+        ret[1](obj, ...)
+        return obj
+    end }
+
+    if class_id then
+        Ustorage:store(ret, class_id)
+        ret[".class_id"] = class_id
+    end
+
+    return setmetatable(ret, mt)
+end
 
 ---------------------------------------------------------------------------------------------------
 

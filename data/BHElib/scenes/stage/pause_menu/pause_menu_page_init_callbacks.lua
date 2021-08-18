@@ -54,8 +54,7 @@ function _callbacks.ReplayEndMenuTitle(menu_manager)
             CreateSelectableArrayForReplayEndMenu(),
             "End of Replay",
             90,
-            90
-    )
+            90)
 
     return MenuPage(selector)
 end
@@ -96,8 +95,49 @@ function _callbacks.UserPauseMenuTitle(menu_manager)
             CreateSelectableArrayForUserPauseMenu(),
             "Pause Menu",
             90,
-            90
-    )
+            90)
+
+    return MenuPage(selector)
+end
+
+local function CreateSelectableArrayForGameOverMenu()
+    local ret = {
+        -- option display text, followed by the choices
+        Selectable("Continue", {
+            {MenuConst.CHOICE_EXIT},
+            {MenuConst.CHOICE_SPECIFY, "to_do", "resume"},
+            {MenuConst.CHOICE_EXECUTE, function(self) self.stage:onGameOverContinue() end}
+        }),
+        Selectable("Quit to Main Menu", {
+            {MenuConst.CHOICE_EXIT},
+            {MenuConst.CHOICE_SPECIFY, "to_do", "quit_to_menu"},
+        }),
+        Selectable("Try Again", {
+            {MenuConst.CHOICE_EXIT},
+            {MenuConst.CHOICE_SPECIFY, "to_do", "restart_scene_group"},
+        }),
+    }
+    return ret
+end
+
+---@param menu_manager MenuManager
+function _callbacks.GameOverMenuTitle(menu_manager)
+    -- create simple menu selector
+
+    local l, r, b, t = Coordinates.getPlayfieldBoundaryInGame()
+    local height = (t - b) * 0.7
+
+    local center_x, center_y = 0, 0
+
+    local selector = SimpleMenuSelector.shortInit(
+            1,
+            1,
+            height,
+            Vec2(center_x, center_y),
+            CreateSelectableArrayForGameOverMenu(),
+            "Game Over",
+            90,
+            90)
 
     return MenuPage(selector)
 end

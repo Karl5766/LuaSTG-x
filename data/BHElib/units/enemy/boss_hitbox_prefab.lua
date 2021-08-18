@@ -1,5 +1,5 @@
 ---------------------------------------------------------------------------------------------------
----boss_hitbox.lua
+---boss_hitbox_prefab.lua
 ---author: Karl
 ---date created: 2021.6.1
 ---desc: Defines the base objects for enemies that have hitboxes; a hitbox here has a disk shaped
@@ -7,10 +7,10 @@
 ---------------------------------------------------------------------------------------------------
 
 local Prefab = require("core.prefab")
-local EnemyHitbox = require("BHElib.units.enemy.enemy_hitbox")
+local EnemyHitboxPrefab = require("BHElib.units.enemy.enemy_hitbox_prefab")
 
 ---@class Prefab.BossHitbox:Prefab.EnemyHitbox
-local M = Prefab.NewX(EnemyHitbox)
+local M = Prefab.NewX(EnemyHitboxPrefab, "Prefab.BossHitobx")
 
 ---------------------------------------------------------------------------------------------------
 ---init
@@ -19,7 +19,7 @@ local M = Prefab.NewX(EnemyHitbox)
 ---@param hp number initial hp
 ---@param session AttackSession
 function M:init(radius, hp, session)
-    EnemyHitbox.init(self, radius, hp)
+    EnemyHitboxPrefab.init(self, radius, hp, session)
 
     self.session = session
     session:addHitbox(self)

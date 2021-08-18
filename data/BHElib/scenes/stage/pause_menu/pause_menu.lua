@@ -19,6 +19,11 @@ local TaskDo = task.Do
 local TaskWait = task.Wait
 
 ---------------------------------------------------------------------------------------------------
+---virtual method
+
+M.initMenuPages = nil
+
+---------------------------------------------------------------------------------------------------
 
 ---@param stage Stage the stage that created this pause menu
 function M.__create(stage)
@@ -26,9 +31,6 @@ function M.__create(stage)
     self.continue_menu = true
     self.stage = stage
     return self
-end
-
-function M:initMenuPages()
 end
 
 function M:continueMenu()
