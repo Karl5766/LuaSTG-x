@@ -85,14 +85,14 @@ function M:onFrame(object)
     EnemyTypeClass.onFrame(self, object)
     local animation = object.animation
     animation:update(1)
+    object.hscale = animation:getHscale()
+    local a, b = object.a, object.b
+    object.img = animation:getSprite()
+    object.a, object.b = a, b
 end
 
 function M:onRender(object)
     EnemyTypeClass.onRender(self, object)
-    ---@type MoveAnimation
-    local animation = object.animation
-    object.hscale = animation:getHscale()
-    object.img = animation:getSprite()
     DefaultRenderFunc(object)
 end
 
