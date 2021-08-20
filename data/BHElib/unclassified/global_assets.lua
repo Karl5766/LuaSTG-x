@@ -1,19 +1,16 @@
-
---LoadTexture('logo', 'game/blank.png')
---local bg_path = 'game/front/stage_ui.png'
---LoadImageFromFile('stage_bg', bg_path)
---
---XASSETS = {}
---XASSETS.font = {
---    wqy    = 'font/WenQuanYiMicroHeiMono.ttf',
---}
+---------------------------------------------------------------------------------------------------
+---global_assets
+---date: <2021.4
+---desc: Loads some global assets into the resource pool
+---------------------------------------------------------------------------------------------------
 
 assert(LoadFont("font:hud_default","THlib\\enemy\\bonus2.fnt"))
 assert(LoadTTF("font:menu", "fonts/averia/Averia-Regular.ttf", 40))
 assert(LoadTTF("font:test", "fonts/averia/Averia-Regular.ttf", 40))
 assert(LoadFontOTF("font:noto_sans_sc", "fonts/Noto_Sans_SC/NotoSansSC-Medium.otf", 40))
 
-LoadImageFromFile('image:white', 'THlib\\misc\\white.png')
+LoadImageFromFile("image:white", "THlib\\misc\\white.png")
+LoadImageFromFile('image:void', 'THlib\\misc\\img_void.png')
 
 LoadImageFromFile("image:test", "data_assets/THlib/bullet/Magic1.png")
 
@@ -131,27 +128,42 @@ do
         {"image:boss_ui_hp_bar_tip", 18, 0, 10, 16},
     }
     LoadTextureAndImages("tex:boss_ui_hp_bar", images, "THlib\\enemy\\lifebar.png")
+
+    ---enemy1,2,3.png
+    images = {
+        {"image:fairy_aura_red", 192, 32, 32, 32},
+        {"image:fairy_aura_green", 224, 32, 32, 32},
+        {"image:fairy_aura_blue", 256, 32, 32, 32},
+        {"image:fairy_aura_purple", 288, 32, 32, 32},
+        {"image:yin_yang_orb_ring_red", 192, 96, 32, 32},
+        {"image:yin_yang_orb_ring_green", 224, 96, 32, 32},
+        {"image:yin_yang_orb_ring_blue", 256, 96, 32, 32},
+        {"image:yin_yang_orb_ring_purple", 288, 96, 32, 32},
+    }
+    LoadTextureAndImages("tex:enemy1", images, "THlib/enemy/enemy1.png")
+    LoadTexture("tex:enemy2", "THlib/enemy/enemy2.png")
+    LoadTexture("tex:enemy3", "THlib/enemy/enemy3.png")
+
+    ---misc
+    -- misc.png
+    images = {
+        {"image:leaf", 0, 32, 32, 32},
+        {"image:boss_aura", 0, 128, 128, 128},
+        {"image:enemy_kill_effect_red", 192, 0, 64, 64},
+        {"image:enemy_kill_effect_green", 192, 64, 64, 64},
+        {"image:enemy_kill_effect_blue", 192, 128, 64, 64},
+        {"image:enemy_kill_effect_yellow", 192, 192, 64, 64},
+    }
+    LoadTextureAndImages("tex:misc", images, "THlib\\misc\\misc.png")
+    -- SetImageState("image:boss_aura", "mul+add", Color(0x80FFFFFF))
+
+    -- particles.png
+    LoadTexture("tex:particles", "THlib\\misc\\particles.png")
+    LoadImageArray("image_array:particle", "tex:particles", 0, 0, 32, 32, 4, 4)
 end
-
-
--- bullets
-local bullet_path = "THlib\\bullet\\"
-LoadTexture("tex:bullet_sprite_1", bullet_path.."bullet1.png")
-LoadTexture("tex:bullet_sprite_2", bullet_path.."bullet2.png")
-LoadTexture("tex:bullet_sprite_3", bullet_path.."bullet3.png")
-LoadTexture("tex:bullet_sprite_4", bullet_path.."bullet4.png")
-LoadTexture("tex:bullet_sprite_6", bullet_path.."bullet6.png")
-
-LoadTexture("tex:bullet_ball_light", bullet_path.."bullet5.png")  -- #5 only contains one type of bullet
-LoadTexture("tex:bullet_bubble", bullet_path.."bullet_ball_huge.png")
-LoadTexture("tex:bullet_music_note", bullet_path.."bullet_music.png")
-LoadTexture("tex:bullet_fireball", bullet_path.."bullet_water_drop.png")
-
-LoadTexture("tex:bullet_cancel", bullet_path.."etbreak.png")
 
 --lasers
 LoadTexture("tex:laser_default", "THlib\\laser\\laser1.png")
-
 
 -- background
 do

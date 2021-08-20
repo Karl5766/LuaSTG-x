@@ -36,7 +36,7 @@ function PlaySound(name, vol, pan, sndflag)
     _PlaySound(name, v, (pan or 0) / 1024)
 end
 
-local _image_group_size = {}
+local _image_array_size = {}
 
 ---
 --- 从纹理资源载入图像组
@@ -57,11 +57,22 @@ function LoadImageArray(image_array_name, tex_name, x, y, width, height, cols, r
         LoadImage(image_array_name .. (i + 1), tex_name,
                   cur_x, cur_y, width, height, a or 0, b or 0, rect or false)
     end
-    _image_group_size[image_array_name] = cols * rows
+    _image_array_size[image_array_name] = cols * rows
 end
 
+---manually register an image array (the other way is to use LoadImageArray function)
+---@param image_array_name string the name of the image array
+---@param size number number of images in the array
+function RegisterImageArray(image_array_name, size)
+    for i = 1, size do
+        assert(CheckRes("img", image_array_name..i), "Error: Attempting to register an invalid image array!")
+    end
+    _image_array_size[image_array_name] = size
+end
+
+---@return number number of images in the
 function GetImageArraySize(image_array_name)
-    return _image_group_size[image_array_name]
+    return _image_array_size[image_array_name]
 end
 
 ---

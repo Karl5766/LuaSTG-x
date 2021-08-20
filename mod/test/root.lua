@@ -59,7 +59,7 @@ local function Init()
     require("BHElib.bhelib_init")
 
     -- initialize units
-    require("BHElib.units.bullet.bullet_types"):init()  -- load resources & init local variables
+    require("BHElib.units.bullet.bullet_types").init()  -- load resources & init local variables
 
     -- initialize save file
     require("BHElib.unclassified.save_file_mirror")
@@ -75,9 +75,12 @@ local function Init()
     local Prefab = require("core.prefab")
     require("BHElib.scenes.game_scene_transition")
 
-    -- register object classes
+    -- other units
+    require("BHElib.units.enemy.enemy_type.enemy_types").init()
+
     Prefab.RegisterAllDefinedPrefabs()
 
+    -- scripting
     require("BHElib.scripts.the_jar")
 
     -- create the menu

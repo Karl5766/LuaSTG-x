@@ -81,44 +81,19 @@ local animated_bullets = {
 }
 
 ---------------------------------------------------------------------------------------------------
----bullet type & color related mappings
-
----total number of colors of enemy bullets; NUM_ENEMY_BULLET_COLOR = 16
-NUM_ENEMY_BULLET_COLOR = 16
-local NUM_COLORS = NUM_ENEMY_BULLET_COLOR
-
-COLOR_DEEP_RED = 1
-COLOR_RED = 2
-COLOR_DEEP_PURPLE = 3
-COLOR_PURPLE = 4
-COLOR_DEEP_BLUE = 5
-COLOR_BLUE = 6
-COLOR_ROYAL_BLUE = 7
-COLOR_CYAN = 8
-COLOR_DEEP_GREEN = 9
-COLOR_GREEN = 10
-COLOR_CHARTREUSE = 11
-COLOR_YELLOW = 12
-COLOR_GOLDEN_YELLOW = 13
-COLOR_ORANGE = 14
-COLOR_DEEP_GRAY = 15
-COLOR_GRAY = 16
-
-
----------------------------------------------------------------------------------------------------
 --- init
 
 ---@param sprite_name_prefix string prefix of the sprite name; the sprite names are obtained by appending 1, 2, ... to the end of it
 ---@param half_flag boolean if true, the sprite to map to only has half of the number of images
 local function CreateColorToSpriteNameMap(sprite_name_prefix, half_flag)
-    -- typically there are NUM_COLORS / 2 or NUM_COLORS images for a bullet type, each has a different color
+    -- typically there are NUM_COLOR_THEMES / 2 or NUM_COLOR_THEMES images for a bullet type, each has a different color
     local color_to_sprite_name = {}
     if half_flag then
-        for i = 1, NUM_COLORS do
+        for i = 1, NUM_COLOR_THEMES do
             color_to_sprite_name[i] = sprite_name_prefix..math.ceil(i / 2)
         end
     else
-        for i = 1, NUM_COLORS do
+        for i = 1, NUM_COLOR_THEMES do
             color_to_sprite_name[i] = sprite_name_prefix..i
         end
     end
@@ -127,9 +102,9 @@ end
 
 ---create a mapping that maps from bullet type & color to sprite name
 local function CreateColorToSpriteNameMapFromImageNum(sprite_name_prefix, total_image_num)
-    if total_image_num == NUM_COLORS then
+    if total_image_num == NUM_COLOR_THEMES then
         return CreateColorToSpriteNameMap(sprite_name_prefix, false)
-    elseif total_image_num == NUM_COLORS / 2 then
+    elseif total_image_num == NUM_COLOR_THEMES / 2 then
         return CreateColorToSpriteNameMap(sprite_name_prefix, true)
     else
         error("the grid for this bullet type contains unexpected number of images. \n"..
@@ -137,7 +112,25 @@ local function CreateColorToSpriteNameMapFromImageNum(sprite_name_prefix, total_
     end
 end
 
+local function LoadResources()
+    local bullet_path = "THlib\\bullet\\"
+    LoadTexture("tex:bullet_sprite_1", bullet_path.."bullet1.png")
+    LoadTexture("tex:bullet_sprite_2", bullet_path.."bullet2.png")
+    LoadTexture("tex:bullet_sprite_3", bullet_path.."bullet3.png")
+    LoadTexture("tex:bullet_sprite_4", bullet_path.."bullet4.png")
+    LoadTexture("tex:bullet_sprite_6", bullet_path.."bullet6.png")
+
+    LoadTexture("tex:bullet_ball_light", bullet_path.."bullet5.png")  -- #5 only contains one type of bullet
+    LoadTexture("tex:bullet_bubble", bullet_path.."bullet_ball_huge.png")
+    LoadTexture("tex:bullet_music_note", bullet_path.."bullet_music.png")
+    LoadTexture("tex:bullet_fireball", bullet_path.."bullet_water_drop.png")
+
+    LoadTexture("tex:bullet_cancel", bullet_path.."etbreak.png")
+end
+
 function M.init()
+    LoadResources()
+
     -- image bullets
     for bullet_type_name, item in pairs(bullets) do
         local image_array_name = "image_array:"..bullet_type_name
@@ -319,7 +312,7 @@ function M.initBulletEffects()
             1,
             8,
             "tex:bullet_sprite_1")
-    for i = 1, NUM_COLORS do
+    for i = 1, NUM_COLOR_THEMES do
         color_index_to_blink_effects[i] = "image_array:bullet_blink"..math.ceil(i / 2)
     end
 
@@ -336,7 +329,7 @@ function M.initBulletEffects()
     }
 
     ---load the bullet cancel effect as a separate animation for each color
-    for i = 1, NUM_COLORS do
+    for i = 1, NUM_COLOR_THEMES do
         local ani_name = "ani_array:bullet_cancel"..i
 
         -- compute blend mode

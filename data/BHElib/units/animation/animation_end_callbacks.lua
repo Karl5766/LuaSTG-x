@@ -23,10 +23,10 @@ end
 function M.repeatAgain(self)
     if self.inc_timer > 0 then
         self.timer = 0
-        self.index = 0
+        self.index = self.min_index
     else
         self.timer = self.animation_interval - 1
-        self.index = self.num_image - 1
+        self.index = self.max_index
     end
     self:updateSpriteByIndex()
 end
@@ -58,15 +58,15 @@ end
 ---------------------------------------------------------------------------------------------------
 
 ---play another animation when the current animation reaches an end
----@param animation_name string name of the animation, specifies a ResAnimation object
+---@param image_array table<string,number,number> specifies an image array, along with an index range on it
 ---@param animation_interval number interval between two consecutive images
 ---@param is_forward boolean true if the animation is to be played forward
 ---@param skip_time number skip timer value; if this is 0, animation will be played from the start
 ---@param end_callback function<self> function to be called at the end of the callback
 ---@return function<self> the callback that loop from the specified index
-function M.playAnotherAnimation(animation_name, animation_interval, is_forward, skip_time, end_callback)
+function M.playAnotherAnimation(image_array, animation_interval, is_forward, skip_time, end_callback)
     return function(self)
-        self:play(animation_name, animation_interval, is_forward, skip_time, end_callback)
+        self:play(image_array, animation_interval, is_forward, skip_time, end_callback)
     end
 end
 

@@ -5,7 +5,6 @@
 ---------------------------------------------------------------------------------------------------
 
 local Prefab = require("core.prefab")
-local AnimatedUnit = require("BHElib.units.animation.animated_unit_prefab")
 
 ---@class Prefab.Player:Prefab.Object
 local M = Prefab.NewX(Prefab.Object)
@@ -50,7 +49,7 @@ M.loadResources = nil
 
 ---the player will copy the number of life and bombs from the previous player object (if exists)
 ---@param player_input InputManager an object that manages recorded player input
----@param animation MovableAnimation controls the update of player sprite
+---@param animation MoveAnimation controls the update of player sprite
 ---@param unfocused_speed number speed when unfocused; per frame
 ---@param focused_speed number speed when focused; per frame
 ---@param player_resource gameplay_resources.Player specifies the initial resources this player holds
@@ -128,6 +127,8 @@ end
 ---update
 
 function M:frame()
+    task.Do(self)
+
     self.animation:update(1)
 
     if self.spawn_counter == 0 then
@@ -252,7 +253,7 @@ function M:updateSpriteByMovement(is_moving_rightward, is_moving_leftward)
         cur_move_dir = 1
     end
 
-    ---@type MovableAnimation
+    ---@type MoveAnimation
     local animation = self.animation
 
     local interval = self.animation_interval
@@ -294,6 +295,14 @@ end
 ---------------------------------------------------------------------------------------------------
 ---collision events
 
+function M:colli(other)
+    local on_player_collision = other.onPlayerCollision
+    if on_player_collision then
+        on_player_collision(other, self)
+    end
+    self:getHit()
+end
+
 ---trigger player miss if the player is not invincible and if the miss is not already triggered;
 ---the miss takes place with a time offset (in which mechanics like deathbombing can be activated)
 function M:getHit()
@@ -301,14 +310,6 @@ function M:getHit()
         PlaySound("se:pldead00", 0.5, 0, true)
         self.miss_counter = 12
     end
-end
-
-function M:colli(other)
-    local on_player_collision = other.onPlayerCollision
-    if on_player_collision then
-        on_player_collision(other, self)
-    end
-    self:getHit()
 end
 
 function M:onEnemyBulletCollision(other)

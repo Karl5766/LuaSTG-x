@@ -30,10 +30,12 @@ function M.__create()
     ---range [0, num_image - 1]
     ---@type number
     self.index = nil  -- index of the image in the animation
+    ---@type number
+    self.min_index = nil
+    ---@type number
+    self.max_index = nil
     ---@type string
     self.image_array_name = nil
-    ---@type number
-    self.num_image = nil
 
     ---@type ResSprite
     self.sprite = nil
@@ -59,9 +61,9 @@ function M:getIncTimer()
     return self.inc_timer
 end
 
----@return string the image array of the animation that is playing
-function M:getImageArrayName()
-    return self.image_array_name
+---@return table<string,number,number> the image array of the animation that is playing
+function M:getImageArray()
+    return {self.image_array_name, self.min_index, self.max_index}
 end
 
 ---@return number number of frames between consecutive images being played
@@ -79,29 +81,42 @@ function M:getSprite()
     return self.sprite
 end
 
+---@return number,number min_index, max_index the index range specifying the animation to play
+function M:getIndexRange()
+    return self.min_index, self.max_index
+end
+
 ---@return number the time required to skip from the first sprite of the animation to the current frame
 function M:getElapsedTime()
+    local image_passed = self.index - 1
     if self.inc_timer > 0 then
-        return self.index * self.num_image + self.timer
+        return image_passed * self.animation_interval + self.timer
     else
-        return self.animation_duration - 1 - (self.index * self.num_image + self.timer)
+        return self.animation_duration - 1 - (image_passed * self.animation_interval + self.timer)
     end
 end
 
 ---------------------------------------------------------------------------------------------------
 
----@param image_array_name string specifies an image array
+---@param image_array table<string,number,number> specifies an image array, along with an index range on it
 ---@param animation_interval number interval between two consecutive images
 ---@param is_forward boolean true if the animation is to be played forward
 ---@param skip_time number skip timer value; if this is 0, animation will be played from the start
 ---@param end_callback function<self> function to be called at the end of the callback
-function M:play(image_array_name, animation_interval, is_forward, skip_time, end_callback)
+function M:play(image_array, animation_interval, is_forward, skip_time, end_callback)
+    local image_array_name = image_array[1]
     assert(image_array_name, "Error: Attempting to play a nil image array!")
-    local num_image = GetImageArraySize(image_array_name)
+
+    local min_index = image_array[2] or 1
+    local max_index = image_array[3] or GetImageArraySize(image_array_name)
+
+    local num_image = max_index - min_index + 1
+
     local animation_duration = animation_interval * num_image
 
+    self.min_index = min_index
+    self.max_index = max_index
     self.image_array_name = image_array_name
-    self.num_image = num_image
     self.animation_interval = animation_interval
     self.animation_duration = animation_duration
     self.end_callback = end_callback
@@ -109,25 +124,25 @@ function M:play(image_array_name, animation_interval, is_forward, skip_time, end
     if is_forward then
         self.inc_timer = 1
         self.timer = 0
-        self.index = 0
+        self.index = min_index
     else
         self.inc_timer = -1
         self.timer = animation_interval - 1
-        self.index = num_image - 1
+        self.index = max_index
     end
     self:updateSpriteByIndex()  -- update may not set this, so do it once here
 
-    self:update(skip_time)
+    self:advanceTime(skip_time)
 end
 
 ---update sprite
 function M:updateSpriteByIndex()
-    self.sprite = FindResSprite(self.image_array_name..(self.index + 1))
+    self.sprite = FindResSprite(self.image_array_name..self.index)
 end
 
----update the image according to the animation type and time elapsed
+---advance animation timer
 ---@param dt number time elapsed; should be a non-negative integer
-function M:update(dt)
+function M:advanceTime(dt)
     local inc_time = self.inc_timer * dt
     local timer = self.timer + inc_time  -- updated value
     local animation_interval = self.animation_interval
@@ -141,7 +156,7 @@ function M:update(dt)
         timer = timer - inc_index * animation_interval
 
         self.index = index
-        if index < 0 or index >= self.num_image then
+        if index < self.min_index or index > self.max_index then
             -- the animation has reached an end
             local end_callback = self.end_callback
             if end_callback then
@@ -154,5 +169,9 @@ function M:update(dt)
 
     self.timer = timer  -- note timer and index will continue to be updated even after the end of the image
 end
+
+---update the image according to the animation type and time elapsed
+---@param dt number time elapsed; should be a non-negative integer
+M.update = M.advanceTime
 
 return M

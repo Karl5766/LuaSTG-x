@@ -111,7 +111,7 @@ end
 
 function M:ctor()
     local hp = 360
-    local hitbox = BossHitbox(16, hp, self)
+    BossHitbox(16, hp, self)
 
     ---@type RumiaAnimation
     local boss = self.boss
@@ -161,6 +161,18 @@ function M:ctor()
     --        task.Wait(60)
     --    end
     --end)
+
+    task.New(self, function()
+        while true do
+            local EnemyTypes = require("BHElib.units.enemy.enemy_type.enemy_types")
+            local Enemy = require("BHElib.units.enemy.enemy_prefab")
+            local object = Enemy(EnemyTypes.bow_tie_fairy_red, 5)
+            object.x = ran:Float(-180, 180)
+            object.y = ran:Float(0, 200)
+            object:playMovementAnimation(180, ran:Sign() == -1)
+            task.Wait(5)
+        end
+    end)
 
     task.New(self, function()
         boss:move(60, -boss.x, 120 - boss.y, boss.x > 0, self)

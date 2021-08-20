@@ -12,7 +12,7 @@ local M = Prefab.NewX(PlayerBase, "units.player.reimu")
 
 local Input = require("BHElib.input.input_and_recording")
 local ReimuSupport = require("player.reimu.reimu_support")
-local MovableAnimation = require("BHElib.units.animation.movable_animation")
+local MoveAnimation = require("BHElib.units.animation.move_animation")
 
 ---------------------------------------------------------------------------------------------------
 
@@ -30,11 +30,11 @@ function M:init(stage, spawning_player, player_resource)
     local base_hscale = 1
     self.animation_interval = 8
     self.transition_interval = 4
-    local animation = MovableAnimation(
+    local animation = MoveAnimation(
             base_hscale,
-            "image_array:reimu_idle",
-            "image_array:reimu_move_left",
-            "image_array:reimu_move_right")
+            {"image_array:reimu_idle"},
+            {"image_array:reimu_move_left"},
+            {"image_array:reimu_move_right"})
     animation:playIdleAnimation(self.animation_interval)
 
     PlayerBase.init(

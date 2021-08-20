@@ -1,13 +1,13 @@
 local Prefab = require("core.prefab")
 
-local AnimatedUnit = require("BHElib.units.animation.animated_unit_prefab")
-
----@class Prefab.AnimatedUnit.Nue:Prefab.AnimatedUnit
-local M = Prefab.NewX(AnimatedUnit)
+---@class Prefab.AnimatedUnit.Nue:Prefab.Object
+local M = Prefab.NewX(Prefab.Object)
 
 function M:init()
     self:loadResources()
-    AnimatedUnit.init(self)
+    self.group = GROUP_GHOST
+    self.layer = LAYER_ENEMY
+    self.bound = false
 
     self.animation_timer = 0
 end
