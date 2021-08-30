@@ -19,6 +19,13 @@ local SceneTransition = require("BHElib.scenes.game_scene_transition")
 local Input = require("BHElib.input.input_and_recording")
 local SceneGroup = require("BHElib.scenes.stage.scene_group")
 local Ustorage = require("util.universal_id")
+local ScreenEffects = require("BHElib.unclassified.screen_effect")
+
+---------------------------------------------------------------------------------------------------
+---virtual method
+
+---update the scene itself; does not include updating the objects and collision check etc.
+M.update = nil
 
 ---------------------------------------------------------------------------------------------------
 ---init
@@ -154,12 +161,18 @@ end
 ---modify the game loop in GameScene:frameUpdate for pause menu
 function M:frameUpdate(dt)
     -- update screen effects if any
-    require("BHElib.unclassified.screen_effect"):update(dt)
+    ScreenEffects:update(dt)
 
     -- check if pause menu should be created
+    -- only create it if no other pause menu is existing
     if Input:isAnyDeviceKeyJustChanged("escape", false, true) and
             not self.is_paused then
         self:createUserPauseMenu()
+    end
+
+    -- put this right before updating the menu so when a menu is deleted there is at least one frame interval till the next menu
+    if self.is_paused then
+        self:updatePauseMenuStatus()
     end
 
     if self.is_paused then
@@ -167,7 +180,6 @@ function M:frameUpdate(dt)
         GameScene.updateUserInput(self)
 
         self.pause_menu:update(dt)
-        self.is_paused = self.pause_menu:continueMenu()
     else
         self:updateSceneAndObjects(dt)  -- call base method on non-menu mode
     end
@@ -182,6 +194,12 @@ function M:render()
 
     -- there can be multiple players exist, so use the interface that returns the unique player
     _hud_painter:drawResources(self, "font:test")
+end
+
+---update the pause menu when a pause menu is present;
+---if the menu ends, reset is_pause to false
+function M:updatePauseMenuStatus(dt)
+    self.is_paused = self.pause_menu:isContinuing()
 end
 
 ---update recorded device input for replay
@@ -242,6 +260,7 @@ end
 ---these transitions can be called almost anywhere through the current stage object
 
 ---terminate current scene and transition to a new one
+---note if this is call multiple times in one frame, only the final one will be taken as valid
 ---@param transition_callback function a function creates new scene and cleanup current scene
 function M:transitionWithCallback(transition_callback)
     assert(type(transition_callback) == "function", "Error: Invalid transition callback!")

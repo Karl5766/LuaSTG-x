@@ -26,6 +26,7 @@ local color_index_to_cancel_effects = BulletTypes.color_index_to_cancel_effects
 local ran = ran
 local DefaultRenderFunc = DefaultRenderFunc  -- engine default render for object to render self.img
 local Render = Render  -- render arbitrary images
+local TaskDo = task.Do
 
 ---------------------------------------------------------------------------------------------------
 ---bullet prefab
@@ -51,6 +52,7 @@ function M:init(bullet_type_name, color_index, group, blink_time, size, destroya
     self.effect_size = size
     self.grazed = false
     self.destroyable = destroyable
+    self.frame_task = false
 
     if blink_time then
         self.img = color_index_to_blink_effects[color_index]
@@ -69,6 +71,9 @@ function M:frame()
             self.blink_time = nil
             self:fire(cur_time - blink_time)
         end
+    end
+    if self.frame_task then
+        TaskDo(self)
     end
 end
 

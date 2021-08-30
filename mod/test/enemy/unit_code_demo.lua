@@ -1,0 +1,80 @@
+--task.New(self, function()
+--    local a = 0
+--    while true do
+--        local Bullet = require("BHElib.units.bullet.bullet_prefab")
+--        local bullet = Bullet("ball", COLOR_BLUE, GROUP_ENEMY_BULLET, 12, 1, true)
+--        bullet.x = boss.x
+--        bullet.y = boss.y
+--        bullet.bound = true
+--        local r = 3
+--        bullet.vx = r * cos(a)
+--        bullet.vy = r * sin(a)
+--        a = a + 3
+--        task.Wait(1)
+--    end
+--end)
+
+--task.New(self, function()
+--    task.Wait(60)
+--    local a = 0
+--    while true do
+--        local Laser = require("BHElib.units.bullet.laser_prefab")
+--        local LaserTypes = require("BHElib.units.bullet.laser_types")
+--        local bullet = Laser(self.game_scene, LaserTypes.default_laser, 4, 0.8, 0.5, 4, false)
+--        bullet:turnOn(30)
+--        bullet:setLength(60, 120, 60)
+--        bullet:setFullWidth(50)
+--        bullet.x = boss.x
+--        bullet.y = boss.y
+--        bullet.bound = true
+--        local r = 3
+--        bullet.vx = r * cos(a)
+--        bullet.vy = r * sin(a)
+--        bullet.rot = a
+--        task.New(bullet, function()
+--            while true do
+--                task.Wait(1)
+--                if bullet.y < 0 then
+--                    Del(bullet)
+--                end
+--            end
+--        end)
+--        --a = a + 30
+--        task.Wait(60)
+--    end
+--end)
+--
+--task.New(self, function()
+--    while true do
+--        local EnemyTypes = require("BHElib.units.enemy.enemy_type.enemy_types")
+--        local Enemy = require("BHElib.units.enemy.enemy_prefab")
+--        local object = Enemy(EnemyTypes.bow_tie_fairy_red, 5)
+--        object.x = ran:Float(-180, 180)
+--        object.y = ran:Float(0, 200)
+--        object:playMovementAnimation(180, ran:Sign() == -1)
+--        task.Wait(5)
+--    end
+--end)
+--
+--if ran:Float(0, 1) < 0.1 then
+--    local Items = require("BHElib.units.item.items")
+--    local p
+--    local rng = ran:Float(0, 1)
+--    if rng < 0.001 then
+--        p = Items.Extend(self.game_scene)
+--    elseif rng < 0.004 then
+--        p = Items.Bomb(self.game_scene)
+--    elseif rng < 0.005 then
+--        p = Items.FullPower(self.game_scene)
+--    elseif rng < 0.008 then
+--        p = Items.BigPower(self.game_scene)
+--    elseif rng < 0.009 then
+--        p = Items.SmallFaith(self.game_scene)
+--    elseif rng < 0.5 then
+--        p = Items.Point(self.game_scene)
+--    else
+--        p = Items.Power(self.game_scene)
+--    end
+--    p.x = ran:Float(-192, 192)
+--    p.y = self.boss.y
+--end

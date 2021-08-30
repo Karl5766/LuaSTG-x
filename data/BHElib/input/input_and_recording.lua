@@ -80,12 +80,12 @@ local SYSTEM_KEYS = {
     "repfast",  -- accelerate replay speed
 }
 
----return the list of game keys
+---@return table an array of the list of game keys
 function M:getGameKeys()
     return GAME_KEYS
 end
 
----return the list of system keys
+---@return table an array of list of system keys
 function M:getSystemKeys()
     return SYSTEM_KEYS
 end

@@ -17,6 +17,7 @@ local M = Prefab.NewX(EnemyHitbox)
 ---@param enemy_type EnemyTypeClass
 ---@param max_hp number
 function M:init(enemy_type, max_hp)
+    self.layer = LAYER_ENEMY
     self.damage_timer = 0
 
     self.enemy_type = enemy_type

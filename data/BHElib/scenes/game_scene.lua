@@ -21,10 +21,18 @@ local _setting_file_mirror = require("setting.setting_file_mirror")
 local floor = math.floor
 
 ---------------------------------------------------------------------------------------------------
+---virtual method
+
+---update the scene itself; does not include updating the objects and collision check etc.
+M.update = nil
+
+---------------------------------------------------------------------------------------------------
 
 ---GameScene object constructor
 ---@return GameScene a GameScene object
 function M.__create()
+
+    -- besides creating variables needed for game scene, also emulate ParentSession.__create() manually
     local self = {
         ---@type boolean
         sessionHasEnded = false,
@@ -72,7 +80,7 @@ function M:createScene()
         SceneTransition.updateAtStartOfFrame()
 
         if not SceneTransition.sceneReplacedInPreviousUpdate() then
-            self:doUpdatesBetweenRender(dt)
+            self:doUpdatesBetweenRender(1)
 
             self:gameRender()
         end
@@ -84,8 +92,8 @@ function M:createScene()
 end
 
 ---for game scene transition;
----cleanup before exiting the scene; overwritten in case anything is changed during the scene of
----subclasses
+---cleanup before exiting the scene;
+---overridden in case anything is changed during the scene of subclasses
 function M:endSession()
     assert(self.sessionHasEnded == false, "Error: Attempt to call endSession() on a session twice!")
     self.sessionHasEnded = true
@@ -214,6 +222,13 @@ end
 
 local coordinates = require("BHElib.unclassified.coordinates_and_screen")
 
+function M:renderObjects()
+    coordinates.setRenderView("game")  -- all objects by default renders to the "game" coordinates
+    profiler.tic('ObjRender')
+    ObjRender()
+    profiler.toc('ObjRender')
+end
+
 ---@~chinese 将被每帧调用以执行渲染指令。
 ---
 ---@~english Will be invoked every frame to process all render instructions.
@@ -229,10 +244,7 @@ function M:gameRender()
     coordinates.setRenderView("ui")
     e:dispatchEvent('onBeforeRender')
 
-    coordinates.setRenderView("game")
-    profiler.tic('ObjRender')
-    ObjRender()
-    profiler.toc('ObjRender')
+    self:renderObjects()
 
     -- after render calls
     e:dispatchEvent('onAfterRender')

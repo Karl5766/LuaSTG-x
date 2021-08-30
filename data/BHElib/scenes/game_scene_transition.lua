@@ -4,6 +4,8 @@
 ---date: 2021.3.27
 ---desc: implements scene transition; coordinates cocos scene creation and visual effects that comes
 ---     before or after a scene transition
+---     if multiple transitionAtStartOfNextFrame call is done in the same frame, this object will
+---     execute transition according to the last call
 ---------------------------------------------------------------------------------------------------
 
 ---@class SceneTransition

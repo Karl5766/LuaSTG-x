@@ -4,102 +4,18 @@
 --- DateTime: 2021/6/1 23:39
 ---
 
-local Prefab = require("core.prefab")
 local SpellSession = assert(require("BHElib.sessions.boss.spell_session"))
 
 ---@class Nue.spell1:SpellSession
 local M = LuaClass("Nue.spell1", SpellSession)
 
 local BossHitbox = require("BHElib.units.enemy.boss_hitbox_prefab")
+local ParameterMatrix = require("BHElib.scripts.linear_tuning.parameter_matrix")
+local DelayedAccBulletOutputColumn = require("BHElib.scripts.units.delayed_acc_bullet_output_column")
+local AccController = require("BHElib.scripts.units.acc_controller")
+local BulletTypes = require("BHElib.units.bullet.bullet_types")
 
 M.SPELL_DISPLAY_NAME = "test spell \"测试符卡\""
-
----------------------------------------------------------------------------------------------------
----bullet
-
-local Orb = Prefab.NewX(Prefab.Object, "bullet.yinyang_orb")
-
----load orb sprite
-do
-    if not CheckRes("tex", "tex:reimu_sprite") then
-        LoadTexture("tex:reimu_sprite", "THlib\\player\\reimu\\reimu.png")
-    end
-    local colli_radius = 5.95
-    LoadImage(
-            "image:yinyang_orb",
-            "tex:reimu_sprite",
-            65,
-            145,
-            14,
-            14,
-            colli_radius,
-            colli_radius,
-            false)
-end
-
-function Orb:init(ix, iy, scale, circle_radius, circle_time, init_angle, slide_angle, acc, acc_time, img_angular_velocity, final_velocity)
-    self.img = "image:yinyang_orb"
-    self.x, self.y = ix, iy
-    self.layer = LAYER_ENEMY_BULLET - scale * 0.01
-    self.group = GROUP_ENEMY_BULLET
-    self.bound = true
-    self.hscale = scale
-    self.vscale = scale
-    self.a = scale * 5.95
-    self.omiga = img_angular_velocity
-    self.opaque = 0
-    self.color = Color(0, 255, 255, 255)
-
-    local base_x, base_y = self.x + circle_radius * cos(init_angle), self.y + circle_radius * sin(init_angle)
-    task.New(self, function()
-        task.New(self, function()
-            while self.transparency ~= 1 do
-                local t = min(1, self.opaque + 0.1)
-                self.opaque = t
-                self.color = Color(t * 255, 255, 255, 255)
-                task.Wait(1)
-            end
-        end)
-        for i = 1, circle_time do
-            task.Wait(1)
-            local angle = init_angle - 180 + i / circle_time * slide_angle
-            self.x, self.y = base_x + circle_radius * cos(angle), base_y + circle_radius * sin(angle)
-        end
-        local v = final_velocity
-        local v_angle = init_angle + slide_angle
-        if slide_angle > 0 then
-            v_angle = v_angle - 90
-        else
-            v_angle = v_angle + 90
-        end
-        self.vx, self.vy = v * cos(v_angle), v * sin(v_angle)
-
-        task.New(self, function()
-            while true do
-                if self.x > 192 then
-                    self.x = 384 - self.x
-                    self.vx = -self.vx
-                elseif self.x < -192 then
-                    self.x = -384 - self.x
-                    self.vx = -self.vx
-                elseif self.y > 224 then
-                    self.y = 448 - self.y
-                    self.vy = -self.vy
-                end
-                task.Wait(1)
-            end
-        end)
-
-        for i = 1, acc_time do
-            self.vy = self.vy - acc
-            task.Wait(1)
-        end
-    end)
-end
-
-Orb.frame = task.Do
-
-Prefab.Register(Orb)
 
 ---------------------------------------------------------------------------------------------------
 
@@ -116,63 +32,7 @@ function M:ctor()
     ---@type RumiaAnimation
     local boss = self.boss
 
-    --task.New(self, function()
-    --    local a = 0
-    --    while true do
-    --        local Bullet = require("BHElib.units.bullet.bullet_prefab")
-    --        local bullet = Bullet("ball", COLOR_BLUE, GROUP_ENEMY_BULLET, 12, 1, true)
-    --        bullet.x = boss.x
-    --        bullet.y = boss.y
-    --        bullet.bound = true
-    --        local r = 3
-    --        bullet.vx = r * cos(a)
-    --        bullet.vy = r * sin(a)
-    --        a = a + 3
-    --        task.Wait(1)
-    --    end
-    --end)
-
-    --task.New(self, function()
-    --    task.Wait(60)
-    --    local a = 0
-    --    while true do
-    --        local Laser = require("BHElib.units.bullet.laser_prefab")
-    --        local LaserTypes = require("BHElib.units.bullet.laser_types")
-    --        local bullet = Laser(self.game_scene, LaserTypes.default_laser, 4, 0.8, 0.5, 4, false)
-    --        bullet:turnOn(30)
-    --        bullet:setLength(60, 120, 60)
-    --        bullet:setFullWidth(50)
-    --        bullet.x = boss.x
-    --        bullet.y = boss.y
-    --        bullet.bound = true
-    --        local r = 3
-    --        bullet.vx = r * cos(a)
-    --        bullet.vy = r * sin(a)
-    --        bullet.rot = a
-    --        task.New(bullet, function()
-    --            while true do
-    --                task.Wait(1)
-    --                if bullet.y < 0 then
-    --                    Del(bullet)
-    --                end
-    --            end
-    --        end)
-    --        --a = a + 30
-    --        task.Wait(60)
-    --    end
-    --end)
-
-    task.New(self, function()
-        while true do
-            local EnemyTypes = require("BHElib.units.enemy.enemy_type.enemy_types")
-            local Enemy = require("BHElib.units.enemy.enemy_prefab")
-            local object = Enemy(EnemyTypes.bow_tie_fairy_red, 5)
-            object.x = ran:Float(-180, 180)
-            object.y = ran:Float(0, 200)
-            object:playMovementAnimation(180, ran:Sign() == -1)
-            task.Wait(5)
-        end
-    end)
+    self:initChain()
 
     task.New(self, function()
         boss:move(60, -boss.x, 120 - boss.y, boss.x > 0, self)
@@ -196,101 +56,41 @@ function M:ctor()
     end)
 end
 
+function M:initChain()
+    local boss = self.boss
+    local col = DelayedAccBulletOutputColumn(boss)
+
+    col.x = 0
+    col.y = 0
+    col.angle = -90
+    col.bullet_type_name = "ball"
+    col.color_index = COLOR_BLUE
+    col.controller = AccController.shortInit(3, 30, 1)
+    col.blink_time = 12
+    col.inc_rot = 3
+    col.effect_size = 1
+    col.destroyable = true
+
+    local tuning_ui = self.game_scene.tuning_ui
+    local num_row, num_col, matrix = tuning_ui:getMatrixOutput()
+    self.chain = ParameterMatrix.MatrixInit(boss, num_row, num_col, matrix, col)
+end
+
 function M:fire(x, y, side)
 
     PlaySound("se:explode", 0.1, 0, true)
-    local density = 1.2
-    local speed = 2
 
-    local scale_array = {2, 2, 4}
-    local slide_angle_array = {180, -180, -180}
-    local num_bullet_array = {20, 20, 12}
-    local base_velocity = speed
-    local final_velocity_array = {base_velocity * 1, base_velocity * 1.6, base_velocity * 1.3}
-    local radius = 35
-    do
-        for j = 1, 3 do
-            local a = ran:Float(0, 360)
-            local n = math.floor(num_bullet_array[j] * density)
-            for i = 1, n do
-                Orb(
-                        x,
-                        y,
-                        scale_array[j],
-                        radius,
-                        60,
-                        (a + i / n * 360) * side,
-                        slide_angle_array[j],
-                        0.006 * speed,
-                        120,
-                        3,
-                        final_velocity_array[j]
-                )
-            end
-        end
-    end
+    self.chain.head:spark()
 end
 
 function M:mouseFire(x, y, side)
 
     PlaySound("se:explode", 0.1, 0, true)
-    local density = 1.5
-    local speed = 1.8
 
-    local scale_array = {2, 2, 4}
-    local slide_angle_array = {180, -180, -180}
-    local num_bullet_array = {20, 20, 12}
-    local base_velocity = speed
-    local final_velocity_array = {base_velocity * 1, base_velocity * 1.6, base_velocity * 1.3}
-    local radius = 35
-    do
-        for j = 2, 2 do
-            local a = ran:Float(0, 360)
-            local n = math.floor(num_bullet_array[j] * density)
-            for i = 1, n do
-                Orb(
-                        x,
-                        y,
-                        scale_array[j],
-                        radius,
-                        60,
-                        (a + i / n * 360) * side,
-                        slide_angle_array[j],
-                        0.006 * speed,
-                        120,
-                        3,
-                        final_velocity_array[j]
-                )
-            end
-        end
-    end
 end
 
 function M:update(dt)
     SpellSession.update(self, dt)
-
-    if ran:Float(0, 1) < 0.1 then
-        local Items = require("BHElib.units.item.items")
-        local p
-        local rng = ran:Float(0, 1)
-        if rng < 0.001 then
-            p = Items.Extend(self.game_scene)
-        elseif rng < 0.004 then
-            p = Items.Bomb(self.game_scene)
-        elseif rng < 0.005 then
-            p = Items.FullPower(self.game_scene)
-        elseif rng < 0.008 then
-            p = Items.BigPower(self.game_scene)
-        elseif rng < 0.009 then
-            p = Items.SmallFaith(self.game_scene)
-        elseif rng < 0.5 then
-            p = Items.Point(self.game_scene)
-        else
-            p = Items.Power(self.game_scene)
-        end
-        p.x = ran:Float(-192, 192)
-        p.y = self.boss.y
-    end
 
     local Input = require("BHElib.input.input_and_recording")
     local Coordinates = require("BHElib.unclassified.coordinates_and_screen")

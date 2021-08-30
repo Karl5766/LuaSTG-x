@@ -33,7 +33,7 @@ function M.__create(stage)
     return self
 end
 
-function M:continueMenu()
+function M:isContinuing()
     return self.continue_menu
 end
 

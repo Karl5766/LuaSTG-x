@@ -133,7 +133,7 @@ function M:setTopMenuPageToEnter()
 end
 
 ---setup menu pages
----@param menu_page_info_array table an array in which each element contains information for initializing each menu page
+---@param menu_page_info_array ta`ble an array in which each element contains information for initializing each menu page
 ---@param coordinates_name string name of the render view to render in E.g. "ui" "game" "3d"
 ---@param init_layer number (if non-nil) set the initial layer of the menu pages to this value
 function M:setupMenuPagesFromInfoArray(menu_page_info_array, coordinates_name, init_layer)

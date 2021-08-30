@@ -126,8 +126,7 @@ function M:render()
     GameScene.render(self)
     _hud_painter:drawHudBackground(
             "image:menu_hud_background",
-            1.3
-    )
+            1.3)
 end
 
 

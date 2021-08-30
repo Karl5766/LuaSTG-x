@@ -1,8 +1,8 @@
 -- created some time around 2021.5
 
-local Stage = require("BHElib.scenes.stage.stage")
+local Stage = require("BHElib.scenes.tuning_stage.tuning_stage")
 
----@class StageLab:Stage
+---@class StageLab:TuningStage
 local M = LuaClass("stage.StageLab", Stage)
 local Prefab = require("core.prefab")
 
@@ -13,7 +13,7 @@ require("se")
 
 local WBG = Prefab.NewX(Prefab.Object, "background.white")
 
-function WBG:init(ix, iy, scale)
+function WBG:init(ix, iy, scale, time)
     self.img = "image:white"
     self.layer = LAYER_TOP
     self.group = GROUP_GHOST
@@ -24,8 +24,8 @@ function WBG:init(ix, iy, scale)
     self.y = iy
 
     task.New(self, function()
-        for i = 1, 60 do
-            local c = 255 * (60 - i) / 60
+        for i = 1, time do
+            local c = 255 * (time - i) / time
             self.color = Color(c, 255, 255, 255)
             task.Wait(1)
         end
@@ -80,12 +80,12 @@ function M:createScene()
     --self.rect = node
 
     task.New(self, function()
-        PlaySound("se:don00", 1)
+        PlaySound("se:don00", 0.5, 0, true)
 
         local NightPassage = require("backgrounds.night_passage.night_passage")
         NightPassage(self)
 
-        WBG(0, 0, 10)
+        WBG(0, 0, 10, 30)
         local Nue = require("enemy.nue_boss_fight")
 
         local boss_fight = Nue(self)
@@ -121,6 +121,7 @@ function M:getEnemyTargetFrom(source)
 end
 
 function M:update(dt)
+
     for i, button in ipairs(self.exit_button) do
         button:update(1)
     end

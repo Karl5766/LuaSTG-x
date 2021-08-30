@@ -71,7 +71,7 @@ function M:update(dt)
     view3d.dirty = true
 end
 
-local function TileHorizontallyWithImage(image_name, dx, z, xi_range, yi_range, base_x, base_y)
+local function TileHorizontallyWithImage(image_name, dx, z, xi_range, yi_range, base_x, base_y, flipped)
     local size = FindResSprite(image_name):getSprite():getContentSize()
 
     local scale = dx / size.height
@@ -83,11 +83,19 @@ local function TileHorizontallyWithImage(image_name, dx, z, xi_range, yi_range, 
         for i = yi_range[1], yi_range[2] do
             local ymin = base_y + i * height
             local ymax = ymin + height
-            Render4V(image_name,
-                    xmax, ymin, z,
-                    xmax, ymax, z,
-                    xmin, ymax, z,
-                    xmin, ymin, z)
+            if not flipped then
+                Render4V(image_name,
+                        xmax, ymin, z,
+                        xmax, ymax, z,
+                        xmin, ymax, z,
+                        xmin, ymin, z)
+            else
+                Render4V(image_name,
+                        xmax, ymax, z,
+                        xmax, ymin, z,
+                        xmin, ymin, z,
+                        xmin, ymax, z)
+            end
         end
     end
 end
@@ -133,9 +141,9 @@ function M:render()
         alpha = 255
     end
 
-    TileHorizontallyWithImage(_image_ground, repeat_dx, 0, {-2, 2}, {-1, -1}, 0, -0.5 * repeat_dx)
-    TileHorizontallyWithImage(_image_ground, repeat_dx, 0, {-2, 2}, {1, 1}, 0, -0.5 * repeat_dx)
-    TileHorizontallyWithImage(_image_road, repeat_dx, 0, {-2, 2}, {0, 0}, 0, -0.5 * repeat_dx)
+    TileHorizontallyWithImage(_image_ground, repeat_dx, 0, {-2, 2}, {-1, -1}, 0, -0.5 * repeat_dx, false)
+    TileHorizontallyWithImage(_image_ground, repeat_dx, 0, {-2, 2}, {1, 1}, 0, -0.5 * repeat_dx, true)
+    TileHorizontallyWithImage(_image_road, repeat_dx, 0, {-2, 2}, {0, 0}, 0, -0.5 * repeat_dx, true)
     local size = _image_road_sprite:getSprite():getContentSize()
     local pillar_y = repeat_dx / size.height * size.width * 0.5
     RenderPillars(_image_pillar, repeat_dx, pillar_y, 1, {-1, 3}, 0, 0, 0, 0.13, -1, 225)

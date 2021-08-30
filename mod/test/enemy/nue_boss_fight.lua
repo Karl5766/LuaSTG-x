@@ -33,9 +33,6 @@ local function Script(self)
 
     boss.x = -100
     boss.y = 300
-
-    _Dialogue1(self)
-    coroutine.yield()
     self:playAttackSessionByIndex(1)
     coroutine.yield()
 end
