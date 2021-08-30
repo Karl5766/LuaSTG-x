@@ -83,7 +83,7 @@ end
 ---@param dt number
 function M:update(dt)
     Session.update(self, dt)
-
+    
     task.Do(self)
 
     -- sync the position of hitbox to that of the boss

@@ -126,4 +126,6 @@ function M:fire(dt)
 	self.frame_task = true
 end
 
+Prefab.Register(M)
+
 return M

@@ -19,7 +19,7 @@ local StringByte = string.byte
 ---------------------------------------------------------------------------------------------------
 
 local function NonPropagateCopy(matrix, row, var_name)
-    for i = 1, #row - 1 do
+    for i = 1, #row - 2 do
         local column = matrix[i]
         column[var_name] = row[i + 2]
     end

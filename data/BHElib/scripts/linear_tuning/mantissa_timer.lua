@@ -86,3 +86,5 @@ function M:copy()
 	newTimer.mantissa_time = self.mantissa_time
 	return newTimer
 end
+
+return M

@@ -29,7 +29,7 @@ function M:ctor()
     local hp = 360
     BossHitbox(16, hp, self)
 
-    ---@type RumiaAnimation
+    ---@type NueAnimation
     local boss = self.boss
 
     self:initChain()

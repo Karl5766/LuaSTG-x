@@ -18,6 +18,7 @@ function M:loadResources()
 end
 
 function M:frame()
+    task.Do(self)
     self.animation_timer = self.animation_timer + 1
 end
 

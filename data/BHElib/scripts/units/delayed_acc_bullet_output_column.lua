@@ -32,7 +32,7 @@ end
 function M:spark()
     -- Generate a delayed acceleration bullet
 
-    local startTime = self.s_t
+    local startTime = self.s_t or 0
 
     TaskNew(self.s_master,function()
         if startTime < 0 then

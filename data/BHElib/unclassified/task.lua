@@ -64,7 +64,8 @@ function task.Do(self)
         local j = 0
 
         -- loop through every task under self.task table
-        for i = 1, #task_list do
+        local i = 1
+        while i <= #task_list do
             local cur_task = task_list[i]
             if status(cur_task) ~= "dead" then
                 -- push into the stack before executing the task
@@ -87,6 +88,7 @@ function task.Do(self)
             else
                 task_list[i] = nil
             end
+            i = i + 1
         end
     end
 end

@@ -196,9 +196,9 @@ function M:spark_backup(backupList)
     for i, obj in ipairs(self.s_next) do
         if backupList[obj] == nil then
             -- if the next object is not in list, create backup of the object
-            local nextCp = obj:spark_backup(backupList)
-            nextCp.s_backup = true  -- is backup
-            s_next[i] = nextCp
+            local next_col = obj:spark_backup(backupList)
+            next_col.s_backup = true  -- is backup
+            s_next[i] = next_col
         else
             s_next[i] = backupList[obj]
         end
