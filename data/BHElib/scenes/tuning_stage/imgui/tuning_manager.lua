@@ -13,6 +13,10 @@ local M = LuaClass("im.TuningManager", Widget)
 
 ---------------------------------------------------------------------------------------------------
 
+local InitTuningMatrixSaves = require("BHElib.scenes.tuning_stage.imgui.init_tuning_matrix_saves")
+
+---------------------------------------------------------------------------------------------------
+
 local im = imgui
 local Remove = table.remove
 
@@ -67,9 +71,9 @@ function M:renderButtons()
         end
     end
     im.sameLine()
-    ret = im.button("+matrix")
+    ret = im.button("+matrixStandardAcc")
     if ret then
-        self.tuning_ui:appendMatrixWindow()
+        self.tuning_ui:appendMatrixWindow(InitTuningMatrixSaves.StandardAcc)
     end
     im.sameLine()
     ret = im.button("+local")
@@ -79,12 +83,14 @@ function M:renderButtons()
 end
 
 function M:_render()
+    im.setWindowFontScale(1.2)
     im.separator()
     self:renderButtons()
 
     local local_names = self.local_names
     local local_values = self.local_values
     local num_locals = self.num_locals
+    local to_del = nil
     for i = 1, num_locals do
         im.setNextItemWidth(self.name_width)
         local changed, str = im.inputText("##name"..tostring(i), local_names[i], im.ImGuiInputTextFlags.None)
@@ -99,6 +105,16 @@ function M:_render()
         if changed then
             local_values[i] = str
         end
+
+        im.sameLine()
+
+        local pressed = im.button("-##btn"..i)
+        if pressed then
+            to_del = i
+        end
+    end
+    if to_del then
+        self:removeLocal(to_del)
     end
 end
 

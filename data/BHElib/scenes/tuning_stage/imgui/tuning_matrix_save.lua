@@ -14,11 +14,18 @@ local StringByte = string.byte
 
 ---@param matrix im.TuningMatrix
 function M.__create(matrix)
-    local self = {
-        num_row = matrix.num_row,
-        num_col = matrix.num_col,
-        matrix = table.deepcopy(matrix.matrix),
-    }
+
+    local self
+    if matrix then
+        self = {
+            num_row = matrix.num_row,
+            num_col = matrix.num_col,
+            matrix = table.deepcopy(matrix.matrix),
+            output_str = matrix.output_str
+        }
+    else
+        self = {}  -- needs to be filled manually
+    end
     return self
 end
 
@@ -29,11 +36,12 @@ function M:writeBack(matrix)
     matrix.num_row = self.num_row
     matrix.num_col = self.num_col
     matrix.matrix = table.deepcopy(self.matrix)
+    matrix.output_str = self.output_str
 end
 
 ---get string representation of the matrix in lua code
 ---@return string a representation of the matrix
-function M:getLuaString()
+function M:getMatrixLuaString()
     local ret = tostring(self.num_row)..","..tostring(self.num_col)..",".."{\n"
 
     local matrix = self.matrix
@@ -64,6 +72,13 @@ function M:getLuaString()
     end
 
     ret = ret.."}"
+
+    return ret
+end
+
+function M:getLuaString()
+    local matrix_str = self:getMatrixLuaString()
+    local ret = matrix_str.."\n"..self.output_str
     return ret
 end
 

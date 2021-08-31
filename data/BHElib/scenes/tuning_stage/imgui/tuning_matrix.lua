@@ -26,18 +26,16 @@ local StringByte = string.byte
 ---------------------------------------------------------------------------------------------------
 ---init
 
-function M:ctor(...)
+---@param tuning_ui TuningUI
+function M:ctor(tuning_ui, ...)
     self.matrix = {
         {"s_script", "N/A", "nil"},
-        {"s_n", "N/A", "1"},
-        {"s_dt", "N/A", "0"},
-        {"angle", "0", "0"},
-        {"x", "0", "0"},
-        {"y", "0", "0"},
     }
     self.num_col = 3
-    self.num_row = 6
+    self.num_row = 1
     self.cell_width = 60
+    self.output_str = ""
+    self.tuning_ui = tuning_ui
 
     Widget.ctor(self, ...)
     self:addChild(function()
@@ -149,8 +147,15 @@ function M:renderResizeButtons()
 end
 
 function M:_render()
+    im.setWindowFontScale(1.2)
     im.separator()
     self:renderResizeButtons()
+
+    local pressed = im.button("output control")
+    if pressed then
+        ---@type tuning_ui.EditText
+        self.tuning_ui:createEditCode(self, self.output_str)
+    end
 
     local matrix = self.matrix
     local cell_width = self.cell_width
@@ -188,6 +193,10 @@ function M:_render()
             end
         end
     end
+end
+
+function M:onEditCodeSave(str)
+    self.output_str = str
 end
 
 ---------------------------------------------------------------------------------------------------

@@ -8,7 +8,7 @@
 local ParameterColumn = require("BHElib.scripts.linear_tuning.parameter_column")
 
 ---@class BulletOutputColumn:ParameterColumn
-local M = LuaClass("DelayedAccBulletOutputColumn", ParameterColumn)
+local M = LuaClass("BulletOutputColumn", ParameterColumn)
 
 ---------------------------------------------------------------------------------------------------
 
