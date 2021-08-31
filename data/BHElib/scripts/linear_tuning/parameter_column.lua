@@ -35,7 +35,7 @@ function M.__create(master, name, s_next)
     self.s_next = {s_next}
     self.s_name = name  -- for debug use
     self.s_control = "s_n"
-    self.s_script = {}  -- functions run before sparking to the next object
+    self.s_script = nil  -- functions run before sparking to the next object
     self.s_n = 1
 
     return self
@@ -156,9 +156,11 @@ function M:async_spark_to(s_next)
 
             cp.s_t = -timer:mantissa()
             local scripts = self.s_script
-            for i = 1, #scripts do
-                local script = scripts[i]
-                script(self, cp, j)
+            if scripts then
+                for i = 1, #scripts do
+                    local script = scripts[i]
+                    script(self, cp, j)
+                end
             end
             cp:spark()
 

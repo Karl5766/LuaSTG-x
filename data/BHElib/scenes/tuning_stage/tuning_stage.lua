@@ -29,9 +29,9 @@ function M:createScene()
     local cocos_scene = Stage.createScene(self)
 
     self.tuning_ui = TuningUI(self)
-    local info = self.scene_group.tuning_info
-    if info then
-        self.tuning_ui:loadInfo(info)
+    local save = self.scene_group.tuning_save
+    if save then
+        self.tuning_ui:loadSave(save)
     end
 
     return cocos_scene
@@ -70,9 +70,9 @@ end
 
 local _hud_painter = require("BHElib.ui.hud_painter")
 function M:renderUserPauseMenuBG()
-    _hud_painter:drawHudBackground(
-            "image:menu_hud_background",
-            1.3)
+    --_hud_painter:drawHudBackground(
+    --        "image:menu_hud_background",
+    --        1.3)
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -91,7 +91,7 @@ end
 ---deletion
 
 function M:endSession(continue_scene_group)
-    self.scene_group.tuning_info = self.tuning_ui:getInfo()
+    self.scene_group.tuning_save = self.tuning_ui:getSave()
     self.tuning_ui:cleanup()
     Stage.endSession(self, continue_scene_group)
 end

@@ -4,13 +4,13 @@
 ---desc: Defines tasks (coroutines) for game objects
 ---modifier:
 ---     Karl, 2021.2.16, deleted the move_to functions temporarily
+---     2021.8.30, deleted the maintenance of object and task stacks and some uncommonly used
+---     functions; implemented task deletion using swap
 ---------------------------------------------------------------------------------------------------
 
 task = {}
 
 local task = task
-local _object_stack = {}  -- corresponding objects of the tasks
-local _task_stack = {}  -- current task stack; similar to function call stack
 
 ---------------------------------------------------------------------------------------------------
 ---cache variables and functions
@@ -24,20 +24,6 @@ local status = coroutine.status
 local rawget = rawget
 
 ---------------------------------------------------------------------------------------------------
-
----@~chinese 设置亲子关系；
----
----@~english set parent-child relation
----@param self table table to be set as parent
----@param child table table to be set as child
-function task.SetChild(self, child)
-    local children = self._child_array
-    if not children then
-        self._child_array = {child}
-    else
-        insert(children, child)
-    end
-end
 
 ---@~chinese 新建task，添加一个执行f的协程
 ---
@@ -57,59 +43,38 @@ end
 ---@~chinese 执行（resume）task中的协程；清除已执行完的task
 ---
 ---@~english execute all the tasks under self.task
----@param self Object tasks under this object will be executed
+---@param self table tasks under this object will be executed
 function task.Do(self)
     local task_list = rawget(self, "task")  -- get self.task
     if task_list then
-        local j = 0
-
         -- loop through every task under self.task table
         local i = 1
         while i <= #task_list do
             local cur_task = task_list[i]
             if status(cur_task) ~= "dead" then
                 -- push into the stack before executing the task
-                insert(_object_stack, self)
-                insert(_task_stack, cur_task)
+                --insert(_object_stack, self)
+                --insert(_task_stack, cur_task)
 
                 -- run the task
                 local success, errmsg = resume(cur_task)
                 if errmsg then
                     error(errmsg)
                 end
+                i = i + 1
 
                 -- pop from the stack after executing the task
-                _object_stack[#_object_stack] = nil
-                _task_stack[#_task_stack] = nil
-
-                task_list[i] = nil
-                j = j + 1
-                task_list[j] = cur_task
+                --_object_stack[#_object_stack] = nil
+                --_task_stack[#_task_stack] = nil
             else
-                task_list[i] = nil
+                -- this implementation may break some important assumptions on tasks, but it should be relatively efficient
+                local n = #task_list
+                task_list[i] = task_list[n]
+                task_list[n] = nil
             end
-            i = i + 1
         end
     end
 end
-local TaskDo = task.Do
-
----TOBEDEBUGGED
----@~chinese 执行对象的task，然后一一执行它所有孩子的task
----
----@~english do tasks under self, and then do its children's tasks
----@param self table the table that contains task and _child_array tables
-local function PropagateDo(self)
-    TaskDo(self)
-    local children = self._child_array
-    if children then
-        for i = 1, #children do
-            PropagateDo(children[i])
-        end
-    end
-end
-task.PropagateDo = PropagateDo
-
 
 ---@~chinese 清空self.tasks
 ---
@@ -117,25 +82,6 @@ task.PropagateDo = PropagateDo
 ---@param self Object clear tasks of this object
 function task.Clear(self)
     self.task = nil
-end
-
----@~chinese 清空self.tasks中除当前执行的task之外所有tasks; 如不包含当前task则清空所有task
----
----@~english clear every task in self.tasks except the currently running task
----@param self Object clear tasks of this object
-function task.ClearExcept(self)
-    local flag = false
-    local cur_task = _task_stack[#_task_stack]
-    for i = 1, #self.task do
-        if self.task[i] == cur_task then
-            flag = true
-            break
-        end
-    end
-    self.task = nil
-    if flag then
-        self.task = { cur_task }
-    end
 end
 
 ---@~chinese 等待t帧（挂起协程t次）
@@ -148,23 +94,4 @@ function task.Wait(t)
     for i = 1, t do
         yield()
     end
-end
-
----@~chinese 等待到timer达到t（挂起协程）
----
----@~english wait until the value of self.timer is as large as t
----@param t number the end value of self.timer
-function task.Until(t)
-    t = int(t)
-    while task.GetSelf().timer < t do
-        yield()
-    end
-end
-
----@~chinese 获取当前task（协程）对应的对象
----
----@~english get the object of the currently executing task
----@return Object the object this task is executing under
-function task.GetSelf()
-    return _object_stack[#_object_stack]
 end

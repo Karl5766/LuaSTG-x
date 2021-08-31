@@ -7,6 +7,10 @@
 ---@class TuningUI
 local M = LuaClass("TuningUI")
 
+local TuningMatrix = require("BHElib.scenes.tuning_stage.imgui.tuning_matrix")
+local TuningManager = require("BHElib.scenes.tuning_stage.imgui.tuning_manager")
+local WidgetWindow = require('imgui.widgets.Window')
+
 ---------------------------------------------------------------------------------------------------
 
 local im = imgui
@@ -68,27 +72,13 @@ function M:ctor()
 
     --self.console = require('imgui.ui.Console').createWindow('Console##xe')
     --la:addChild(self.console)
-    --la:addChild(function()
-    --    local ret = im.button('1')
-    --    if ret then
-    --        Print("button 1 is pressed")
-    --    end
-    --    im.separator()
-    --    im.sameLine()
-    --    ret = im.button('2')
-    --    if ret then
-    --        Print("button 2 is pressed")
-    --    end
-    --end)
 
-    local TuningMatrix = require("BHElib.scenes.tuning_stage.imgui.tuning_matrix")
+    self.matrices = {}
+    self:appendMatrixWindow()
 
-    local window = require('imgui.widgets.Window')("Matrix1##TuningUI")
-    local matrix = TuningMatrix()
-    matrix:resizeTo(9, 4)
-    window:addChild(matrix)
-    la:addChild(window)
-    self.tuning_matrix = matrix
+    local manager = TuningManager(self)
+    self:registerChildWidget(manager, "Manager")
+    self.tuning_manager = manager
 
     -- la:addChild(im.showDemoWindow)
 
@@ -157,6 +147,42 @@ function M:setupImguiFont()
 end
 
 ---------------------------------------------------------------------------------------------------
+---matrix windows
+
+---create a window for the imgui widget child
+function M:registerChildWidget(widget, window_label)
+    local window = WidgetWindow(window_label)
+    window:addChild(widget)
+    self.imgui_la:addChild(window)
+end
+
+function M:getNumMatrices()
+    return #self.matrices
+end
+
+---add a new matrix window
+---@return im.TuningMatrix newly appended matrix
+function M:appendMatrixWindow()
+    local matrices = self.matrices
+    local i = #matrices + 1
+
+    local matrix = TuningMatrix()
+    self:registerChildWidget(matrix, "Matrix"..i)
+
+    matrices[i] = matrix
+    return matrix
+end
+
+---remove the most recent matrix window
+function M:popMatrixWindow()
+    local matrices = self.matrices
+    local matrix = matrices[#matrices]
+    matrices[#matrices] = nil
+    local window = matrix:getParent()
+    window:removeFromParent()  -- remove window from la
+end
+
+---------------------------------------------------------------------------------------------------
 ---menu bar
 
 function M.menuBar()
@@ -196,24 +222,85 @@ end
 
 function M:off()
     if not self.is_cleaned then
+        lstg.eventDispatcher:dispatchEvent("onTuningUIExit")
         self.imgui_la:setVisible(false)
     end
 end
 
-function M:getInfo()
+local TuningMatrixSave = require("BHElib.scenes.tuning_stage.imgui.tuning_matrix_save")
+local TuningManagerSave = require("BHElib.scenes.tuning_stage.imgui.tuning_manager_save")
+
+function M:getSave()
+    local matrix_saves = {}
+    for i = 1, #self.matrices do
+        local matrix = self.matrices[i]
+        matrix_saves[i] = TuningMatrixSave(matrix)
+    end
+
+    local manager_save = TuningManagerSave(self.tuning_manager)
+
     return {
-        matrix = self.tuning_matrix:saveToTable()
+        matrix_saves = matrix_saves,
+        manager_save = manager_save,
     }
 end
 
-function M:loadInfo(info)
-    self.tuning_matrix:loadFromTable(info.matrix)
+function M:loadSave(save)
+    local matrix_saves = save.matrix_saves
+    for i = 1, #matrix_saves do
+        local matrix_save = matrix_saves[i]
+        local matrix = self:appendMatrixWindow()
+        matrix_save:writeBack(matrix)
+    end
+
+    save.manager_save:writeBack(self.tuning_manager)
 end
 
-function M:getMatrixOutput()
-    local str = self.tuning_matrix:getMatrixStringRepr()
-    local num_row, num_col, matrix = loadstring("return "..str)()
-    return num_row, num_col, matrix
+---get callbacks from matrices that would create chains
+function M:getChainCallbacks()
+    local save = self:getSave()
+
+    local code = save.manager_save:getLuaString()
+    code = code.."return {"
+    local matrix_saves = save.matrix_saves
+    for i = 1, #matrix_saves do
+        local matrix_save = matrix_saves[i]
+        local matrix_str = matrix_save:getLuaString()
+        local matrix_code = [==[
+            function(master)
+                local n_row, n_col, matrix = ]==]..matrix_str..[==[
+
+                local ParameterMatrix = require("BHElib.scripts.linear_tuning.parameter_matrix")
+                local BulletOutputColumn = require("BHElib.scripts.units.bullet_output_column")
+                local AccController = require("BHElib.scripts.units.acc_controller")
+
+                local col = BulletOutputColumn(master)
+                col.x = 0
+                col.y = 0
+                col.angle = -90
+                col.bullet_type_name = "ball"
+                col.color_index = COLOR_BLUE
+                col.controller = 1 --AccController.shortInit(3, 30, 1)
+                col.blink_time = 12
+                col.inc_rot = 3
+                col.effect_size = 1
+                col.destroyable = true
+
+                return ParameterMatrix.MatrixInit(master, n_row, n_col, matrix, col)
+            end,
+        ]==]
+        code = code..matrix_code
+    end
+    code = code.."}"
+
+    SystemLog(code)
+
+    local f, msg = loadstring(code)
+    if msg then
+        error(msg)
+    end
+
+    return f()
 end
 
 ---------------------------------------------------------------------------------------------------

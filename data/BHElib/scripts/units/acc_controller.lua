@@ -40,7 +40,7 @@ function M.shortInit(...)
     local acc_con = M(select(1, ...))
     local n = select("#", ...)
     for i = 3, n, 2 do
-        acc_con:addAcc(select(i - 1, ...), select(i, ...))
+        acc_con:accTo(select(i - 1, ...), select(i, ...))
     end
     return acc_con
 end
@@ -50,7 +50,7 @@ end
 
 ---@param acc_time number
 ---@param final_speed number
-function M:newAcc(acc_time, final_speed)
+function M:accTo(acc_time, final_speed)
     if acc_time == nil then
         error("ExpressionAccController: The value of time entered is nil.")
     elseif final_speed == nil then
@@ -76,8 +76,6 @@ function M:newAcc(acc_time, final_speed)
     local c = total_length - a * total_time ^ 2 - b * total_time
     self.coeff_array[n] = {a, b, c}
 end
-
-M.addAcc = M.newAcc
 
 function M:getDistance(t)
     local i, tList = 1, self.time_array

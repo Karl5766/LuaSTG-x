@@ -27,9 +27,16 @@ local StringByte = string.byte
 ---init
 
 function M:ctor(...)
-    self.matrix = {{"s_script", "N/A", "nil"}}  -- a matrix of only strings
-    self.num_col = MIN_COL_COUNT
-    self.num_row = MIN_ROW_COUNT
+    self.matrix = {
+        {"s_script", "N/A", "nil"},
+        {"s_n", "N/A", "1"},
+        {"s_dt", "N/A", "0"},
+        {"angle", "0", "0"},
+        {"x", "0", "0"},
+        {"y", "0", "0"},
+    }
+    self.num_col = 3
+    self.num_row = 6
     self.cell_width = 60
 
     Widget.ctor(self, ...)
@@ -71,42 +78,6 @@ function M:copyFromMatrix(matrix)
             end
         end
     end
-end
-
----get string representation of the matrix in lua code
----@return string a representation of the matrix
-function M:getMatrixStringRepr()
-    local ret = tostring(self.num_row)..","..tostring(self.num_col)..",".."{\n"
-
-    local matrix = self.matrix
-    -- append string row by row
-    for i = 1, self.num_row do
-        local row = matrix[i]
-        local row_label = row[1]
-        local row_str = "{"
-
-        for j = 1, self.num_col do
-            local str
-            if j == 1 then
-                str = "\""..row[j].."\""
-            elseif j == 2 and StringByte(row_label, 2) == 95 then
-                str = "nil"
-            else
-                str = row[j]
-            end
-            if str ~= "nil" and row_label == "s_script" and j >= 2 then
-                row_str = row_str..("{"..str.."},")
-            else
-                row_str = row_str..(str..",")
-            end
-        end
-
-        row_str = row_str.."},\n"
-        ret = ret..row_str
-    end
-
-    ret = ret.."}"
-    return ret
 end
 
 ---@param num_row number
@@ -178,9 +149,8 @@ function M:renderResizeButtons()
 end
 
 function M:_render()
-    self:renderResizeButtons()
-
     im.separator()
+    self:renderResizeButtons()
 
     local matrix = self.matrix
     local cell_width = self.cell_width
@@ -192,19 +162,24 @@ function M:_render()
 
             local text = row[j]
 
-            local changed, str = im.inputText(label, text, im.ImGuiInputTextFlags.EnterReturnsTrue)
-            if changed then
-                if j == 1 then
+            if j == 1 then
+                local changed, str = im.inputText(label, text, im.ImGuiInputTextFlags.EnterReturnsTrue)
+                if changed then
                     self:setRowLabel(i, str)
-                elseif j == 2 then
-                    local row_label = row[1]
-                    if StringByte(row_label, 2) == 95 then
-                        -- do nothing
+                end
+            else
+                local changed, str = im.inputText(label, text, im.ImGuiInputTextFlags.None)
+                if changed then
+                    if j == 2 then
+                        local row_label = row[1]
+                        if StringByte(row_label, 2) == 95 then
+                            -- do nothing
+                        else
+                            row[j] = str
+                        end
                     else
                         row[j] = str
                     end
-                else
-                    row[j] = str
                 end
             end
 
@@ -213,18 +188,6 @@ function M:_render()
             end
         end
     end
-end
-
----------------------------------------------------------------------------------------------------
----save and load
-
-function M:saveToTable()
-    return {self.num_row, self.num_col, self.matrix}
-end
-
-function M:loadFromTable(t)
-    self:resizeTo(t[1], t[2])
-    self:copyFromMatrix(t[3])
 end
 
 ---------------------------------------------------------------------------------------------------

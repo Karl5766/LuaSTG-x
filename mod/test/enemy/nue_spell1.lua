@@ -11,7 +11,7 @@ local M = LuaClass("Nue.spell1", SpellSession)
 
 local BossHitbox = require("BHElib.units.enemy.boss_hitbox_prefab")
 local ParameterMatrix = require("BHElib.scripts.linear_tuning.parameter_matrix")
-local DelayedAccBulletOutputColumn = require("BHElib.scripts.units.delayed_acc_bullet_output_column")
+local BulletOutputColumn = require("BHElib.scripts.units.bullet_output_column")
 local AccController = require("BHElib.scripts.units.acc_controller")
 local BulletTypes = require("BHElib.units.bullet.bullet_types")
 
@@ -21,6 +21,8 @@ M.SPELL_DISPLAY_NAME = "test spell \"测试符卡\""
 
 function M.__create(parent, boss)
     local self = SpellSession.__create(parent, boss, 12000, "test_attack")
+
+    self.tuning_ui = self.game_scene.tuning_ui
 
     return self
 end
@@ -32,55 +34,64 @@ function M:ctor()
     ---@type NueAnimation
     local boss = self.boss
 
-    self:initChain()
-
     task.New(self, function()
         boss:move(60, -boss.x, 120 - boss.y, boss.x > 0, self)
-        task.Wait(120)
-        local boss_y = boss.y
-        while true do
-            task.Wait(24)
-            --boss:playAnimation("cast", true, false, true)
-            task.Wait(36)
-            for i = 1, 1 do
-                if i % 2 == 1 then
-                    self:fire(boss.x, boss.y, 1)
-                else
-                    self:fire(boss.x, boss.y, -1)
-                end
-                task.Wait(120)
-            end
-            self:autoMove(-54, 54, boss_y - 10, boss_y + 10)
-            task.Wait(120)
-        end
+
+        self:initChain()
+
+        lstg.eventDispatcher:addListener("onTuningUIExit", function()
+            self:initChain()
+        end, 0, tostring(self))
+
+        --task.Wait(120)
+        --local boss_y = boss.y
+        --while true do
+        --    task.Wait(24)
+        --    --boss:playAnimation("cast", true, false, true)
+        --    task.Wait(36)
+        --    for i = 1, 1 do
+        --        if i % 2 == 1 then
+        --            self:fire(boss.x, boss.y, 1)
+        --        else
+        --            self:fire(boss.x, boss.y, -1)
+        --        end
+        --        task.Wait(120)
+        --    end
+        --    self:autoMove(-54, 54, boss_y - 10, boss_y + 10)
+        --    task.Wait(120)
+        --end
     end)
+end
+
+function M:endSession()
+    SpellSession.endSession(self)
+    lstg.eventDispatcher:removeListenerByTag(tostring(self))
 end
 
 function M:initChain()
     local boss = self.boss
-    local col = DelayedAccBulletOutputColumn(boss)
+    task.Clear(boss)  -- clear all matrices
+    self.chains = {}  -- clear all chains
 
-    col.x = 0
-    col.y = 0
-    col.angle = -90
-    col.bullet_type_name = "ball"
-    col.color_index = COLOR_BLUE
-    col.controller = AccController.shortInit(3, 30, 1)
-    col.blink_time = 12
-    col.inc_rot = 3
-    col.effect_size = 1
-    col.destroyable = true
+    local callbacks = self.tuning_ui:getChainCallbacks()
+    for i = 1, #callbacks do
+        -- create a chain for each callback
+        local chain = callbacks[i](boss)
+        table.insert(self.chains, chain)
+    end
 
-    local tuning_ui = self.game_scene.tuning_ui
-    local num_row, num_col, matrix = tuning_ui:getMatrixOutput()
-    self.chain = ParameterMatrix.MatrixInit(boss, num_row, num_col, matrix, col)
+    self:fire(boss.x, boss.y, 1)
 end
 
 function M:fire(x, y, side)
 
     PlaySound("se:explode", 0.1, 0, true)
 
-    self.chain.head:spark()
+    local chains = self.chains
+    for i = 1, #chains do
+        local chain = chains[i]
+        chain.head:spark()
+    end
 end
 
 function M:mouseFire(x, y, side)

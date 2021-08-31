@@ -42,14 +42,14 @@ local TaskDo = task.Do
 ---@param color_index number indicate color of the bullet
 ---@param group number
 ---@param blink_time number persist time of blinking effect
----@param size number size of the effects
+---@param effect_size number size of the effects
 ---@param destroyable boolean whether this bullet is destroyable in collision with a player
-function M:init(bullet_type_name, color_index, group, blink_time, size, destroyable)
+function M:init(bullet_type_name, color_index, group, blink_time, effect_size, destroyable)
     self.bound = true
     self.group = group
     self.bullet_type_name = bullet_type_name
     self.color_index = color_index
-    self.effect_size = size
+    self.effect_size = effect_size
     self.grazed = false
     self.destroyable = destroyable
     self.frame_task = false
@@ -67,6 +67,8 @@ function M:frame()
     local blink_time = self.blink_time
     if blink_time then
         local cur_time = self.timer
+        self.hscale = self.effect_size * (1 + 3 * (blink_time - cur_time) / blink_time)  -- decreasing size
+        self.vscale = self.hscale
         if cur_time >= blink_time then
             self.blink_time = nil
             self:fire(cur_time - blink_time)
@@ -77,20 +79,11 @@ function M:frame()
     end
 end
 
-function M:render()
-    local blink_time = self.blink_time
-    if blink_time then
-        local cur_time = self.timer
-        local scale = 1 + 3 * (blink_time - cur_time) / blink_time  -- decreasing size
-        Render(self.img, self.x, self.y, self.rot, scale * self.effect_size)
-    else
-        DefaultRenderFunc(self)
-    end
-end
-
 ---@param dt number time elapsed since the end of blink time
 function M:fire(dt)
     self.layer = LAYER_ENEMY_BULLET
+    self.hscale = 1
+    self.vscale = 1
     self:changeSpriteTo(self.bullet_type_name, self.color_index)
 end
 

@@ -18,24 +18,24 @@ local StringByte = string.byte
 
 ---------------------------------------------------------------------------------------------------
 
-local function NonPropagateCopy(matrix, row, var_name)
-    for i = 1, #row - 2 do
+local function NoDCopy(matrix, num_col, row, var_name)
+    for i = 1, num_col - 2 do
         local column = matrix[i]
         column[var_name] = row[i + 2]
     end
 end
 
-local function PropagateCopy(chain, row, var_name)
+local function DCopy(chain, num_col, row, var_name)
     local d_name = "d_"..var_name
     chain[1][var_name] = row[2]
-    for i = 1, #row - 2 do
+    for i = 1, num_col - 2 do
         local node = chain[i]
         node[d_name] = row[i + 2]
     end
 end
 
-local function NonPropagatePackList(chain, row, var_name)
-    for i = 1, #row - 1 do
+local function ScriptCopy(chain, num_col, row, var_name)
+    for i = 1, num_col - 1 do
         local node = chain[i]
 
         local value = row[i + 1]
@@ -46,7 +46,7 @@ local function NonPropagatePackList(chain, row, var_name)
 end
 
 local _special_var_lookup = {
-    s_script = NonPropagatePackList
+    s_script = ScriptCopy
 }
 
 ---@return table a table with .head set to the first column of the matrix
@@ -65,15 +65,15 @@ function M.MatrixInit(master, num_row, num_col, matrix, output_column)
 
         local callback = _special_var_lookup[var_name]
         if callback then
-            callback(chain, row, var_name)
+            callback(chain, num_col, row, var_name)
         else
             assert(num_col >= #row - 1)
             if StringByte(var_name, 2) ~= 95 then
-                -- propagate variable
-                PropagateCopy(chain, row, var_name)
+                -- d variable
+                DCopy(chain, num_col, row, var_name)
             else
-                -- non-propagate variable
-                NonPropagateCopy(chain, row, var_name)
+                -- no-d variable
+                NoDCopy(chain, num_col, row, var_name)
             end
         end
     end
