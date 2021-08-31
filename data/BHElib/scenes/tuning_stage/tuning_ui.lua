@@ -190,6 +190,12 @@ function M:popMatrixWindow()
     local matrices = self.matrices
     local matrix = matrices[#matrices]
     matrices[#matrices] = nil
+
+    local edit_code = self.edit_code
+    if edit_code:isVisible() and edit_code:getNode() == matrix then
+        edit_code:off()
+    end
+
     local window = matrix:getParent()
     window:removeFromParent()  -- remove window from la
 end
@@ -205,6 +211,10 @@ end
 
 function M:off()
     if not self.is_cleaned then
+        local edit_code = self.edit_code
+        if edit_code:isActive() then
+            edit_code:commitChanges()
+        end
         lstg.eventDispatcher:dispatchEvent("onTuningUIExit")
         self.imgui_la:setVisible(false)
     end

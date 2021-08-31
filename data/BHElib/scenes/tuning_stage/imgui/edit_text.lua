@@ -81,7 +81,7 @@ function M:_handler()
 
     local pressed = im.button("cancel")
     if pressed then
-        self:getParent():setVisible(false)
+        self:off()
     end
 
     im.sameLine()
@@ -95,9 +95,25 @@ function M:_handler()
 
     pressed = im.button("ok")
     if pressed then
-        self.node:onEditCodeSave(input:getText())
-        self:getParent():setVisible(false)
+        self:commitChanges()
+        self:off()
     end
+end
+
+function M:commitChanges()
+    self.node:onEditCodeSave(self._input:getText())
+end
+
+function M:off()
+    self:getParent():setVisible(false)  -- set windows inactive
+end
+
+function M:isActive()
+    return self:getParent():isVisible()
+end
+
+function M:getNode()
+    return self.node
 end
 
 return M

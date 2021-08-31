@@ -14,6 +14,7 @@ local M = LuaClass("im.TuningManager", Widget)
 ---------------------------------------------------------------------------------------------------
 
 local InitTuningMatrixSaves = require("BHElib.scenes.tuning_stage.imgui.init_tuning_matrix_saves")
+local InitTuningManagerSaves = require("BHElib.scenes.tuning_stage.imgui.init_tuning_manager_saves")
 
 ---------------------------------------------------------------------------------------------------
 
@@ -28,8 +29,8 @@ function M:ctor(tuning_ui, ...)
     self.tuning_ui = tuning_ui
 
     self.num_locals = 0
-    self.name_width = 60
-    self.value_width = 180
+    self.name_width = 180
+    self.value_width = 210
     self.local_names = {}
     self.local_values = {}
 
@@ -71,19 +72,35 @@ function M:renderButtons()
         end
     end
     im.sameLine()
-    ret = im.button("+matrixStandardAcc")
-    if ret then
-        self.tuning_ui:appendMatrixWindow(InitTuningMatrixSaves.StandardAcc)
-    end
-    im.sameLine()
     ret = im.button("+local")
     if ret then
         self:appendLocal()
     end
+
+    self:renderAddMatrixButtons()
+    self:renderLoadManagerButtons()
+end
+
+function M:renderAddMatrixButtons()
+    for key_str, matrix_save in pairs(InitTuningMatrixSaves) do
+        local ret = im.button("+matrix"..key_str)
+        if ret then
+            self.tuning_ui:appendMatrixWindow(matrix_save)
+        end
+    end
+end
+
+function M:renderLoadManagerButtons()
+    for key_str, manager_save in pairs(InitTuningManagerSaves) do
+        local ret = im.button("local"..key_str)
+        if ret then
+            manager_save:writeBack(self)
+        end
+    end
 end
 
 function M:_render()
-    im.setWindowFontScale(1.2)
+    im.setWindowFontScale(1.1)
     im.separator()
     self:renderButtons()
 

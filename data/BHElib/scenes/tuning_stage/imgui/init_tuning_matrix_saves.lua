@@ -16,18 +16,14 @@ StandardAcc.matrix = {
 StandardAcc.num_col = 3
 StandardAcc.num_row = 6
 StandardAcc.output_str = [==[
-local ParameterMatrix = require("BHElib.scripts.linear_tuning.parameter_matrix")
-local BulletOutputColumn = require("BHElib.scripts.units.bullet_output_column")
-local DelayedAccBulletOutputColumn = require("BHElib.scripts.units.delayed_acc_bullet_output_column")
-local AccController = require("BHElib.scripts.units.acc_controller")
 
-local col = BulletOutputColumn(master)
+local col = DelayedAccBulletOutputColumn(master)
 col.x = 0
 col.y = 0
 col.angle = -90
 col.bullet_type_name = "ball"
 col.color_index = COLOR_BLUE
-col.controller = 1 --AccController.shortInit(3, 30, 1)
+col.controller = AccController.shortInit(3, 30, 1)
 col.blink_time = 12
 col.inc_rot = 3
 col.effect_size = 1
