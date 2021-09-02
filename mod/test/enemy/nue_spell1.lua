@@ -11,7 +11,7 @@ local M = LuaClass("Nue.spell1", SpellSession)
 
 local BossHitbox = require("BHElib.units.enemy.boss_hitbox_prefab")
 local ParameterMatrix = require("BHElib.scripts.linear_tuning.parameter_matrix")
-local BulletOutputColumn = require("BHElib.scripts.units.bullet_output_column")
+local BulletOutputColumn = require("BHElib.scripts.linear_tuning.output_columns.bullet_output_column")
 local AccController = require("BHElib.scripts.units.acc_controller")
 local BulletTypes = require("BHElib.units.bullet.bullet_types")
 

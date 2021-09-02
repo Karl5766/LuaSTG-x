@@ -5,9 +5,16 @@ local TuningManagerSave = require("BHElib.scenes.tuning_stage.imgui.tuning_manag
 local Default = TuningManagerSave()
 Default:loadLocalArray({
     {"ParameterMatrix", "require(\"BHElib.scripts.linear_tuning.parameter_matrix\")"},
-    {"BulletOutputColumn", "require(\"BHElib.scripts.units.output_columns.bullet_output_column\")"},
-    {"DelayedAccBulletOutputColumn", "require(\"BHElib.scripts.units.output_columns.delayed_acc_bullet_output_column\")"},
+    {"BulletOutputColumn", "require(\"BHElib.scripts.linear_tuning.output_columns.bullet_output_column\")"},
+    {"AccCol", "require(\"BHElib.scripts.linear_tuning.output_columns.delayed_acc_bullet_output_column\")"},
     {"AccController", "require(\"BHElib.scripts.units.acc_controller\")"},
+    {"ColumnScripts", "require(\"BHElib.scripts.linear_tuning.column_scripts\")"},
+    {"F", "ColumnScripts.DefaultFollow"},
+    {"PV", "ColumnScripts.DefaultPolarVelocity"},
+    {"PP", "ColumnScripts.DefaultPolarPos"},
+    {"RE", "ColumnScripts.ConstructReplace"},
+    {"AIM", "ColumnScripts.ConstructAimFromPos"},
+    {"AIMP", "ColumnScripts.ConstructAimFromPos(\"x\",\"y\",\"da\")"},
 })
 M.Default = Default
 

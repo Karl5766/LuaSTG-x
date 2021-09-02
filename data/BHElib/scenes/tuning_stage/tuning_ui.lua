@@ -38,6 +38,7 @@ function M.__create(stage)
     local self = {}
     self.stage = stage
     self.is_cleaned = false
+    self.current_matrix_index = 1  -- uniquely assign ids to matrices
     return self
 end
 
@@ -47,6 +48,18 @@ function M:ctor()
 
     local la = im.on(cocos_scene)
     self.imgui_la = la
+
+    la:addChild(function()
+        -- modified from intellij idea theme color, looks a bit more comfortable
+        im.pushStyleColor(im.Col.Text, im.vec4(255/255, 255/255, 255/255, 1.0))
+        im.pushStyleColor(im.Col.Button, im.vec4(65/255, 66/255, 67/255, 1.0))
+        im.pushStyleColor(im.Col.FrameBg, im.vec4(20/255, 0/255, 20/255, 1.0))
+        im.pushStyleColor(im.Col.WindowBg, im.vec4(40/255, 41/255, 42/255, 1.0))
+        im.pushStyleColor(im.Col.ButtonHovered, im.vec4(78/255, 82/255, 84/255, 1.0))
+        im.pushStyleColor(im.Col.ButtonActive, im.vec4(51/255, 53/255, 55/255, 1.0))
+
+        -- normally would need to be popped somewhere, but whatever
+    end)
 
     cc.Director:getInstance():setDisplayStats(false)
 
@@ -173,23 +186,34 @@ end
 ---@return im.TuningMatrix newly appended matrix
 function M:appendMatrixWindow(save)
     local matrices = self.matrices
-    local i = #matrices + 1
+    local i = self.current_matrix_index
+    self.current_matrix_index = i + 1
 
     local matrix = TuningMatrix(self)
-    self:registerChildWidget(matrix, "Matrix"..i)
+    local window = self:registerChildWidget(matrix, "Matrix"..i)
+    window:setFlags(im.WindowFlags.MenuBar)
     if save then
         save:writeBack(matrix)
     end
 
-    matrices[i] = matrix
+    matrices[#matrices + 1] = matrix
     return matrix
 end
 
 ---remove the most recent matrix window
 function M:popMatrixWindow()
+    self:removeMatrixWindowByIndex(#self.matrices)
+end
+
+---remove the most recent matrix window
+function M:removeMatrixWindowByIndex(index)
     local matrices = self.matrices
-    local matrix = matrices[#matrices]
-    matrices[#matrices] = nil
+    local num_matrices = #matrices
+    local matrix = matrices[index]
+    for i = index, num_matrices - 1 do
+        matrices[i] = matrices[i + 1]
+    end
+    matrices[num_matrices] = nil
 
     local edit_code = self.edit_code
     if edit_code:isVisible() and edit_code:getNode() == matrix then
@@ -198,6 +222,18 @@ function M:popMatrixWindow()
 
     local window = matrix:getParent()
     window:removeFromParent()  -- remove window from la
+end
+
+---@param matrix im.TuningMatrix
+function M:removeMatrixWindow(matrix)
+    local matrices = self.matrices
+    for i = 1, #matrices do
+        if matrices[i] == matrix then
+            self:removeMatrixWindowByIndex(i)
+            return
+        end
+    end
+    error("Error: Matrix to remove is not found!")
 end
 
 ---------------------------------------------------------------------------------------------------

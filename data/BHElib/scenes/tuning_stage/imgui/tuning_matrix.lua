@@ -33,7 +33,7 @@ function M:ctor(tuning_ui, ...)
     }
     self.num_col = 3
     self.num_row = 1
-    self.cell_width = 60
+    self.cell_width = 90
     self.output_str = ""
     self.tuning_ui = tuning_ui
 
@@ -147,6 +147,30 @@ function M:renderResizeButtons()
 end
 
 function M:_render()
+
+    local matrix = self.matrix
+    local cell_width = self.cell_width
+
+    local remove_flag = false
+    if im.beginMenuBar() then
+        if im.beginMenu("Matrix") then
+            if im.menuItem("Create Copy") then
+                local MatrixSave = require("BHElib.scenes.tuning_stage.imgui.tuning_matrix_save")
+                local save = MatrixSave(self)
+                self.tuning_ui:appendMatrixWindow(save)
+            end
+            im.endMenu()
+        end
+        im.sameLine()
+        if im.beginMenu("Del") then
+            if im.menuItem("Confirm") then
+                remove_flag = true
+            end
+            im.endMenu()
+        end
+        im.endMenuBar()
+    end
+
     im.setWindowFontScale(1.2)
     im.separator()
     self:renderResizeButtons()
@@ -157,8 +181,6 @@ function M:_render()
         self.tuning_ui:createEditCode(self, self.output_str)
     end
 
-    local matrix = self.matrix
-    local cell_width = self.cell_width
     for i = 1, self.num_row do
         local row = matrix[i]
         for j = 1, self.num_col do
@@ -192,6 +214,11 @@ function M:_render()
                 im.sameLine()
             end
         end
+    end
+
+    -- after render all other things
+    if remove_flag then
+        self.tuning_ui:removeMatrixWindow(self)
     end
 end
 
