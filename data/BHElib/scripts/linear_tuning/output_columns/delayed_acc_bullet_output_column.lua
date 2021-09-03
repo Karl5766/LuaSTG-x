@@ -32,14 +32,14 @@ end
 function M:spark()
     -- Generate a delayed acceleration bullet
 
-    local startTime = self.s_t or 0
+    local start_time = self.s_t or 0
 
     TaskNew(self.s_master,function()
-        if startTime < 0 then
+        if start_time < 0 then
             local decimal = 1 - (-self.s_t) % 1
-            startTime = startTime - decimal
-            TaskWait(-startTime)
-            startTime = decimal
+            start_time = start_time - decimal
+            TaskWait(-start_time)
+            start_time = decimal
         end
 
         if self.sound then
@@ -47,6 +47,7 @@ function M:spark()
             PlaySound(soundName, soundVol, self.x/256, true)
         end
         if self.s_n ~= 0 then
+            self.start_time = start_time
             DelayedAccBullet(self)
         end
     end)

@@ -22,7 +22,9 @@ function M.__create(stage)
     local self = ParentSession.__create(stage)
 
     local tuning_ui = stage:getTuningUI()
-    tuning_ui:on()
+    if not stage:isReplay() then
+        tuning_ui:on()
+    end
     self.tuning_ui = tuning_ui
 
     return self
@@ -33,7 +35,7 @@ end
 
 function M:update(dt)
     ParentSession.update(self, dt)
-    if Input:isAnyDeviceKeyJustChanged("escape", false, true) then
+    if Input:isAnyKeyJustChanged("escape", false, true) then
         self:endSession()
     end
 end

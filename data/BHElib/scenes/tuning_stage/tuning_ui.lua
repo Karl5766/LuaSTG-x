@@ -91,7 +91,7 @@ function M:ctor()
     -- self:appendMatrixWindow()
 
     local manager = TuningManager(self)
-    self:registerChildWidget(manager, "Manager")
+    self:registerChildWidget(manager, "Manager", im.WindowFlags.MenuBar)
     self.tuning_manager = manager
 
     local edit_code = EditText()
@@ -170,9 +170,12 @@ end
 
 ---create a window for the imgui widget child
 ---@return im.Window
-function M:registerChildWidget(widget, window_label)
+function M:registerChildWidget(widget, window_label, flags)
     local window = WidgetWindow(window_label)
     window:addChild(widget)
+    if flags then
+        window:setFlags(flags)
+    end
     self.imgui_la:addChild(window)
     return window
 end
@@ -190,8 +193,7 @@ function M:appendMatrixWindow(save)
     self.current_matrix_index = i + 1
 
     local matrix = TuningMatrix(self)
-    local window = self:registerChildWidget(matrix, "Matrix"..i)
-    window:setFlags(im.WindowFlags.MenuBar)
+    self:registerChildWidget(matrix, "Matrix"..i, im.WindowFlags.MenuBar)
     if save then
         save:writeBack(matrix)
     end
@@ -245,15 +247,27 @@ function M:on()
     end
 end
 
+function M:clearMatrices()
+    while #self.matrices > 0 do
+        self:popMatrixWindow()
+    end
+end
+
 function M:off()
     if not self.is_cleaned then
         local edit_code = self.edit_code
         if edit_code:isActive() then
             edit_code:commitChanges()
         end
-        lstg.eventDispatcher:dispatchEvent("onTuningUIExit")
         self.imgui_la:setVisible(false)
     end
+end
+
+function M:callStageTransition(callback)
+    local replay_io_manager = self.stage.scene_group:getReplayIOManager()
+    local file_writer = replay_io_manager:getReplayFileWriter():getFileWriter()
+    file_writer:writeByte(0)
+    self.stage:transitionWithCallback(callback)
 end
 
 function M:createEditCode(node, init_str)
@@ -286,6 +300,8 @@ function M:getSave()
 end
 
 function M:loadSave(save)
+    self:clearMatrices()
+
     local matrix_saves = save.matrix_saves
     for i = 1, #matrix_saves do
         local matrix_save = matrix_saves[i]
@@ -322,6 +338,45 @@ function M:getChainCallbacks()
     end
 
     return f()
+end
+
+---------------------------------------------------------------------------------------------------
+---file I/O
+
+---save the object to file at the current file cursor position
+---@param file_writer SequentialFileWriter the object for writing to file
+function M.writeSaveToFile(file_writer, save)
+    local matrix_saves = save.matrix_saves
+    file_writer:writeUInt(#matrix_saves)
+    for i = 1, #matrix_saves do
+        ---@type TuningMatrixSave
+        local matrix_save = matrix_saves[i]
+        matrix_save:writeToFile(file_writer)
+    end
+
+    ---@type TuningManagerSave
+    local manager_save = save.manager_save
+    manager_save:writeToFile(file_writer)
+end
+
+---read the object from file at the current file cursor position
+---@param file_reader SequentialFileReader the object for reading from file
+function M.readSaveFromFile(file_reader)
+    local matrix_saves = {}
+    local num_matrices = file_reader:readUInt()
+    for i = 1, num_matrices do
+        local matrix_save = TuningMatrixSave(nil)
+        matrix_save:readFromFile(file_reader)
+        matrix_saves[i] = matrix_save
+    end
+
+    local manager_save = TuningManagerSave(nil)
+    manager_save:readFromFile(file_reader)
+
+    return {
+        matrix_saves = matrix_saves,
+        manager_save = manager_save,
+    }
 end
 
 ---------------------------------------------------------------------------------------------------

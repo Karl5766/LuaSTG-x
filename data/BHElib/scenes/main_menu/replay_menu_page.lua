@@ -100,7 +100,7 @@ local function ReplayMenuProcessInput(self)
     ---@type InputManager
     local input = self.selection_input
 
-    if input:isAnyDeviceKeyJustChanged("escape", false, true) then
+    if input:isAnyKeyJustChanged("escape", false, true) then
         self:exit()
     else
         MultiPageMenuSelector.processInput(self)

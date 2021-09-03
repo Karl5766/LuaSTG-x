@@ -43,7 +43,9 @@ function M.__create(scene_init_state, scene_group)
 
     scene_group:appendSceneInitState(scene_init_state)  -- record the init state of the current scene
 
+    ---@type ReplayIOManager
     self.replay_io_manager = scene_group:getReplayIOManager()
+
     self.is_paused = false  -- for pause menu
     self.transition_type = nil  -- for scene transition
     self.end_replay = false
@@ -127,11 +129,16 @@ end
 ---------------------------------------------------------------------------------------------------
 ---pause menus
 
-function M:createUserPauseMenu()
-    self.is_paused = true
-    local PauseMenu = require("BHElib.scenes.stage.pause_menu.user_pause_menu")
-    self.pause_menu = PauseMenu(self)
-    return self.pause_menu
+---check if pause menu should be created
+---only create it if no other pause menu is existing
+function M:createUserPauseMenuIfNeeded()
+    if Input:isAnyKeyJustChanged("escape", false, true) and
+            not self.is_paused then
+        self.is_paused = true
+        local PauseMenu = require("BHElib.scenes.stage.pause_menu.user_pause_menu")
+        self.pause_menu = PauseMenu(self)
+        return self.pause_menu
+    end
 end
 
 function M:createReplayEndMenu()
@@ -163,12 +170,7 @@ function M:frameUpdate(dt)
     -- update screen effects if any
     ScreenEffects:update(dt)
 
-    -- check if pause menu should be created
-    -- only create it if no other pause menu is existing
-    if Input:isAnyDeviceKeyJustChanged("escape", false, true) and
-            not self.is_paused then
-        self:createUserPauseMenu()
-    end
+    self:createUserPauseMenuIfNeeded()
 
     -- put this right before updating the menu so when a menu is deleted there is at least one frame interval till the next menu
     if self.is_paused then

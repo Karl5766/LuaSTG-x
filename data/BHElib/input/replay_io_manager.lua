@@ -49,7 +49,7 @@
 
 ---@class ReplayIOManager
 ---@brief An object of this class manages replay information read/write in one play-through
-local ReplayIOManager = LuaClass("input.ReplayIOManager")
+local M = LuaClass("input.ReplayIOManager")
 
 local _input = require("BHElib.input.input_and_recording")
 local FileStream = require("file_system.file_stream")
@@ -63,7 +63,7 @@ local ReplayFileWriter = require("BHElib.input.replay_file_writer")
 ---@param replay_path_for_read string the path to read in replay information; can be nil if not in replay mode
 ---@param replay_path_for_write string the path to write in replay information
 ---@param start_stage_for_replay number the starting stage in the replay; can be nil if not in replay mode
-function ReplayIOManager.__create(is_replay, replay_path_for_read, replay_path_for_write, start_stage_for_replay)
+function M.__create(is_replay, replay_path_for_read, replay_path_for_write, start_stage_for_replay)
     local self = {}
 
     self.is_replay = is_replay
@@ -86,15 +86,25 @@ end
 ---getter
 
 ---@return boolean true if the game is currently in replay mode
-function ReplayIOManager:isReplay()
+function M:isReplay()
     return self.is_replay
+end
+
+---@return ReplayFileReader
+function M:getReplayFileReader()
+    return self.replay_file_reader
+end
+
+---@return ReplayFileWriter
+function M:getReplayFileWriter()
+    return self.replay_file_writer
 end
 
 ---------------------------------------------------------------------------------------------------
 ---update
 
 ---update the recorded input on the current frame
-function ReplayIOManager:updateUserInput()
+function M:updateUserInput()
     -- update recorded input
     if self:isReplay() then
         -- may be better to separate read and write in two function calls
@@ -112,7 +122,7 @@ end
 ---for transition
 
 ---start a new scene
-function ReplayIOManager:startNewScene()
+function M:startNewScene()
     local is_replay = self:isReplay()
     _input:resetRecording(is_replay)  -- clear the current input states
 
@@ -124,17 +134,17 @@ end
 
 ---finish the current scene; called at the end of a scene
 ---@param stage Stage the current stage object
-function ReplayIOManager:finishCurrentScene(stage)
+function M:finishCurrentScene(stage)
     self.replay_file_writer:finishCurrentScene(stage)
 end
 
 ---finish writing the entire replay to the replay file
 ---@param stage Stage the current stage object
-function ReplayIOManager:finishCurrentSceneGroup(stage)
+function M:finishCurrentSceneGroup(stage)
     self.replay_file_writer:finishCurrentSceneGroup(stage)
 end
 
-function ReplayIOManager:cleanup()
+function M:cleanup()
     if self:isReplay() then
         self.replay_file_reader:close()
     end
@@ -145,13 +155,13 @@ end
 ---for replay mode only
 
 ---@return table summaries read from replay file
-function ReplayIOManager:readSummariesFromFile()
+function M:readSummariesFromFile()
     return self.replay_file_reader:readSummariesFromFile()
 end
 
 ---switch the game to non-replay mode
 ---this operation is irreversible, the game cannot be switched back to replay mode
-function ReplayIOManager:changeToNonReplayMode()
+function M:changeToNonReplayMode()
     self.is_replay = false
     _input:changeToNonReplayMode()
     self.replay_file_reader:close()
@@ -160,8 +170,8 @@ end
 ---return if the input of current stage from the replay file has all been read;
 ---this function should only be called when the cursor is within replay input or immediately after that
 ---@return boolean true if the file reader has finished reading the final input of the current stage
-function ReplayIOManager:isStageEndReached()
+function M:isStageEndReached()
     return self.replay_file_reader:isStageEndReached()
 end
 
-return ReplayIOManager
+return M

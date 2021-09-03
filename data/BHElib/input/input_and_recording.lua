@@ -67,13 +67,15 @@ local GAME_KEYS = {
     "shoot",  -- player main shot
     "spell",  -- bomb
     "special",  -- "C"
+    "recorded_pause_menu",
+    "recorded_ctrl",
+    "retry",  -- shortcut for start over a game in pause menu
 }
 
 local SYSTEM_KEYS = {
     "select",  -- menu selection
     "escape",  -- call pause menu
     "snapshot",  -- take a snapshot
-    "retry",  -- shortcut for start over a game in pause menu
 
     "toggle_collider",  -- display object collider
     "repslow",  -- decelerate replay speed
@@ -217,7 +219,7 @@ end
 ---@param function_key_name string name of the function key
 ---@param is_recorded boolean if true, return device input; if false return recorded input
 ---@param is_down boolean if true, return if the key is just pressed; otherwise return if the key is just released
-function M:isDeviceKeyJustChanged(device_id, function_key_name, is_recorded, is_down)
+function M:isKeyJustChanged(device_id, function_key_name, is_recorded, is_down)
     local states = _device_states
     local prev_states = _prev_device_states
     if is_recorded then
@@ -238,13 +240,13 @@ end
 ---@param function_key_name string name of the function key
 ---@param is_recorded boolean if true, return device input; if false return recorded input
 ---@param is_down boolean if true, return if the key is just pressed; otherwise return if the key is just released
-function M:isAnyDeviceKeyJustChanged(function_key_name, is_recorded, is_down)
+function M:isAnyKeyJustChanged(function_key_name, is_recorded, is_down)
     local states = _device_states
     if is_recorded then
         states = _recorded_device_states
     end
     for device_id, _ in pairs(states) do
-        if M:isDeviceKeyJustChanged(device_id, function_key_name, is_recorded, is_down) then
+        if M:isKeyJustChanged(device_id, function_key_name, is_recorded, is_down) then
             return true
         end
     end

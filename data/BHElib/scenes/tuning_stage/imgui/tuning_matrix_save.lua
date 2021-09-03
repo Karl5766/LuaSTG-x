@@ -7,6 +7,11 @@ local M = LuaClass("TuningMatrixSave")
 
 ---------------------------------------------------------------------------------------------------
 
+local JsonFileMirror = require("file_system.json_file_mirror")
+
+---------------------------------------------------------------------------------------------------
+---cache variables and functions
+
 local StringByte = string.byte
 
 ---------------------------------------------------------------------------------------------------
@@ -37,6 +42,24 @@ function M:writeBack(matrix)
     matrix.num_col = self.num_col
     matrix.matrix = table.deepcopy(self.matrix)
     matrix.output_str = self.output_str
+end
+
+---save the object to file at the current file cursor position
+---@param file_writer SequentialFileWriter the object for writing to file
+function M:writeToFile(file_writer)
+    file_writer:writeUInt(self.num_row)
+    file_writer:writeUInt(self.num_col)
+    file_writer:writeVarLengthString(self.output_str)
+    file_writer:writeVarLengthString(JsonFileMirror.turnLuaObjectToString(self.matrix))
+end
+
+---read the object from file at the current file cursor position
+---@param file_reader SequentialFileReader the object for reading from file
+function M:readFromFile(file_reader)
+    self.num_row = file_reader:readUInt()
+    self.num_col = file_reader:readUInt()
+    self.output_str = file_reader:readVarLengthString()
+    self.matrix = JsonFileMirror.turnStringToLuaObject(file_reader:readVarLengthString())
 end
 
 ---get string representation of the matrix in lua code

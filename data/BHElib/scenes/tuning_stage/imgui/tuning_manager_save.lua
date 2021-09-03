@@ -6,6 +6,10 @@
 local M = LuaClass("TuningManagerSave")
 
 ---------------------------------------------------------------------------------------------------
+
+local JsonFileMirror = require("file_system.json_file_mirror")
+
+---------------------------------------------------------------------------------------------------
 ---init
 
 ---@param manager im.TuningManager
@@ -31,6 +35,22 @@ function M:writeBack(manager)
     manager.num_locals = self.num_locals
     manager.local_names = table.deepcopy(self.local_names)
     manager.local_values = table.deepcopy(self.local_values)
+end
+
+---save the object to file at the current file cursor position
+---@param file_writer SequentialFileWriter the object for writing to file
+function M:writeToFile(file_writer)
+    file_writer:writeUInt(self.num_locals)
+    file_writer:writeVarLengthStringArray(self.local_names)
+    file_writer:writeVarLengthStringArray(self.local_values)
+end
+
+---read the object from file at the current file cursor position
+---@param file_reader SequentialFileReader the object for reading from file
+function M:readFromFile(file_reader)
+    self.num_locals = file_reader:readUInt()
+    self.local_names = file_reader:readVarLengthStringArray()
+    self.local_values = file_reader:readVarLengthStringArray()
 end
 
 function M:loadLocalArray(locals)

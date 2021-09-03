@@ -12,16 +12,16 @@ local save
 
 save = TuningMatrixSave(nil)
 save.matrix = {
-    {"s_script", "N/A", "nil"},
-    {"s_n", "N/A", "1"},
-    {"s_dt", "N/A", "0"},
-    {"da", "0", "0"},
-    {"v", "0", "0"},
-    {"x", "0", "0"},
-    {"y", "0", "0"},
+    {"s_script", "N/A", "nil", "nil"},
+    {"s_n", "N/A", "INFINITE", "1"},
+    {"s_dt", "N/A", "0", "0"},
+    {"da", "0", "0", "0"},
+    {"v", "0", "0", "0"},
+    {"x", "0", "0", "0"},
+    {"y", "0", "0", "0"},
 }
-save.num_col = 3
-save.num_row = 6
+save.num_col = 4
+save.num_row = 7
 save.output_str = [==[
 local col = AccCol(master)
 col.x = 0
@@ -50,18 +50,18 @@ M.StandardAcc = save
 
 save = TuningMatrixSave(nil)
 save.matrix = {
-    {"s_script", "N/A", "PP,F"},
-    {"s_n", "N/A", "1"},
-    {"s_t", "N/A", "0"},
-    {"s_dt", "N/A", "0"},
-    {"a", "0", "0"},
-    {"r", "0", "0"},
-    {"da", "0", "0"},
-    {"v", "0", "0"},
-    {"x", "0", "0"},
-    {"y", "0", "0"},
+    {"s_script", "N/A", "nil", "PP,F"},
+    {"s_n", "N/A", "INFINITE", "1"},
+    {"s_t", "N/A", "0", "0"},
+    {"s_dt", "N/A", "60", "0"},
+    {"a", "0", "0", "0"},
+    {"r", "0", "0", "0"},
+    {"da", "0", "0", "0"},
+    {"v", "0", "0", "0"},
+    {"x", "0", "0", "0"},
+    {"y", "0", "0", "0"},
 }
-save.num_col = 3
+save.num_col = 4
 save.num_row = 10
 save.output_str = [==[
 local col = AccCol(master)

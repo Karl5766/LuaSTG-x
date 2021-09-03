@@ -90,10 +90,10 @@ function M.ConstructCenterAt(a_name, r_name, da_name, v_name, x_name, y_name, vx
     return PolarToStd
 end
 
-function M.ConstructRandom(var_name, random_radius)
+function M.ConstructRandom(var_name, val1, val2)
     local function Rand(self, next, i)
         local v = next[var_name] or 0
-        next[var_name] = v + ran:Float(-random_radius, random_radius)
+        next[var_name] = v + ran:Float(val1, val2 or 0)
     end
     return Rand
 end
@@ -144,11 +144,9 @@ M.DefaultPolarPos = M.ConstructPolarVec("a", "r", "x", "y")
 M.DefaultPolarVelocity = M.ConstructPolarVec("da", "v", "vx", "vy")
 M.DefaultPolar = M.ConstructPolar(
         "a", "r", "da", "v",
-        "x", "y", "vx", "vy"
-)
+        "x", "y", "vx", "vy")
 M.DefaultCenterAt = M.ConstructCenterAt(
         "a", "r", "da", "v",
-        "x", "y", "vx", "vy"
-)
+        "x", "y", "vx", "vy")
 
 return M

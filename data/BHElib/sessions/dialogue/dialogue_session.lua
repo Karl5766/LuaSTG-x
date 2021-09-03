@@ -128,7 +128,7 @@ function M:processInput()
     -- resume the coroutine if player has pressed shoot key
     ---@type InputManager
     local input = self.player_input
-    if input:isAnyDeviceKeyJustChanged("shoot", true, true) then
+    if input:isAnyKeyJustChanged("shoot", true, true) then
         self:resumeCoroutine()
     end
 end

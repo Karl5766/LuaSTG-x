@@ -145,16 +145,16 @@ function M:processInput()
 
     local page_index_diff = 0
     local focused_index_diff = 0
-    if input:isAnyDeviceKeyJustChanged("left", false, true) then
+    if input:isAnyKeyJustChanged("left", false, true) then
         page_index_diff = -1
-    elseif input:isAnyDeviceKeyJustChanged("right", false, true) then
+    elseif input:isAnyKeyJustChanged("right", false, true) then
         page_index_diff = 1
     end
     if page_index_diff == 0 then  -- only check for up down movement if no page flip has happened
         -- moving through options
-        if input:isAnyDeviceKeyJustChanged("up", false, true) then
+        if input:isAnyKeyJustChanged("up", false, true) then
             focused_index_diff = -1
-        elseif input:isAnyDeviceKeyJustChanged("down", false, true) then
+        elseif input:isAnyKeyJustChanged("down", false, true) then
             focused_index_diff = 1
         end
         local focused_index = self.focused_index + focused_index_diff
@@ -173,7 +173,7 @@ function M:processInput()
     end
 
     -- selecting an option
-    if input:isAnyDeviceKeyJustChanged("select", false, true) then
+    if input:isAnyKeyJustChanged("select", false, true) then
         self:select(self.focused_index)
     end
 end

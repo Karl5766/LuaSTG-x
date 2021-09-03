@@ -148,7 +148,7 @@ local show_collider = false
 
 local _input = require("BHElib.input.input_and_recording")
 e:addListener('beforeEndScene', function()
-    if _input:isAnyDeviceKeyJustChanged('toggle_collider') then
+    if _input:isAnyKeyJustChanged('toggle_collider') then
         show_collider = not show_collider
     end
     if show_collider then

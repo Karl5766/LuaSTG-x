@@ -122,14 +122,14 @@ function M:processInput()
 
     local focused_index = self.focused_index
     -- moving through options
-    if input:isAnyDeviceKeyJustChanged("up", false, true) then
+    if input:isAnyKeyJustChanged("up", false, true) then
         self:moveFocusTo(focused_index - 1)
-    elseif input:isAnyDeviceKeyJustChanged("down", false, true) then
+    elseif input:isAnyKeyJustChanged("down", false, true) then
         self:moveFocusTo(focused_index + 1)
     end
 
     -- selecting an option
-    if input:isAnyDeviceKeyJustChanged("select", false, true) then
+    if input:isAnyKeyJustChanged("select", false, true) then
         self:select(focused_index)
     end
 end

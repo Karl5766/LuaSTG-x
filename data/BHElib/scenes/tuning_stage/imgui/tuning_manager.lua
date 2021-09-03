@@ -101,6 +101,18 @@ end
 
 function M:_render()
     im.setWindowFontScale(1.1)
+
+    if im.beginMenuBar() then
+        if im.beginMenu("End Stage") then
+            if im.menuItem("Confirm") then
+                local Callbacks = require("BHElib.scenes.stage.stage_transition_callbacks")
+                self.tuning_ui:callStageTransition(Callbacks.createMenuAndSaveReplay)
+            end
+            im.endMenu()
+        end
+        im.endMenuBar()
+    end
+
     im.separator()
     self:renderButtons()
 

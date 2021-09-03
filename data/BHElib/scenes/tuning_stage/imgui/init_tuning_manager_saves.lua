@@ -15,6 +15,8 @@ Default:loadLocalArray({
     {"RE", "ColumnScripts.ConstructReplace"},
     {"AIM", "ColumnScripts.ConstructAimFromPos"},
     {"AIMP", "ColumnScripts.ConstructAimFromPos(\"x\",\"y\",\"da\")"},
+    {"R", "ColumnScripts.ConstructRandom"},
+    {"RCIR", "ColumnScripts.ConstructOffsetRandomOnCircle"},
 })
 M.Default = Default
 
