@@ -114,41 +114,91 @@ function M:setRowLabel(i, str)
             row[2] = "0"
         end
     end
+end
 
+---@param index number insert row before this index
+function M:insertRow(index)
+    assert(index >= 1 and index <= self.num_row + 1, "Error: Insert row index out of range!")
+    local n = self.num_row + 1
+    self.num_row = n
+
+    local row = {}
+    row[1] = "label"
+    for j = 2, self.num_col do
+        row[j] = "0"
+    end
+
+    table.insert(self.matrix, index, row)
+end
+
+---@param index number remove row at this index
+function M:removeRow(index)
+    local n = self.num_row - 1
+    self.num_row = n
+
+    table.remove(self.matrix, index)
+end
+
+---@param index number insert column before this index
+function M:insertColumn(index)
+    assert(index >= MIN_COL_COUNT, "Error: The first two columns can not be inserted between!")
+    assert(index <= self.num_col + 1, "Error: Insert column index out of range!")
+    local n = self.num_col + 1
+    self.num_col = n
+
+    local matrix = self.matrix
+    for i = 1, self.num_row do
+        local row = matrix[i]
+        local label = row[1]
+        if label == "s_script" then
+            table.insert(row, index, "nil")
+        else
+            table.insert(row, index, "0")
+        end
+    end
+end
+
+---@param index number remove column at this index
+function M:removeColumn(index)
+    assert(index >= MIN_COL_COUNT, "Error: The first two columns can not be removed!")
+    local n = self.num_col - 1
+    self.num_col = n
+
+    local matrix = self.matrix
+    for i = 1, self.num_row do
+        table.remove(matrix[i], index)
+    end
 end
 
 ---------------------------------------------------------------------------------------------------
 ---imgui render
 
 function M:renderResizeButtons()
-    local ret = im.button("-row")
+    local ret
+    ret = im.button("row+")
     if ret then
-        if self.num_row > MIN_ROW_COUNT then
-            self:resizeTo(self.num_row - 1, self.num_col)
-        end
+        self:insertRow(self.num_row + 1)
     end
     im.sameLine()
-    ret = im.button("+row")
+    ret = im.button("-##row-")
+    if ret and self.num_row > MIN_ROW_COUNT then
+        self:removeRow(self.num_row)
+    end
+
+    im.sameLine()
+
+    ret = im.button("col+")
     if ret then
-        self:resizeTo(self.num_row + 1, self.num_col)
+        self:insertColumn(self.num_col + 1)
     end
     im.sameLine()
-    ret = im.button("-col")
-    if ret then
-        if self.num_col > MIN_COL_COUNT then
-            self:resizeTo(self.num_row, self.num_col - 1)
-        end
-    end
-    im.sameLine()
-    ret = im.button("+col")
-    if ret then
-        self:resizeTo(self.num_row, self.num_col + 1)
+    ret = im.button("-##col-")
+    if ret and self.num_col > MIN_COL_COUNT then
+        self:removeColumn(self.num_col)
     end
 end
 
 function M:_render()
-
-    local matrix = self.matrix
     local cell_width = self.cell_width
 
     local remove_flag = false
@@ -175,12 +225,9 @@ function M:_render()
     im.separator()
     self:renderResizeButtons()
 
-    local pressed = im.button("output control")
-    if pressed then
-        ---@type tuning_ui.EditText
-        self.tuning_ui:createEditCode(self, self.output_str)
-    end
-
+    local matrix = self.matrix
+    local to_insert = nil
+    local to_remove = nil
     for i = 1, self.num_row do
         local row = matrix[i]
         for j = 1, self.num_col do
@@ -209,11 +256,54 @@ function M:_render()
                     end
                 end
             end
-
-            if j ~= self.num_col then
-                im.sameLine()
-            end
+            im.sameLine()
         end
+
+        local is_pressed = im.button("before+##row"..i.."+")
+        if is_pressed then
+            to_insert = i
+        end
+        im.sameLine()
+        is_pressed = im.button("-##row"..i.."-")
+        if is_pressed then
+            to_remove = i
+        end
+    end
+    if to_insert then
+        self:insertRow(to_insert)
+    elseif to_remove then
+        self:removeRow(to_remove)
+    end
+
+    local pressed = im.button("output control", im.vec2(cell_width * 2 + 8, 24))
+    if pressed then
+        ---@type tuning_ui.EditText
+        self.tuning_ui:createEditCode(self, self.output_str)
+    end
+    im.sameLine()
+
+    to_insert = nil
+    to_remove = nil
+    local button1_width = cell_width * 0.8 - 4
+    local button2_width = cell_width * 0.2 - 4
+    for i = 3, self.num_col do
+        local is_pressed = im.button("before+##col"..i.."+", im.vec2(button1_width, 24))
+        if is_pressed then
+            to_insert = i
+        end
+        im.sameLine()
+        is_pressed = im.button("-##col"..i.."-", im.vec2(button2_width, 24))
+        if is_pressed then
+            to_remove = i
+        end
+        if i ~= self.num_col then
+            im.sameLine()
+        end
+    end
+    if to_insert then
+        self:insertColumn(to_insert)
+    elseif to_remove then
+        self:removeColumn(to_remove)
     end
 
     -- after render all other things
