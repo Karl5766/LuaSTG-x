@@ -46,14 +46,15 @@ save = TuningMatrixSave(nil)
 save.matrix = {
     {"s_script", "N/A", "nil", "nil"},
     {"s_n", "N/A", "INFINITE", "1"},
-    {"s_dt", "N/A", "0", "0"},
+    {"s_t", "N/A", "0", "0"},
+    {"s_dt", "N/A", "120", "0"},
     {"a", "0", "0", "0"},
     {"v", "3", "0", "0"},
     {"x", "0", "0", "0"},
     {"y", "0", "0", "0"},
 }
 save.num_col = 4
-save.num_row = 7
+save.num_row = 8
 save.output_str = [==[
 local col = OutputColumns.AccBullet(master)
 col.x = 0
@@ -66,6 +67,7 @@ col.blink_time = 12
 col.inc_rot = 3
 col.effect_size = 1
 col.destroyable = true
+col.sound = {"se:tan00", 0.1}
 
 function col:spark()
     self.angle = self.a
@@ -85,7 +87,7 @@ save.matrix = {
     {"s_script", "N/A", "nil", "PP,F"},
     {"s_n", "N/A", "INFINITE", "1"},
     {"s_t", "N/A", "0", "0"},
-    {"s_dt", "N/A", "60", "0"},
+    {"s_dt", "N/A", "120", "0"},
     {"ra", "0", "0", "0"},
     {"r", "0", "0", "0"},
     {"a", "0", "0", "0"},
@@ -109,6 +111,7 @@ col.blink_time = 12
 col.inc_rot = 3
 col.effect_size = 1
 col.destroyable = true
+col.sound = {"se:tan00", 0.1}
 
 function col:spark()
     self.angle = self.a
@@ -127,7 +130,7 @@ save = TuningMatrixSave(nil)
 save.matrix = {
     {"s_script", "N/A", "nil", "PV"},
     {"s_n", "N/A", "INFINITE", "1"},
-    {"s_dt", "N/A", "60", "0"},
+    {"s_dt", "N/A", "120", "0"},
     {"a", "-90", "0", "0"},
     {"v", "1", "0", "0"},
     {"x", "0", "0", "0"},

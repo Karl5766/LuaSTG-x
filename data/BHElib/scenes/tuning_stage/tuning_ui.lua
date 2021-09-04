@@ -411,6 +411,27 @@ function M.readSaveFromFile(file_reader)
     }
 end
 
+local backup_path = "data/BHElib/scenes/tuning_stage/matrix_backup"
+local FileStream = require("file_system.file_stream")
+local SequentialFileReader = require("file_system.sequential_file_reader")
+local SequentialFileWriter = require("file_system.sequential_file_writer")
+
+function M:loadBackup()
+    local stream = FileStream(backup_path, "rb")
+    local file_reader = SequentialFileReader(stream)
+    local save = M.readSaveFromFile(file_reader)
+    file_reader:close()
+    self:loadSave(save)
+end
+
+function M:saveBackup()
+    local stream = FileStream(backup_path, "wb")
+    local file_writer = SequentialFileWriter(stream)
+    local save = self:getSave()
+    M.writeSaveToFile(file_writer, save)
+    file_writer:close()
+end
+
 ---------------------------------------------------------------------------------------------------
 ---cleanup
 

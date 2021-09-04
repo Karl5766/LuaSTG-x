@@ -104,6 +104,18 @@ function M:_render()
             end
             im.endMenu()
         end
+        if im.beginMenu("Load Backup") then
+            if im.menuItem("Confirm") then
+                self.tuning_ui:loadBackup()
+            end
+            im.endMenu()
+        end
+        if im.beginMenu("Save Backup") then
+            if im.menuItem("Confirm") then
+                self.tuning_ui:saveBackup()
+            end
+            im.endMenu()
+        end
         im.endMenuBar()
     end
 

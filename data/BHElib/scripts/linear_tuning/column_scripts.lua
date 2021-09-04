@@ -136,6 +136,18 @@ function M.ConstructReplace(replaced_name, value_name)
     return Replace
 end
 
+---@param var_name string
+---@param mirror_value number the variable will be mirrored against this value when i is even
+function M.ConstructMirror(var_name, mirror_value)
+    local function Mirror(self, next, i)
+        if i % 2 == 0 then
+            local v = next[var_name] or mirror_value
+            next[var_name] = mirror_value * 2 - v
+        end
+    end
+    return Mirror
+end
+
 ---------------------------------------------------------------------------------------------------
 ---default callbacks
 
