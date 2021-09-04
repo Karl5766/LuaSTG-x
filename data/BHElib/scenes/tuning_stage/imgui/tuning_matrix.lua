@@ -217,7 +217,7 @@ function M:_render()
             if im.menuItem("Create Copy") then
                 local MatrixSave = require("BHElib.scenes.tuning_stage.imgui.tuning_matrix_save")
                 local save = MatrixSave(self)
-                self.tuning_ui:appendMatrixWindow(save)
+                self.tuning_ui:appendMatrixWindow(save, self.title.."_")
             end
             im.endMenu()
         end

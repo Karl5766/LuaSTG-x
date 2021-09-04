@@ -18,27 +18,27 @@ local StringByte = string.byte
 
 ---------------------------------------------------------------------------------------------------
 
-local function NoDCopy(matrix, num_col, row, var_name)
-    for i = 1, num_col - 2 do
+local function NoDCopy(matrix, num_node, row, var_name)
+    for i = 1, num_node do
         local column = matrix[i]
         column[var_name] = row[i + 2]
     end
 end
 
-local function DCopy(chain, num_col, row, var_name)
+local function DCopy(chain, num_node, row, var_name)
     local d_name = "d_"..var_name
     chain[1][var_name] = row[2]
-    for i = 1, num_col - 2 do
+    for i = 1, num_node do
         local node = chain[i]
         node[d_name] = row[i + 2]
     end
 end
 
-local function ScriptCopy(chain, num_col, row, var_name)
-    for i = 1, num_col - 1 do
+local function ScriptCopy(chain, num_node, row, var_name)
+    for i = 1, num_node do
         local node = chain[i]
 
-        local value = row[i + 1]
+        local value = row[i + 2]
         assert(type(value) == "table" or type(value) == "nil", "Error: type is "..type(value).."!")
 
         node[var_name] = value
@@ -64,8 +64,9 @@ end
 ---@return table a table with .head set to the first column of the matrix
 function M.ChainInit(master, num_row, num_col, matrix, output_column)
     local chain = {}
-    for i = 1, num_col do
-        chain[i] = ParameterColumn(master, "matrix_unit", nil)
+    local num_node = num_col - 2
+    for i = 1, num_node do
+        chain[i] = ParameterColumn(master, "matrix_unit_"..i, nil)
         if i > 1 then
             chain[i - 1]:set_next_list({chain[i]})
         end
@@ -77,15 +78,15 @@ function M.ChainInit(master, num_row, num_col, matrix, output_column)
 
         local callback = _special_var_lookup[var_name]
         if callback then
-            callback(chain, num_col, row, var_name)
+            callback(chain, num_node, row, var_name)
         else
-            assert(num_col >= #row - 1)
+            assert(num_node >= #row - 2)
             if StringByte(var_name, 2) ~= 95 then
                 -- d variable
-                DCopy(chain, num_col, row, var_name)
+                DCopy(chain, num_node, row, var_name)
             else
                 -- no-d variable
-                NoDCopy(chain, num_col, row, var_name)
+                NoDCopy(chain, num_node, row, var_name)
             end
         end
     end

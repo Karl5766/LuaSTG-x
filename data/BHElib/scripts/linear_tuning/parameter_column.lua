@@ -117,6 +117,40 @@ function M:spark_to(s_next)
     end
 end
 
+local function AsyncSpark(self, timer, j, pj, ij, s_next, dt)
+    timer:wait(0)
+    -- spark s_next n times
+    while j ~= pj do
+        local cp = s_next:copy()
+
+        for i, v in pairs(self) do
+            -- Find attributes that are not functions and not start with "#_"
+            if type(v) ~= "function" and StringByte(i, 2) ~= 95 then
+                local base, inc = v, self["d_"..i]
+                if inc then
+                    base = base + inc * j
+                end
+
+                local output = self["o_"..i] or i
+                cp[output] = base
+            end
+        end
+
+        cp.s_t = -timer:mantissa()
+        local scripts = self.s_script
+        if scripts then
+            for i = 1, #scripts do
+                local script = scripts[i]
+                script(self, cp, j)
+            end
+        end
+        cp:spark()
+
+        timer:wait(dt)
+        j = j + ij
+    end
+end
+
 function M:async_spark_to(s_next)
     -- spark interval ~= 0
 
@@ -136,38 +170,7 @@ function M:async_spark_to(s_next)
     end
 
     TaskNew(self.s_master, function()
-        timer:wait(0)
-        -- spark s_next n times
-        while j ~= pj do
-            local cp = s_next:copy()
-
-            for i, v in pairs(self) do
-                -- Find attributes that are not functions and not start with "#_"
-                if type(v) ~= "function" and StringByte(i, 2) ~= 95 then
-                    local base, inc = v, self["d_"..i]
-                    if inc then
-                        base = base + inc * j
-                    end
-
-                    local output = self["o_"..i] or i
-                    cp[output] = base
-                end
-            end
-
-            cp.s_t = -timer:mantissa()
-            local scripts = self.s_script
-            if scripts then
-                for i = 1, #scripts do
-                    local script = scripts[i]
-                    script(self, cp, j)
-                end
-            end
-            cp:spark()
-
-            timer:wait(dt)
-            j = j + ij
-        end
-        return
+        AsyncSpark(self, timer, j, pj, ij, s_next, dt)
     end)
 end
 
