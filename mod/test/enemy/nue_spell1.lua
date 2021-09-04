@@ -10,12 +10,26 @@ local SpellSession = assert(require("BHElib.sessions.boss.spell_session"))
 local M = LuaClass("Nue.spell1", SpellSession)
 
 local BossHitbox = require("BHElib.units.enemy.boss_hitbox_prefab")
-local ParameterMatrix = require("BHElib.scripts.linear_tuning.parameter_matrix")
-local BulletOutputColumn = require("BHElib.scripts.linear_tuning.output_columns.bullet_output_column")
-local AccController = require("BHElib.scripts.units.acc_controller")
-local BulletTypes = require("BHElib.units.bullet.bullet_types")
+local Input = require("BHElib.input.input_and_recording")
+local Coordinates = require("BHElib.unclassified.coordinates_and_screen")
+local Prefab = require("core.prefab")
 
 M.SPELL_DISPLAY_NAME = "test spell \"测试符卡\""
+
+---------------------------------------------------------------------------------------------------
+
+local MouseFollower = Prefab.NewX(Prefab.Object)
+function MouseFollower:init()
+    self.bound = false
+    self.group = GROUP_GHOST
+end
+
+function MouseFollower:frame()
+    local x, y = Input:getRecordedMousePositionInUI()
+    self.x, self.y = Coordinates.uiToGame(x, y)
+    task.Do(self)
+end
+Prefab.Register(MouseFollower)
 
 ---------------------------------------------------------------------------------------------------
 
@@ -33,6 +47,8 @@ function M:ctor()
 
     ---@type NueAnimation
     local boss = self.boss
+    local mouse_follower = MouseFollower()
+    self.mouse_follower = mouse_follower
 
     task.New(self, function()
         boss:move(60, -boss.x, 120 - boss.y, boss.x > 0, self)
@@ -42,24 +58,6 @@ function M:ctor()
         lstg.eventDispatcher:addListener("onTuningUIExit", function()
             self:initChain()
         end, 0, tostring(self))
-
-        --task.Wait(120)
-        --local boss_y = boss.y
-        --while true do
-        --    task.Wait(24)
-        --    --boss:playAnimation("cast", true, false, true)
-        --    task.Wait(36)
-        --    for i = 1, 1 do
-        --        if i % 2 == 1 then
-        --            self:fire(boss.x, boss.y, 1)
-        --        else
-        --            self:fire(boss.x, boss.y, -1)
-        --        end
-        --        task.Wait(120)
-        --    end
-        --    self:autoMove(-54, 54, boss_y - 10, boss_y + 10)
-        --    task.Wait(120)
-        --end
     end)
 end
 
@@ -70,67 +68,51 @@ end
 
 function M:initChain()
     local boss = self.boss
-    task.Clear(boss)  -- clear all matrices
-    self.chains = {}  -- clear all chains
+    task.Clear(boss)  -- clear all matrices' tasks
+    task.Clear(self.mouse_follower)
 
-    local callbacks = self.tuning_ui:getChainCallbacks()
-    for i = 1, #callbacks do
-        -- create a chain for each callback
-        local chain = callbacks[i](boss)
-        table.insert(self.chains, chain)
+    local chains, master_indices = self.tuning_ui:getChains(nil)
+
+    self.chains = {}
+    for i = 1, #chains do
+        if master_indices[i] == 0 then
+            table.insert(self.chains, chains[i])
+        end
     end
 
-    self:fire(boss.x, boss.y, 1)
+    if self.tuning_ui.tuning_manager.boss_fire_flag then
+        self:fire(boss.x, boss.y)
+    end
 end
 
-function M:fire(x, y, side)
+function M:fire()
 
     PlaySound("se:explode", 0.1, 0, true)
 
     local chains = self.chains
     for i = 1, #chains do
         local chain = chains[i]
-        chain.head:spark()
+        chain:sparkAll(self.boss)
     end
 end
 
-function M:mouseFire(x, y, side)
+function M:mouseFire()
 
     PlaySound("se:explode", 0.1, 0, true)
 
+    local chains = self.chains
+    for i = 1, #chains do
+        local chain = chains[i]
+        chain:sparkAll(self.mouse_follower)
+    end
 end
 
 function M:update(dt)
     SpellSession.update(self, dt)
 
-    local Input = require("BHElib.input.input_and_recording")
-    local Coordinates = require("BHElib.unclassified.coordinates_and_screen")
     if Input:isMouseButtonJustChanged(true, true) then
-        local x, y = Input:getRecordedMousePositionInUI()
-        x, y = Coordinates.uiToGame(x, y)
-
-        self:mouseFire(x, y,ran:Sign())
+        self:mouseFire()
     end
-end
-
-function M:autoMove(l, r, b, t)
-    ---@type RumiaAnimation
-    local boss = self.boss
-    local x_dir = ran:Sign()
-    local y_dir = ran:Sign()
-    if boss.x < l then
-        x_dir = 1
-    elseif boss.x > r then
-        x_dir = -1
-    end
-    if boss.y < b then
-        y_dir = 1
-    elseif boss.y > t then
-        y_dir = -1
-    end
-    local dx = x_dir * ran:Float(32, 48)
-    local dy = y_dir * ran:Float(0, 16)
-    boss:move(60, dx, dy, x_dir == -1, self)
 end
 
 return M

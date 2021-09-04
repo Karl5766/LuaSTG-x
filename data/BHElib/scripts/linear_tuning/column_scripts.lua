@@ -140,13 +140,7 @@ end
 ---default callbacks
 
 M.DefaultFollow = M.ConstructFollow("x", "y")
-M.DefaultPolarPos = M.ConstructPolarVec("a", "r", "x", "y")
-M.DefaultPolarVelocity = M.ConstructPolarVec("da", "v", "vx", "vy")
-M.DefaultPolar = M.ConstructPolar(
-        "a", "r", "da", "v",
-        "x", "y", "vx", "vy")
-M.DefaultCenterAt = M.ConstructCenterAt(
-        "a", "r", "da", "v",
-        "x", "y", "vx", "vy")
+M.DefaultPolarPos = M.ConstructPolarVec("ra", "r", "x", "y")
+M.DefaultPolarVelocity = M.ConstructPolarVec("a", "v", "vx", "vy")
 
 return M

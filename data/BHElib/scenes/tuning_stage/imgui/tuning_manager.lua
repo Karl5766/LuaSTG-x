@@ -29,10 +29,12 @@ function M:ctor(tuning_ui, ...)
     self.tuning_ui = tuning_ui
 
     self.num_locals = 0
-    self.name_width = 180
-    self.value_width = 210
     self.local_names = {}
     self.local_values = {}
+    self.boss_fire_flag = true
+
+    self.name_width = 180
+    self.value_width = 210
 
     Widget.ctor(self, ...)
     self:addChild(function()
@@ -64,15 +66,7 @@ end
 ---imgui render
 
 function M:renderButtons()
-    local ret = im.button("-matrix")
-    if ret then
-        local n = self.tuning_ui:getNumMatrices()
-        if n >= 1 then
-            self.tuning_ui:popMatrixWindow()
-        end
-    end
-    im.sameLine()
-    ret = im.button("+local")
+    local ret = im.button("+local")
     if ret then
         self:appendLocal()
     end
@@ -85,7 +79,7 @@ function M:renderAddMatrixButtons()
     for key_str, matrix_save in pairs(InitTuningMatrixSaves) do
         local ret = im.button("+matrix"..key_str)
         if ret then
-            self.tuning_ui:appendMatrixWindow(matrix_save)
+            self.tuning_ui:appendMatrixWindow(matrix_save, key_str)
         end
     end
 end
@@ -114,6 +108,14 @@ function M:_render()
     end
 
     im.separator()
+
+    do
+        local changed, value = im.checkbox("boss fire", self.boss_fire_flag)
+        if changed then
+            self.boss_fire_flag = value
+        end
+    end
+
     self:renderButtons()
 
     local local_names = self.local_names

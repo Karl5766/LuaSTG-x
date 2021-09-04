@@ -49,8 +49,20 @@ local _special_var_lookup = {
     s_script = ScriptCopy
 }
 
+function M.SetChainMaster(chain, master)
+    for i, v in ipairs(chain) do
+        v.s_master = master
+    end
+    chain.output_column.s_master = master
+end
+
+local function ChainSparkAll(self, master)
+    M.SetChainMaster(self, master)
+    self.head:spark()
+end
+
 ---@return table a table with .head set to the first column of the matrix
-function M.MatrixInit(master, num_row, num_col, matrix, output_column)
+function M.ChainInit(master, num_row, num_col, matrix, output_column)
     local chain = {}
     for i = 1, num_col do
         chain[i] = ParameterColumn(master, "matrix_unit", nil)
@@ -80,24 +92,8 @@ function M.MatrixInit(master, num_row, num_col, matrix, output_column)
 
     chain[#chain]:add(output_column)
     chain.head = chain[1]
-
-    return chain
-end
-
-function M.GetChain(master, output_column)
-    local center_at = ColumnScripts.default_center_at
-    local ran_on_circle = ColumnScripts.ConstructSetRandomOnCircle("tx", "ty", 32)
-    local offset = ColumnScripts.ConstructOffset("x", "y", "tx", "ty")
-    local test_matrix = {
-        {"s_script", nil, {ran_on_circle}, nil, {center_at, offset}},
-        {"s_n", nil, INFINITE, 12, 7},
-        {"s_dt", nil, 2, 0, 3},
-        {"x", 0, 0, 30, 1},
-        {"y", 0, 0, 0, 0},
-        {"vx", 0, 0, 0, 0},
-        {"vy", 3, 0, 0, 0.5},
-    }
-    local chain = M.MatrixInit(master, test_matrix, output_column)
+    chain.output_column = output_column
+    chain.sparkAll = ChainSparkAll
 
     return chain
 end

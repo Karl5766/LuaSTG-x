@@ -26,10 +26,13 @@ function M.__create(matrix)
             num_row = matrix.num_row,
             num_col = matrix.num_col,
             matrix = table.deepcopy(matrix.matrix),
-            output_str = matrix.output_str
+            output_str = matrix.output_str,
+            master_index = matrix:getMasterIndex(),
         }
     else
-        self = {}  -- needs to be filled manually
+        self = {
+            master_index = 0,
+        }  -- needs to be filled manually
     end
     return self
 end
@@ -42,6 +45,7 @@ function M:writeBack(matrix)
     matrix.num_col = self.num_col
     matrix.matrix = table.deepcopy(self.matrix)
     matrix.output_str = self.output_str
+    matrix:setMasterIndex(self.master_index)
 end
 
 ---save the object to file at the current file cursor position
@@ -51,6 +55,7 @@ function M:writeToFile(file_writer)
     file_writer:writeUInt(self.num_col)
     file_writer:writeVarLengthString(self.output_str)
     file_writer:writeVarLengthString(JsonFileMirror.turnLuaObjectToString(self.matrix))
+    file_writer:writeUInt(self.master_index)
 end
 
 ---read the object from file at the current file cursor position
@@ -60,6 +65,7 @@ function M:readFromFile(file_reader)
     self.num_col = file_reader:readUInt()
     self.output_str = file_reader:readVarLengthString()
     self.matrix = JsonFileMirror.turnStringToLuaObject(file_reader:readVarLengthString())
+    self.master_index = file_reader:readUInt()
 end
 
 ---get string representation of the matrix in lua code
@@ -101,7 +107,7 @@ end
 
 function M:getLuaString()
     local matrix_str = self:getMatrixLuaString()
-    local ret = matrix_str.."\n"..self.output_str
+    local ret = matrix_str.."\n"..(self.output_str..(","..self.master_index))
     return ret
 end
 

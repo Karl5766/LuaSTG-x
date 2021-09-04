@@ -43,6 +43,7 @@ local TaskNew = task.New
 -- .rot_controller (AccController)
 -- .alt_controller (AccController)
 -- .polar_mode (boolean)
+-- .chain (see parameter_matrix.lua)
 
 function M:init(args)
 	Bullet.init(
@@ -89,6 +90,12 @@ function M:init(args)
 			self.a, self.b = colli_radius, colli_radius
 		end
     end)
+
+	if args.chains then
+		for _, chain in ipairs(args.chains) do
+			chain:sparkAll(self)
+		end
+	end
 
 	local start_time = args.start_time or 0
 	local controller = args.controller

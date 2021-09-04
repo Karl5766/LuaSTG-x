@@ -58,37 +58,41 @@ function M:createUserPauseMenuIfNeeded()
 end
 
 function M:updatePauseMenuStatus(dt)
-    if self:isReplay() then
-        -- immediately resume and simulate the output of pause menu by reading from replay
-        local file_reader = self.replay_io_manager:getReplayFileReader():getFileReader()
-        local file_writer = self.replay_io_manager:getReplayFileWriter():getFileWriter()
+    if self.is_in_user_pause_menu then
+        if self:isReplay() then
+            -- immediately resume and simulate the output of pause menu by reading from replay
+            local file_reader = self.replay_io_manager:getReplayFileReader():getFileReader()
+            local file_writer = self.replay_io_manager:getReplayFileWriter():getFileWriter()
 
-        if file_reader:readByte() == 1 then
-            local tuning_ui = self.tuning_ui
-            local save = tuning_ui.readSaveFromFile(file_reader)
-            tuning_ui:loadSave(save)
-            file_writer:writeByte(1)
-            tuning_ui.writeSaveToFile(file_writer, save)  -- have to be write back to support real time replay mode switch
-            self.is_paused = false
-            self.is_in_user_pause_menu = false
-            lstg.eventDispatcher:dispatchEvent("onTuningUIExit")
+            if file_reader:readByte() == 1 then
+                local tuning_ui = self.tuning_ui
+                local save = tuning_ui.readSaveFromFile(file_reader)
+                tuning_ui:loadSave(save)
+                file_writer:writeByte(1)
+                tuning_ui.writeSaveToFile(file_writer, save)  -- have to be write back to support real time replay mode switch
+                self.is_paused = false
+                self.is_in_user_pause_menu = false
+                lstg.eventDispatcher:dispatchEvent("onTuningUIExit")
+            else
+                file_writer:writeByte(0)
+                local Callbacks = require("BHElib.scenes.stage.stage_transition_callbacks")
+                self.tuning_ui:callStageTransition(Callbacks.createMenuAndSaveReplay)
+            end
         else
-            file_writer:writeByte(0)
-            local Callbacks = require("BHElib.scenes.stage.stage_transition_callbacks")
-            self.tuning_ui:callStageTransition(Callbacks.createMenuAndSaveReplay)
+            Stage.updatePauseMenuStatus(self, dt)
+            if not self.is_paused then
+                self.is_in_user_pause_menu = false
+                local tuning_ui = self.tuning_ui
+                local save = tuning_ui:getSave()
+                ---@type SequentialFileWriter
+                local file_writer = self.replay_io_manager:getReplayFileWriter():getFileWriter()
+                file_writer:writeByte(1)  -- without going to stage
+                tuning_ui.writeSaveToFile(file_writer, save)
+                lstg.eventDispatcher:dispatchEvent("onTuningUIExit")
+            end
         end
     else
         Stage.updatePauseMenuStatus(self, dt)
-        if not self.is_paused then
-            self.is_in_user_pause_menu = false
-            local tuning_ui = self.tuning_ui
-            local save = tuning_ui:getSave()
-            ---@type SequentialFileWriter
-            local file_writer = self.replay_io_manager:getReplayFileWriter():getFileWriter()
-            file_writer:writeByte(1)  -- without going to stage
-            tuning_ui.writeSaveToFile(file_writer, save)
-            lstg.eventDispatcher:dispatchEvent("onTuningUIExit")
-        end
     end
 end
 

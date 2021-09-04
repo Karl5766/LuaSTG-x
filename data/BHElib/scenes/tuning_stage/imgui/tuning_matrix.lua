@@ -27,15 +27,19 @@ local StringByte = string.byte
 ---init
 
 ---@param tuning_ui TuningUI
-function M:ctor(tuning_ui, ...)
+function M:ctor(tuning_ui, matrix_title, ...)
     self.matrix = {
         {"s_script", "N/A", "nil"},
     }
     self.num_col = 3
     self.num_row = 1
-    self.cell_width = 90
     self.output_str = ""
+    self.master_index = 0
+
+    -- temporary state, no need to be saved/loaded
     self.tuning_ui = tuning_ui
+    self.title = matrix_title
+    self.cell_width = 90
 
     Widget.ctor(self, ...)
     self:addChild(function()
@@ -45,6 +49,14 @@ end
 
 ---------------------------------------------------------------------------------------------------
 ---setters and getters
+
+function M:setMasterIndex(index)
+    self.master_index = index
+end
+
+function M:getMasterIndex()
+    return self.master_index
+end
 
 ---copy values from the input matrix to self.matrix
 ---@param matrix table entries can be only strings or have nil, numbers that can be turned to strings
@@ -199,8 +211,6 @@ function M:renderResizeButtons()
 end
 
 function M:_render()
-    local cell_width = self.cell_width
-
     local remove_flag = false
     if im.beginMenuBar() then
         if im.beginMenu("Matrix") then
@@ -218,6 +228,26 @@ function M:_render()
             end
             im.endMenu()
         end
+        im.sameLine()
+
+        local menu_title = "Master"
+        local master_index = self.master_index
+        local matrices = self.tuning_ui:getMatrices()
+        if master_index ~= 0 then
+            menu_title = matrices[master_index].title
+        end
+        if im.beginMenu(menu_title) then
+            if im.menuItem("Master") then
+                self.master_index = 0
+            end
+            for i = 1, #matrices do
+                local title = matrices[i].title
+                if title ~= self.title and im.menuItem(title) then
+                    self.master_index = i
+                end
+            end
+            im.endMenu()
+        end
         im.endMenuBar()
     end
 
@@ -225,6 +255,7 @@ function M:_render()
     im.separator()
     self:renderResizeButtons()
 
+    local cell_width = self.cell_width
     local matrix = self.matrix
     local to_insert = nil
     local to_remove = nil

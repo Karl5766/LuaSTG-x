@@ -26,6 +26,7 @@ function M:init(enemy_type, max_hp)
 end
 
 function M:frame()
+    task.Do(self)
     self.damage_timer = max(0, self.damage_timer - 1)
 
     EnemyHitbox.frame(self)

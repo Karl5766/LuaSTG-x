@@ -93,6 +93,8 @@ function M:ctor()
     local manager = TuningManager(self)
     self:registerChildWidget(manager, "Manager", im.WindowFlags.MenuBar)
     self.tuning_manager = manager
+    local InitTuningManagerSaves = require("BHElib.scenes.tuning_stage.imgui.init_tuning_manager_saves")
+    InitTuningManagerSaves.Default:writeBack(manager)  -- use default locals
 
     local edit_code = EditText()
     self.edit_code = edit_code
@@ -180,20 +182,27 @@ function M:registerChildWidget(widget, window_label, flags)
     return window
 end
 
+function M:getMatrices()
+    return self.matrices
+end
+
 function M:getNumMatrices()
     return #self.matrices
 end
 
 ---add a new matrix window
 ---@param save TuningMatrixSave if non-nil, load the matrix from this save
+---@param title string if non-nil, use this as the prefix of the title
 ---@return im.TuningMatrix newly appended matrix
-function M:appendMatrixWindow(save)
+function M:appendMatrixWindow(save, title)
     local matrices = self.matrices
     local i = self.current_matrix_index
     self.current_matrix_index = i + 1
 
-    local matrix = TuningMatrix(self)
-    self:registerChildWidget(matrix, "Matrix"..i, im.WindowFlags.MenuBar)
+    local prefix = title or "Matrix"
+    local matrix_title = prefix..i
+    local matrix = TuningMatrix(self, matrix_title)
+    self:registerChildWidget(matrix, matrix_title, im.WindowFlags.MenuBar)
     if save then
         save:writeBack(matrix)
     end
@@ -210,12 +219,20 @@ end
 ---remove the most recent matrix window
 function M:removeMatrixWindowByIndex(index)
     local matrices = self.matrices
-    local num_matrices = #matrices
     local matrix = matrices[index]
-    for i = index, num_matrices - 1 do
-        matrices[i] = matrices[i + 1]
+
+    -- update references
+    for i = 1, #matrices do
+        local cur_matrix = matrices[i]
+        local cur_index = cur_matrix:getMasterIndex()
+        if cur_index == index then
+            cur_matrix:setMasterIndex(0)
+        elseif cur_index > index then
+            cur_matrix:setMasterIndex(cur_index - 1)
+        end
     end
-    matrices[num_matrices] = nil
+
+    table.remove(matrices, index)
 
     local edit_code = self.edit_code
     if edit_code:isVisible() and edit_code:getNode() == matrix then
@@ -313,7 +330,7 @@ function M:loadSave(save)
 end
 
 ---get callbacks from matrices that would create chains
-function M:getChainCallbacks()
+function M:getChains(master)
     local save = self:getSave()
 
     local code = save.manager_save:getLuaString()
@@ -337,7 +354,22 @@ function M:getChainCallbacks()
         error(msg)
     end
 
-    return f()
+    local chain_functions = f()
+    local master_indices = {}
+    local ret = {}
+    for i = 1, #chain_functions do
+        ret[i], master_indices[i] = chain_functions[i](master)
+    end
+    for i = 1, #master_indices do
+        local index = master_indices[i]
+        if index ~= 0 then
+            local master_chain = ret[index]
+            master_chain.output_column.chains = {} or master_chain.output_column.chains
+            table.insert(master_chain.output_column.chains, ret[i])
+        end
+    end
+
+    return ret, master_indices
 end
 
 ---------------------------------------------------------------------------------------------------
