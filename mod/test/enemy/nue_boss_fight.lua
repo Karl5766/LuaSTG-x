@@ -35,6 +35,15 @@ local function Script(self)
     boss.y = 300
     self:playAttackSessionByIndex(1)
     coroutine.yield()
+    task.New(self, function()
+        task.Clear(boss)
+        require("BHElib.scripts.units.unit_motion").RandomBossMove(
+                boss, -100, 100, -100, 200,
+                32, 48, 16, 32, 120)
+        require("BHElib.units.effects.boss_fight_effects").CreateBossDeathEffect(boss.x, boss.y, 255, 255, 255, boss)
+        task.Wait(120)
+    end)
+    coroutine.yield()
 end
 
 ---@param parent ParentSession the parent session of this session

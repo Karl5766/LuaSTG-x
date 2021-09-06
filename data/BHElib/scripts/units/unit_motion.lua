@@ -112,4 +112,26 @@ function M.VariableAngleControllerMoveTo(self, controller, rotCon, initAngle, st
     end)
 end
 
+function M.RandomBossMove(boss, l, r, b, t, dxmin, dxmax, dymin, dymax, move_time)
+    TaskNew(boss,function()
+        if boss.move then
+            local x_dir = ran:Sign()
+            local y_dir = ran:Sign()
+            if boss.x < l then
+                x_dir = 1
+            elseif boss.x > r then
+                x_dir = -1
+            end
+            if boss.y < b then
+                y_dir = 1
+            elseif boss.y > t then
+                y_dir = -1
+            end
+            local dx = x_dir * ran:Float(dxmin, dxmax)
+            local dy = y_dir * ran:Float(dymin, dymax)
+            boss:move(move_time, dx, dy, x_dir == -1, boss)
+        end
+    end)
+end
+
 return M

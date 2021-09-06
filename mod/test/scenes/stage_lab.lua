@@ -97,6 +97,8 @@ function M:createScene()
         self:transitionWithCallback(callbacks.restartStageAndKeepRecording)
     end)
 
+    self.player:getPlayerResource().num_power = 400
+
     return scene
 end
 

@@ -16,6 +16,7 @@ GROUP_ALL             = 16
 LAYER_HUD                   = -700  -- for ui hud
 LAYER_BG                    = -700
 LAYER_SPELL_BG              = -699.9
+LAYER_ENEMY_CAST_EFFECT     = -650
 LAYER_ENEMY                 = -600
 LAYER_ENEMY_DEATH_EFFECT    = -550
 LAYER_PLAYER_BULLET         = -500

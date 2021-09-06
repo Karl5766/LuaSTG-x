@@ -83,6 +83,8 @@ local function Init()
     -- scripting
     require("BHElib.scripts.the_jar")
 
+    -- require("setting.screen_metrics").setWindowed(false)
+
     -- create the menu
     SetupGroupInitState()
     local menu = CreateMenu()

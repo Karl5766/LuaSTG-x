@@ -17,3 +17,6 @@
 
 # ignore lstg_log change
 /lstg_log.txt
+
+# ignore data backups
+/data/BHElib/scenes/tuning_stage/backups/*

@@ -46,41 +46,6 @@ end)
 
 ---------------------------------------------------------------------------------------------------
 
-M.BossMove = Define("BossMoveOutputColumn", function(self)
-    local startTime = self.s_t or 0
-
-    TaskNew(self.s_master,function()
-        if startTime < 0 then
-            local decimal = 1 - (-self.s_t) % 1
-            startTime = startTime - decimal
-            TaskWait(-startTime)
-            startTime = decimal
-        end
-
-        local l, r, b, t = self.l, self.r, self.b, self.t
-        local boss = self.s_master
-        if boss.move then
-            local x_dir = ran:Sign()
-            local y_dir = ran:Sign()
-            if boss.x < l then
-                x_dir = 1
-            elseif boss.x > r then
-                x_dir = -1
-            end
-            if boss.y < b then
-                y_dir = 1
-            elseif boss.y > t then
-                y_dir = -1
-            end
-            local dx = x_dir * ran:Float(self.dxmin, self.dxmax)
-            local dy = y_dir * ran:Float(self.dymin, self.dymax)
-            boss:move(self.mt, dx, dy, x_dir == -1, boss)
-        end
-    end)
-end)
-
----------------------------------------------------------------------------------------------------
-
 M.Bullet = Define("BulletOutputColumn", function(self)
     local startTime = self.s_t or 0
 

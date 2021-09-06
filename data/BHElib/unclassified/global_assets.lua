@@ -147,6 +147,7 @@ do
     ---misc
     -- misc.png
     images = {
+        {"image:leaf_silhouettes", 0, 0, 32, 32},
         {"image:leaf", 0, 32, 32, 32},
         {"image:boss_aura", 0, 128, 128, 128},
         {"image:enemy_kill_effect_red", 192, 0, 64, 64},

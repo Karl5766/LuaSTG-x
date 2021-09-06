@@ -15,6 +15,7 @@ local M = LuaClass("im.TuningManager", Widget)
 
 local InitTuningMatrixSaves = require("BHElib.scenes.tuning_stage.imgui.init_tuning_matrix_saves")
 local InitTuningManagerSaves = require("BHElib.scenes.tuning_stage.imgui.init_tuning_manager_saves")
+local FS = require("file_system.file_system")
 
 ---------------------------------------------------------------------------------------------------
 
@@ -93,6 +94,8 @@ function M:renderLoadManagerButtons()
     end
 end
 
+local _backup_dir = "data/BHElib/scenes/tuning_stage/backups/"
+
 function M:_render()
     im.setWindowFontScale(1.1)
 
@@ -105,14 +108,31 @@ function M:_render()
             im.endMenu()
         end
         if im.beginMenu("Load Backup") then
-            if im.menuItem("Confirm") then
-                self.tuning_ui:loadBackup()
+            local file_info = FS.getBriefOfFilesInDirectory(_backup_dir)
+            local file_names = {}
+            for _, item in ipairs(file_info) do
+                if not item.isDirectory then
+                    file_names[#file_names + 1] = item.name
+                end
+            end
+            for i = 1, #file_names do
+                local file_name = file_names[i]
+                if im.menuItem(file_name) then
+                    self.tuning_ui:loadBackup(_backup_dir..file_name)
+                end
+            end
+            if #file_names > 0 and im.menuItem("move backups to storage") then
+                for i = 1, #file_names do
+                    local file_name = file_names[i]
+                    os.rename(_backup_dir..file_name, _backup_dir.."storage/"..file_name)
+                end
             end
             im.endMenu()
         end
         if im.beginMenu("Save Backup") then
             if im.menuItem("Confirm") then
-                self.tuning_ui:saveBackup()
+                local file_name = os.date("%Y_%m_%d_%H_%M_%S.bak")
+                self.tuning_ui:saveBackup(_backup_dir..file_name)
             end
             im.endMenu()
         end

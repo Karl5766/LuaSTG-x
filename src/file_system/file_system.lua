@@ -54,7 +54,6 @@ function M.copyFile(path_from, path_to)
     end
     file_from:close()
     file_to:close()
-    print("finished copying file")
 end
 
 
