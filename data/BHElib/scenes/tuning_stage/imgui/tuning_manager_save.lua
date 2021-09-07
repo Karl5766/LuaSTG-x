@@ -20,11 +20,13 @@ function M.__create(manager)
             num_locals = manager.num_locals,
             local_names = table.deepcopy(manager.local_names),
             local_values = table.deepcopy(manager.local_values),
-            boss_fire_flag = manager.boss_fire_flag
+            boss_fire_flag = manager.boss_fire_flag,
+            file_name_prefix = manager.file_name_prefix,
         }
     else
         self = {
-            boss_fire_flag = true
+            boss_fire_flag = true,
+            file_name_prefix = "Matrix",
         }  -- need to be manually filled
     end
     return self
@@ -39,6 +41,7 @@ function M:writeBack(manager)
     manager.local_names = table.deepcopy(self.local_names)
     manager.local_values = table.deepcopy(self.local_values)
     manager.boss_fire_flag = self.boss_fire_flag
+    manager.file_name_prefix = self.file_name_prefix
 end
 
 ---save the object to file at the current file cursor position
@@ -52,6 +55,7 @@ function M:writeToFile(file_writer)
     else
         file_writer:writeByte(0)
     end
+    file_writer:writeVarLengthString(self.file_name_prefix)
 end
 
 ---read the object from file at the current file cursor position
@@ -61,6 +65,7 @@ function M:readFromFile(file_reader)
     self.local_names = file_reader:readVarLengthStringArray()
     self.local_values = file_reader:readVarLengthStringArray()
     self.boss_fire_flag = file_reader:readByte() == 1
+    self.file_name_prefix = file_reader:readVarLengthString()
 end
 
 function M:loadLocalArray(locals)

@@ -13,11 +13,12 @@ Default:loadLocalArray({
     {"AIMP", "ColumnScripts.ConstructAimFromPos(\"x\",\"y\",\"da\")"},
     {"F", "ColumnScripts.DefaultFollow"},
     {"MIR", "ColumnScripts.ConstructMirror"},
-    {"PV", "ColumnScripts.DefaultPolarVelocity"},
-    {"PP", "ColumnScripts.DefaultPolarPos"},
+    {"PP,PV", "ColumnScripts.DefaultPolarPos,ColumnScripts.DefaultPolarVelocity"},
     {"RE", "ColumnScripts.ConstructReplace"},
     {"R", "ColumnScripts.ConstructRandom"},
     {"RCIR", "ColumnScripts.ConstructOffsetRandomOnCircle"},
+    {"ADD", "ColumnScripts.ConstructAdd"},
+    {"SET,SETI,SETJ,SETK", "ColumnScripts.ConstructSet,ColumnScripts.SetI,ColumnScripts.SetJ,ColumnScripts.SetK"}
 })
 M.Default = Default
 

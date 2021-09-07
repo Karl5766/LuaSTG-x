@@ -38,8 +38,6 @@ function M.ConstructPolarVec(a_name, r_name, x_name, y_name)
         -- coordinate conversion
         local a, r = next[a_name], next[r_name]
         local x, y = next[x_name] or 0, next[y_name] or 0
-        next[a_name] = nil
-        next[r_name] = nil
 
         -- assign the results
         next[x_name], next[y_name] = x + r * cos(a), y + r * sin(a)
@@ -56,10 +54,6 @@ function M.ConstructPolar(a_name, r_name, da_name, v_name, x_name, y_name, vx_na
 
         local x, y = next[x_name] or 0, next[y_name] or 0
         local vx, vy = next[vx_name] or 0, next[vy_name] or 0
-        next[a_name] = nil
-        next[r_name] = nil
-        next[da_name] = nil
-        next[v_name] = nil
 
         -- assign the results
         next[x_name], next[y_name] = x + r * cos(a), y + r * sin(a)
@@ -77,10 +71,6 @@ function M.ConstructCenterAt(a_name, r_name, da_name, v_name, x_name, y_name, vx
 
         local x, y = next[x_name] or 0, next[y_name] or 0
         local vx, vy = next[vx_name] or 0, next[vy_name] or 0
-        next[a_name] = nil
-        next[r_name] = nil
-        next[da_name] = nil
-        next[v_name] = nil
 
         -- assign the results
         local master = self.s_master
@@ -146,6 +136,34 @@ function M.ConstructMirror(var_name, mirror_value)
         end
     end
     return Mirror
+end
+
+function M.ConstructAdd(target_name, add_name)
+    local function Add(self, next, i)
+        local v = next[add_name]
+        next[target_name] = (next[target_name] or 0) + v
+    end
+    return Add
+end
+
+function M.ConstructSet(var_name, value)
+    local function Set(self, next, i)
+        next[var_name] = value
+    end
+    return Set
+end
+
+---------------------------------------------------------------------------------------------------
+---non-constructive methods
+
+function M.SetI(self, next, i)
+    next.i = i
+end
+function M.SetJ(self, next, i)
+    next.j = i
+end
+function M.SetK(self, next, i)
+    next.k = i
 end
 
 ---------------------------------------------------------------------------------------------------

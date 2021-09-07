@@ -33,6 +33,7 @@ function M:ctor(tuning_ui, ...)
     self.local_names = {}
     self.local_values = {}
     self.boss_fire_flag = true
+    self.file_name_prefix = ""
 
     self.name_width = 180
     self.value_width = 210
@@ -96,6 +97,43 @@ end
 
 local _backup_dir = "data/BHElib/scenes/tuning_stage/backups/"
 
+---@param dir_path string the path where backups are located
+function M:renderLoadBackupMenu(dir_path)
+    local file_info = FS.getBriefOfFilesInDirectory(dir_path)
+    local dirs = {}
+    local file_names = {}
+    for _, item in ipairs(file_info) do
+        if item.isDirectory then
+            dirs[#dirs + 1] = item
+        else
+            file_names[#file_names + 1] = item.name
+        end
+    end
+    for i = 1, #dirs do
+        local dir = dirs[i]
+        if im.beginMenu(dir.name.."##directory") then
+            self:renderLoadBackupMenu(dir.fullPath)
+            im.endMenu()
+        end
+    end
+    for i = 1, #file_names do
+        local file_name = file_names[i]
+        if im.menuItem(file_name) then
+            self.tuning_ui:loadBackup(dir_path..file_name)
+        end
+    end
+    if dir_path == _backup_dir and #file_names > 0 and im.menuItem("move backups to storage") then
+        for i = 1, #file_names do
+            local storage_path = dir_path.."storage/"
+            if not FS.isFileExist(storage_path) then
+                FS.createDirectory(storage_path)
+            end
+            local file_name = file_names[i]
+            os.rename(dir_path..file_name, storage_path..file_name)
+        end
+    end
+end
+
 function M:_render()
     im.setWindowFontScale(1.1)
 
@@ -108,30 +146,12 @@ function M:_render()
             im.endMenu()
         end
         if im.beginMenu("Load Backup") then
-            local file_info = FS.getBriefOfFilesInDirectory(_backup_dir)
-            local file_names = {}
-            for _, item in ipairs(file_info) do
-                if not item.isDirectory then
-                    file_names[#file_names + 1] = item.name
-                end
-            end
-            for i = 1, #file_names do
-                local file_name = file_names[i]
-                if im.menuItem(file_name) then
-                    self.tuning_ui:loadBackup(_backup_dir..file_name)
-                end
-            end
-            if #file_names > 0 and im.menuItem("move backups to storage") then
-                for i = 1, #file_names do
-                    local file_name = file_names[i]
-                    os.rename(_backup_dir..file_name, _backup_dir.."storage/"..file_name)
-                end
-            end
+            self:renderLoadBackupMenu(_backup_dir)
             im.endMenu()
         end
         if im.beginMenu("Save Backup") then
             if im.menuItem("Confirm") then
-                local file_name = os.date("%Y_%m_%d_%H_%M_%S.bak")
+                local file_name = self.file_name_prefix..os.date("_%Y%m%d_%H%M%S.bak")
                 self.tuning_ui:saveBackup(_backup_dir..file_name)
             end
             im.endMenu()
@@ -142,7 +162,13 @@ function M:_render()
     im.separator()
 
     do
-        local changed, value = im.checkbox("boss fire", self.boss_fire_flag)
+        im.setNextItemWidth(self.name_width)
+        local changed, str = im.inputText("File Name", self.file_name_prefix)
+        if changed then
+            self.file_name_prefix = str
+        end
+        local value
+        changed, value = im.checkbox("boss fire", self.boss_fire_flag)
         if changed then
             self.boss_fire_flag = value
         end

@@ -15,7 +15,7 @@ save.matrix = {
     {"s_script", "N/A", "nil", "nil"},
     {"s_n", "N/A", "INFINITE", "2"},
     {"s_t", "N/A", "-60", "0"},
-    {"s_dt", "N/A", "240", "60"},
+    {"s_dt", "N/A", "240", "180"},
     {"i", "0", "0", "1"}
 }
 save.num_col = 4
@@ -93,7 +93,7 @@ M.StandardAcc = save
 
 save = TuningMatrixSave(nil)
 save.matrix = {
-    {"s_script", "N/A", "nil", "PP,F"},
+    {"s_script", "N/A", "nil", "PP,F,ADD(\"a\",\"ra\")"},
     {"s_n", "N/A", "INFINITE", "1"},
     {"s_t", "N/A", "0", "0"},
     {"s_dt", "N/A", "120", "0"},

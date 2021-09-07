@@ -134,9 +134,13 @@ function M:update(dt)
 end
 
 local _hud_painter = require("BHElib.ui.hud_painter")
+local Input = require("BHElib.input.input_and_recording")
+
 function M:render()
     Stage.render(self)
-    -- _hud_painter:drawPerformanceProfile("font:menu")
+    if Input:isAnyDeviceKeyDown("retry") then
+        _hud_painter:drawPerformanceProfile("font:menu")
+    end
     -- _hud_painter:drawKeys()
 end
 
