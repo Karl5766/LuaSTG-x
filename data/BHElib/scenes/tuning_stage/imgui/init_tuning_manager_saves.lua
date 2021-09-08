@@ -9,6 +9,7 @@ Default:loadLocalArray({
     {"AccController", "require(\"BHElib.scripts.units.acc_controller\")"},
     {"ColumnScripts", "require(\"BHElib.scripts.linear_tuning.column_scripts\")"},
     {"EnemyTypes", "require(\"BHElib.units.enemy.enemy_type.enemy_types\")"},
+    {"ADD", "ColumnScripts.ConstructAdd"},
     {"AIM", "ColumnScripts.ConstructAimFromPos"},
     {"AIMP", "ColumnScripts.ConstructAimFromPos(\"x\",\"y\",\"da\")"},
     {"F", "ColumnScripts.DefaultFollow"},
@@ -17,7 +18,7 @@ Default:loadLocalArray({
     {"RE", "ColumnScripts.ConstructReplace"},
     {"R", "ColumnScripts.ConstructRandom"},
     {"RCIR", "ColumnScripts.ConstructOffsetRandomOnCircle"},
-    {"ADD", "ColumnScripts.ConstructAdd"},
+    {"ROT", "ColumnScripts.ConstructRotation"},
     {"SET,SETI,SETJ,SETK", "ColumnScripts.ConstructSet,ColumnScripts.SetI,ColumnScripts.SetJ,ColumnScripts.SetK"}
 })
 M.Default = Default

@@ -319,13 +319,20 @@ end
 function M:loadSave(save)
     self:clearMatrices()
 
+    self:loadMatricesFromSave(save)
+    self:loadManagerFromSave(save)
+end
+
+function M:loadMatricesFromSave(save)
     local matrix_saves = save.matrix_saves
     for i = 1, #matrix_saves do
         local matrix_save = matrix_saves[i]
         local matrix = self:appendMatrixWindow()
         matrix_save:writeBack(matrix)
     end
+end
 
+function M:loadManagerFromSave(save)
     save.manager_save:writeBack(self.tuning_manager)
 end
 
@@ -415,12 +422,21 @@ local FileStream = require("file_system.file_stream")
 local SequentialFileReader = require("file_system.sequential_file_reader")
 local SequentialFileWriter = require("file_system.sequential_file_writer")
 
-function M:loadBackup(file_path)
+---@param load_mode number pass nil or 0 for replace, 1 for load matrices, 2 for load manager
+function M:loadBackup(file_path, load_mode)
     local stream = FileStream(file_path, "rb")
     local file_reader = SequentialFileReader(stream)
     local save = M.readSaveFromFile(file_reader)
     file_reader:close()
-    self:loadSave(save)
+    if load_mode == 0 then
+        self:loadSave(save)
+    elseif load_mode == 1 then
+        self:loadMatricesFromSave(save)
+    elseif load_mode == 2 then
+        self:loadManagerFromSave(save)
+    else
+        error("ERROR: Unrecognized load mode!")
+    end
 end
 
 function M:saveBackup(file_path)
@@ -429,6 +445,17 @@ function M:saveBackup(file_path)
     local save = self:getSave()
     M.writeSaveToFile(file_writer, save)
     file_writer:close()
+end
+
+local FS = require("file_system.file_system")
+
+function M:autoSaveBackup()
+    local dir = self.tuning_manager.backup_dir.."auto/"
+    if not FS.isFileExist(dir) then
+        FS.createDirectory(dir)
+    end
+    local file_name = "Auto"..os.date("_%Y%m%d_%H%M%S.bak")
+    self:saveBackup(dir..file_name)
 end
 
 ---------------------------------------------------------------------------------------------------

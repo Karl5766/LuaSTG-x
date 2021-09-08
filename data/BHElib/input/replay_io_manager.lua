@@ -145,9 +145,12 @@ function M:finishCurrentSceneGroup(stage)
 end
 
 function M:cleanup()
+    print("replay cleaning up")
     if self:isReplay() then
+        print("closing replay file reader")
         self.replay_file_reader:close()
     end
+    print("closing replay file writer")
     self.replay_file_writer:close()
 end
 
@@ -164,6 +167,7 @@ end
 function M:changeToNonReplayMode()
     self.is_replay = false
     _input:changeToNonReplayMode()
+    print("changing to non-replay mode and closing replay file reader")
     self.replay_file_reader:close()
 end
 

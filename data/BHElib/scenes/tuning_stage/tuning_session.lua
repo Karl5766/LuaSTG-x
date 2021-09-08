@@ -44,6 +44,7 @@ end
 ---deletion
 
 function M:endSession()
+    self.tuning_ui:autoSaveBackup()
     self.tuning_ui:off()
     ParentSession.endSession(self)
 end

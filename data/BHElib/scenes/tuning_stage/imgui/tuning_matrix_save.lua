@@ -46,6 +46,7 @@ function M:writeBack(matrix)
     matrix.matrix = table.deepcopy(self.matrix)
     matrix.output_str = self.output_str
     matrix:setMasterIndex(self.master_index)
+    matrix:resetLocks()
 end
 
 ---save the object to file at the current file cursor position

@@ -153,6 +153,19 @@ function M.ConstructSet(var_name, value)
     return Set
 end
 
+---rotate around p
+function M.ConstructRotation(x_name, y_name, angle)
+    local cos_a = cos(angle)
+    local sin_a = sin(angle)
+    local function Rot(self, next, i)
+        local x = next[x_name] or 0
+        local y = next[y_name] or 0
+        next[x_name] = x * cos_a - y * sin_a
+        next[y_name] = x * sin_a + y * cos_a
+    end
+    return Rot
+end
+
 ---------------------------------------------------------------------------------------------------
 ---non-constructive methods
 

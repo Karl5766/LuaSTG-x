@@ -23,7 +23,7 @@ end
 
 ---@param bullet Prefab.Object the bullet that is grazed
 function M:graze(bullet)
-    PlaySound("se:graze", 0.3, 0, true)
+    PlaySound("se:graze", 0.15, 0, true)
     local player = self.player
     local player_resource = player.player_resource
     player_resource.num_graze = player_resource.num_graze + 1

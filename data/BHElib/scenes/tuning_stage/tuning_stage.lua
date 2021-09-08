@@ -96,6 +96,10 @@ function M:updatePauseMenuStatus(dt)
     end
 end
 
+function M:addSession(session)
+    Stage.addSession(self, session)
+end
+
 function M:renderObjects()
     if self.is_in_user_pause_menu then
         self:renderUserPauseMenuBG()
@@ -128,8 +132,8 @@ end
 
 function M:endSession(continue_scene_group)
     self.scene_group.tuning_save = self.tuning_ui:getSave()
-    self.tuning_ui:cleanup()
     Stage.endSession(self, continue_scene_group)
+    self.tuning_ui:cleanup()
 end
 
 return M

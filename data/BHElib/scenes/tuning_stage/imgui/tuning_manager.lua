@@ -25,6 +25,8 @@ local Remove = table.remove
 ---------------------------------------------------------------------------------------------------
 ---init
 
+local _backup_dir = "data/BHElib/scenes/tuning_stage/backups/"
+
 ---@param tuning_ui TuningUI
 function M:ctor(tuning_ui, ...)
     self.tuning_ui = tuning_ui
@@ -34,9 +36,14 @@ function M:ctor(tuning_ui, ...)
     self.local_values = {}
     self.boss_fire_flag = true
     self.file_name_prefix = ""
+    self.backup_dir = _backup_dir
 
     self.name_width = 180
     self.value_width = 210
+
+    if not FS.isFileExist(_backup_dir) then
+        FS.createDirectory(_backup_dir)
+    end
 
     Widget.ctor(self, ...)
     self:addChild(function()
@@ -95,8 +102,6 @@ function M:renderLoadManagerButtons()
     end
 end
 
-local _backup_dir = "data/BHElib/scenes/tuning_stage/backups/"
-
 ---@param dir_path string the path where backups are located
 function M:renderLoadBackupMenu(dir_path)
     local file_info = FS.getBriefOfFilesInDirectory(dir_path)
@@ -112,14 +117,23 @@ function M:renderLoadBackupMenu(dir_path)
     for i = 1, #dirs do
         local dir = dirs[i]
         if im.beginMenu(dir.name.."##directory") then
-            self:renderLoadBackupMenu(dir.fullPath)
+            self:renderLoadBackupMenu(dir_path..dir.name.."/")
             im.endMenu()
         end
     end
     for i = 1, #file_names do
         local file_name = file_names[i]
-        if im.menuItem(file_name) then
-            self.tuning_ui:loadBackup(dir_path..file_name)
+        if im.beginMenu(file_name) then
+            if im.menuItem("Replace") then
+                self.tuning_ui:loadBackup(dir_path..file_name, 0)
+            end
+            if im.menuItem("Append Matrices") then
+                self.tuning_ui:loadBackup(dir_path..file_name, 1)
+            end
+            if im.menuItem("Load Manager Save") then
+                self.tuning_ui:loadBackup(dir_path..file_name, 2)
+            end
+            im.endMenu()
         end
     end
     if dir_path == _backup_dir and #file_names > 0 and im.menuItem("move backups to storage") then
@@ -131,6 +145,14 @@ function M:renderLoadBackupMenu(dir_path)
             local file_name = file_names[i]
             os.rename(dir_path..file_name, storage_path..file_name)
         end
+    elseif dir_path == _backup_dir.."auto/" and im.beginMenu("Delete Automatic Backups") then
+        if im.menuItem("Confirm") then
+            for i = 1, #file_names do
+                local file_name = file_names[i]
+                os.remove(dir_path..file_name)
+            end
+        end
+        im.endMenu()
     end
 end
 
@@ -205,14 +227,6 @@ function M:_render()
     if to_del then
         self:removeLocal(to_del)
     end
-end
-
----------------------------------------------------------------------------------------------------
-
-function M.createWindow(...)
-    local ret = require('imgui.widgets.Window')(...)
-    ret:addChild(M())
-    return ret
 end
 
 return M
