@@ -51,7 +51,7 @@ function M:add_script(script)
 end
 
 ---@param s_next table an array of next columns
-function M:set_next_list(s_next)
+function M:setNextList(s_next)
     -- set a list of chain object as successors
     self.s_next = s_next
 end

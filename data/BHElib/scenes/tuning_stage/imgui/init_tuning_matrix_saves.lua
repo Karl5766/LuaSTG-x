@@ -70,7 +70,7 @@ col.x = 0
 col.y = 0
 col.a = 0
 col.v = 3
-col.bullet_type_name = "arrowhead"
+col.bullet_type_name = "ball"
 col.color_index = COLOR_BLUE
 col.blink_time = 12
 col.inc_rot = 3
@@ -155,10 +155,9 @@ col.a = 0
 col.v = 2
 col.hp = 5
 col.type = EnemyTypes.bow_tie_fairy_red
+col.del_out_of_after_coming_in = {-192, 192, -224, 224}
 
 function col:spark()
-    local a, v = self.a, self.v
-
     OutputColumns.Enemy.spark(self)
 end
 

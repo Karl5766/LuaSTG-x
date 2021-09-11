@@ -5,7 +5,7 @@
 ---desc: This file defines functions that find target(s) for movement/attack
 ---------------------------------------------------------------------------------------------------
 
----@class scripts.target
+---@class TargetScripts
 local M = {}
 
 ---------------------------------------------------------------------------------------------------

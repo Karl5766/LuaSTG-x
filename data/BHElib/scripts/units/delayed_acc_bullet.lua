@@ -8,11 +8,13 @@
 local Prefab = require("core.prefab")
 local Bullet = require("BHElib.units.bullet.bullet_prefab")
 
+---@class DelayedAccBullet
 local M = Prefab.NewX(Bullet)
 
 ---------------------------------------------------------------------------------------------------
 
 local UnitMotion = require("BHElib.scripts.units.unit_motion")
+local DeletionTasks = require("BHElib.scripts.units.deletion_tasks")
 
 ---------------------------------------------------------------------------------------------------
 ---cache variables and functions
@@ -36,8 +38,8 @@ local TaskNew = task.New
 -- *effect_size (number)
 -- *destroyable (boolean)
 -- .colli_radius (number)
--- .del_time (number) a number specifies frames that need to wait to delete the bullets
--- .del_after (table<number,number,number,number>) the format is l, r, b, t specifying the border rectangle;
+-- .del_after (number) a number specifies frames that need to wait to delete the bullets
+-- .del_out_of (table<number,number,number,number>) the format is l, r, b, t specifying the border rectangle;
 -- if any element is nil, they are assumed to be -math.huge for min or math.huge for max
 --
 -- .rot_controller (AccController)
@@ -64,15 +66,15 @@ function M:init(args)
 
 	self.bound = true
 
-    if args.del_time ~= nil then
+    if args.del_after ~= nil then
         self.bound = false
-        CustomTask.del_after(self, args.del_time)
+		DeletionTasks.DelAfter(self, args.del_after)
     end
     
     -- delThrough is a list of 4 numbers {xmin, xmax, ymin, ymax}
-	if args.del_through then
+	if args.del_out_of then
 		self.bound = false
-		CustomTask.del_through(self, unpack(args.del_through))
+		DeletionTasks.DelOutOf(self, unpack(args.del_out_of))
 	end
 	
 	if args.scale then

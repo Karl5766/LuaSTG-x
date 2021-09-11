@@ -8,7 +8,6 @@ function M:ctor(...)
 end
 
 function M:setName(name)
-    --base.setName(self, name)
     self:setParam(1, name)
     return self
 end

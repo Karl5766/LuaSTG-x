@@ -68,7 +68,7 @@ function M.ChainInit(master, num_row, num_col, matrix, output_column)
     for i = 1, num_node do
         chain[i] = ParameterColumn(master, "matrix_unit_"..i, nil)
         if i > 1 then
-            chain[i - 1]:set_next_list({chain[i]})
+            chain[i - 1]:setNextList({chain[i]})
         end
     end
 

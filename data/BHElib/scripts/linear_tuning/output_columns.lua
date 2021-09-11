@@ -18,6 +18,7 @@ local Bullet = require("BHElib.units.bullet.bullet_prefab")
 local DelayedAccBullet = require("BHElib.scripts.units.delayed_acc_bullet")
 local EnemyTypes = require("BHElib.units.enemy.enemy_type.enemy_types")
 local Enemy = require("BHElib.units.enemy.enemy_prefab")
+local DeletionTasks = require("BHElib.scripts.units.deletion_tasks")
 
 ---------------------------------------------------------------------------------------------------
 ---cache variables and functions
@@ -124,6 +125,10 @@ M.Enemy = Define("EnemyOutputColumn", function(self)
                 enemy:playMovementAnimation(INFINITE, true)
             end
             enemy.bound = true
+            if self.del_out_of_after_coming_in then
+                enemy.bound = false
+                DeletionTasks.DelOutOfAfterComingIn(enemy, unpack(self.del_out_of_after_coming_in))
+            end
             if self.chains then
                 for _, chain in ipairs(self.chains) do
                     chain:sparkAll(enemy)
