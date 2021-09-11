@@ -285,9 +285,10 @@ end
 
 function M:createEditCode(node, init_str, title)
     local edit_code = self.edit_code
-    edit_code:reset(node, "output control", init_str, self.font_mono)
+    edit_code:reset(node, title, init_str, self.font_mono)
     local window = edit_code:getParent()
     window:setVisible(true)
+    window:setName(title)
 end
 
 function M:getEditCode()
