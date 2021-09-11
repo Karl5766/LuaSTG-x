@@ -70,13 +70,13 @@ col.x = 0
 col.y = 0
 col.a = 0
 col.v = 3
-col.bullet_type_name = "ball"
+col.bullet_type_name = "arrowhead"
 col.color_index = COLOR_BLUE
 col.blink_time = 12
 col.inc_rot = 3
 col.effect_size = 1
 col.destroyable = true
-col.sound = {"se:tan00", 0.1}
+col.sound = {"se:tan00", 0.06}
 
 function col:spark()
     self.angle = self.a
@@ -114,17 +114,17 @@ col.a = 0
 col.v = 3
 col.ra = 0
 col.r = 0
-col.bullet_type_name = "ball"
+col.bullet_type_name = "arrowhead"
 col.color_index = COLOR_BLUE
 col.blink_time = 12
-col.inc_rot = 3
+col.inc_rot = 0
 col.effect_size = 1
 col.destroyable = true
-col.sound = {"se:tan00", 0.1}
+col.sound = {"se:tan00", 0.06}
 
 function col:spark()
     self.angle = self.a
-    self.controller = AccController.shortInit(6, 30, self.v)
+    self.controller = AccController.shortInit(6, 20, self.v)
     OutputColumns.AccBullet.spark(self)
 end
 

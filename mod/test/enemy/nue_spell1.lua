@@ -71,12 +71,19 @@ function M:initChain()
     task.Clear(boss)  -- clear all matrices' tasks
     task.Clear(self.mouse_follower)
 
-    local chains, master_indices = self.tuning_ui:getChains(nil)
+    local chains, references = self.tuning_ui:getChains(nil)
 
     self.chains = {}
+    self.mouse_chains = {}
     for i = 1, #chains do
-        if master_indices[i] == 0 then
-            table.insert(self.chains, chains[i])
+        ---@type TuningMatrixIndicesArray
+        local indices = references[i]
+        for j = 1, indices:getNumIndices() do
+            if indices:isBoss(j) then
+                table.insert(self.chains, chains[i])
+            elseif indices:isMouse(j) then
+                table.insert(self.mouse_chains, chains[i])
+            end
         end
     end
 
@@ -100,7 +107,7 @@ function M:mouseFire()
 
     PlaySound("se:explode", 0.1, 0, true)
 
-    local chains = self.chains
+    local chains = self.mouse_chains
     for i = 1, #chains do
         local chain = chains[i]
         chain:sparkAll(self.mouse_follower)

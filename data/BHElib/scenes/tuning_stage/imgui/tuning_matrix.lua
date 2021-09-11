@@ -17,6 +17,7 @@ local MIN_COL_COUNT = 3
 ---------------------------------------------------------------------------------------------------
 
 local im = imgui
+local IndicesArray = require("BHElib.scenes.tuning_stage.imgui.tuning_matrix_indices_array")
 
 ---------------------------------------------------------------------------------------------------
 ---cache variables and functions
@@ -34,7 +35,7 @@ function M:ctor(tuning_ui, matrix_title, ...)
     self.num_col = 3
     self.num_row = 1
     self.output_str = ""
-    self.master_index = 0
+    self.indices = IndicesArray()
 
     -- temporary state, no need to be saved/loaded
     self.tuning_ui = tuning_ui
@@ -64,12 +65,13 @@ end
 ---------------------------------------------------------------------------------------------------
 ---setters and getters
 
-function M:setMasterIndex(index)
-    self.master_index = index
+function M:setIndicesArray(indices)
+    self.indices = indices
 end
 
-function M:getMasterIndex()
-    return self.master_index
+---@return TuningMatrixIndicesArray
+function M:getIndicesArray()
+    return self.indices
 end
 
 ---copy values from the input matrix to self.matrix
@@ -249,22 +251,49 @@ function M:_render()
         end
         im.sameLine()
 
-        local menu_title = "Master"
-        local master_index = self.master_index
-        local matrices = self.tuning_ui:getMatrices()
-        if master_index ~= 0 then
-            menu_title = matrices[master_index].title
-        end
-        if im.beginMenu(menu_title) then
-            if im.menuItem("Master") then
-                self.master_index = 0
-            end
-            for i = 1, #matrices do
-                local title = matrices[i].title
-                if title ~= self.title and im.menuItem(title) then
-                    self.master_index = i
+        if im.beginMenu("Parents") then
+            local indices = self.indices
+            local matrices = self.tuning_ui:getMatrices()
+            local to_del = nil
+            for i = 1, indices:getNumIndices() do
+                local title
+                if indices:isMatrix(i) then
+                    local matrix = matrices[indices:getMatrixIndex(i)]
+                    title = matrix.title
+                elseif indices:isBoss(i) then
+                    title = "Boss"
+                elseif indices:isMouse(i) then
+                    title = "Mouse"
+                end
+
+                if im.beginMenu(title.."##"..tostring(i)) then
+                    if im.menuItem("Confirm Deletion") then
+                        to_del = i
+                    end
+                    im.endMenu()
                 end
             end
+
+            if im.beginMenu("Add Parent") then
+                if im.menuItem("Boss") then
+                    indices:appendBoss()
+                end
+                if im.menuItem("Mouse") then
+                    indices:appendMouse()
+                end
+                for i = 1, #matrices do
+                    local title = matrices[i].title
+                    if im.menuItem(title) then
+                        indices:appendMatrix(i)
+                    end
+                end
+                im.endMenu()
+            end
+
+            if to_del then
+                indices:removeIndex(to_del)
+            end
+
             im.endMenu()
         end
         im.endMenuBar()
@@ -349,7 +378,7 @@ function M:_render()
     local pressed = im.button("output control", im.vec2(cell_width * 2 + 8, 24))
     if pressed then
         ---@type tuning_ui.EditText
-        self.tuning_ui:createEditCode(self, self.output_str)
+        self.tuning_ui:createEditCode(self, self.output_str, "Output Control")
     end
     im.sameLine()
 

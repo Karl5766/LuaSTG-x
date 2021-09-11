@@ -8,6 +8,7 @@ local M = LuaClass("TuningMatrixSave")
 ---------------------------------------------------------------------------------------------------
 
 local JsonFileMirror = require("file_system.json_file_mirror")
+local IndicesArray = require("BHElib.scenes.tuning_stage.imgui.tuning_matrix_indices_array")
 
 ---------------------------------------------------------------------------------------------------
 ---cache variables and functions
@@ -27,11 +28,11 @@ function M.__create(matrix)
             num_col = matrix.num_col,
             matrix = table.deepcopy(matrix.matrix),
             output_str = matrix.output_str,
-            master_index = matrix:getMasterIndex(),
+            indices = matrix:getIndicesArray():clone(),
         }
     else
         self = {
-            master_index = 0,
+            indices = IndicesArray(),
         }  -- needs to be filled manually
     end
     return self
@@ -45,7 +46,7 @@ function M:writeBack(matrix)
     matrix.num_col = self.num_col
     matrix.matrix = table.deepcopy(self.matrix)
     matrix.output_str = self.output_str
-    matrix:setMasterIndex(self.master_index)
+    matrix:setIndicesArray(self.indices:clone())
     matrix:resetLocks()
 end
 
@@ -56,7 +57,7 @@ function M:writeToFile(file_writer)
     file_writer:writeUInt(self.num_col)
     file_writer:writeVarLengthString(self.output_str)
     file_writer:writeVarLengthString(JsonFileMirror.turnLuaObjectToString(self.matrix))
-    file_writer:writeUInt(self.master_index)
+    self.indices:writeToFile(file_writer)
 end
 
 ---read the object from file at the current file cursor position
@@ -66,7 +67,9 @@ function M:readFromFile(file_reader)
     self.num_col = file_reader:readUInt()
     self.output_str = file_reader:readVarLengthString()
     self.matrix = JsonFileMirror.turnStringToLuaObject(file_reader:readVarLengthString())
-    self.master_index = file_reader:readUInt()
+    local indices = IndicesArray()
+    indices:readFromFile(file_reader)
+    self.indices = indices
 end
 
 ---get string representation of the matrix in lua code
@@ -108,8 +111,12 @@ end
 
 function M:getLuaString()
     local matrix_str = self:getMatrixLuaString()
-    local ret = matrix_str.."\n"..(self.output_str..(","..self.master_index))
+    local ret = matrix_str.."\n"..(self.output_str)
     return ret
+end
+
+function M:getIndices()
+    return self.indices
 end
 
 return M

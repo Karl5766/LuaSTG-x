@@ -223,13 +223,9 @@ function M:removeMatrixWindowByIndex(index)
 
     -- update references
     for i = 1, #matrices do
+        ---@type im.TuningMatrix
         local cur_matrix = matrices[i]
-        local cur_index = cur_matrix:getMasterIndex()
-        if cur_index == index then
-            cur_matrix:setMasterIndex(0)
-        elseif cur_index > index then
-            cur_matrix:setMasterIndex(cur_index - 1)
-        end
+        cur_matrix:getIndicesArray():onRemoveMatrix(index)
     end
 
     table.remove(matrices, index)
@@ -287,7 +283,7 @@ function M:callStageTransition(callback)
     self.stage:transitionWithCallback(callback)
 end
 
-function M:createEditCode(node, init_str)
+function M:createEditCode(node, init_str, title)
     local edit_code = self.edit_code
     edit_code:reset(node, "output control", init_str, self.font_mono)
     local window = edit_code:getParent()
@@ -362,21 +358,31 @@ function M:getChains(master)
     end
 
     local chain_functions = f()
-    local master_indices = {}
-    local ret = {}
-    for i = 1, #chain_functions do
-        ret[i], master_indices[i] = chain_functions[i](master)
+    local matrices = self.matrices
+    local num_matrices = #matrices  -- should equal to #chain_functions
+    local references = {}
+    for i = 1, num_matrices do
+        references[i] = matrices[i]:getIndicesArray()
     end
-    for i = 1, #master_indices do
-        local index = master_indices[i]
-        if index ~= 0 then
-            local master_chain = ret[index]
-            master_chain.output_column.chains = {} or master_chain.output_column.chains
-            table.insert(master_chain.output_column.chains, ret[i])
+
+    local ret = {}
+    for i = 1, num_matrices do
+        ret[i] = chain_functions[i](master)
+    end
+    for i = 1, num_matrices do
+        ---@type TuningMatrixIndicesArray
+        local indices = references[i]
+        for j = 1, indices:getNumIndices() do
+            if indices:isMatrix(j) then
+                local index = indices:getMatrixIndex(j)
+                local master_chain = ret[index]
+                master_chain.output_column.chains = {} or master_chain.output_column.chains
+                table.insert(master_chain.output_column.chains, ret[i])
+            end
         end
     end
 
-    return ret, master_indices
+    return ret, references
 end
 
 ---------------------------------------------------------------------------------------------------

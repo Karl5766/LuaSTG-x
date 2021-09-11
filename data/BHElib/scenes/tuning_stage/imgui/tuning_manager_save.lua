@@ -6,10 +6,6 @@
 local M = LuaClass("TuningManagerSave")
 
 ---------------------------------------------------------------------------------------------------
-
-local JsonFileMirror = require("file_system.json_file_mirror")
-
----------------------------------------------------------------------------------------------------
 ---init
 
 ---@param manager im.TuningManager
@@ -22,6 +18,7 @@ function M.__create(manager)
             local_values = table.deepcopy(manager.local_values),
             boss_fire_flag = manager.boss_fire_flag,
             file_name_prefix = manager.file_name_prefix,
+            context_str = manager.context_str,
         }
     else
         self = {
@@ -42,6 +39,7 @@ function M:writeBack(manager)
     manager.local_values = table.deepcopy(self.local_values)
     manager.boss_fire_flag = self.boss_fire_flag
     manager.file_name_prefix = self.file_name_prefix
+    manager.context_str = self.context_str
 end
 
 ---save the object to file at the current file cursor position
@@ -56,6 +54,7 @@ function M:writeToFile(file_writer)
         file_writer:writeByte(0)
     end
     file_writer:writeVarLengthString(self.file_name_prefix)
+    file_writer:writeVarLengthString(self.context_str)
 end
 
 ---read the object from file at the current file cursor position
@@ -66,6 +65,7 @@ function M:readFromFile(file_reader)
     self.local_values = file_reader:readVarLengthStringArray()
     self.boss_fire_flag = file_reader:readByte() == 1
     self.file_name_prefix = file_reader:readVarLengthString()
+    self.context_str = file_reader:readVarLengthString()
 end
 
 function M:loadLocalArray(locals)
@@ -84,13 +84,13 @@ function M:getLuaString()
     local local_names = self.local_names
     local local_values = self.local_values
 
-    local ret = ""
+    local ret = "\n"  -- separates the context string and the locals
 
     for i = 1, self.num_locals do
         ret = ret..("local "..local_names[i].."="..local_values[i].."\n")
     end
 
-    return ret
+    return self.context_str..ret
 end
 
 return M

@@ -33,7 +33,7 @@ function M.ConstructOffset(x_name, y_name, off_x_name, off_y_name)
     return Offset
 end
 
-function M.ConstructPolarVec(a_name, r_name, x_name, y_name)
+function M.ConstructPolarVec(x_name, y_name, r_name, a_name)
     local function PolarToStd(self, next, i)
         -- coordinate conversion
         local a, r = next[a_name], next[r_name]
@@ -128,11 +128,24 @@ end
 
 ---@param var_name string
 ---@param mirror_value number the variable will be mirrored against this value when i is even
-function M.ConstructMirror(var_name, mirror_value)
-    local function Mirror(self, next, i)
-        if i % 2 == 0 then
-            local v = next[var_name] or mirror_value
-            next[var_name] = mirror_value * 2 - v
+---@param i_name string specifies the variable to use as i; will use the current iterator if nil
+function M.ConstructMirror(var_name, mirror_value, i_name)
+    mirror_value = mirror_value or 0
+
+    local Mirror
+    if i_name then
+        function Mirror(self, next, i)
+            if next[i_name] % 2 == 1 then
+                local v = next[var_name] or mirror_value
+                next[var_name] = mirror_value * 2 - v
+            end
+        end
+    else
+        function Mirror(self, next, i)
+            if i % 2 == 1 then
+                local v = next[var_name] or mirror_value
+                next[var_name] = mirror_value * 2 - v
+            end
         end
     end
     return Mirror
@@ -183,7 +196,7 @@ end
 ---default callbacks
 
 M.DefaultFollow = M.ConstructFollow("x", "y")
-M.DefaultPolarPos = M.ConstructPolarVec("ra", "r", "x", "y")
-M.DefaultPolarVelocity = M.ConstructPolarVec("a", "v", "vx", "vy")
+M.DefaultPolarPos = M.ConstructPolarVec("x", "y", "r", "ra")
+M.DefaultPolarVelocity = M.ConstructPolarVec("vx", "vy", "v", "a")
 
 return M

@@ -32,14 +32,15 @@ function M:ctor(tuning_ui, ...)
     self.tuning_ui = tuning_ui
 
     self.num_locals = 0
+    self.context_str = ""
     self.local_names = {}
     self.local_values = {}
     self.boss_fire_flag = true
     self.file_name_prefix = ""
-    self.backup_dir = _backup_dir
 
-    self.name_width = 180
-    self.value_width = 210
+    self.backup_dir = _backup_dir
+    self.name_width = 150
+    self.value_width = 240
 
     if not FS.isFileExist(_backup_dir) then
         FS.createDirectory(_backup_dir)
@@ -71,15 +72,14 @@ function M:removeLocal(index)
     self.num_locals = n - 1
 end
 
+function M:onEditCodeSave(str)
+    self.context_str = str
+end
+
 ---------------------------------------------------------------------------------------------------
 ---imgui render
 
 function M:renderButtons()
-    local ret = im.button("+local")
-    if ret then
-        self:appendLocal()
-    end
-
     self:renderAddMatrixButtons()
     self:renderLoadManagerButtons()
 end
@@ -184,15 +184,31 @@ function M:_render()
     im.separator()
 
     do
-        im.setNextItemWidth(self.name_width)
-        local changed, str = im.inputText("File Name", self.file_name_prefix)
-        if changed then
-            self.file_name_prefix = str
+        local ret = im.button("+local")
+        if ret then
+            self:appendLocal()
         end
-        local value
-        changed, value = im.checkbox("boss fire", self.boss_fire_flag)
+
+        im.sameLine()
+
+        local changed, value = im.checkbox("boss fire", self.boss_fire_flag)
         if changed then
             self.boss_fire_flag = value
+        end
+
+        im.sameLine()
+
+        local pressed = im.button("context control")
+        if pressed then
+            ---@type tuning_ui.EditText
+            self.tuning_ui:createEditCode(self, self.context_str, "Context Control")
+        end
+
+        local str
+        im.setNextItemWidth(self.value_width - 30)
+        changed, str = im.inputText("File Name", self.file_name_prefix)
+        if changed then
+            self.file_name_prefix = str
         end
     end
 
