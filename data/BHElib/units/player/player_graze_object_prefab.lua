@@ -27,7 +27,7 @@ function M:graze(bullet)
     local player = self.player
     local player_resource = player.player_resource
     player_resource.num_graze = player_resource.num_graze + 1
-    player:getStage():addScore(1)
+    player:getStage():addScore(10000)
 end
 
 function M:colli(other)
