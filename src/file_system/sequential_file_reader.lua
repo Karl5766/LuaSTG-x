@@ -170,7 +170,7 @@ end
 function SequentialFileReader:readFieldsOfTable(targetTable, floatFields, stringFields)
     for i = 1, #floatFields do
         local field = floatFields[i]
-        targetTable[field] = self:readDouble()
+        targetTable[field] = self:readFloat()
     end
     for i = 1, #stringFields do
         local field = stringFields[i]
@@ -236,14 +236,14 @@ local function Test()
         0.0 / 0.0
     }
     for i, v in ipairs(test_set) do
-        writer:writeDouble(v)
+        writer:writeFloat(v)
     end
     writer:close()
 
     local output = FileStream("mod/test/test_file.txt", "r")
     local reader = SequentialFileReader(output)
     for i, v in ipairs(test_set) do
-        print(reader:readDouble())
+        print(reader:readFloat())
     end
     reader:close()
 end

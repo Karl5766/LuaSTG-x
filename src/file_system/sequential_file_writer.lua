@@ -220,7 +220,7 @@ end
 function SequentialFileWriter:writeFieldsOfTable(sourceTable, floatFields, stringFields)
     for i = 1, #floatFields do
         local field = floatFields[i]
-        self:writeDouble(sourceTable[field])
+        self:writeFloat(sourceTable[field])
     end
     for i = 1, #stringFields do
         local field = stringFields[i]

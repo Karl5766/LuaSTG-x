@@ -372,8 +372,8 @@ local function WriteRecordedInputToStream(sequential_writer)
     -- mouse input
     local b1, b2, b3, x, y = unpack(_recorded_mouse_states)
     sequential_writer:writeBitArray({b1, b2, b3})
-    sequential_writer:writeDouble(x)
-    sequential_writer:writeDouble(y)
+    sequential_writer:writeFloat(x)
+    sequential_writer:writeFloat(y)
 end
 
 ---update _recorded_device_states and _recorded_mouse_states by reading from the given input stream
@@ -397,8 +397,8 @@ local function ReadRecordedInputFromStream(sequential_reader)
 
     -- mouse input
     local b1, b2, b3 = unpack(sequential_reader:readBitArray())
-    local x = sequential_reader:readDouble()
-    local y = sequential_reader:readDouble()
+    local x = sequential_reader:readFloat()
+    local y = sequential_reader:readFloat()
     _recorded_mouse_states = {b1, b2, b3, x, y}  -- overwrite the mouse states
 end
 
