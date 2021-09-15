@@ -15,7 +15,10 @@ local MIN_ROW_COUNT = 1
 local MIN_COL_COUNT = 3
 
 M.NON_APPLICABLE_STR = "-"
+M.EMPTY_CELL_STR = ""
 local NON_APPLICABLE_STR = M.NON_APPLICABLE_STR
+local EMPTY_CELL_STR = M.EMPTY_CELL_STR
+local DEFAULT_LABEL = "label"
 
 ---------------------------------------------------------------------------------------------------
 
@@ -33,7 +36,7 @@ local StringByte = string.byte
 ---@param tuning_ui TuningUI
 function M:ctor(tuning_ui, matrix_title, ...)
     self.matrix = {
-        {"s_script", NON_APPLICABLE_STR, "nil"},
+        {"s_script", NON_APPLICABLE_STR, EMPTY_CELL_STR},
     }
     self.num_col = 3
     self.num_row = 1
@@ -84,11 +87,11 @@ function M:copyFromMatrix(matrix)
         if self.num_col > #row then
             if row_label == "s_script" then
                 for j = #row + 1, self.num_col do
-                    target_row[j] = "nil"
+                    target_row[j] = EMPTY_CELL_STR
                 end
             else
                 for j = #row + 1, self.num_col do
-                    target_row[j] = "0"
+                    target_row[j] = EMPTY_CELL_STR
                 end
             end
         end
@@ -107,9 +110,9 @@ function M:resizeTo(num_row, num_col)
 
     for i = 1, num_row do
         local row = {}
-        row[1] = "label"
+        row[1] = DEFAULT_LABEL
         for j = 2, num_col do
-            row[j] = "0"
+            row[j] = EMPTY_CELL_STR
         end
 
         new_matrix[i] = row
@@ -128,7 +131,7 @@ function M:setRowLabel(i, str)
         row[2] = NON_APPLICABLE_STR
     else
         if row[2] == NON_APPLICABLE_STR then
-            row[2] = "0"
+            row[2] = EMPTY_CELL_STR
         end
     end
 end
@@ -140,9 +143,9 @@ function M:insertRow(index)
     self.num_row = n
 
     local row = {}
-    row[1] = "label"
+    row[1] = DEFAULT_LABEL
     for j = 2, self.num_col do
-        row[j] = "0"
+        row[j] = EMPTY_CELL_STR
     end
 
     table.insert(self.matrix, index, row)
@@ -168,9 +171,9 @@ function M:insertColumn(index)
         local row = matrix[i]
         local label = row[1]
         if label == "s_script" then
-            table.insert(row, index, "nil")
+            table.insert(row, index, EMPTY_CELL_STR)
         else
-            table.insert(row, index, "0")
+            table.insert(row, index, EMPTY_CELL_STR)
         end
     end
 end
@@ -191,27 +194,18 @@ end
 ---imgui render
 
 function M:renderResizeButtons()
+    local cell_width = self.cell_width
+    local button_width = cell_width * 0.5 - 4
+
     local ret
-    ret = im.button("row+")
+    ret = im.button("+col")
     if ret then
-        self:insertRow(self.num_row + 1)
+        self:insertColumn(self.num_col + 1, im.vec2(button_width, 24))
     end
     im.sameLine()
-    ret = im.button("-##row-")
-    if ret and self.num_row > MIN_ROW_COUNT then
-        self:removeRow(self.num_row)
-    end
-
-    im.sameLine()
-
-    ret = im.button("col+")
+    ret = im.button("+row")
     if ret then
-        self:insertColumn(self.num_col + 1)
-    end
-    im.sameLine()
-    ret = im.button("-##col-")
-    if ret and self.num_col > MIN_COL_COUNT then
-        self:removeColumn(self.num_col)
+        self:insertRow(self.num_row + 1, im.vec2(button_width, 24))
     end
 end
 
@@ -285,7 +279,6 @@ function M:_render()
 
     im.setWindowFontScale(1.2)
     im.separator()
-    self:renderResizeButtons()
 
     local cell_width = self.cell_width
     local matrix = self.matrix
@@ -322,7 +315,7 @@ function M:_render()
             im.sameLine()
         end
 
-        local is_pressed = im.button("before+##row"..i.."+")
+        local is_pressed = im.button("+before##row"..i.."+")
         if is_pressed then
             to_insert = i
         end
@@ -350,7 +343,7 @@ function M:_render()
     local button1_width = cell_width * 0.8 - 4
     local button2_width = cell_width * 0.2 - 4
     for i = 3, self.num_col do
-        local is_pressed = im.button("before+##col"..i.."+", im.vec2(button1_width, 24))
+        local is_pressed = im.button("+before##col"..i.."+", im.vec2(button1_width, 24))
         if is_pressed then
             to_insert = i
         end
@@ -369,6 +362,9 @@ function M:_render()
     elseif to_remove then
         self:removeColumn(to_remove)
     end
+
+    im.sameLine()
+    self:renderResizeButtons()
 
     -- after render all other things
     if remove_flag then

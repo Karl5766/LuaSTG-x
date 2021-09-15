@@ -86,7 +86,7 @@ end
 ---
 ---@~english write 32bit float in little endian order
 ---@param f number 要写入的浮点数
-function SequentialFileWriter:writeFloat(f)
+function SequentialFileWriter:writeDouble(f)
     local stream = self.stream
     if f == 0.0 then
         stream:writeByte(0)
@@ -220,7 +220,7 @@ end
 function SequentialFileWriter:writeFieldsOfTable(sourceTable, floatFields, stringFields)
     for i = 1, #floatFields do
         local field = floatFields[i]
-        self:writeFloat(sourceTable[field])
+        self:writeDouble(sourceTable[field])
     end
     for i = 1, #stringFields do
         local field = stringFields[i]

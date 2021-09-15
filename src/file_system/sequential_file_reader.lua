@@ -85,7 +85,7 @@ end
 
 ---@brief 以小端序读取一个32位浮点数
 ---@return number 读取的浮点数
-function SequentialFileReader:readFloat()
+function SequentialFileReader:readDouble()
     local b1, b2, b3, b4 = self:readByte(), self:readByte(), self:readByte(), self:readByte()
     local sign = (b4 >= 0x80)
     local expo = (b4 % 0x80) * 0x2 + math.floor(b3 / 0x80)
@@ -170,7 +170,7 @@ end
 function SequentialFileReader:readFieldsOfTable(targetTable, floatFields, stringFields)
     for i = 1, #floatFields do
         local field = floatFields[i]
-        targetTable[field] = self:readFloat()
+        targetTable[field] = self:readDouble()
     end
     for i = 1, #stringFields do
         local field = stringFields[i]
@@ -236,14 +236,14 @@ local function Test()
         0.0 / 0.0
     }
     for i, v in ipairs(test_set) do
-        writer:writeFloat(v)
+        writer:writeDouble(v)
     end
     writer:close()
 
     local output = FileStream("mod/test/test_file.txt", "r")
     local reader = SequentialFileReader(output)
     for i, v in ipairs(test_set) do
-        print(reader:readFloat())
+        print(reader:readDouble())
     end
     reader:close()
 end

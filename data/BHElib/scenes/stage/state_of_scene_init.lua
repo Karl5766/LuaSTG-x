@@ -39,8 +39,8 @@ function M:writeToFile(file_writer)
     file_writer:writeUInt(self.random_seed)
 
     file_writer:writeDouble(self.score)
-    file_writer:writeFloat(self.player_pos.x)
-    file_writer:writeFloat(self.player_pos.y)
+    file_writer:writeDouble(self.player_pos.x)
+    file_writer:writeDouble(self.player_pos.y)
 
     file_writer:writeUInt(self.difficulty)
 
@@ -53,8 +53,8 @@ function M:readFromFile(file_reader)
     self.random_seed = file_reader:readUInt()
 
     self.score = file_reader:readDouble()
-    self.player_pos.x = file_reader:readFloat()
-    self.player_pos.y = file_reader:readFloat()
+    self.player_pos.x = file_reader:readDouble()
+    self.player_pos.y = file_reader:readDouble()
 
     self.difficulty = file_reader:readUInt()
 

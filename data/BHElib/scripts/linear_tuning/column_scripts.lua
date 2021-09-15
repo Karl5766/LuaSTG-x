@@ -16,6 +16,49 @@ local cos = cos
 local Angle = Angle
 
 ---------------------------------------------------------------------------------------------------
+---accessing and modifying variables
+
+local function GetSetter(var)
+    assert(type(var) == "string", "Error: Invalid variable type!")
+
+    local var_name
+    if string.sub(var, 1, 2) == "p_" then
+        var_name = string.sub(var, 3, -1)
+        return function(self, next, value)
+            self[var_name] = value
+        end
+    else
+        var_name = var
+        return function(self, next, value)
+            next[var_name] = value
+        end
+    end
+end
+
+local function GetGetter(var)
+    if type(var) == "number" then
+        return function()
+            return var
+        end
+    elseif type(var) == "string" then
+        local var_name
+        if string.sub(var, 1, 2) == "p_" then
+            var_name = string.sub(var, 3, -1)
+            return function(self, next)
+                return self[var_name] or 0
+            end
+        else
+            var_name = var
+            return function(self, next)
+                return next[var_name] or 0
+            end
+        end
+    else
+        error("Error: Invalid variable type!")
+    end
+end
+
+---------------------------------------------------------------------------------------------------
 
 ---center at master
 function M.ConstructFollow(x_name, y_name)
@@ -105,65 +148,73 @@ function M.ConstructOffsetRandomOnCircle(x_name, y_name, radius)
     return Rand
 end
 
-function M.ConstructAimFromPos(x_name, y_name, a_name)
+function M.ConstructAimFromPos(a_name, x_name, y_name)
+    local a_setter = GetSetter(a_name)
+    local a_getter = GetGetter(a_name)
+    local x_getter = GetGetter(x_name)
+    local y_getter = GetGetter(y_name)
+
     local function Aim(self, next, i)
-        local x, y = next[x_name] or 0, next[y_name] or 0
-        local a = (next[a_name] or 0) + Angle(x, y, player.x, player.y)
-        next[a_name] = a
+        local x, y = x_getter(self, next), y_getter(self, next)
+
+        local a = a_getter(self, next) + Angle(x, y, player.x, player.y)
+        a_setter(self, next, a)
     end
     return Aim
 end
 
 ---assign a value to an attribute, remove the attribute where the value comes from
 function M.ConstructReplace(replaced_name, value_name)
-    local function Replace(self, next, i)
-        local v = next[value_name]
-        next[value_name] = nil  -- remove the value attribute
+    local r_setter = GetSetter(replaced_name)
+    local v_getter = GetGetter(value_name)
 
-        -- assign the new value
-        next[replaced_name] = (next[replaced_name] or 0) + v
+    local function Replace(self, next, i)
+        r_setter(self, next, v_getter(self, next))
     end
     return Replace
 end
+M.ConstructSet = M.ConstructReplace
 
----@param var_name string
----@param mirror_value number the variable will be mirrored against this value when i is even
----@param i_name string specifies the variable to use as i; will use the current iterator if nil
-function M.ConstructMirror(var_name, mirror_value, i_name)
-    mirror_value = mirror_value or 0
+---@param var string
+---@param mirror_var number the variable will be mirrored against this value when i is even
+---@param i_var string specifies the variable to use as i; will use the current iterator if nil
+function M.ConstructMirror(var, mirror_var, i_var)
+    local var_setter = GetSetter(var)
+    local var_getter = GetGetter(var)
+    local mirror_getter = GetGetter(mirror_var)
 
     local Mirror
-    if i_name then
+    if i_var then
+        local i_getter = GetGetter(i_var)
         function Mirror(self, next, i)
-            if next[i_name] % 2 == 1 then
-                local v = next[var_name] or mirror_value
-                next[var_name] = mirror_value * 2 - v
+            if i_getter(self, next) % 2 == 1 then
+                local v = var_getter(self, next)
+                local mir = mirror_getter(self, next)
+                var_setter(self, next, mir * 2 - v)
             end
         end
     else
         function Mirror(self, next, i)
             if i % 2 == 1 then
-                local v = next[var_name] or mirror_value
-                next[var_name] = mirror_value * 2 - v
+                local v = var_getter(self, next)
+                local mir = mirror_getter(self, next)
+                var_setter(self, next, mir * 2 - v)
             end
         end
     end
     return Mirror
 end
 
-function M.ConstructAdd(target_name, add_name)
+function M.ConstructAdd(target_var, add_var)
+    local target_setter = GetSetter(target_var)
+    local add_getter = GetGetter(add_var)
+    local target_getter = GetGetter(target_var)
+
     local function Add(self, next, i)
-        local v = next[add_name]
-        next[target_name] = (next[target_name] or 0) + v
+        local v = add_getter(self, next)
+        target_setter(self, next,target_getter(self, next) + v)
     end
     return Add
-end
-
-function M.ConstructSet(var_name, value)
-    local function Set(self, next, i)
-        next[var_name] = value
-    end
-    return Set
 end
 
 ---rotate around p
@@ -180,7 +231,7 @@ function M.ConstructRotation(x_name, y_name, angle)
 end
 
 ---------------------------------------------------------------------------------------------------
----non-constructive methods
+---non-construct methods
 
 function M.SetI(self, next, i)
     next.i = i
@@ -191,12 +242,5 @@ end
 function M.SetK(self, next, i)
     next.k = i
 end
-
----------------------------------------------------------------------------------------------------
----default callbacks
-
-M.DefaultFollow = M.ConstructFollow("x", "y")
-M.DefaultPolarPos = M.ConstructPolarVec("x", "y", "r", "ra")
-M.DefaultPolarVelocity = M.ConstructPolarVec("vx", "vy", "v", "a")
 
 return M
