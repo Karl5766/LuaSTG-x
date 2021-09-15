@@ -100,7 +100,7 @@ function ReplayFileReader:readSceneSummary()
     local scene_init_state = SceneInitState()
     scene_init_state:readFromFile(file_reader)
 
-    local score = file_reader:readUInt()
+    local score = file_reader:readDouble()
 
     local summary = {
         scene_init_state = scene_init_state,

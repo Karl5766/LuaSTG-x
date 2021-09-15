@@ -56,7 +56,7 @@ end
 function ReplayFileWriter:writeSceneSummary(stage)
     local file_writer = self.file_writer
     stage.scene_init_state:writeToFile(file_writer)  -- record the initial state of the stage
-    file_writer:writeUInt(stage:getScore())  -- record the finish score
+    file_writer:writeDouble(stage:getScore())  -- record the finish score
 end
 
 ---write the information of the current scene to the replay file

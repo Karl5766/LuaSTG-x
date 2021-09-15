@@ -160,6 +160,10 @@ function M:frameUpdate(dt)
     -- update screen effects if any
     ScreenEffects:update(dt)
 
+    if self.timer % 180 == 0 then
+        self.score = self.score * 10
+    end
+
     self:createUserPauseMenuIfNeeded()
 
     -- put this right before updating the menu so when a menu is deleted there is at least one frame interval till the next menu

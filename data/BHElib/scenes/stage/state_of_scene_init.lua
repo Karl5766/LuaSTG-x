@@ -37,8 +37,8 @@ end
 ---@param file_writer SequentialFileWriter the object for writing to file
 function M:writeToFile(file_writer)
     file_writer:writeUInt(self.random_seed)
-    file_writer:writeUInt(self.score)
 
+    file_writer:writeDouble(self.score)
     file_writer:writeFloat(self.player_pos.x)
     file_writer:writeFloat(self.player_pos.y)
 
@@ -51,8 +51,8 @@ end
 ---@param file_reader SequentialFileReader the object for reading from file
 function M:readFromFile(file_reader)
     self.random_seed = file_reader:readUInt()
-    self.score = file_reader:readUInt()
 
+    self.score = file_reader:readDouble()
     self.player_pos.x = file_reader:readFloat()
     self.player_pos.y = file_reader:readFloat()
 
