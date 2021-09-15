@@ -21,8 +21,10 @@ local Angle = Angle
 local function GetSetter(var)
     assert(type(var) == "string", "Error: Invalid variable type!")
 
+    local prefix = string.sub(var, 1, 2)
+
     local var_name
-    if string.sub(var, 1, 2) == "p_" then
+    if prefix == "p_" then
         var_name = string.sub(var, 3, -1)
         return function(self, next, value)
             self[var_name] = value
@@ -41,11 +43,22 @@ local function GetGetter(var)
             return var
         end
     elseif type(var) == "string" then
+        local prefix = string.sub(var, 1, 2)
+
         local var_name
-        if string.sub(var, 1, 2) == "p_" then
+        if prefix == "c_" then  -- "current"
             var_name = string.sub(var, 3, -1)
             return function(self, next)
                 return self[var_name] or 0
+            end
+        elseif prefix == "p_" then  -- "player"
+            var_name = string.sub(var, 3, -1)
+            return function(self, next)
+                return player[var_name]
+            end
+        elseif prefix == "m_" then  -- "master"
+            return function(self, next)
+                return self.s_master[var_name]
             end
         else
             var_name = var
@@ -123,10 +136,19 @@ function M.ConstructCenterAt(a_name, r_name, da_name, v_name, x_name, y_name, vx
     return PolarToStd
 end
 
-function M.ConstructRandom(var_name, val1, val2)
+
+function M.ConstructRandom(var, val1, val2)
+    val2 = val2 or 0
+    local var_setter = GetSetter(var)
+    local var_getter = GetGetter(var)
+    local val1_getter = GetGetter(val1)
+    local val2_getter = GetGetter(val2)
+
     local function Rand(self, next, i)
-        local v = next[var_name] or 0
-        next[var_name] = v + ran:Float(val1, val2 or 0)
+        local v = var_getter(self, next)
+        local v1, v2 = val1_getter(self, next), val2_getter(self, next)
+        v = v + ran:Float(v1, v2)
+        var_setter(self, next, v)
     end
     return Rand
 end

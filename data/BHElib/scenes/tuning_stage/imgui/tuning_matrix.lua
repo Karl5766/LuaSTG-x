@@ -172,6 +172,8 @@ function M:insertColumn(index)
         local label = row[1]
         if label == "s_script" then
             table.insert(row, index, EMPTY_CELL_STR)
+        elseif label == "s_n" then
+            table.insert(row, index, "1")
         else
             table.insert(row, index, EMPTY_CELL_STR)
         end
