@@ -51,7 +51,9 @@ end
 ---@return number,number num_capture, num_attempt
 function M:getCaptureRate(difficulty, attack_id, player_id)
 
-	local capture_rate_table = _save_file_mirror:getContent().capture_rate
+	local content = _save_file_mirror:getContent()
+	local capture_rate_table = content.capture_rate or {}
+	content.capture_rate = capture_rate_table
 
 	if difficulty == nil then
 		local total_capture, total_attempt = 0, 0
@@ -106,8 +108,9 @@ end
 function M:setCaptureRate(difficulty, attack_id, player_id, capture_rate)
 	CheckInputNonNil(difficulty, attack_id, player_id)
 
-	local capture_rate_table = _save_file_mirror:getContent().capture_rate
-
+	local content = _save_file_mirror:getContent()
+	local capture_rate_table = content.capture_rate or {}
+	content.capture_rate = capture_rate_table
 	local difficulty_table = capture_rate_table[difficulty] or {}
 	capture_rate_table[difficulty] = difficulty_table
 	local attack_table = difficulty_table[attack_id] or {}

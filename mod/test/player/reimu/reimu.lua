@@ -166,7 +166,7 @@ function M:processBombInput(player_input)
     if self.bomb_cooldown_timer <= 0 and player_input:isAnyRecordedKeyDown("spell") then
         local player_resource = self.player_resource
         if player_resource.num_bomb > 0 then
-            self.stage:onPlayerMissOrBomb()
+            lstg.eventDispatcher:dispatchEvent("onPlayerBomb", self)
             player_resource.num_bomb = player_resource.num_bomb - 1
             self:saveFromMiss()
             require("BHElib.unclassified.screen_effect"):shakePlayfield(

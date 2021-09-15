@@ -11,6 +11,7 @@ local Session = require("BHElib.sessions.session")
 local M = LuaClass("AttackSession", Session)
 
 local Renderer = require("BHElib.ui.renderer_prefab")
+local _event_dispatcher = lstg.eventDispatcher
 
 ---------------------------------------------------------------------------------------------------
 
@@ -49,6 +50,13 @@ function M.__create(parent, boss, duration, attack_id)
     self.countdown_pos = math.Vec2(0, 164)
 
     self.hp_bar_pos = math.Vec2(-400, 230)
+
+    _event_dispatcher:addListener("onPlayerMiss", function(player)
+        self:onPlayerMissOrBomb()
+    end, 0, self)
+    _event_dispatcher:addListener("onPlayerBomb", function(player)
+        self:onPlayerMissOrBomb()
+    end, 0, self)
 
     return self
 end
@@ -177,6 +185,8 @@ end
 
 function M:endSession()
     Session.endSession(self)
+
+    _event_dispatcher:removeListenerByTag(self)
 
     local stage = self.game_scene
     if self.enable_capture then

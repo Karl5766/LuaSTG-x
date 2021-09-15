@@ -329,7 +329,7 @@ function M:teleportTo(x, y)
 end
 
 function M:onMiss()
-    self.stage:onPlayerMissOrBomb()
+    lstg.eventDispatcher:dispatchEvent("onPlayerMiss", self)
     local player_resource = self.player_resource
     player_resource.num_life = player_resource.num_life - 1
     player_resource.num_bomb = 3

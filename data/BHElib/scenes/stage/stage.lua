@@ -105,16 +105,6 @@ function M:addScore(inc_score)
     self.score = self.score + inc_score
 end
 
----triggered when a player misses or bombs
-function M:onPlayerMissOrBomb()
-    for session, _ in pairs(self.sessions) do
-        local on_player_miss_or_bomb = session.onPlayerMissOrBomb
-        if on_player_miss_or_bomb then
-            on_player_miss_or_bomb(session)
-        end
-    end
-end
-
 ---@param player Prefab.Player the player of this stage
 function M:setPlayer(player)
     self.player = player
