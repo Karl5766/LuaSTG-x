@@ -47,7 +47,6 @@ function M:writeBack(matrix)
     matrix.matrix = table.deepcopy(self.matrix)
     matrix.output_str = self.output_str
     matrix:setIndicesArray(self.indices:clone())
-    matrix:resetLocks()
 end
 
 ---save the object to file at the current file cursor position
@@ -72,6 +71,14 @@ function M:readFromFile(file_reader)
     self.indices = indices
 end
 
+local function GetDefaultValue(col, row_label)
+    if row_label == "s_script" then
+        return "nil"
+    else
+        return "0"
+    end
+end
+
 ---get string representation of the matrix in lua code
 ---@return string a representation of the matrix
 function M:getMatrixLuaString()
@@ -92,6 +99,10 @@ function M:getMatrixLuaString()
                 str = "nil"
             else
                 str = row[j]
+                -- use default value for empty string
+                if str == "" then
+                    str = GetDefaultValue(j, row_label)
+                end
             end
             if str ~= "nil" and row_label == "s_script" and j >= 2 then
                 row_str = row_str..("{"..str.."},")

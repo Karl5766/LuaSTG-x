@@ -145,7 +145,6 @@ function M:frame()
         Print(string.format("Set3D('fovy',%.2f)", lstg.view3d.fovy))
         Print(string.format("Set3D('z',%.2f,%.2f)", unpack(lstg.view3d.z)))
         Print(string.format("Set3D('fog',%.2f,%.2f,Color(%d,%d,%d,%d))", lstg.view3d.fog[1], lstg.view3d.fog[2], lstg.view3d.fog[3]:ARGB()))
-        Print("--")
     end
 end
 

@@ -93,8 +93,8 @@ function M:init(args)
 		end
     end)
 
-	if args.chains then
-		for _, chain in ipairs(args.chains) do
+	if args.s_chains then
+		for _, chain in ipairs(args.s_chains) do
 			chain:sparkAll(self)
 		end
 	end

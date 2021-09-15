@@ -12,6 +12,8 @@ local ParameterColumn = require("BHElib.scripts.linear_tuning.parameter_column")
 ---@class OutputColumns
 local M = {}
 
+local ParameterMatrix = require("BHElib.scripts.linear_tuning.parameter_matrix")
+
 ---------------------------------------------------------------------------------------------------
 
 local Bullet = require("BHElib.units.bullet.bullet_prefab")
@@ -43,6 +45,22 @@ local Define = M.Define
 ---------------------------------------------------------------------------------------------------
 
 M.Empty = Define("EmptyOutputColumn", function(self)
+end)
+
+---------------------------------------------------------------------------------------------------
+---A column solely for call spark() on other matrices' heads
+
+M.Matrices = Define("MatricesColumn", function(self)
+    local chains = self.s_chains
+    if chains then
+        for i = 1, #chains do
+            local chain = chains[i]
+            local head = chain.head
+            self:add(head)
+            ParameterMatrix.SetChainMaster(chain, self.s_master)
+        end
+    end
+    ParameterColumn.spark(self)
 end)
 
 ---------------------------------------------------------------------------------------------------
@@ -129,8 +147,8 @@ M.Enemy = Define("EnemyOutputColumn", function(self)
                 enemy.bound = false
                 DeletionTasks.DelOutOfAfterComingIn(enemy, unpack(self.del_out_of_after_coming_in))
             end
-            if self.chains then
-                for _, chain in ipairs(self.chains) do
+            if self.s_chains then
+                for _, chain in ipairs(self.s_chains) do
                     chain:sparkAll(enemy)
                 end
             end

@@ -4,6 +4,9 @@ local M = {}
 
 local TuningMatrixSave = require("BHElib.scenes.tuning_stage.imgui.tuning_matrix_save")
 
+local NON_APPLICABLE_STR = require("BHElib.scenes.tuning_stage.imgui.tuning_matrix").NON_APPLICABLE_STR
+
+---------------------------------------------------------------------------------------------------
 
 local save
 
@@ -12,11 +15,11 @@ local save
 
 save = TuningMatrixSave(nil)
 save.matrix = {
-    {"s_script", "N/A", "nil", "nil"},
-    {"s_n", "N/A", "INFINITE", "2"},
-    {"s_t", "N/A", "-60", "0"},
-    {"s_dt", "N/A", "240", "180"},
-    {"i", "0", "0", "1"}
+    {"s_script", NON_APPLICABLE_STR, "", ""},
+    {"s_n", NON_APPLICABLE_STR, "INFINITE", "2"},
+    {"s_t", NON_APPLICABLE_STR, "-60", ""},
+    {"s_dt", NON_APPLICABLE_STR, "240", "180"},
+    {"i", "", "", "1"}
 }
 save.num_col = 4
 save.num_row = 5
@@ -53,14 +56,14 @@ M.BossMove = save
 
 save = TuningMatrixSave(nil)
 save.matrix = {
-    {"s_script", "N/A", "nil", "nil"},
-    {"s_n", "N/A", "INFINITE", "1"},
-    {"s_t", "N/A", "0", "0"},
-    {"s_dt", "N/A", "120", "0"},
-    {"a", "0", "0", "0"},
-    {"v", "3", "0", "0"},
-    {"x", "0", "0", "0"},
-    {"y", "0", "0", "0"},
+    {"s_script", NON_APPLICABLE_STR, "", ""},
+    {"s_n", NON_APPLICABLE_STR, "INFINITE", "1"},
+    {"s_t", NON_APPLICABLE_STR, "", ""},
+    {"s_dt", NON_APPLICABLE_STR, "120", ""},
+    {"a", "", "", ""},
+    {"v", "3", "", ""},
+    {"x", "", "", ""},
+    {"y", "", "", ""},
 }
 save.num_col = 4
 save.num_row = 8
@@ -93,16 +96,16 @@ M.StandardAcc = save
 
 save = TuningMatrixSave(nil)
 save.matrix = {
-    {"s_script", "N/A", "nil", "PP,F,ADD(\"a\",\"ra\")"},
-    {"s_n", "N/A", "INFINITE", "1"},
-    {"s_t", "N/A", "0", "0"},
-    {"s_dt", "N/A", "120", "0"},
-    {"ra", "0", "0", "0"},
-    {"r", "0", "0", "0"},
-    {"a", "0", "0", "0"},
-    {"v", "3", "0", "0"},
-    {"x", "0", "0", "0"},
-    {"y", "0", "0", "0"},
+    {"s_script", NON_APPLICABLE_STR, "", "PP,F,ADD(\"a\",\"ra\")"},
+    {"s_n", NON_APPLICABLE_STR, "INFINITE", "1"},
+    {"s_t", NON_APPLICABLE_STR, "", ""},
+    {"s_dt", NON_APPLICABLE_STR, "120", ""},
+    {"ra", "", "", ""},
+    {"r", "", "", ""},
+    {"a", "", "", ""},
+    {"v", "3", "", ""},
+    {"x", "", "", ""},
+    {"y", "", "", ""},
 }
 save.num_col = 4
 save.num_row = 10
@@ -137,13 +140,13 @@ M.PolarAcc = save
 
 save = TuningMatrixSave(nil)
 save.matrix = {
-    {"s_script", "N/A", "nil", "PV"},
-    {"s_n", "N/A", "INFINITE", "1"},
-    {"s_dt", "N/A", "120", "0"},
-    {"a", "-90", "0", "0"},
-    {"v", "1", "0", "0"},
-    {"x", "0", "0", "0"},
-    {"y", "234", "0", "0"},
+    {"s_script", NON_APPLICABLE_STR, "", "PV"},
+    {"s_n", NON_APPLICABLE_STR, "INFINITE", "1"},
+    {"s_dt", NON_APPLICABLE_STR, "120", ""},
+    {"a", "-90", "", ""},
+    {"v", "1", "", ""},
+    {"x", "", "", ""},
+    {"y", "234", "", ""},
 }
 save.num_col = 4
 save.num_row = 7

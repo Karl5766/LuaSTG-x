@@ -14,6 +14,9 @@ local M = LuaClass("im.TuningMatrix", Widget)
 local MIN_ROW_COUNT = 1
 local MIN_COL_COUNT = 3
 
+M.NON_APPLICABLE_STR = "-"
+local NON_APPLICABLE_STR = M.NON_APPLICABLE_STR
+
 ---------------------------------------------------------------------------------------------------
 
 local im = imgui
@@ -30,7 +33,7 @@ local StringByte = string.byte
 ---@param tuning_ui TuningUI
 function M:ctor(tuning_ui, matrix_title, ...)
     self.matrix = {
-        {"s_script", "N/A", "nil"},
+        {"s_script", NON_APPLICABLE_STR, "nil"},
     }
     self.num_col = 3
     self.num_row = 1
@@ -41,25 +44,11 @@ function M:ctor(tuning_ui, matrix_title, ...)
     self.tuning_ui = tuning_ui
     self.title = matrix_title
     self.cell_width = 90
-    self:resetLocks()
 
     Widget.ctor(self, ...)
     self:addChild(function()
         self:_render()
     end)
-end
-
-function M:resetLocks()
-    local locked_rows = {}
-    for i = 1, self.num_row do
-        locked_rows[i] = false
-    end
-    local locked_cols = {}
-    for i = 1, self.num_col do
-        locked_cols[i] = false
-    end
-    self.locked_rows = locked_rows
-    self.locked_cols = locked_cols
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -87,7 +76,7 @@ function M:copyFromMatrix(matrix)
                 "Error: matrix labels should be strings! got "..tostring(row_label).." instead.")
         for j = 1, min(#row, self.num_col) do
             if j == 2 and StringByte(row_label, 2) == 95 then
-                target_row[j] = "N/A"
+                target_row[j] = NON_APPLICABLE_STR
             else
                 target_row[j] = tostring(row[j])
             end
@@ -104,7 +93,6 @@ function M:copyFromMatrix(matrix)
             end
         end
     end
-    self:resetLocks()
 end
 
 ---@param num_row number
@@ -137,9 +125,9 @@ function M:setRowLabel(i, str)
     local row = self.matrix[i]
     row[1] = str
     if StringByte(str, 2) == 95 then
-        row[2] = "N/A"
+        row[2] = NON_APPLICABLE_STR
     else
-        if row[2] == "N/A" then
+        if row[2] == NON_APPLICABLE_STR then
             row[2] = "0"
         end
     end
@@ -158,7 +146,6 @@ function M:insertRow(index)
     end
 
     table.insert(self.matrix, index, row)
-    table.insert(self.locked_rows, index, false)
 end
 
 ---@param index number remove row at this index
@@ -167,7 +154,6 @@ function M:removeRow(index)
     self.num_row = n
 
     table.remove(self.matrix, index)
-    table.remove(self.locked_rows, index)
 end
 
 ---@param index number insert column before this index
@@ -187,7 +173,6 @@ function M:insertColumn(index)
             table.insert(row, index, "0")
         end
     end
-    table.insert(self.locked_cols, index, false)
 end
 
 ---@param index number remove column at this index
@@ -200,7 +185,6 @@ function M:removeColumn(index)
     for i = 1, self.num_row do
         table.remove(matrix[i], index)
     end
-    table.remove(self.locked_cols, index)
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -313,12 +297,6 @@ function M:_render()
             local label = "##i"..i.."_"..j
             im.setNextItemWidth(cell_width)
 
-            local is_locked = self.locked_rows[i] or self.locked_cols[j]
-            if is_locked then
-                im.pushStyleColor(im.Col.Text, im.vec4(220/255, 220/255, 220/255, 1.0))
-                im.pushStyleColor(im.Col.FrameBg, im.vec4(60/255, 60/255, 60/255, 1.0))
-            end
-
             local text = row[j]
 
             if j == 1 then
@@ -341,10 +319,6 @@ function M:_render()
                     end
                 end
             end
-
-            if is_locked then
-                im.popStyleColor(2)
-            end
             im.sameLine()
         end
 
@@ -356,17 +330,6 @@ function M:_render()
         is_pressed = im.button("-##row"..i.."-")
         if is_pressed then
             to_remove = i
-        end
-
-        im.sameLine()
-        local is_locked = self.locked_rows[i] == true
-        local name = "lock"
-        if is_locked then
-            name = "unlock"
-        end
-        is_pressed = im.button(name.."##lock_row"..i, im.vec2(cell_width, 24))
-        if is_pressed then
-            self.locked_rows[i] = not is_locked
         end
     end
     if to_insert then
@@ -398,20 +361,6 @@ function M:_render()
         end
         if i ~= self.num_col then
             im.sameLine()
-        end
-    end
-    for i = 1, self.num_col do
-        if i ~= 1 then
-            im.sameLine()
-        end
-        local is_locked = self.locked_cols[i] == true
-        local name = "lock"
-        if is_locked then
-            name = "unlock"
-        end
-        local is_pressed = im.button(name.."##lock_col"..i, im.vec2(cell_width, 24))
-        if is_pressed then
-            self.locked_cols[i] = not is_locked
         end
     end
 

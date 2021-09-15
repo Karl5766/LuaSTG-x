@@ -377,8 +377,8 @@ function M:getChains(master)
             if indices:isMatrix(j) then
                 local index = indices:getMatrixIndex(j)
                 local master_chain = ret[index]
-                master_chain.output_column.chains = master_chain.output_column.chains or {}
-                table.insert(master_chain.output_column.chains, ret[i])
+                master_chain.output_column.s_chains = master_chain.output_column.s_chains or {}
+                table.insert(master_chain.output_column.s_chains, ret[i])
             end
         end
     end
