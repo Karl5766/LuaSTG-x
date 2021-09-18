@@ -23,8 +23,8 @@ save.matrix = {
     {"s_dt", NON_APPLICABLE_STR, "240", "180"},
     {"i", EPT, EPT, "1"}
 }
-save.num_col = 4
-save.num_row = 5
+save.num_col = #save.matrix[1]
+save.num_row = #save.matrix
 save.output_str = [==[
 local col = OutputColumns.Empty(master)
 col.l = -60
@@ -67,8 +67,8 @@ save.matrix = {
     {"x", EPT, EPT, EPT},
     {"y", EPT, EPT, EPT},
 }
-save.num_col = 4
-save.num_row = 8
+save.num_col = #save.matrix[1]
+save.num_row = #save.matrix
 save.output_str = [==[
 local col = OutputColumns.AccBullet(master)
 col.x = 0
@@ -106,11 +106,9 @@ save.matrix = {
     {"r", EPT, EPT, EPT},
     {"a", EPT, EPT, EPT},
     {"v", "3", EPT, EPT},
-    {"x", EPT, EPT, EPT},
-    {"y", EPT, EPT, EPT},
 }
-save.num_col = 4
-save.num_row = 10
+save.num_col = #save.matrix[1]
+save.num_row = #save.matrix
 save.output_str = [==[
 local col = OutputColumns.AccBullet(master)
 col.x = 0
@@ -150,8 +148,8 @@ save.matrix = {
     {"x", EPT, EPT, EPT},
     {"y", "234", EPT, EPT},
 }
-save.num_col = 4
-save.num_row = 7
+save.num_col = #save.matrix[1]
+save.num_row = #save.matrix
 save.output_str = [==[
 local col = OutputColumns.Enemy(master)
 col.x = 0

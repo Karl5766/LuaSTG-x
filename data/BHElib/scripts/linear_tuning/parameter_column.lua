@@ -117,7 +117,7 @@ function M:spark_to(s_next)
     end
 end
 
-local function AsyncSpark(self, timer, j, pj, ij, s_next, dt)
+local function AsyncSpark(self, timer, j, pj, ij, s_next, dt_positive)
     timer:wait(0)
     -- spark s_next n times
     while j ~= pj do
@@ -146,7 +146,12 @@ local function AsyncSpark(self, timer, j, pj, ij, s_next, dt)
         end
         cp:spark()
 
-        timer:wait(dt)
+        local dt = self.s_dt
+        if dt_positive then
+            timer:wait(dt)
+        else
+            timer:wait(-dt)
+        end
         j = j + ij
     end
 end
@@ -159,18 +164,18 @@ function M:async_spark_to(s_next)
 
     -- dt is the interval time between two sparks
     local dt = self.s_dt or 0
+    local dt_positive = dt >= 0
     ---@type MantissaTimer
     local timer = MantissaTimer(self.s_t or 0)
 
     local j, ij, pj = 0, 1, n
     if dt < 0 then
         -- special case, loop in the reversed order
-        dt = -dt
         j, ij, pj = n - 1, -1, -1
     end
 
     TaskNew(self.s_master, function()
-        AsyncSpark(self, timer, j, pj, ij, s_next, dt)
+        AsyncSpark(self, timer, j, pj, ij, s_next, dt_positive)
     end)
 end
 
