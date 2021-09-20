@@ -93,7 +93,9 @@ function M:changeSpriteTo(bullet_type_name, color_index)
     self.bullet_type_name = bullet_type_name
     self.blink_time = nil
     self.color_index = color_index
-    self.img = bullet_type_to_info[bullet_type_name].color_to_sprite_name[color_index]
+    local bullet_type_info = bullet_type_to_info[bullet_type_name]
+    assert(bullet_type_info, "Error: Unrecognized bullet type!")
+    self.img = bullet_type_info.color_to_sprite_name[color_index]
 end
 
 function M:createCancelEffect()

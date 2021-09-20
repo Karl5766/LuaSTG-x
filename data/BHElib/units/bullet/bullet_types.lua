@@ -37,12 +37,12 @@ local bullets = {
     butterfly =     {32, 32, 112, 0, 4.0, 0.7, 1, 8, "tex:bullet_sprite_1"},
     square =        {16, 16, 152, 0, 3.0, 0.8, 1, 16, "tex:bullet_sprite_1"},
     ball =          {32, 32, 176, 0, 4.0, 0.75, 1, 8, "tex:bullet_sprite_1"},
+    ball_big =      {32, 32, 192, 0, 4.5, 1.0, 1, 8, "tex:bullet_sprite_2"},
     mildew =        {16, 16, 208, 0, 2.0, 0.401, 1, 16, "tex:bullet_sprite_1"},
     ellipse =       {32, 32, 224, 0, 4.5, 0.701, 1, 8, "tex:bullet_sprite_1"},
 
     star =          {16, 16, 96, 0, 3.0, 0.5, 1, 16, "tex:bullet_sprite_2"},
     star_big =      {32, 32, 224, 0, 5.5, 0.998, 1, 8, "tex:bullet_sprite_2"},
-    ball_big =      {32, 32, 192, 0, 4.5, 1.0, 1, 8, "tex:bullet_sprite_2"},
     pellet =        {16, 16, 176, 0, 2.0, 0.402, 1, 16, "tex:bullet_sprite_2"},
     grain =         {16, 16, 160, 0, 2.5, 0.403, 1, 16, "tex:bullet_sprite_2"},
     shard =         {16, 16, 128, 0, 2.5, 0.404, 1, 16, "tex:bullet_sprite_2"},

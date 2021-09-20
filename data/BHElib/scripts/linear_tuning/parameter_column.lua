@@ -2,7 +2,7 @@
 ---parameter_column.lua
 ---author: Karl
 ---date created: before 2021
----desc: Manages the ui of a tuning stage
+---desc: Defines a parameter column
 ---------------------------------------------------------------------------------------------------
 
 ---@class ParameterColumn
@@ -98,8 +98,8 @@ function M:spark_to(s_next)
         local cp = s_next:copy()
 
         for k, v in pairs(self) do
-            -- Find attributes that are not functions and not start with "#_"
-            if type(v) ~= "function" and StringByte(k, 2) ~= 95 then
+            -- Find attributes that are numbers and not start with "#_"
+            if type(v) == "number" and StringByte(k, 2) ~= 95 then
                 local inc = self["d_"..k]
                 if inc then
                     v = v + inc * j

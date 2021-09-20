@@ -234,7 +234,8 @@ function M.ConstructAdd(target_var, add_var)
 
     local function Add(self, next, i)
         local v = add_getter(self, next)
-        target_setter(self, next,target_getter(self, next) + v)
+        local original_value = target_getter(self, next)
+        target_setter(self, next,original_value + v)
     end
     return Add
 end
