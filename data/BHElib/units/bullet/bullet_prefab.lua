@@ -95,7 +95,9 @@ function M:changeSpriteTo(bullet_type_name, color_index)
     self.color_index = color_index
     local bullet_type_info = bullet_type_to_info[bullet_type_name]
     assert(bullet_type_info, "Error: Unrecognized bullet type!")
-    self.img = bullet_type_info.color_to_sprite_name[color_index]
+    local image = bullet_type_info.color_to_sprite_name[color_index]
+    assert(image, "Error: Unrecognized color for the given bullet type!")
+    self.img = image
 end
 
 function M:createCancelEffect()

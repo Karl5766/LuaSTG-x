@@ -9,6 +9,7 @@ local M = LuaClass("TuningMatrixSave")
 
 local JsonFileMirror = require("file_system.json_file_mirror")
 local IndicesArray = require("BHElib.scenes.tuning_stage.imgui.tuning_matrix_indices_array")
+local CodeSnapshotBufferSave = require("BHElib.scenes.tuning_stage.imgui.code_snapshot_buffer_save")
 
 ---------------------------------------------------------------------------------------------------
 ---cache variables and functions
@@ -27,12 +28,15 @@ function M.__create(matrix)
             num_row = matrix.num_row,
             num_col = matrix.num_col,
             matrix = table.deepcopy(matrix.matrix),
-            output_str = matrix.output_str,
+            output_control_save = CodeSnapshotBufferSave(matrix.output_control),
             indices = matrix:getIndicesArray():clone(),
+            matrix_title = matrix.matrix_title,
+            tail_script = matrix.tail_script
         }
     else
         self = {
             indices = IndicesArray(),
+            output_control_save = CodeSnapshotBufferSave(),
         }  -- needs to be filled manually
     end
     return self
@@ -41,12 +45,15 @@ end
 ---------------------------------------------------------------------------------------------------
 ---interfaces
 
+---@param matrix im.TuningMatrix
 function M:writeBack(matrix)
     matrix.num_row = self.num_row
     matrix.num_col = self.num_col
     matrix.matrix = table.deepcopy(self.matrix)
-    matrix.output_str = self.output_str
+    self.output_control_save:writeBack(matrix.output_control)
     matrix:setIndicesArray(self.indices:clone())
+    matrix.matrix_title = self.matrix_title
+    matrix.tail_script = self.tail_script
 end
 
 ---save the object to file at the current file cursor position
@@ -54,9 +61,11 @@ end
 function M:writeToFile(file_writer)
     file_writer:writeUInt(self.num_row)
     file_writer:writeUInt(self.num_col)
-    file_writer:writeVarLengthString(self.output_str)
     file_writer:writeVarLengthString(JsonFileMirror.turnLuaObjectToString(self.matrix))
     self.indices:writeToFile(file_writer)
+    file_writer:writeVarLengthString(self.matrix_title)
+    file_writer:writeVarLengthString(self.tail_script)
+    self.output_control_save:writeToFile(file_writer)
 end
 
 ---read the object from file at the current file cursor position
@@ -64,11 +73,13 @@ end
 function M:readFromFile(file_reader)
     self.num_row = file_reader:readUInt()
     self.num_col = file_reader:readUInt()
-    self.output_str = file_reader:readVarLengthString()
     self.matrix = JsonFileMirror.turnStringToLuaObject(file_reader:readVarLengthString())
     local indices = IndicesArray()
     indices:readFromFile(file_reader)
     self.indices = indices
+    self.matrix_title = file_reader:readVarLengthString()
+    self.tail_script = file_reader:readVarLengthString()
+    self.output_control_save:readFromFile(file_reader)
 end
 
 local function GetDefaultValue(col, row_label)
@@ -104,8 +115,19 @@ function M:getMatrixLuaString()
                     str = GetDefaultValue(j, row_label)
                 end
             end
-            if str ~= "nil" and row_label == "s_script" and j >= 2 then
-                row_str = row_str..("{"..str.."},")
+            if row_label == "s_script" then
+                if j == self.num_col then
+                    local tail_script = self.tail_script
+                    if str == "nil" then
+                        row_str = row_str..("{"..tail_script.."},")
+                    else
+                        row_str = row_str..("{"..str..","..tail_script.."},")
+                    end
+                elseif str ~= "nil" and j >= 2 then
+                    row_str = row_str..("{"..str.."},")
+                else
+                    row_str = row_str..(str..",")
+                end
             else
                 row_str = row_str..(str..",")
             end
@@ -122,7 +144,7 @@ end
 
 function M:getLuaString()
     local matrix_str = self:getMatrixLuaString()
-    local ret = matrix_str.."\n"..(self.output_str)
+    local ret = matrix_str.."\n"..(self.output_control_save.str)
     return ret
 end
 

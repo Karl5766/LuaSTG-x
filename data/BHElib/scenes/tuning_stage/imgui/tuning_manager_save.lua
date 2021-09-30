@@ -4,6 +4,7 @@
 
 ---@class TuningManagerSave
 local M = LuaClass("TuningManagerSave")
+local CodeSnapshotBufferSave = require("BHElib.scenes.tuning_stage.imgui.code_snapshot_buffer_save")
 
 ---------------------------------------------------------------------------------------------------
 ---init
@@ -18,12 +19,13 @@ function M.__create(manager)
             local_values = table.deepcopy(manager.local_values),
             boss_fire_flag = manager.boss_fire_flag,
             file_name_prefix = manager.file_name_prefix,
-            context_str = manager.context_str,
+            context_control_save = CodeSnapshotBufferSave(manager.context_control),
         }
     else
         self = {
             boss_fire_flag = true,
             file_name_prefix = "Matrix",
+            context_control_save = CodeSnapshotBufferSave(),
         }  -- need to be manually filled
     end
     return self
@@ -39,7 +41,7 @@ function M:writeBack(manager)
     manager.local_values = table.deepcopy(self.local_values)
     manager.boss_fire_flag = self.boss_fire_flag
     manager.file_name_prefix = self.file_name_prefix
-    manager.context_str = self.context_str
+    self.context_control_save:writeBack(manager.context_control)
 end
 
 ---save the object to file at the current file cursor position
@@ -54,7 +56,7 @@ function M:writeToFile(file_writer)
         file_writer:writeByte(0)
     end
     file_writer:writeVarLengthString(self.file_name_prefix)
-    file_writer:writeVarLengthString(self.context_str)
+    self.context_control_save:writeToFile(file_writer)
 end
 
 ---read the object from file at the current file cursor position
@@ -65,7 +67,7 @@ function M:readFromFile(file_reader)
     self.local_values = file_reader:readVarLengthStringArray()
     self.boss_fire_flag = file_reader:readByte() == 1
     self.file_name_prefix = file_reader:readVarLengthString()
-    self.context_str = file_reader:readVarLengthString()
+    self.context_control_save:readFromFile(file_reader)
 end
 
 function M:loadLocalArray(locals)
@@ -90,7 +92,7 @@ function M:getLuaString()
         ret = ret..("local "..local_names[i].."="..local_values[i].."\n")
     end
 
-    return self.context_str..ret
+    return (self.context_control_save.str)..ret
 end
 
 return M

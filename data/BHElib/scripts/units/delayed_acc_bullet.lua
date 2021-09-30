@@ -27,7 +27,7 @@ local TaskNew = task.New
 -- args will have attributes:
 -- *x (number)
 -- *y (number)
--- *angle (number)
+-- *a (number)
 -- .start_time (number)
 -- *bullet_type_name (string)
 -- *color_index (number)
@@ -61,7 +61,7 @@ function M:init(args)
 
 	self.omiga = args.inc_rot or 0
 
-	local angle = args.angle
+	local angle = args.a
     self.rot = args.rot or angle
 
 	self.bound = true

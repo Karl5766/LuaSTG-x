@@ -98,14 +98,19 @@ function M:spark_to(s_next)
         local cp = s_next:copy()
 
         for k, v in pairs(self) do
-            -- Find attributes that are numbers and not start with "#_"
-            if type(v) == "number" and StringByte(k, 2) ~= 95 then
-                local inc = self["d_"..k]
-                if inc then
-                    v = v + inc * j
+            -- Find attributes that are not functions and not start with "#_"
+            if type(v) ~= "function" and StringByte(k, 2) ~= 95 then
+                if type(v) == "number" then
+                    local inc = self["d_"..k]
+                    if inc then
+                        v = v + inc * j
+                    end
+                    local output = self["o_"..k] or k
+                    cp[output] = v
+                else
+                    local output = self["o_"..k] or k
+                    cp[output] = v
                 end
-                local output = self["o_"..k] or k
-                cp[output] = v
             end
         end
         local scripts = self.s_script

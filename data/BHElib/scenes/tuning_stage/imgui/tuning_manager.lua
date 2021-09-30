@@ -15,6 +15,7 @@ local M = LuaClass("im.TuningManager", Widget)
 
 local InitTuningMatrixSaves = require("BHElib.scenes.tuning_stage.imgui.init_tuning_matrix_saves")
 local InitTuningManagerSaves = require("BHElib.scenes.tuning_stage.imgui.init_tuning_manager_saves")
+local CodeSnapshotBuffer = require("BHElib.scenes.tuning_stage.imgui.code_snapshot_buffer")
 local FS = require("file_system.file_system")
 
 ---------------------------------------------------------------------------------------------------
@@ -32,7 +33,6 @@ function M:ctor(tuning_ui, ...)
     self.tuning_ui = tuning_ui
 
     self.num_locals = 0
-    self.context_str = ""
     self.local_names = {}
     self.local_values = {}
     self.boss_fire_flag = true
@@ -41,6 +41,10 @@ function M:ctor(tuning_ui, ...)
     self.backup_dir = _backup_dir
     self.name_width = 150
     self.value_width = 240
+
+    -- context control
+    self.context_control = CodeSnapshotBuffer(tuning_ui, "Context Control", self:getSyncFilePath())
+    self.context_control:changeSync(true)
 
     if not FS.isFileExist(_backup_dir) then
         FS.createDirectory(_backup_dir)
@@ -54,6 +58,10 @@ end
 
 ---------------------------------------------------------------------------------------------------
 ---interfaces
+
+function M:getSyncFilePath()
+    return "data/BHElib/scenes/tuning_stage/code/context_control.lua"
+end
 
 function M:appendLocal()
     local i = self.num_locals + 1
@@ -72,10 +80,6 @@ function M:removeLocal(index)
     self.num_locals = n - 1
 end
 
-function M:onEditCodeSave(str)
-    self.context_str = str
-end
-
 ---------------------------------------------------------------------------------------------------
 ---imgui render
 
@@ -88,7 +92,7 @@ function M:renderAddMatrixButtons()
     for key_str, matrix_save in pairs(InitTuningMatrixSaves) do
         local ret = im.button("+matrix"..key_str)
         if ret then
-            self.tuning_ui:appendMatrixWindow(matrix_save, key_str)
+            self.tuning_ui:appendMatrixWindow(matrix_save, matrix_save.matrix_title)
         end
     end
 end
@@ -198,10 +202,10 @@ function M:_render()
 
         im.sameLine()
 
-        local pressed = im.button("context control")
-        if pressed then
-            ---@type tuning_ui.EditText
-            self.tuning_ui:createEditCode(self, self.context_str, "Context Control")
+        local control = self.context_control
+        control:renderSyncButtons()
+        if not control:isSync() then
+            control:renderEditButtons()
         end
 
         local str

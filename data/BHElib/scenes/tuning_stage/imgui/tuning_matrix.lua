@@ -24,6 +24,7 @@ local DEFAULT_LABEL = "label"
 
 local im = imgui
 local IndicesArray = require("BHElib.scenes.tuning_stage.imgui.tuning_matrix_indices_array")
+local CodeSnapshotBuffer = require("BHElib.scenes.tuning_stage.imgui.code_snapshot_buffer")
 
 ---------------------------------------------------------------------------------------------------
 ---cache variables and functions
@@ -34,19 +35,24 @@ local StringByte = string.byte
 ---init
 
 ---@param tuning_ui TuningUI
-function M:ctor(tuning_ui, matrix_title, ...)
+function M:ctor(tuning_ui, matrix_title, matrix_id, ...)
     self.matrix = {
         {"s_script", NON_APPLICABLE_STR, EMPTY_CELL_STR},
     }
     self.num_col = 3
     self.num_row = 1
-    self.output_str = ""
+    self.matrix_title = matrix_title
+    self.tail_script = EMPTY_CELL_STR
     self.indices = IndicesArray()
 
     -- temporary state, no need to be saved/loaded
     self.tuning_ui = tuning_ui
-    self.title = matrix_title
-    self.cell_width = 90
+    self.matrix_id = matrix_id
+    self.cell_width = 180
+
+    -- output control
+    self.output_control = CodeSnapshotBuffer(tuning_ui, "Output Control", self:getSyncFilePath())
+    self.output_control:changeSync(true)
 
     Widget.ctor(self, ...)
     self:addChild(function()
@@ -56,6 +62,20 @@ end
 
 ---------------------------------------------------------------------------------------------------
 ---setters and getters
+
+function M:getSyncFilePath()
+    return "data/BHElib/scenes/tuning_stage/code/output_control_"..self.matrix_id..".lua"
+end
+
+function M:setWindowTitle(title)
+    self.matrix_title = title
+    local window_title = self:getWindowTitle()
+    self:getParent():setName(window_title)
+end
+
+function M:getWindowTitle()
+    return "m"..tostring(self.matrix_id).."_"..self.matrix_title
+end
 
 function M:setIndicesArray(indices)
     self.indices = indices
@@ -218,7 +238,7 @@ function M:_render()
             if im.menuItem("Create Copy") then
                 local MatrixSave = require("BHElib.scenes.tuning_stage.imgui.tuning_matrix_save")
                 local save = MatrixSave(self)
-                self.tuning_ui:appendMatrixWindow(save, self.title.."_")
+                self.tuning_ui:appendMatrixWindow(save, self.matrix_title)
             end
             im.endMenu()
         end
@@ -239,7 +259,7 @@ function M:_render()
                 local title
                 if indices:isMatrix(i) then
                     local matrix = matrices[indices:getMatrixIndex(i)]
-                    title = matrix.title
+                    title = matrix:getWindowTitle()
                 elseif indices:isBoss(i) then
                     title = "Boss"
                 elseif indices:isMouse(i) then
@@ -262,7 +282,7 @@ function M:_render()
                     indices:appendMouse()
                 end
                 for i = 1, #matrices do
-                    local title = matrices[i].title
+                    local title = matrices[i]:getWindowTitle()
                     if im.menuItem(title) then
                         indices:appendMatrix(i)
                     end
@@ -283,6 +303,21 @@ function M:_render()
     im.separator()
 
     local cell_width = self.cell_width
+    do
+        im.setNextItemWidth(cell_width * 2 + 8)
+        local changed, str = im.inputText("Title", self.matrix_title, im.ImGuiInputTextFlags.EnterReturnsTrue)
+        if changed then
+            self:setWindowTitle(str)
+        end
+    end
+    do
+        im.setNextItemWidth(cell_width * 2 + 8)
+        local changed, str = im.inputText("Tail Script", self.tail_script, im.ImGuiInputTextFlags.None)
+        if changed then
+            self.tail_script = str
+        end
+    end
+
     local matrix = self.matrix
     local to_insert = nil
     local to_remove = nil
@@ -333,11 +368,8 @@ function M:_render()
         self:removeRow(to_remove)
     end
 
-    local pressed = im.button("output control", im.vec2(cell_width * 2 + 8, 24))
-    if pressed then
-        ---@type tuning_ui.EditText
-        self.tuning_ui:createEditCode(self, self.output_str, "Output Control")
-    end
+    local control = self.output_control
+    control:renderSyncButtons(cell_width * 2 + 8)
     im.sameLine()
 
     to_insert = nil
@@ -368,14 +400,14 @@ function M:_render()
     im.sameLine()
     self:renderResizeButtons()
 
+    if not control:isSync() then
+        control:renderEditButtons()
+    end
+
     -- after render all other things
     if remove_flag then
         self.tuning_ui:removeMatrixWindow(self)
     end
-end
-
-function M:onEditCodeSave(str)
-    self.output_str = str
 end
 
 return M

@@ -88,7 +88,6 @@ function M:ctor()
     --la:addChild(self.console)
 
     self.matrices = {}
-    -- self:appendMatrixWindow()
 
     local manager = TuningManager(self)
     self:registerChildWidget(manager, "Manager", im.WindowFlags.MenuBar)
@@ -199,10 +198,9 @@ function M:appendMatrixWindow(save, title)
     local i = self.current_matrix_index
     self.current_matrix_index = i + 1
 
-    local prefix = title or "Matrix"
-    local matrix_title = prefix..i
-    local matrix = TuningMatrix(self, matrix_title)
-    self:registerChildWidget(matrix, matrix_title, im.WindowFlags.MenuBar)
+    local matrix = TuningMatrix(self, "", i)
+    self:registerChildWidget(matrix, "", bit.bor(im.WindowFlags.MenuBar, im.WindowFlags.HorizontalScrollbar))
+    matrix:setWindowTitle(title or "Matrix")
     if save then
         save:writeBack(matrix)
     end
@@ -326,6 +324,7 @@ function M:loadMatricesFromSave(save)
         local matrix_save = matrix_saves[i]
         local matrix = self:appendMatrixWindow()
         matrix_save:writeBack(matrix)
+        matrix:setWindowTitle(matrix.matrix_title)
     end
 end
 

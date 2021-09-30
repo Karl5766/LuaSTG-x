@@ -47,22 +47,42 @@ local function GetGetter(var)
 
         local var_name
         if prefix == "c_" then  -- "current"
+            if var == "c_" then
+                return function(self, next, i)
+                    return self
+                end
+            end
             var_name = string.sub(var, 3, -1)
-            return function(self, next)
+            return function(self, next, i)
                 return self[var_name] or 0
+            end
+        elseif prefix == "n_" then  -- "next"
+            if var == "n_" then
+                return function(self, next, i)
+                    return next
+                end
+            end
+            var_name = string.sub(var, 3, -1)
+            return function(self, next, i)
+                return next[var_name] or 0
             end
         elseif prefix == "p_" then  -- "player"
             var_name = string.sub(var, 3, -1)
-            return function(self, next)
+            return function(self, next, i)
                 return player[var_name]
             end
         elseif prefix == "m_" then  -- "master"
-            return function(self, next)
+            return function(self, next, i)
                 return self.s_master[var_name]
             end
+        elseif prefix == "i_" then
+            return function(self, next, i)
+                return i
+            end
         else
+            -- same as n_
             var_name = var
-            return function(self, next)
+            return function(self, next, i)
                 return next[var_name] or 0
             end
         end
@@ -145,18 +165,10 @@ function M.ConstructRandom(var, val1, val2)
     local val2_getter = GetGetter(val2)
 
     local function Rand(self, next, i)
-        local v = var_getter(self, next)
-        local v1, v2 = val1_getter(self, next), val2_getter(self, next)
+        local v = var_getter(self, next, i)
+        local v1, v2 = val1_getter(self, next, i), val2_getter(self, next, i)
         v = v + ran:Float(v1, v2)
         var_setter(self, next, v)
-    end
-    return Rand
-end
-
-function M.ConstructSetRandomOnCircle(x_name, y_name, radius)
-    local function Rand(self, next, i)
-        local a = ran:Float(0, 360)
-        next[x_name], next[y_name] = cos(a) * radius, sin(a) * radius
     end
     return Rand
 end
@@ -177,30 +189,47 @@ function M.ConstructAimFromPos(a_name, x_name, y_name)
     local y_getter = GetGetter(y_name)
 
     local function Aim(self, next, i)
-        local x, y = x_getter(self, next), y_getter(self, next)
+        local x, y = x_getter(self, next, i), y_getter(self, next, i)
 
-        local a = a_getter(self, next) + Angle(x, y, player.x, player.y)
+        local a = a_getter(self, next, i) + Angle(x, y, player.x, player.y)
         a_setter(self, next, a)
     end
     return Aim
 end
 
 ---assign a value to an attribute, remove the attribute where the value comes from
-function M.ConstructReplace(replaced_name, value_name)
+---"a = b [+ c [* d]] "
+function M.ConstructSet(replaced_name, value_name, add_name, mul_name)
     local r_setter = GetSetter(replaced_name)
     local v_getter = GetGetter(value_name)
 
-    local function Replace(self, next, i)
-        r_setter(self, next, v_getter(self, next))
+    local Replace
+
+    if add_name and mul_name then
+        local a_getter = GetGetter(add_name)
+        local m_getter = GetGetter(mul_name)
+        function Replace(self, next, i)
+            r_setter(self, next, v_getter(self, next, i) + a_getter(self, next, i) * m_getter(self, next, i))
+        end
+    elseif add_name then
+        local a_getter = GetGetter(add_name)
+        function Replace(self, next, i)
+            r_setter(self, next, v_getter(self, next, i) + a_getter(self, next, i))
+        end
+    else
+        function Replace(self, next, i)
+            r_setter(self, next, v_getter(self, next, i))
+        end
     end
+
     return Replace
 end
-M.ConstructSet = M.ConstructReplace
 
 ---@param var string
 ---@param mirror_var number the variable will be mirrored against this value when i is even
 ---@param i_var string specifies the variable to use as i; will use the current iterator if nil
 function M.ConstructMirror(var, mirror_var, i_var)
+    mirror_var = mirror_var or 0
     local var_setter = GetSetter(var)
     local var_getter = GetGetter(var)
     local mirror_getter = GetGetter(mirror_var)
@@ -209,17 +238,17 @@ function M.ConstructMirror(var, mirror_var, i_var)
     if i_var then
         local i_getter = GetGetter(i_var)
         function Mirror(self, next, i)
-            if i_getter(self, next) % 2 == 1 then
-                local v = var_getter(self, next)
-                local mir = mirror_getter(self, next)
+            if i_getter(self, next, i) % 2 == 1 then
+                local v = var_getter(self, next, i)
+                local mir = mirror_getter(self, next, i)
                 var_setter(self, next, mir * 2 - v)
             end
         end
     else
         function Mirror(self, next, i)
             if i % 2 == 1 then
-                local v = var_getter(self, next)
-                local mir = mirror_getter(self, next)
+                local v = var_getter(self, next, i)
+                local mir = mirror_getter(self, next, i)
                 var_setter(self, next, mir * 2 - v)
             end
         end
@@ -227,20 +256,44 @@ function M.ConstructMirror(var, mirror_var, i_var)
     return Mirror
 end
 
-function M.ConstructAdd(target_var, add_var)
-    local target_setter = GetSetter(target_var)
-    local add_getter = GetGetter(add_var)
-    local target_getter = GetGetter(target_var)
+---a += b [+ c]
+function M.ConstructAdd(target_var, add_var, mul_var)
+    local t_setter = GetSetter(target_var)
+    local t_getter = GetGetter(target_var)
+    local a_getter = GetGetter(add_var)
 
-    local function Add(self, next, i)
-        local v = add_getter(self, next)
-        local original_value = target_getter(self, next)
-        target_setter(self, next,original_value + v)
+    if mul_var then
+        local m_getter = GetGetter(mul_var)
+        local function Add(self, next, i)
+            local v = a_getter(self, next, i) * m_getter(self, next, i)
+            local original_value = t_getter(self, next, i)
+            t_setter(self, next,original_value + v)
+        end
+        return Add
+    else
+        local function Add(self, next, i)
+            local v = a_getter(self, next, i)
+            local original_value = t_getter(self, next, i)
+            t_setter(self, next,original_value + v)
+        end
+        return Add
     end
-    return Add
 end
 
----rotate around p
+function M.ConstructMultiply(target_var, mul_var)
+    local t_setter = GetSetter(target_var)
+    local t_getter = GetGetter(target_var)
+    local m_getter = GetGetter(mul_var)
+
+    local function Mul(self, next, i)
+        local v = m_getter(self, next, i)
+        local original_value = t_getter(self, next, i)
+        t_setter(self, next,original_value * v)
+    end
+    return Mul
+end
+
+---rotate around O
 function M.ConstructRotation(x_name, y_name, angle)
     local cos_a = cos(angle)
     local sin_a = sin(angle)

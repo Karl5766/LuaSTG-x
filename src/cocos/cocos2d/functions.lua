@@ -424,6 +424,8 @@ function io.exists(path)
     return false
 end
 
+---@param path string the path to file to read from
+---@return nil|string return the file content as string if successfully open
 function io.readfile(path)
     local file = io.open(path, "r")
     if file then
@@ -434,6 +436,10 @@ function io.readfile(path)
     return nil
 end
 
+---@param path string the path to the file to write to
+---@param content string the string content to write to file
+---@param mode string specifies io mode (for Lua built-in io.open)
+---@return boolean true if successfully written, false otherwise
 function io.writefile(path, content, mode)
     mode = mode or "w+b"
     local file = io.open(path, mode)
