@@ -220,14 +220,14 @@ function M:renderResizeButtons()
     local button_width = cell_width * 0.5 - 4
 
     local ret
-    ret = im.button("+col")
-    if ret then
-        self:insertColumn(self.num_col + 1, im.vec2(button_width, 24))
-    end
-    im.sameLine()
     ret = im.button("+row")
     if ret then
         self:insertRow(self.num_row + 1, im.vec2(button_width, 24))
+    end
+    im.sameLine()
+    ret = im.button("+col")
+    if ret then
+        self:insertColumn(self.num_col + 1, im.vec2(button_width, 24))
     end
 end
 

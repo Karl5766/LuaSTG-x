@@ -11,6 +11,7 @@ local MUL = ColumnScripts.ConstructMultiply
 local PO = ColumnScripts.ConstructPolarVec
 local R = ColumnScripts.ConstructRandom
 local RCIR = ColumnScripts.ConstructOffsetRandomOnCircle
+local RNOM = ColumnScripts.ConstructRandomNormal
 local ROT = ColumnScripts.ConstructRotation
 local S,SETI,SETJ,SETK = ColumnScripts.ConstructSet,ColumnScripts.SetI,ColumnScripts.SetJ,ColumnScripts.SetK
 

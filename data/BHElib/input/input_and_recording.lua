@@ -77,9 +77,10 @@ local SYSTEM_KEYS = {
     "escape",  -- call pause menu
     "snapshot",  -- take a snapshot
 
+    "full_screen",
     "toggle_collider",  -- display object collider
     "repslow",  -- decelerate replay speed
-    "repfast",  -- accelerate replay speed
+    "ctrl",  -- accelerate replay speed
 }
 
 ---@return table an array of the list of game keys

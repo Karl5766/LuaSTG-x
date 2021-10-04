@@ -21,12 +21,6 @@ local _setting_file_mirror = require("setting.setting_file_mirror")
 local floor = math.floor
 
 ---------------------------------------------------------------------------------------------------
----virtual method
-
----update the scene itself; does not include updating the objects and collision check etc.
-M.update = nil
-
----------------------------------------------------------------------------------------------------
 
 ---GameScene object constructor
 ---@return GameScene a GameScene object
@@ -133,6 +127,12 @@ end
 ---------------------------------------------------------------------------------------------------
 ---frame update
 
+---update the scene itself; does not include updating the objects and collision check etc.
+---called when updateSceneAndObjects is called
+function M:updateScene(dt)
+    self:update(dt)
+end
+
 ---update objects and call the scene update() function;
 ---advance the time by 1 frame
 function M:updateSceneAndObjects(dt)
@@ -144,7 +144,7 @@ function M:updateSceneAndObjects(dt)
     profiler.toc('ObjFrame')
 
     -- update current scene
-    self:update(1)
+    self:updateScene(1)
 
     profiler.tic('UserSystemOperation')
     UserSystemOperation()  --用于lua层模拟内核级操作

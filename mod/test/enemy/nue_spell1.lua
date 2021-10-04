@@ -42,7 +42,7 @@ function M.__create(parent, boss)
 end
 
 function M:ctor()
-    local hp = 360
+    local hp = 640
     BossHitbox(16, hp, self)
 
     ---@type NueAnimation

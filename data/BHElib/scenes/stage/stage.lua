@@ -22,12 +22,6 @@ local Ustorage = require("util.universal_id")
 local ScreenEffects = require("BHElib.unclassified.screen_effect")
 
 ---------------------------------------------------------------------------------------------------
----virtual method
-
----update the scene itself; does not include updating the objects and collision check etc.
-M.update = nil
-
----------------------------------------------------------------------------------------------------
 ---init
 
 ---create and return a new stage instance, representing an actual play-through;
@@ -217,7 +211,7 @@ function M:updateUserInput()
             replay_io_manager:changeToNonReplayMode()
         elseif Input:isAnyDeviceKeyDown("repslow") then
             self:setPlaybackSpeed(0.25)
-        elseif Input:isAnyDeviceKeyDown("repfast") then
+        elseif Input:isAnyDeviceKeyDown("ctrl") then
             self:setPlaybackSpeed(4)
         end
     end

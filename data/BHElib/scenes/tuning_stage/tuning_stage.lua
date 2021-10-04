@@ -118,12 +118,17 @@ end
 ---------------------------------------------------------------------------------------------------
 ---quick restart
 
+local Screen = require("setting.screen_metrics")
 function M:frameUpdate(dt)
     Stage.frameUpdate(self, dt)
     if self.timer >= 2
             and Input:isAnyKeyJustChanged("retry", true, true)
             and Input:isAnyRecordedKeyDown("recorded_ctrl") then
         self:transitionWithCallback(TransitionCallbacks.restartStageAndKeepRecording)
+    end
+    if Input:isAnyKeyJustChanged("full_screen", false, true)
+            and Input:isAnyDeviceKeyDown("ctrl") then
+        Screen.setWindowed(not Screen.getWindowed())
     end
 end
 

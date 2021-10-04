@@ -115,9 +115,8 @@ function M:endSession()
 end
 
 ---@param dt number elapsed time
-function M:update(dt)
-    GameScene.update(self, dt)
-
+function M:updateScene(dt)
+    GameScene.updateScene(self, dt)
     self.menu_manager:update(dt)
 end
 

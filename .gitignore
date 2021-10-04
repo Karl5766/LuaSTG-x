@@ -21,3 +21,4 @@
 # ignore data backups
 /data/BHElib/scenes/tuning_stage/backups/*
 /data/BHElib/scenes/tuning_stage/default_code/*
+/data/BHElib/scenes/tuning_stage/code/*
