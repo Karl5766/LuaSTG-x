@@ -70,7 +70,6 @@ function M:frame()
         self.hscale = self.effect_size * (1 + 3 * (blink_time - cur_time) / blink_time)  -- decreasing size
         self.vscale = self.hscale
         if cur_time >= blink_time then
-            self.blink_time = nil
             self:fire(cur_time - blink_time)
         end
     end
@@ -84,6 +83,7 @@ function M:fire(dt)
     self.layer = LAYER_ENEMY_BULLET
     self.hscale = 1
     self.vscale = 1
+    self.blink_time = nil
     self:changeSpriteTo(self.bullet_type_name, self.color_index)
 end
 
@@ -91,13 +91,26 @@ end
 ---@param color_index number number specifying the color of the bullet
 function M:changeSpriteTo(bullet_type_name, color_index)
     self.bullet_type_name = bullet_type_name
-    self.blink_time = nil
     self.color_index = color_index
-    local bullet_type_info = bullet_type_to_info[bullet_type_name]
-    assert(bullet_type_info, "Error: Unrecognized bullet type!")
-    local image = bullet_type_info.color_to_sprite_name[color_index]
-    assert(image, "Error: Unrecognized color for the given bullet type!")
-    self.img = image
+    if self.blink_time == nil then
+        local bullet_type_info = bullet_type_to_info[bullet_type_name]
+        assert(bullet_type_info, "Error: Unrecognized bullet type "..tostring(bullet_type_name).."!")
+        local image = bullet_type_info.color_to_sprite_name[color_index]
+        assert(image, "Error: Unrecognized color "..tostring(color_index).." for the given bullet type!")
+        self.img = image
+    else
+        self.img = color_index_to_blink_effects[color_index]
+    end
+end
+
+---@param bullet_type_name string name of the bullet type to change to
+function M:changeBulletTypeTo(bullet_type_name)
+    self:changeSpriteTo(bullet_type_name, self.color_index)
+end
+
+---@param color_index number number specifying the color of the bullet
+function M:changeColorIndexTo(color_index)
+    self:changeSpriteTo(self.bullet_type_name, color_index)
 end
 
 function M:createCancelEffect()

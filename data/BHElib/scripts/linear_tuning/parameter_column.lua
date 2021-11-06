@@ -141,7 +141,7 @@ local function AsyncSpark(self, timer, j, pj, ij, s_next, dt_positive)
             end
         end
 
-        cp.s_t = -timer:mantissa()
+        cp.s_t = (cp.s_t or 0) - timer:mantissa()
         local scripts = self.s_script
         if scripts then
             for i = 1, #scripts do

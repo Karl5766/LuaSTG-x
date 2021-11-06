@@ -13,6 +13,7 @@ local BossHitbox = require("BHElib.units.enemy.boss_hitbox_prefab")
 local Input = require("BHElib.input.input_and_recording")
 local Coordinates = require("BHElib.unclassified.coordinates_and_screen")
 local Prefab = require("core.prefab")
+local RecordingCCButton = require("BHElib.input.recording_cc_button")
 
 M.SPELL_DISPLAY_NAME = "test spell \"测试符卡\""
 
@@ -45,7 +46,6 @@ function M:ctor()
     local hp = 640
     BossHitbox(16, hp, self)
 
-    ---@type NueAnimation
     local boss = self.boss
     local mouse_follower = MouseFollower()
     self.mouse_follower = mouse_follower
@@ -57,22 +57,55 @@ function M:ctor()
 
         lstg.eventDispatcher:addListener("onTuningUIExit", function()
             self:initChain()
-        end, 0, tostring(self))
+        end, 0, tostring(self).."0")
+
+        lstg.eventDispatcher:addListener("reloadChains", function(params)
+            self:reloadChains()
+        end, 0, tostring(self).."1")
+
+        lstg.eventDispatcher:addListener("onTuningUIEnter", function(params)
+            self:removeButtons()
+        end, 0, tostring(self).."2")
     end)
+
+    self.buttons = {}
 end
 
 function M:endSession()
+    self:removeButtons()
     SpellSession.endSession(self)
-    lstg.eventDispatcher:removeListenerByTag(tostring(self))
+    lstg.eventDispatcher:removeListenerByTag(tostring(self).."0")
+    lstg.eventDispatcher:removeListenerByTag(tostring(self).."1")
+    lstg.eventDispatcher:removeListenerByTag(tostring(self).."2")
 end
 
 function M:initChain()
+    local ui_init_params = self.tuning_ui:getChains(nil)
+    self.ui_init_params = ui_init_params
+
+    self:reloadChains()
+end
+
+function M:reloadChains()
+    -- cleanup everything
     local boss = self.boss
+
     task.Clear(boss)  -- clear all matrices' tasks
     task.Clear(self.mouse_follower)
 
-    local chains, references = self.tuning_ui:getChains(nil)
+    for _, object in ObjList(GROUP_ENEMY_BULLET) do
+        local on_bullet_cancel = object.onBulletCancel
+        if on_bullet_cancel then
+            on_bullet_cancel(object, self.game_scene)
+        end
+    end
+    self:removeButtons()
 
+    -- re-init everything
+    local external_objects, chains, references = unpack(self.ui_init_params)
+
+    self.hot_iter = external_objects.hot_iter
+    self:loadButtons()
     self.chains = {}
     self.mouse_chains = {}
     for i = 1, #chains do
@@ -90,6 +123,97 @@ function M:initChain()
     if self.tuning_ui.tuning_manager.boss_fire_flag then
         self:fire(boss.x, boss.y)
     end
+end
+
+function M:loadButtons()
+    local hot_iter = self.hot_iter
+    if hot_iter == nil then
+        return
+    end
+
+    local callback_sets = hot_iter:getButtonCallbacks()
+    for i = 1, #callback_sets do
+        local base_x, base_y = -100, 500 - 80 * i
+
+        local callbacks = callback_sets[i]
+        local onTouchEnded = RecordingCCButton.onTouchEnded
+        if callbacks.dimension == 1 then
+            -- create 2 buttons
+            for j = 1, 2 do
+                local button = RecordingCCButton(
+                        "creator/image/default_btn_normal.png",
+                        "creator/image/default_btn_pressed.png",
+                        "creator/image/default_btn_disabled.png", 0)
+                button:setPositionInUI(base_x + j * 60, base_y)
+                button:setButtonSize(50, 50)
+                button:setUseRecordingInput(true)
+                button.onTouchEnded = function(self, x, y)
+                    callbacks[j]()
+                    onTouchEnded(self, x, y)
+                end
+                self:addButton(button)
+                if j == 1 then
+                    button:setTitleText(callbacks.label)
+                    button:setTitleColor(cc.c3b(0, 0, 0))
+                end
+            end
+        else
+            -- create 4 buttons
+            for j = 1, 2 do
+                local button = RecordingCCButton(
+                        "creator/image/default_btn_normal.png",
+                        "creator/image/default_btn_pressed.png",
+                        "creator/image/default_btn_disabled.png", 0)
+                button:setPositionInUI(base_x - 12.5 + j * 75, base_y)
+                button:setButtonSize(25, 50)
+                button:setUseRecordingInput(true)
+                button.onTouchEnded = function(self, x, y)
+                    callbacks[j]()
+                    onTouchEnded(self, x, y)
+                end
+                self:addButton(button)
+                if j == 1 then
+                    button:setTitleText(callbacks.label)
+                    button:setTitleColor(cc.c3b(0, 0, 0))
+                end
+            end
+            for j = 1, 2 do
+                local button = RecordingCCButton(
+                        "creator/image/default_btn_normal.png",
+                        "creator/image/default_btn_pressed.png",
+                        "creator/image/default_btn_disabled.png", 0)
+                button:setPositionInUI(base_x + 100, base_y + (j - 1.5) * 26)
+                button:setButtonSize(44, 21)
+                button:setUseRecordingInput(true)
+                button.onTouchEnded = function(self, x, y)
+                    callbacks[j + 2]()
+                    onTouchEnded(self, x, y)
+                end
+                self:addButton(button)
+            end
+        end
+    end
+end
+
+function M:addButton(button)
+    local canvas = self.game_scene.canvas
+    canvas:addChild(button, 0)
+    self.buttons[#self.buttons + 1] = button
+end
+
+function M:updateButtons()
+    local buttons = self.buttons
+    for i = 1, #buttons do
+        buttons[i]:update(1)
+    end
+end
+
+function M:removeButtons()
+    local buttons = self.buttons
+    for i = 1, #buttons do
+        buttons[i]:removeFromParent()
+    end
+    self.buttons = {}
 end
 
 function M:fire()
@@ -117,6 +241,7 @@ end
 function M:update(dt)
     SpellSession.update(self, dt)
 
+    self:updateButtons()
     if Input:isMouseButtonJustChanged(true, true) then
         self:mouseFire()
     end

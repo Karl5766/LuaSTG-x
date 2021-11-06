@@ -336,8 +336,8 @@ end
 function M:getChains(master)
     local save = self:getSave()
 
-    local code = save.manager_save:getLuaString()
-    code = code.."return {"
+    local code = "local external_objects = {}\n"..save.manager_save:getLuaString()
+    code = code.."\nreturn external_objects, {"
     local matrix_saves = save.matrix_saves
     for i = 1, #matrix_saves do
         local matrix_save = matrix_saves[i]
@@ -357,7 +357,7 @@ function M:getChains(master)
         error(msg)
     end
 
-    local chain_functions = f()
+    local external_objects, chain_functions = f()
     local matrices = self.matrices
     local num_matrices = #matrices  -- should equal to #chain_functions
     local references = {}
@@ -382,7 +382,7 @@ function M:getChains(master)
         end
     end
 
-    return ret, references
+    return {external_objects, ret, references}
 end
 
 ---------------------------------------------------------------------------------------------------

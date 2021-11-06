@@ -10,11 +10,12 @@ local MIR = ColumnScripts.ConstructMirror
 local MUL = ColumnScripts.ConstructMultiply
 local PO = ColumnScripts.ConstructPolarVec
 local R = ColumnScripts.ConstructRandom
-local RCIR = ColumnScripts.ConstructOffsetRandomOnCircle
+local RCIRC = ColumnScripts.ConstructOffsetRandomOnCircle
 local ROT = ColumnScripts.ConstructRotation
+local RNORM = ColumnScripts.ConstructRandomNormal
 local S,SETI,SETJ,SETK = ColumnScripts.ConstructSet,ColumnScripts.SetI,ColumnScripts.SetJ,ColumnScripts.SetK
 
-local AIMP = ColumnScripts.ConstructAimFromPos("ra","x","y")
+local AIMP = ColumnScripts.ConstructAimFromPos("a","x","y")
 local ARA = ColumnScripts.ConstructAdd("a","ra")
 local F = ColumnScripts.ConstructFollow("x", "y")
 local PP = PO("x", "y", "r", "ra")

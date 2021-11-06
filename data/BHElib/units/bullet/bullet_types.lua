@@ -17,6 +17,9 @@ local M = {}
 M.bullet_type_to_info = {}
 local bullet_type_to_info = M.bullet_type_to_info
 
+---names of all bullet types as an array
+M.all_bullet_types = {}
+
 ---color_index to image name of the blink effect
 M.color_index_to_blink_effects = {}
 local color_index_to_blink_effects = M.color_index_to_blink_effects
@@ -131,8 +134,11 @@ end
 function M.init()
     LoadResources()
 
+    M.all_bullet_types = {}
+
     -- image bullets
     for bullet_type_name, item in pairs(bullets) do
+        M.all_bullet_types[#M.all_bullet_types + 1] = bullet_type_name
         local image_array_name = "image_array:"..bullet_type_name
 
         local center_x, center_y = nil, nil
@@ -180,20 +186,10 @@ end
 ---@param image_array_name string name of the image array
 ---@param width number width of the bullet sprite in pixels
 ---@param height number height of the bullet sprite in pixels
-function M.loadSprite(image_array_name,
-                            width,
-                            height,
-                            x,
-                            y,
-                            collision_radius,
-                            num_images_in_row,
-                            num_images_in_col,
-                            tex_name,
-                            dx,
-                            dy,
-                            blend_mode,
-                            set_center_x,
-                            set_center_y)
+function M.loadSprite(image_array_name, width, height,
+                        x, y, collision_radius, num_images_in_row,
+                        num_images_in_col, tex_name, dx, dy,
+                        blend_mode, set_center_x, set_center_y)
     -- default values
     dx = dx or width
     dy = dy or height
@@ -221,21 +217,11 @@ function M.loadSprite(image_array_name,
 end
 
 ---load a grid of animations, each animation is a grid of images
-function M.loadAnimationArray(animation_array_name,
-                             width,
-                             height,
-                             x,
-                             y,
-                             collision_radius,
-                             num_image_row,
-                             num_image_col,
-                             num_animation_row,
-                             animation_row_dy,
-                             num_animation_col,
-                             animation_col_dx,
-                             interval,
-                             tex_name,
-                             blend_mode)
+function M.loadAnimationArray(animation_array_name, width, height,
+                             x, y, collision_radius, num_image_row,
+                             num_image_col, num_animation_row, animation_row_dy,
+                             num_animation_col, animation_col_dx, interval,
+                             tex_name, blend_mode)
 
     blend_mode = blend_mode or "mul+alpha"
 
@@ -269,16 +255,9 @@ function M.loadAnimationArray(animation_array_name,
 end
 
 ---load a grid of images, each column represent a different animation
-function M.loadColumnAnimation(animation_array_name,
-                            width,
-                            height,
-                            x,
-                            y,
-                            collision_radius,
-                            num_images_in_animation,
-                            num_animations,
-                            interval,
-                            tex_name,
+function M.loadColumnAnimation(animation_array_name, width, height,
+                            x, y, collision_radius, num_images_in_animation,
+                            num_animations, interval, tex_name,
                             blend_mode)
     M.loadAnimationArray(
             animation_array_name,

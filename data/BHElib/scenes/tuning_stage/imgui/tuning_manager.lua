@@ -36,7 +36,7 @@ function M:ctor(tuning_ui, ...)
     self.local_names = {}
     self.local_values = {}
     self.boss_fire_flag = true
-    self.file_name_prefix = ""
+    self.file_name_suffix = ""
 
     self.backup_dir = _backup_dir
     self.name_width = 150
@@ -85,7 +85,6 @@ end
 
 function M:renderButtons()
     self:renderAddMatrixButtons()
-    self:renderLoadManagerButtons()
 end
 
 function M:renderAddMatrixButtons()
@@ -97,14 +96,14 @@ function M:renderAddMatrixButtons()
     end
 end
 
-function M:renderLoadManagerButtons()
-    for key_str, manager_save in pairs(InitTuningManagerSaves) do
-        local ret = im.button("local"..key_str)
-        if ret then
-            manager_save:writeBack(self)
-        end
-    end
-end
+--function M:renderLoadManagerButtons()
+--    for key_str, manager_save in pairs(InitTuningManagerSaves) do
+--        local ret = im.button("local"..key_str)
+--        if ret then
+--            manager_save:writeBack(self)
+--        end
+--    end
+--end
 
 ---@param dir_path string the path where backups are located
 function M:renderLoadBackupMenu(dir_path)
@@ -177,7 +176,7 @@ function M:_render()
         end
         if im.beginMenu("Save Backup") then
             if im.menuItem("Confirm") then
-                local file_name = self.file_name_prefix..os.date("_%Y%m%d_%H%M%S.bak")
+                local file_name = os.date("%Y%m%d_%H%M%S_")..self.file_name_suffix..".bak"
                 self.tuning_ui:saveBackup(_backup_dir..file_name)
             end
             im.endMenu()
@@ -210,9 +209,9 @@ function M:_render()
 
         local str
         im.setNextItemWidth(self.value_width - 30)
-        changed, str = im.inputText("File Name", self.file_name_prefix)
+        changed, str = im.inputText("File Name", self.file_name_suffix)
         if changed then
-            self.file_name_prefix = str
+            self.file_name_suffix = str
         end
     end
 

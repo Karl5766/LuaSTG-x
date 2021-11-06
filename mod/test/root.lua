@@ -52,6 +52,8 @@ local function Init()
     --    end
     --end
     --zip:close()
+    require("BHElib.unclassified.color"):init()
+
     require("BHElib.unclassified.coordinates_and_screen").initGameCoordinates()  -- setup the coordinates
     require("BHElib.input.input_and_recording"):init()  -- initialize player input
 

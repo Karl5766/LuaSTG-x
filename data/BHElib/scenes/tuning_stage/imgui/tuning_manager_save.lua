@@ -18,13 +18,13 @@ function M.__create(manager)
             local_names = table.deepcopy(manager.local_names),
             local_values = table.deepcopy(manager.local_values),
             boss_fire_flag = manager.boss_fire_flag,
-            file_name_prefix = manager.file_name_prefix,
+            file_name_suffix = manager.file_name_suffix,
             context_control_save = CodeSnapshotBufferSave(manager.context_control),
         }
     else
         self = {
             boss_fire_flag = true,
-            file_name_prefix = "Matrix",
+            file_name_suffix = "Matrix",
             context_control_save = CodeSnapshotBufferSave(),
         }  -- need to be manually filled
     end
@@ -40,7 +40,7 @@ function M:writeBack(manager)
     manager.local_names = table.deepcopy(self.local_names)
     manager.local_values = table.deepcopy(self.local_values)
     manager.boss_fire_flag = self.boss_fire_flag
-    manager.file_name_prefix = self.file_name_prefix
+    manager.file_name_suffix = self.file_name_suffix
     self.context_control_save:writeBack(manager.context_control)
 end
 
@@ -55,7 +55,7 @@ function M:writeToFile(file_writer)
     else
         file_writer:writeByte(0)
     end
-    file_writer:writeVarLengthString(self.file_name_prefix)
+    file_writer:writeVarLengthString(self.file_name_suffix)
     self.context_control_save:writeToFile(file_writer)
 end
 
@@ -66,7 +66,7 @@ function M:readFromFile(file_reader)
     self.local_names = file_reader:readVarLengthStringArray()
     self.local_values = file_reader:readVarLengthStringArray()
     self.boss_fire_flag = file_reader:readByte() == 1
-    self.file_name_prefix = file_reader:readVarLengthString()
+    self.file_name_suffix = file_reader:readVarLengthString()
     self.context_control_save:readFromFile(file_reader)
 end
 

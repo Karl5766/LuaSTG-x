@@ -74,6 +74,7 @@ local function GetGetter(var)
                 return player[var_name]
             end
         elseif prefix == "m_" then  -- "master"
+            var_name = string.sub(var, 3, -1)
             return function(cur, next, i)
                 return cur.s_master[var_name]
             end
@@ -194,10 +195,12 @@ function M.ConstructRandomNormal(var, sigma)
 end
 
 function M.ConstructOffsetRandomOnCircle(x_name, y_name, radius)
+    local radius_getter = GetGetter(radius)
     local function Rand(cur, next, i)
         local x, y = next[x_name] or 0, next[y_name] or 0
         local a = ran:Float(0, 360)
-        next[x_name], next[y_name] = x + cos(a) * radius, y + sin(a) * radius
+        local r = radius_getter(cur, next, i)
+        next[x_name], next[y_name] = x + cos(a) * r, y + sin(a) * r
     end
     return Rand
 end

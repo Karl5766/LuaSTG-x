@@ -60,24 +60,7 @@ function M:createScene()
 
     local canvas = require('imgui.Widget').ChildWindow('canvas')
     scene:addChild(canvas)
-    self.exit_button = {}
-    --for j = 1, 12 do
-    --    for i = 1, 30 do
-    --        local exit_button = require("BHElib.input.recording_cc_button")(
-    --                "creator/image/default_btn_normal.png",
-    --                "creator/image/default_btn_pressed.png",
-    --                "creator/image/default_btn_disabled.png", 0)
-    --        exit_button:setPositionInUI(200 + i * 30, 200 + j * 50)
-    --        exit_button:setUseRecordingInput(true)
-    --        canvas:addChild(exit_button, 0)
-    --        table.insert(self.exit_button, exit_button)
-    --    end
-    --end
-
-    --local node = cc.DrawNode:create()
-    --node:drawSolidRect(cc.p(-50, -50), cc.p(50, 50), {a = 1, r = 1, g = 1, b = 1})
-    --canvas:addChild(node, 0)
-    --self.rect = node
+    self.canvas = canvas
 
     task.New(self, function()
         PlaySound("se:don00", 0.5, 0, true)
@@ -123,11 +106,6 @@ function M:getEnemyTargetFrom(source)
 end
 
 function M:update(dt)
-
-    for i, button in ipairs(self.exit_button) do
-        button:update(1)
-    end
-
     self:fetchEnemyTargets()
 
     Stage.update(self, dt)

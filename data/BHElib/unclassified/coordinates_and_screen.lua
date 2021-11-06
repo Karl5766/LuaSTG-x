@@ -12,8 +12,6 @@
 ---of the origin and the relative scale of the coordinates are calculated based on the other coordinate
 ---system when they are needed
 
-require("BHElib.unclassified.const")
-
 ---@class Coordinates
 local M = {}
 

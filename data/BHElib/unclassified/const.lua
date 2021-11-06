@@ -32,29 +32,6 @@ LAYER_DIALOGUE_BOX          = -50
 LAYER_TOP                   = 0
 LAYER_MENU                  = 0
 
----------------------------------------------------------------------------------------------------
----bullet/enemy color related mappings
-
----total number of color themes; NUM_ENEMY_BULLET_COLOR = 16
-NUM_COLOR_THEMES = 16
-
-COLOR_DEEP_RED = 1
-COLOR_RED = 2
-COLOR_DEEP_PURPLE = 3
-COLOR_PURPLE = 4
-COLOR_DEEP_BLUE = 5
-COLOR_BLUE = 6
-COLOR_ROYAL_BLUE = 7
-COLOR_CYAN = 8
-COLOR_DEEP_GREEN = 9
-COLOR_GREEN = 10
-COLOR_CHARTREUSE = 11
-COLOR_YELLOW = 12
-COLOR_GOLDEN_YELLOW = 13
-COLOR_ORANGE = 14
-COLOR_DEEP_GRAY = 15
-COLOR_GRAY = 16
-
 
 -- 常量
 -- math constants

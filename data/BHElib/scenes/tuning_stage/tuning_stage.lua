@@ -54,6 +54,7 @@ function M:createUserPauseMenuIfNeeded()
         local TuningSession = require("BHElib.scenes.tuning_stage.tuning_session")
         self.pause_menu = TuningSession(self)
         self.is_in_user_pause_menu = true
+        lstg.eventDispatcher:dispatchEvent("onTuningUIEnter")
     end
 end
 

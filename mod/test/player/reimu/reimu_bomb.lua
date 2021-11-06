@@ -42,9 +42,9 @@ end
 
 function DamageCircle:colli(other)
     PlayerBullet.colli(self, other)
-    local on_bullet_clear = other.onBulletCancel
-    if on_bullet_clear then
-        on_bullet_clear(other, self.stage)
+    local on_bullet_cancel = other.onBulletCancel
+    if on_bullet_cancel then
+        on_bullet_cancel(other, self.stage)
     end
 end
 
