@@ -25,6 +25,7 @@ end
 function M.__create()
     local self = {}
     self.items = {}
+    self.index_history = {}
     self.listeners = {}
     return self
 end
@@ -32,36 +33,56 @@ end
 ---------------------------------------------------------------------------------------------------
 ---adding items and accessing data
 
+function M:addItem(label, item)
+    local items = self.items
+    assert(items[label] == nil, "Error: Attempting to add the same label twice!")
+    items[label] = item
+    if self.index_history[label] then
+        local index_history = self.index_history
+        item.i = index_history[label].i or item.i
+        item.j = index_history[label].j or item.j
+        index_history[label] = nil
+    end
+end
+
 ---@param label string an id identifying the array
 ---@param array table an array of element to iterate from
 ---@param listener table need to have a method called onBroadcast(iter, label, value)
-function M:register(label, array, init_index, listener)
+function M:registerWithListener(label, array, listener, init_index)
     init_index = init_index or 1
-    self.items[label] = {
+    self:addItem(label, {
         dimension = 1,
         array = array,
         i = init_index,
-    }
+    })
     if listener then
         self:addListener(listener)
     end
 end
 
+function M:register(label, array, init_index)
+    self:registerWithListener(label, array, M.ReloadOnChange(label), init_index)
+end
+
 ---@param label string an id identifying the array
 ---@param matrix table an array of element to iterate from
 ---@param listener table need to have a method called onBroadcast(iter, label, value)
-function M:registerMatrix(label, matrix, init_col, init_row, listener)
+function M:registerMatrixWithListener(label, matrix, listener, init_col, init_row)
     init_col = init_col or 1
     init_row = init_row or 1
-    self.items[label] = {
+    self:addItem(label, {
         dimension = 2,
         matrix = matrix,
         i = init_col,
         j = init_row,
-    }
+    })
     if listener then
         self:addListener(listener)
     end
+end
+
+function M:registerMatrix(label, matrix, init_col, init_row)
+    self:registerWithListener(label, matrix, M.ReloadOnChange(label), init_col, init_row)
 end
 
 function M:removeItem(label)
@@ -84,6 +105,24 @@ end
 
 ---------------------------------------------------------------------------------------------------
 ---modification
+
+---copy the index information from the previous iter
+function M:inheritIndices(iter)
+    local prev_items = iter.items
+    local items = self.items
+    for label, prev_item in pairs(prev_items) do
+        local item = items[label]
+        if item and item.dimension == prev_item.dimension then
+            item.i = prev_item.i
+            item.j = prev_item.j
+        elseif item == nil then
+            local index = {}
+            index.i = prev_item.i
+            index.j = prev_item.j
+            self.index_history[label] = index
+        end
+    end
+end
 
 ---whenever an index is changed, trigger an index change event
 function M:broadcastChanges(label)

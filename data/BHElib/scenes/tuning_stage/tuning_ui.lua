@@ -333,10 +333,10 @@ function M:loadManagerFromSave(save)
 end
 
 ---get callbacks from matrices that would create chains
-function M:getChains(master)
+function M:getChains(master, environment)
     local save = self:getSave()
 
-    local code = "local external_objects = {}\n"..save.manager_save:getLuaString()
+    local code = save.manager_save:getLuaString()
     code = code.."\nreturn external_objects, {"
     local matrix_saves = save.matrix_saves
     for i = 1, #matrix_saves do
@@ -352,7 +352,7 @@ function M:getChains(master)
     SystemLog("Initializing chains...")
     SystemLog(code)
 
-    local f, msg = loadstring(code)
+    local f, msg = load(code, nil, "t", environment)
     if msg then
         error(msg)
     end

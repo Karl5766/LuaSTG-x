@@ -4,6 +4,15 @@ local OutputColumns = require("BHElib.scripts.linear_tuning.output_columns")
 local AccController = require("BHElib.scripts.units.acc_controller")
 local ColumnScripts = require("BHElib.scripts.linear_tuning.column_scripts")
 local EnemyTypes = require("BHElib.units.enemy.enemy_type.enemy_types")
+local HotIter = require("BHElib.scripts.iter.hot_iter")
+local IterTypes = require("BHElib.scripts.iter.iter_types")
+
+local hot_iter = HotIter()
+if external_objects.hot_iter then
+    hot_iter:inheritIndices(external_objects.hot_iter)
+end
+external_objects.hot_iter = hot_iter
+
 local ADD = ColumnScripts.ConstructAdd
 local AIM = ColumnScripts.ConstructAimFromPos
 local MIR = ColumnScripts.ConstructMirror

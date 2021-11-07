@@ -41,7 +41,7 @@ local function GetOnInitFunction(bullet_list)
 end
 
 ---@param hot_iter HotIter
-function M:addBulletColorIter(hot_iter, label, colors, init_index, is_live)
+function M:addBulletColorIter(hot_iter, label, colors, is_live, init_index)
     if is_live == nil then
         is_live = true
     end
@@ -71,15 +71,14 @@ function M:addBulletColorIter(hot_iter, label, colors, init_index, is_live)
             end
         end
 
-        hot_iter:register(label, registerers, init_index, listener)
+        hot_iter:registerWithListener(label, registerers, listener, init_index)
     else
-        hot_iter:register(label, colors, init_index, listener)
-        listener = HotIter.ReloadOnChange(label)
+        hot_iter:register(label, colors, init_index)
     end
 end
 
 ---@param hot_iter HotIter
-function M:addBulletTypeIter(hot_iter, label, types, init_index, is_live)
+function M:addBulletTypeIter(hot_iter, label, types, is_live, init_index)
     if is_live == nil then
         is_live = true
     end
@@ -109,27 +108,18 @@ function M:addBulletTypeIter(hot_iter, label, types, init_index, is_live)
             end
         end
 
-        hot_iter:register(label, registerers, init_index, listener)
+        hot_iter:registerWithListener(label, registerers, listener, init_index)
     else
-        hot_iter:register(label, types, init_index, listener)
-        listener = HotIter.ReloadOnChange(label)
+        hot_iter:register(label, types, init_index)
     end
 end
 
 ---@param hot_iter HotIter
-function M:addBulletColorTypeIter(hot_iter, label, color_types, init_col, init_row, is_live)
+function M:addBulletColorTypeIter(hot_iter, label, color_types, is_live, init_col, init_row)
     if is_live == nil then
         is_live = true
     end
-    if color_types == nil then
-        color_types = {}
-        for i = 1, #Color.all_color_indices do
-            color_types[i] = {}
-            for j = 1, #BulletTypes.all_bullet_types do
-                color_types[i][j] = {BulletTypes.all_bullet_types[j], Color.all_color_indices[i]}
-            end
-        end
-    end
+    color_types = color_types or BulletTypes.all_bullet_type_color
 
     local listener
     if is_live then
@@ -159,10 +149,9 @@ function M:addBulletColorTypeIter(hot_iter, label, color_types, init_col, init_r
             end
         end
 
-        hot_iter:registerMatrix(label, registerers, init_col, init_row, listener)
+        hot_iter:registerMatrixWithListener(label, registerers, listener, init_col, init_row)
     else
-        hot_iter:registerMatrix(label, color_types, init_col, init_row, listener)
-        listener = HotIter.ReloadOnChange(label)
+        hot_iter:registerMatrix(label, color_types, init_col, init_row)
     end
 end
 

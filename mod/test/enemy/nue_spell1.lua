@@ -38,6 +38,7 @@ function M.__create(parent, boss)
     local self = SpellSession.__create(parent, boss, 12000, "test_attack")
 
     self.tuning_ui = self.game_scene.tuning_ui
+    self.ui_init_params = {}
 
     return self
 end
@@ -60,7 +61,7 @@ function M:ctor()
         end, 0, tostring(self).."0")
 
         lstg.eventDispatcher:addListener("reloadChains", function(params)
-            self:reloadChains()
+            self.init_chain_flag = true
         end, 0, tostring(self).."1")
 
         lstg.eventDispatcher:addListener("onTuningUIEnter", function(params)
@@ -80,13 +81,16 @@ function M:endSession()
 end
 
 function M:initChain()
-    local ui_init_params = self.tuning_ui:getChains(nil)
+    local environment = setmetatable({}, {__index = _G})
+    environment.external_objects = self.ui_init_params[1] or {}
+
+    local ui_init_params = self.tuning_ui:getChains(nil, environment)
     self.ui_init_params = ui_init_params
 
-    self:reloadChains()
+    self:initChainFromUIParams()
 end
 
-function M:reloadChains()
+function M:initChainFromUIParams()
     -- cleanup everything
     local boss = self.boss
 
@@ -105,6 +109,7 @@ function M:reloadChains()
     local external_objects, chains, references = unpack(self.ui_init_params)
 
     self.hot_iter = external_objects.hot_iter
+
     self:loadButtons()
     self.chains = {}
     self.mouse_chains = {}
@@ -125,6 +130,13 @@ function M:reloadChains()
     end
 end
 
+local function ButtonInit()
+    return RecordingCCButton(
+            "creator/image/default_btn_normal.png",
+            "creator/image/default_btn_pressed.png",
+            "creator/image/default_btn_disabled.png", 0)
+end
+
 function M:loadButtons()
     local hot_iter = self.hot_iter
     if hot_iter == nil then
@@ -132,38 +144,39 @@ function M:loadButtons()
     end
 
     local callback_sets = hot_iter:getButtonCallbacks()
+    local wadd = 38
+    local button_color = cc.c3b(36 + wadd, 22 + wadd, 42 + wadd)
+    local wadd_text = 78
+    local title_color = cc.c3b(button_color.r + wadd_text, button_color.g + wadd_text, button_color.b + wadd_text)
+    local title_font_size = 20
     for i = 1, #callback_sets do
-        local base_x, base_y = -100, 500 - 80 * i
+        local base_x, base_y = -108, 500 - 80 * i
 
         local callbacks = callback_sets[i]
         local onTouchEnded = RecordingCCButton.onTouchEnded
         if callbacks.dimension == 1 then
             -- create 2 buttons
             for j = 1, 2 do
-                local button = RecordingCCButton(
-                        "creator/image/default_btn_normal.png",
-                        "creator/image/default_btn_pressed.png",
-                        "creator/image/default_btn_disabled.png", 0)
-                button:setPositionInUI(base_x + j * 60, base_y)
-                button:setButtonSize(50, 50)
+                local button = ButtonInit()
+                button:setPositionInUI(base_x + j * 54 + 19, base_y)
+                button:setButtonSize(46, 50)
                 button:setUseRecordingInput(true)
                 button.onTouchEnded = function(self, x, y)
                     callbacks[j]()
                     onTouchEnded(self, x, y)
                 end
+                button:setColor(button_color)
                 self:addButton(button)
                 if j == 1 then
                     button:setTitleText(callbacks.label)
-                    button:setTitleColor(cc.c3b(0, 0, 0))
+                    button:setTitleColor(title_color)
+                    button:setTitleFontSize(title_font_size)
                 end
             end
         else
             -- create 4 buttons
             for j = 1, 2 do
-                local button = RecordingCCButton(
-                        "creator/image/default_btn_normal.png",
-                        "creator/image/default_btn_pressed.png",
-                        "creator/image/default_btn_disabled.png", 0)
+                local button = ButtonInit()
                 button:setPositionInUI(base_x - 12.5 + j * 75, base_y)
                 button:setButtonSize(25, 50)
                 button:setUseRecordingInput(true)
@@ -171,24 +184,24 @@ function M:loadButtons()
                     callbacks[j]()
                     onTouchEnded(self, x, y)
                 end
+                button:setColor(button_color)
                 self:addButton(button)
                 if j == 1 then
                     button:setTitleText(callbacks.label)
-                    button:setTitleColor(cc.c3b(0, 0, 0))
+                    button:setTitleColor(title_color)
+                    button:setTitleFontSize(title_font_size)
                 end
             end
             for j = 1, 2 do
-                local button = RecordingCCButton(
-                        "creator/image/default_btn_normal.png",
-                        "creator/image/default_btn_pressed.png",
-                        "creator/image/default_btn_disabled.png", 0)
-                button:setPositionInUI(base_x + 100, base_y + (j - 1.5) * 26)
-                button:setButtonSize(44, 21)
+                local button = ButtonInit()
+                button:setPositionInUI(base_x + 100, base_y + (j - 1.5) * 27)
+                button:setButtonSize(44, 22)
                 button:setUseRecordingInput(true)
                 button.onTouchEnded = function(self, x, y)
                     callbacks[j + 2]()
                     onTouchEnded(self, x, y)
                 end
+                button:setColor(button_color)
                 self:addButton(button)
             end
         end
@@ -242,8 +255,16 @@ function M:update(dt)
     SpellSession.update(self, dt)
 
     self:updateButtons()
+    if self.init_chain_flag then
+        self:initChain()
+        self.init_chain_flag = nil
+    end
     if Input:isMouseButtonJustChanged(true, true) then
-        self:mouseFire()
+        local l, r, b, t = Coordinates.getPlayfieldBoundaryInGame()
+        local x, y = self.mouse_follower.x, self.mouse_follower.y
+        if x >= l and x <= r and y >= b and y <= t then
+            self:mouseFire()
+        end
     end
 end
 

@@ -13,12 +13,18 @@ local M = {}
 ---has 3 attributes:
 ---color_to_sprite_name (table) - map from color to the sprite name
 ---sprite_array_name (string) - name of sprite array
+---available_colors (table) - show an array of available colors; indexed by bullet type name
 ---size (number) - size of visual effect
 M.bullet_type_to_info = {}
 local bullet_type_to_info = M.bullet_type_to_info
 
 ---names of all bullet types as an array
 M.all_bullet_types = {}
+
+---a 2d array [bullet_type_i][color_j] = {bullet_type_name, color_index} of all possible type color
+---combinations; note here i and j are not the same as bullet_type and color_index, the order is not
+---guaranteed
+M.all_bullet_type_color = {}
 
 ---color_index to image name of the blink effect
 M.color_index_to_blink_effects = {}
@@ -27,6 +33,10 @@ local color_index_to_blink_effects = M.color_index_to_blink_effects
 ---color_index to animation name of the cancel effect
 M.color_index_to_cancel_effects = {}
 local color_index_to_cancel_effects = M.color_index_to_cancel_effects
+
+---------------------------------------------------------------------------------------------------
+
+local ColorThemes = require("BHElib.unclassified.color")
 
 ---------------------------------------------------------------------------------------------------
 ---bullets
@@ -63,8 +73,8 @@ local bullets = {
     money =         {16, 16, 168, 0, 4.0, 0.753, 1, 8, "tex:bullet_sprite_4"},
 
     -- miscellaneous
-    ball_light =    {64, 64, 0, 0, 11.5, 2.0, 4, 2, "tex:bullet_ball_light", nil, nil, "mul+add"},  -- with 2 rows & 4 columns
-    bubble =        {64, 64, 0, 0, 14.0, 2.0, 4, 2, "tex:bullet_bubble", nil, nil, "mul+add"},
+    ball_light =    {64, 64, 0, 0, 11.5, 2.0, 4, 2, "tex:bullet_ball_light", nil, nil, "mul+add"; is_row_major = true},  -- with 2 rows & 4 columns
+    bubble =        {64, 64, 0, 0, 14.0, 2.0, 4, 2, "tex:bullet_bubble", nil, nil, "mul+add"; is_row_major = true},
     music_rest =    {32, 32, 192, 0, 4.5, 0.8, 1, 8, "tex:bullet_sprite_6"},
 }
 
@@ -86,21 +96,28 @@ local animated_bullets = {
 ---------------------------------------------------------------------------------------------------
 --- init
 
+local half_color_set = {
+    COLOR_RED, COLOR_PURPLE, COLOR_BLUE, COLOR_CYAN,
+    COLOR_GREEN, COLOR_YELLOW, COLOR_ORANGE, COLOR_GRAY,
+}
 ---@param sprite_name_prefix string prefix of the sprite name; the sprite names are obtained by appending 1, 2, ... to the end of it
 ---@param half_flag boolean if true, the sprite to map to only has half of the number of images
 local function CreateColorToSpriteNameMap(sprite_name_prefix, half_flag)
     -- typically there are NUM_COLOR_THEMES / 2 or NUM_COLOR_THEMES images for a bullet type, each has a different color
     local color_to_sprite_name = {}
+    local available_colors
     if half_flag then
         for i = 1, NUM_COLOR_THEMES do
             color_to_sprite_name[i] = sprite_name_prefix..math.ceil(i / 2)
         end
+        available_colors = half_color_set
     else
         for i = 1, NUM_COLOR_THEMES do
             color_to_sprite_name[i] = sprite_name_prefix..i
         end
+        available_colors = ColorThemes.all_color_indices
     end
-    return color_to_sprite_name
+    return color_to_sprite_name, available_colors
 end
 
 ---create a mapping that maps from bullet type & color to sprite name
@@ -131,6 +148,15 @@ local function LoadResources()
     LoadTexture("tex:bullet_cancel", bullet_path.."etbreak.png")
 end
 
+local function GenerateTypeColorCombinations(bullet_type_name, available_colors)
+    local ret = {}
+    for i = 1, #available_colors do
+        local color = available_colors[i]
+        ret[#ret + 1] = {bullet_type_name, color}
+    end
+    return ret
+end
+
 function M.init()
     LoadResources()
 
@@ -138,7 +164,6 @@ function M.init()
 
     -- image bullets
     for bullet_type_name, item in pairs(bullets) do
-        M.all_bullet_types[#M.all_bullet_types + 1] = bullet_type_name
         local image_array_name = "image_array:"..bullet_type_name
 
         local center_x, center_y = nil, nil
@@ -146,19 +171,32 @@ function M.init()
             center_x, center_y = unpack(bullet_sprite_center[bullet_type_name])
         end
 
-        M.loadSprite(
-                image_array_name,
-                item[1], item[2], item[3], item[4], item[5],
-                item[7], item[8], item[9], item[10], item[11],
-                item[12], center_x, center_y)
+        if item.is_row_major then
+            M.loadSpriteRowMajor(
+                    image_array_name,
+                    item[1], item[2], item[3], item[4], item[5],
+                    item[7], item[8], item[9], item[10], item[11],
+                    item[12], center_x, center_y)
+        else
+            M.loadSpriteColumnMajor(
+                    image_array_name,
+                    item[1], item[2], item[3], item[4], item[5],
+                    item[7], item[8], item[9], item[10], item[11],
+                    item[12], center_x, center_y)
+        end
 
         local total_image_num = item[7] * item[8]  -- nImg = nRow * nCol
+        local color_to_sprite_name, available_colors = CreateColorToSpriteNameMapFromImageNum(image_array_name, total_image_num)
         local bullet_info = {
-            color_to_sprite_name = CreateColorToSpriteNameMapFromImageNum(image_array_name, total_image_num),
+            color_to_sprite_name = color_to_sprite_name,
             sprite_array_name = image_array_name,
+            available_colors = available_colors,
             size = item[6]  -- visual effect size
         }
         bullet_type_to_info[bullet_type_name] = bullet_info
+
+        M.all_bullet_types[#M.all_bullet_types + 1] = bullet_type_name
+        M.all_bullet_type_color[#M.all_bullet_type_color + 1] = GenerateTypeColorCombinations(bullet_type_name, available_colors)
     end
 
     -- animated bullets
@@ -169,12 +207,17 @@ function M.init()
                 item[1], item[2], item[3], item[4], item[5],
                 item[7], item[8], item[9], item[10], item[11])
         local total_image_num = item[8]
+        local color_to_sprite_name, available_colors = CreateColorToSpriteNameMapFromImageNum(ani_array_name, total_image_num)
         local bullet_info = {
-            color_to_sprite_name = CreateColorToSpriteNameMapFromImageNum(ani_array_name, total_image_num),
+            color_to_sprite_name = color_to_sprite_name,
             sprite_array_name = ani_array_name,
+            available_colors = available_colors,
             size = item[6]  -- visual effect size
         }
         bullet_type_to_info[bullet_type_name] = bullet_info
+
+        M.all_bullet_types[#M.all_bullet_types + 1] = bullet_type_name
+        M.all_bullet_type_color[#M.all_bullet_type_color + 1] = GenerateTypeColorCombinations(bullet_type_name, available_colors)
     end
 
     M.initBulletEffects()
@@ -187,18 +230,16 @@ end
 ---@param width number width of the bullet sprite in pixels
 ---@param height number height of the bullet sprite in pixels
 function M.loadSprite(image_array_name, width, height,
-                        x, y, collision_radius, num_images_in_row,
-                        num_images_in_col, tex_name, dx, dy,
+                        x, y, collision_radius, i_num, j_num,
+                        tex_name, dxi, dyi, dxj, dyj,
                         blend_mode, set_center_x, set_center_y)
     -- default values
-    dx = dx or width
-    dy = dy or height
     blend_mode = blend_mode or "mul+alpha"
 
     local counter = 1
-    for i = 1, num_images_in_row do
-        for j = 1, num_images_in_col do
-            local cur_x, cur_y = x + (i - 1) * dx, y + (j - 1) * dy
+    for i = 0, i_num - 1 do
+        for j = 0, j_num - 1 do
+            local cur_x, cur_y = x + i * dxi + j * dxj, y + i * dyi + j * dyj
             local image_name = image_array_name..counter
             local resSprite = LoadImage(image_name, tex_name, cur_x, cur_y, width, height, collision_radius, collision_radius)
 
@@ -214,6 +255,36 @@ function M.loadSprite(image_array_name, width, height,
             counter = counter + 1
         end
     end
+end
+
+---@param image_array_name string name of the image array
+---@param width number width of the bullet sprite in pixels
+---@param height number height of the bullet sprite in pixels
+function M.loadSpriteRowMajor(image_array_name, width, height,
+                      x, y, collision_radius, num_images_in_row,
+                      num_images_in_col, tex_name, dx, dy,
+                      blend_mode, set_center_x, set_center_y)
+    dx = dx or width
+    dy = dy or height
+    M.loadSprite(image_array_name, width, height,
+            x, y, collision_radius, num_images_in_col,
+            num_images_in_row, tex_name, 0, dy, dx, 0,
+            blend_mode, set_center_x, set_center_y)
+end
+
+---@param image_array_name string name of the image array
+---@param width number width of the bullet sprite in pixels
+---@param height number height of the bullet sprite in pixels
+function M.loadSpriteColumnMajor(image_array_name, width, height,
+                              x, y, collision_radius, num_images_in_row,
+                              num_images_in_col, tex_name, dx, dy,
+                              blend_mode, set_center_x, set_center_y)
+    dx = dx or width
+    dy = dy or height
+    M.loadSprite(image_array_name, width, height,
+            x, y, collision_radius, num_images_in_row,
+            num_images_in_col, tex_name, dx, 0, 0, dy,
+            blend_mode, set_center_x, set_center_y)
 end
 
 ---load a grid of animations, each animation is a grid of images
@@ -282,14 +353,9 @@ end
 function M.initBulletEffects()
 
     -- bullet blink
-    M.loadSprite("image_array:bullet_blink",
-            32,
-            32,
-            80,
-            0,
-            nil,
-            1,
-            8,
+    M.loadSpriteColumnMajor("image_array:bullet_blink",
+            32, 32, 80, 0,
+            nil, 1, 8,
             "tex:bullet_sprite_1")
     for i = 1, NUM_COLOR_THEMES do
         color_index_to_blink_effects[i] = "image_array:bullet_blink"..math.ceil(i / 2)

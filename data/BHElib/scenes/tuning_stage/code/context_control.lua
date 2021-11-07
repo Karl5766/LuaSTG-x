@@ -23,8 +23,14 @@ local PV = PO("vx", "vy", "v", "a")
 
 local hot_iter = require("BHElib.scripts.iter.hot_iter")()
 local IterTypes = require("BHElib.scripts.iter.iter_types")
-IterTypes:addBulletColorTypeIter(hot_iter, "aimed")
+if external_objects.hot_iter then
+    hot_iter:inheritIndices(external_objects.hot_iter)
+end
 external_objects.hot_iter = hot_iter
+
+IterTypes:addBulletColorTypeIter(hot_iter, "aimed")
+hot_iter:register("delay", {3, 3.5, 4, 4.5, 5, 5.5, 6, 6.5, 7, 7.5, 8, 8.5, 9})
+
 
 local function MIRROR_I(cur, next, i)
 	if next.i % 2 == 1 then

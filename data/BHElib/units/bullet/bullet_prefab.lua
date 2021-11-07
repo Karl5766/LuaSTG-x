@@ -54,7 +54,7 @@ function M:init(bullet_type_name, color_index, group, blink_time, effect_size, d
     self.destroyable = destroyable
     self.frame_task = false
 
-    if blink_time then
+    if blink_time and blink_time > 0 then
         self.img = color_index_to_blink_effects[color_index]
         self.layer = LAYER_BULLET_BLINK
         self.blink_time = blink_time
