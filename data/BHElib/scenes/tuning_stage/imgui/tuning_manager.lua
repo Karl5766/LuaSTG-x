@@ -96,15 +96,6 @@ function M:renderAddMatrixButtons()
     end
 end
 
---function M:renderLoadManagerButtons()
---    for key_str, manager_save in pairs(InitTuningManagerSaves) do
---        local ret = im.button("local"..key_str)
---        if ret then
---            manager_save:writeBack(self)
---        end
---    end
---end
-
 ---@param dir_path string the path where backups are located
 function M:renderLoadBackupMenu(dir_path)
     local file_info = FS.getBriefOfFilesInDirectory(dir_path)
@@ -135,6 +126,12 @@ function M:renderLoadBackupMenu(dir_path)
             end
             if im.menuItem("Load Manager Save") then
                 self.tuning_ui:loadBackup(dir_path..file_name, 2)
+            end
+            if im.beginMenu("Delete") then
+                if im.menuItem("Confirm") then
+                    os.remove(dir_path..file_name)
+                end
+                im.endMenu()
             end
             im.endMenu()
         end

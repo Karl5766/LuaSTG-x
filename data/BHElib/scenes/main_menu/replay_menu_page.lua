@@ -31,12 +31,42 @@ local STR_REPLAY_SUFFIX = ".Replay"  -- credit to Trackmania replay suffix, hard
 
 ---------------------------------------------------------------------------------------------------
 
-local function CreateSaveSelectable(display_text, full_path, i)
+local OnSaveReplay  -- forward declaration
+
+local function OnLoadReplay()
+    PlaySound("se:select00", 0.1, 0, true)
+end
+
+local function CreateSaveSelectable(display_text, full_path, file_name, i)
+    local replay_info = {
+        i = i,
+        file_name = file_name,
+        full_path = full_path,
+    }
     local selectable = Selectable(display_text, {
         {MenuConst.CHOICE_SPECIFY, "replay_path_for_write", full_path},
+        {MenuConst.CHOICE_SPECIFY, "replay_info", replay_info},
+        {MenuConst.CHOICE_EXECUTE, OnSaveReplay},
         {MenuConst.CHOICE_CASCADE},  -- let title page do the saving job
     })
     return selectable
+end
+
+local function CreateLoadSelectable(display_text, full_path)
+    local selectable = Selectable(display_text, {
+        {MenuConst.CHOICE_SPECIFY, "replay_path_for_read", full_path},
+        {MenuConst.CHOICE_EXECUTE, OnLoadReplay},
+        {MenuConst.CHOICE_EXIT}  -- let stage scene do the loading job
+    })
+    return selectable
+end
+
+function OnSaveReplay(menu_manager, menu_page)
+    local info = menu_manager:queryChoice("replay_info")
+    local selector = menu_page:getSelector()
+    selector:setSelectableAtIndex(info.i, CreateSaveSelectable(info.file_name, info.full_path, info.file_name, info.i))
+
+    PlaySound("se:extend", 0.1, 0, true)
 end
 
 ---scan through all replay files in the directory, create an array of options with index specified by the replay file;
@@ -61,13 +91,11 @@ local function CreateAllSelectable(is_saving, replay_file_directory, max_index, 
             if number and number <= max_index then
 
                 local selectable
+                local full_path = replay_file_directory.."/"..file_name
                 if is_saving then
-                    selectable = CreateSaveSelectable(file_name, replay_file_directory.."/"..file_name, number)
+                    selectable = CreateSaveSelectable(file_name, full_path, file_name, number)
                 else
-                    selectable = Selectable(file_name, {
-                        {MenuConst.CHOICE_SPECIFY, "replay_path_for_read", replay_file_directory.."/"..file_name},
-                        {MenuConst.CHOICE_EXIT}  -- let stage scene do the loading job
-                    })
+                    selectable = CreateLoadSelectable(file_name, full_path)
                 end
                 ret[number] = selectable
                 size = max(number, size) + empty_room_num
@@ -82,11 +110,12 @@ local function CreateAllSelectable(is_saving, replay_file_directory, max_index, 
     for i = 1, size do
         if ret[i] == nil then
             if is_saving then
+                local file_name = STR_REPLAY_PREFIX..tostring(i)..STR_REPLAY_SUFFIX
                 ret[i] = CreateSaveSelectable(
                         "--- empty ---",
-                        replay_file_directory.."/"..STR_REPLAY_PREFIX..tostring(i)..STR_REPLAY_SUFFIX,
-                        i
-                )
+                        replay_file_directory.."/"..file_name,
+                        file_name,
+                        i)
             else
                 ret[i] = Selectable("--- empty ---", nil)
             end

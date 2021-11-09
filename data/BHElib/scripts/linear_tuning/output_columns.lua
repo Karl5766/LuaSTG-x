@@ -49,7 +49,9 @@ end
 ---@return function a spark function for the output column
 local function GetSparkFunction(spawn_callback)
     local function Spark(self)
-        SparkTaskCallback(self, spawn_callback)
+        TaskNew(self.s_master, function()
+            SparkTaskCallback(self, spawn_callback)
+        end)
     end
 
     return Spark
@@ -138,25 +140,13 @@ M.AccBullet = SpawnDefine("DelayedAccBulletOutputColumn", function(col, s_t)
         end
         col.start_time = s_t
 
+        local bullet = DelayedAccBullet(col)
+
         local registerers = col.registerers
         if registerers then
             for i = 1, #registerers do
                 local registerer = registerers[i]
-                if registerer.bullet_type_name then
-                    col.bullet_type_name = registerer.bullet_type_name
-                end
-                if registerer.color_index then
-                    col.color_index = registerer.color_index
-                end
-            end
-        end
-
-        local bullet = DelayedAccBullet(col)
-
-        if registerers then
-            for i = 1, #registerers do
-                local registerer = registerers[i]
-                registerer.on_init(bullet)
+                registerer:on_init(bullet)
             end
         end
 

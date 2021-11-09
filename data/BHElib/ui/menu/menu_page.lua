@@ -5,6 +5,7 @@
 ---desc: implements the simple default behaviors of MenuPage objects
 ---------------------------------------------------------------------------------------------------
 
+---@class MenuPage
 local MenuPage = LuaClass("menu.MenuPage")
 
 local InteractiveSelector = require("BHElib.ui.selectors.interactive_selector")
@@ -23,6 +24,10 @@ function MenuPage.__create(selector)
     return self
 end
 
+function MenuPage:getSelector()
+    return self.selector
+end
+
 ---@param menu_page_array MenuPageArray
 function MenuPage:onCascade(menu_page_array)
 end
@@ -34,6 +39,10 @@ end
 
 function MenuPage:setRenderView(view)
     self.renderer.coordinates_name = view
+end
+
+function MenuPage:getSelectableArray()
+    return self.selector:getSelectableArray()
 end
 
 ---@param state_const number a constant indicating the state of the selector about transitioning, E.g. IN_FORWARD

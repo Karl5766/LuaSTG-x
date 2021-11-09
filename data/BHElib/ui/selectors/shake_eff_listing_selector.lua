@@ -74,6 +74,11 @@ function M.__create(
     return self
 end
 
+---for modification purposes
+function M:getSelectableArray(selectable_array)
+    return self.selectable_array
+end
+
 function M:setShakeCoeff(shake_max_time, shake_amplitude, shake_period)
     self.shake_max_time = shake_max_time
     self.shake_amplitude = shake_amplitude

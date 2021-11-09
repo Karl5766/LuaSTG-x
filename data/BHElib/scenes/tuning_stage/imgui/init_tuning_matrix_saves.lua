@@ -38,23 +38,23 @@ M[save.matrix_title] = save
 ---------------------------------------------------------------------------------------------------
 ---StdBullet
 
-save = TuningMatrixSave(nil)
-save.matrix = {
-    {"s_script", NON_APPLICABLE_STR, EPT},
-    {"s_n", NON_APPLICABLE_STR, "INFINITE"},
-    {"s_t", NON_APPLICABLE_STR, EPT},
-    {"s_dt", NON_APPLICABLE_STR, "120"},
-    {"a", EPT, EPT},
-    {"v", "3", EPT},
-    {"x", EPT, EPT},
-    {"y", EPT, EPT},
-}
-save.num_col = #save.matrix[1]
-save.num_row = #save.matrix
-save.matrix_title = "StdBullet"
-save.output_control_save = GetDefaultSave(save.matrix_title)
-save.tail_script = EPT
-M[save.matrix_title] = save
+--save = TuningMatrixSave(nil)
+--save.matrix = {
+--    {"s_script", NON_APPLICABLE_STR, EPT},
+--    {"s_n", NON_APPLICABLE_STR, "INFINITE"},
+--    {"s_t", NON_APPLICABLE_STR, EPT},
+--    {"s_dt", NON_APPLICABLE_STR, "120"},
+--    {"a", EPT, EPT},
+--    {"v", "3", EPT},
+--    {"x", EPT, EPT},
+--    {"y", EPT, EPT},
+--}
+--save.num_col = #save.matrix[1]
+--save.num_row = #save.matrix
+--save.matrix_title = "StdBullet"
+--save.output_control_save = GetDefaultSave(save.matrix_title)
+--save.tail_script = EPT
+--M[save.matrix_title] = save
 
 ---------------------------------------------------------------------------------------------------
 ---Bullet

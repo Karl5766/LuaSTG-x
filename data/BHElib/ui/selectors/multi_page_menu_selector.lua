@@ -113,6 +113,11 @@ function M:loadSelectableArray(index)
     end
 end
 
+function M:setSelectableAtIndex(index, new_selectable)
+    self.all_selectable[index] = new_selectable
+    self:loadSelectableArray(self.page_index)
+end
+
 function M:renderSelectable(index)
     if self.selectable_array[index] == nil then
         self:renderDummySelectable(index)

@@ -96,7 +96,8 @@ function M:changeSpriteTo(bullet_type_name, color_index)
         local bullet_type_info = bullet_type_to_info[bullet_type_name]
         assert(bullet_type_info, "Error: Unrecognized bullet type "..tostring(bullet_type_name).."!")
         local image = bullet_type_info.color_to_sprite_name[color_index]
-        assert(image, "Error: Unrecognized color "..tostring(color_index).." for the given bullet type!")
+        assert(image, "Error: Unrecognized color "..tostring(color_index)..
+                " for the given bullet type "..tostring(bullet_type_name).."!")
         self.img = image
     else
         self.img = color_index_to_blink_effects[color_index]

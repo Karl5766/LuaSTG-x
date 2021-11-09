@@ -45,6 +45,10 @@ function M:addItem(label, item)
     end
 end
 
+function M:addRegisterer(label, registerer)
+    self.items[label].registerer = registerer
+end
+
 ---@param label string an id identifying the array
 ---@param array table an array of element to iterate from
 ---@param listener table need to have a method called onBroadcast(iter, label, value)
@@ -89,13 +93,21 @@ function M:removeItem(label)
     self.items[label] = nil
 end
 
-function M:get(label)
+function M:getValue(label)
     local item = self.items[label]
     if item.dimension == 1 then
         return item.array[item.i]
     else
         return item.matrix[item.i][item.j]
     end
+end
+
+function M:get(label)
+    local item = self.items[label]
+    if item.registerer then
+        return item.registerer
+    end
+    return self:getValue(label)
 end
 
 ---@param listener table need to have a method called onBroadcast(iter, label, value)
@@ -126,7 +138,7 @@ end
 
 ---whenever an index is changed, trigger an index change event
 function M:broadcastChanges(label)
-    local new_val = self:get(label)
+    local new_val = self:getValue(label)
     for i, listener in ipairs(self.listeners) do
         listener(self, label, new_val)
     end

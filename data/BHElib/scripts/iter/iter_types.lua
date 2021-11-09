@@ -16,143 +16,106 @@ local BulletTypes = require("BHElib.units.bullet.bullet_types")
 
 ---------------------------------------------------------------------------------------------------
 
-local function GetOnInitFunction(bullet_list)
-    local function OnInit(bullet)
-        local n = #bullet_list + 1
-        bullet_list[n] = bullet
+local function OnInit(registerer, bullet)
+    registerer:set(bullet)
+    local bullet_list = registerer.bullet_list
 
-        bullet_list.bound = bullet_list.bound or MIN_BOUND
-        if n > bullet_list.bound then
-            local num_exist = 0  -- actual number of existing bullets
-            -- remove invalid bullets in-place
-            for i = 1, n do
-                if IsValid(bullet_list[i]) then
-                    num_exist = num_exist + 1
-                    bullet_list[num_exist] = bullet_list[i]
+    local n = #bullet_list + 1
+    bullet_list[n] = bullet
+
+    bullet_list.bound = bullet_list.bound or MIN_BOUND
+    if n > bullet_list.bound then
+        local num_exist = 0  -- actual number of existing bullets
+        -- remove invalid bullets in-place
+        for i = 1, n do
+            if IsValid(bullet_list[i]) then
+                num_exist = num_exist + 1
+                bullet_list[num_exist] = bullet_list[i]
+            end
+        end
+        for i = n, num_exist + 1, -1 do
+            bullet_list[i] = nil
+        end
+        bullet_list.bound = max(MIN_BOUND, math.ceil(num_exist * BOUND_EXPAND_FACTOR))
+    end
+end
+
+local function AddLiveRegisterer(hot_iter, label, registerer)
+    local bullets = registerer.bullet_list
+
+    local listener = function(iter, broadcast_label, value)
+        registerer.value = value
+        if hot_iter == iter and label == broadcast_label then
+            for i = 1, #bullets do
+                local bullet = bullets[i]
+                if IsValid(bullet) then
+                    registerer:set(bullet)
                 end
             end
-            for i = n, num_exist + 1, -1 do
-                bullet_list[i] = nil
-            end
-            bullet_list.bound = max(MIN_BOUND, math.ceil(num_exist * BOUND_EXPAND_FACTOR))
         end
     end
-    return OnInit
+
+    hot_iter:addRegisterer(label, registerer)
+    hot_iter:addListener(listener)
 end
+
+local function AutoAddLiveRegisterer(hot_iter, label, set)
+    local registerer = {
+        is_registerer = true,
+        value = hot_iter:getValue(label),
+        set = set,
+        on_init = OnInit,
+        bullet_list = {},
+    }
+    AddLiveRegisterer(hot_iter, label, registerer)
+end
+
+local function Add1dTypeIter(hot_iter, label, array, is_live, set, init_index)
+    hot_iter:registerWithListener(label, array, nil, init_index)
+    if is_live then
+        AutoAddLiveRegisterer(hot_iter, label, set)
+    else
+        hot_iter:addListener(HotIter.ReloadOnChange(label))
+    end
+end
+
+local function Add2dTypeIter(hot_iter, label, matrix, is_live, set, init_col, init_row)
+    hot_iter:registerMatrixWithListener(label, matrix, nil, init_col, init_row)
+    if is_live then
+        AutoAddLiveRegisterer(hot_iter, label, set)
+    else
+        hot_iter:addListener(HotIter.ReloadOnChange(label))
+    end
+end
+
+---------------------------------------------------------------------------------------------------
 
 ---@param hot_iter HotIter
 function M:addBulletColorIter(hot_iter, label, colors, is_live, init_index)
-    if is_live == nil then
-        is_live = true
+    local function set(registerer, bullet)
+        bullet:changeColorIndexTo(registerer.value)
     end
-    colors = colors or Color.all_color_indices
-
-    local listener
-    if is_live then
-        local registerers = {}
-        local bullets = {}
-
-        local on_init = GetOnInitFunction(bullets)
-        for i, color_index in ipairs(colors) do
-            registerers[i] = {
-                is_registerer = true,
-                on_init = on_init,
-                color_index = color_index,
-            }
-        end
-
-        listener = function(iter, broadcast_label, registerer)
-            if hot_iter == iter and label == broadcast_label then
-                for i, bullet in ipairs(bullets) do
-                    if IsValid(bullet) then
-                        bullet:changeColorIndexTo(registerer.color_index)
-                    end
-                end
-            end
-        end
-
-        hot_iter:registerWithListener(label, registerers, listener, init_index)
-    else
-        hot_iter:register(label, colors, init_index)
-    end
+    Add1dTypeIter(hot_iter, label, colors or Color.all_color_indices,
+                is_live == nil or is_live, set, init_index)
 end
 
 ---@param hot_iter HotIter
 function M:addBulletTypeIter(hot_iter, label, types, is_live, init_index)
-    if is_live == nil then
-        is_live = true
+    local function set(registerer, bullet)
+        bullet:changeBulletTypeTo(registerer.value)
     end
-    types = types or BulletTypes.all_bullet_types
-
-    local listener
-    if is_live then
-        local registerers = {}
-        local bullets = {}
-
-        local on_init = GetOnInitFunction(bullets)
-        for i, bullet_type_name in ipairs(types) do
-            registerers[i] = {
-                is_registerer = true,
-                on_init = on_init,
-                bullet_type_name = bullet_type_name,
-            }
-        end
-
-        listener = function(iter, broadcast_label, registerer)
-            if hot_iter == iter and label == broadcast_label then
-                for i, bullet in ipairs(bullets) do
-                    if IsValid(bullet) then
-                        bullet:changeBulletTypeTo(registerer.bullet_type_name)
-                    end
-                end
-            end
-        end
-
-        hot_iter:registerWithListener(label, registerers, listener, init_index)
-    else
-        hot_iter:register(label, types, init_index)
-    end
+    Add1dTypeIter(hot_iter, label, colors or BulletTypes.all_bullet_types,
+            is_live == nil or is_live, set, init_index)
 end
 
 ---@param hot_iter HotIter
-function M:addBulletColorTypeIter(hot_iter, label, color_types, is_live, init_col, init_row)
-    if is_live == nil then
-        is_live = true
+function M:addBulletTypeColorIter(hot_iter, label, color_types, is_live, init_col, init_row)
+    local function set(registerer, bullet)
+        local v = registerer.value
+        bullet:changeSpriteTo(v[1], v[2])
     end
-    color_types = color_types or BulletTypes.all_bullet_type_color
-
-    local listener
-    if is_live then
-        local registerers = {}
-        local bullets = {}
-
-        local on_init = GetOnInitFunction(bullets)
-        for i, row in ipairs(color_types) do
-            registerers[i] = {}
-            for j, color_type in ipairs(row) do
-                registerers[i][j] = {
-                    is_registerer = true,
-                    on_init = on_init,
-                    bullet_type_name = color_type[1],
-                    color_index = color_type[2],
-                }
-            end
-        end
-
-        listener = function(iter, broadcast_label, registerer)
-            if hot_iter == iter and label == broadcast_label then
-                for i, bullet in ipairs(bullets) do
-                    if IsValid(bullet) then
-                        bullet:changeSpriteTo(registerer.bullet_type_name, registerer.color_index)
-                    end
-                end
-            end
-        end
-
-        hot_iter:registerMatrixWithListener(label, registerers, listener, init_col, init_row)
-    else
-        hot_iter:registerMatrix(label, color_types, init_col, init_row)
-    end
+    Add2dTypeIter(hot_iter, label, color_types or BulletTypes.all_bullet_type_color,
+            is_live == nil or is_live, set, init_col, init_row)
 end
 
 return M

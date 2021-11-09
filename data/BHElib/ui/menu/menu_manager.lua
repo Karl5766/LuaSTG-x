@@ -173,7 +173,7 @@ function M:update(dt)
 
             local choices = menu_page:getChoice()
             if choices ~= nil then
-                self:handleChoices(choices, menu_page_pos)
+                self:handleChoices(choices, menu_page_pos, menu_page)
             end
         end
     end
@@ -191,7 +191,8 @@ end
 
 ---handle choices raised by a menu page in the menu array at the given index
 ---@param menu_page_pos number the index of the menu page that raised the choices
-function M:handleChoices(choices, menu_page_pos)
+---@param menu_page MenuPage
+function M:handleChoices(choices, menu_page_pos, menu_page)
     local menu_page_array = self.menu_page_array
 
     local exit_indicator = 0
@@ -206,7 +207,7 @@ function M:handleChoices(choices, menu_page_pos)
             cascade_flag = true
         elseif label == MenuConst.CHOICE_EXECUTE then
             local callback = choice[2]
-            callback(self)
+            callback(self, menu_page)
         else
             -- menu page switch
             if label == MenuConst.CHOICE_GO_BACK then

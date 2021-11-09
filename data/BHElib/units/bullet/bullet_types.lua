@@ -9,6 +9,8 @@
 ---@class BulletTypes
 local M = {}
 
+---below are some information tables that this file is responsible for initializing
+
 ---contains information about a given bullet type
 ---has 3 attributes:
 ---color_to_sprite_name (table) - map from color to the sprite name
@@ -28,7 +30,7 @@ M.all_bullet_type_color = {}
 
 ---color_index to image name of the blink effect
 M.color_index_to_blink_effects = {}
-local color_index_to_blink_effects = M.color_index_to_blink_effects
+local _color_index_to_blink_effects = M.color_index_to_blink_effects
 
 ---color_index to animation name of the cancel effect
 M.color_index_to_cancel_effects = {}
@@ -37,45 +39,52 @@ local color_index_to_cancel_effects = M.color_index_to_cancel_effects
 ---------------------------------------------------------------------------------------------------
 
 local ColorThemes = require("BHElib.unclassified.color")
+local _touhou_theme = ColorThemes.touhou_theme
+local _touhou_theme_half = ColorThemes.touhou_theme_half
+local _mugenri_theme = ColorThemes.mugenri_theme
+local _mugenri_theme_animated = ColorThemes.mugenri_theme_animated
 
 ---------------------------------------------------------------------------------------------------
 ---bullets
 
 ---width, height, x, y (from up-left), collision_radius, size (of visual effect), num_images_in_row, num_images_in_col, tex_name,
----dx, dy (default to width, height), blend_mode (default to "mul+alpha")
+---available_colors, dx, dy (default to width, height), blend_mode (default to "mul+alpha")
 local bullets = {
     -- each row loads a column in the image file
-    arrowhead =     {16, 16, 0, 0, 2.5, 0.6, 1, 16, "tex:bullet_sprite_1"},
-    gun_bullet =    {16, 16, 24, 0, 2.5, 0.4, 1, 16, "tex:bullet_sprite_1"},
-    butterfly =     {32, 32, 112, 0, 4.0, 0.7, 1, 8, "tex:bullet_sprite_1"},
-    square =        {16, 16, 152, 0, 3.0, 0.8, 1, 16, "tex:bullet_sprite_1"},
-    ball =          {32, 32, 176, 0, 4.0, 0.75, 1, 8, "tex:bullet_sprite_1"},
-    ball_big =      {32, 32, 192, 0, 4.5, 1.0, 1, 8, "tex:bullet_sprite_2"},
-    mildew =        {16, 16, 208, 0, 2.0, 0.401, 1, 16, "tex:bullet_sprite_1"},
-    ellipse =       {32, 32, 224, 0, 4.5, 0.701, 1, 8, "tex:bullet_sprite_1"},
+    arrowhead =     {16, 16, 0, 0, 2.5, 0.6, 1, 16, "tex:bullet_sprite_1", _touhou_theme},
+    gun_bullet =    {16, 16, 24, 0, 2.5, 0.4, 1, 16, "tex:bullet_sprite_1", _touhou_theme},
+    butterfly =     {32, 32, 112, 0, 4.0, 0.7, 1, 8, "tex:bullet_sprite_1", _touhou_theme_half},
+    square =        {16, 16, 152, 0, 3.0, 0.8, 1, 16, "tex:bullet_sprite_1", _touhou_theme},
+    ball =          {32, 32, 176, 0, 4.0, 0.75, 1, 8, "tex:bullet_sprite_1", _touhou_theme_half},
+    ball_big =      {32, 32, 192, 0, 4.5, 1.0, 1, 8, "tex:bullet_sprite_2", _touhou_theme_half},
+    mildew =        {16, 16, 208, 0, 2.0, 0.401, 1, 16, "tex:bullet_sprite_1", _touhou_theme},
+    ellipse =       {32, 32, 224, 0, 4.5, 0.701, 1, 8, "tex:bullet_sprite_1", _touhou_theme_half},
 
-    star =          {16, 16, 96, 0, 3.0, 0.5, 1, 16, "tex:bullet_sprite_2"},
-    star_big =      {32, 32, 224, 0, 5.5, 0.998, 1, 8, "tex:bullet_sprite_2"},
-    pellet =        {16, 16, 176, 0, 2.0, 0.402, 1, 16, "tex:bullet_sprite_2"},
-    grain =         {16, 16, 160, 0, 2.5, 0.403, 1, 16, "tex:bullet_sprite_2"},
-    shard =         {16, 16, 128, 0, 2.5, 0.404, 1, 16, "tex:bullet_sprite_2"},
+    star =          {16, 16, 96, 0, 3.0, 0.5, 1, 16, "tex:bullet_sprite_2", _touhou_theme},
+    star_big =      {32, 32, 224, 0, 5.5, 0.998, 1, 8, "tex:bullet_sprite_2", _touhou_theme_half},
+    point =         {16, 16, 176, 0, 2.0, 0.402, 1, 16, "tex:bullet_sprite_2", _touhou_theme},
+    grain =         {16, 16, 160, 0, 2.5, 0.403, 1, 16, "tex:bullet_sprite_2", _touhou_theme},
+    shard =         {16, 16, 128, 0, 2.5, 0.404, 1, 16, "tex:bullet_sprite_2", _touhou_theme},
 
-    knife =         {32, 32, 0, 0, 4.0, 0.754, 1, 8, "tex:bullet_sprite_3"},
-    grain_dark =    {16, 16, 48, 0, 2.5, 0.405, 1, 16, "tex:bullet_sprite_3"},
-    kunai =         {16, 16, 80, 0, 2.5, 0.407, 1, 16, "tex:bullet_sprite_3"},
-    droplet =       {16, 16, 112, 0, 2.5, 0.406, 1, 16, "tex:bullet_sprite_3"},
+    --knife =         {32, 32, 0, 0, 4.0, 0.754, 1, 8, "tex:bullet_sprite_3", _touhou_theme_half},
+    --grain_dark =    {16, 16, 48, 0, 2.5, 0.405, 1, 16, "tex:bullet_sprite_3", _touhou_theme},
+    --kunai =         {16, 16, 80, 0, 2.5, 0.407, 1, 16, "tex:bullet_sprite_3", _touhou_theme},
+    --droplet =       {16, 16, 112, 0, 2.5, 0.406, 1, 16, "tex:bullet_sprite_3", _touhou_theme},
+    --
+    --ball_glow =     {32, 32, 64, 0, 4.0, 0.751, 1, 8, "tex:bullet_sprite_4", _touhou_theme_half},
+    --arrow =         {32, 32, 96, 0, 3.5, 0.61, 1, 8, "tex:bullet_sprite_4", _touhou_theme_half},
+    --heart =         {32, 32, 128, 0, 9.0, 1.0, 1, 8, "tex:bullet_sprite_4", _touhou_theme_half},
+    --knife_b =       {32, 32, 192, 0, 3.5, 0.755, 1, 8, "tex:bullet_sprite_4", _touhou_theme_half},
+    --ball_ring =     {16, 16, 232, 8, 4.0, 0.752, 1, 8, "tex:bullet_sprite_4", _touhou_theme_half, 16, 32},  -- not aligned the same way as others
+    --money =         {16, 16, 168, 0, 4.0, 0.753, 1, 8, "tex:bullet_sprite_4", _touhou_theme_half},
+    --
+    ---- miscellaneous
+    --ball_light =    {64, 64, 0, 0, 11.5, 2.0, 4, 2, "tex:bullet_ball_light", _touhou_theme_half, nil, nil, "mul+add"; is_row_major = true},  -- with 2 rows & 4 columns
+    --bubble =        {64, 64, 0, 0, 14.0, 2.0, 4, 2, "tex:bullet_bubble", _touhou_theme_half, nil, nil, "mul+add"; is_row_major = true},
+    --music_rest =    {32, 32, 192, 0, 4.5, 0.8, 1, 8, "tex:bullet_sprite_6", _touhou_theme_half},
 
-    ball_glow =     {32, 32, 64, 0, 4.0, 0.751, 1, 8, "tex:bullet_sprite_4"},
-    arrow =         {32, 32, 96, 0, 3.5, 0.61, 1, 8, "tex:bullet_sprite_4"},
-    heart =         {32, 32, 128, 0, 9.0, 1.0, 1, 8, "tex:bullet_sprite_4"},
-    knife_b =       {32, 32, 192, 0, 3.5, 0.755, 1, 8, "tex:bullet_sprite_4"},
-    ball_ring =     {16, 16, 232, 8, 4.0, 0.752, 1, 8, "tex:bullet_sprite_4", 16, 32},  -- not aligned the same way as others
-    money =         {16, 16, 168, 0, 4.0, 0.753, 1, 8, "tex:bullet_sprite_4"},
-
-    -- miscellaneous
-    ball_light =    {64, 64, 0, 0, 11.5, 2.0, 4, 2, "tex:bullet_ball_light", nil, nil, "mul+add"; is_row_major = true},  -- with 2 rows & 4 columns
-    bubble =        {64, 64, 0, 0, 14.0, 2.0, 4, 2, "tex:bullet_bubble", nil, nil, "mul+add"; is_row_major = true},
-    music_rest =    {32, 32, 192, 0, 4.5, 0.8, 1, 8, "tex:bullet_sprite_6"},
+    ---Mugenri Shots for experimentation
+    --mugenri_jewel = {16, 16, 752, 0, 5.5, 0.75, 1, 9, "tex:mugenri_shot", _mugenri_theme},
 }
 
 ---some bullet sprites are not exactly centered, set the image center manually
@@ -86,50 +95,97 @@ local bullet_sprite_center = {
 
 ---some bullets are animated, they need to be loaded via LoadAnimation
 ---width, height (of a single frame), x, y (from up-left), collision_radius, size, num_images_in_animation, num_animations,
----interval (time between two images in frames), tex_name, blend_mode (default to "")
+---interval (time between two images in frames), tex_name, available_colors, blend_mode (default to "")
 local animated_bullets = {
     -- each animation is a column of images; we can load each row for each color of the bullet
-    fireball =      {48, 32, 0, 0, 4.0, 0.702, 4, 8, 4, "tex:bullet_fireball", "mul+add"},
-    music_note =    {60, 32, 0, 0, 4.0, 0.8, 3, 8, 8, "tex:bullet_music_note"},
+    fireball =      {48, 32, 0, 0, 4.0, 0.702, 4, 8, 4, "tex:bullet_fireball", _touhou_theme_half, "mul+add"},
+    music_note =    {60, 32, 0, 0, 4.0, 0.8, 3, 8, 8, "tex:bullet_music_note", _touhou_theme_half},
+
+    --mugenri_crystal = {32, 32, 128, 0, 10.0, 1.6, 4, 9, 4, "tex:mugenri_shot", _mugenri_theme_animated},
+    --mugenri_shuriken = {32, 32, 128, 256, 6.0, 1.0, 3, 9, 8, "tex:mugenri_shot", _mugenri_theme_animated},
+    --mugenri_sperm = {32, 32, 128, 640, 6.0, 1.0, 3, 9, 8, "tex:mugenri_shot", _mugenri_theme_animated},
+    --
+    --mugenri_yin_yang = {32, 32, 416, 0, 11.5, 2.0, 4, 9, 8, "tex:mugenri_shot", _mugenri_theme_animated},
+    --mugenri_rot_ellipse = {32, 32, 416, 256, 9.0, 1.5, 4, 9, 8, "tex:mugenri_shot", _mugenri_theme_animated},
+    --mugenri_fire_sword = {32, 32, 416, 512, 6.0, 1.0, 4, 9, 8, "tex:mugenri_shot", _mugenri_theme_animated},
+    --mugenri_fire_sword_shadow = {32, 32, 416, 640, 6.0, 1.0, 4, 9, 8, "tex:mugenri_shot", _mugenri_theme_animated},
+    --mugenri_shock_wave = {32, 32, 416, 768, 10.0, 1.8, 4, 9, 8, "tex:mugenri_shot", _mugenri_theme_animated},
+
 }
+
+local inclusion_list = {
+    1,2,3,4,5,6,7,8,9,10,
+    11,12,13,14,15,16,17,18,19,20,
+    21,22,23,24,25,26,27,28,29,30,
+    31,32,33,34,35,36,37,38,39,40,
+    41,42,43,44,45,46,47,48,49,50,
+    51,52,53,54,55,56,57,58,59,60,
+    61,62,63,64,65,66,67,
+}
+local function LoadFireBullet(i)
+    local ri = i
+    if ri <= 19 then
+        animated_bullets["fire_bullet_x2_"..i] = {
+            32, 32, 0, (ri - 1) * 32, 6.0, 1.2, 4, 1, 8,
+            "tex:fire_bullet_1", ColorThemes.fire_bullet_theme;
+            is_row_major = true}
+        return
+    end
+    ri = ri - 19
+
+    if ri <= 14 then
+        animated_bullets["fire_bullet_x2_"..i] = {
+            32, 32, 0, (ri - 1) * 32, 6.0, 1.2, 4, 1, 8,
+            "tex:fire_bullet_2", ColorThemes.fire_bullet_theme;
+            is_row_major = true}
+        return
+    end
+    ri = ri - 14
+
+    if ri <= 14 then
+        animated_bullets["fire_bullet_x2_"..i] = {
+            32, 32, 192, (ri - 1) * 32, 6.0, 1.2, 4, 1, 8,
+            "tex:fire_bullet_2", ColorThemes.fire_bullet_theme;
+            is_row_major = true}
+        return
+    end
+    ri = ri - 14
+
+    if ri <= 20 then
+        animated_bullets["fire_bullet_x2_"..i] = {
+            32, 32, 0, (ri - 1) * 32, 6.0, 1.2, 4, 1, 8,
+            "tex:fire_bullet_3", ColorThemes.fire_bullet_theme;
+            is_row_major = true}
+        return
+    end
+    error("Error: Unexpected index!")
+end
+for j = 1, #inclusion_list do
+    local i = inclusion_list[j]
+    LoadFireBullet(i)
+end
 
 ---------------------------------------------------------------------------------------------------
 --- init
 
-local half_color_set = {
-    COLOR_RED, COLOR_PURPLE, COLOR_BLUE, COLOR_CYAN,
-    COLOR_GREEN, COLOR_YELLOW, COLOR_ORANGE, COLOR_GRAY,
-}
 ---@param sprite_name_prefix string prefix of the sprite name; the sprite names are obtained by appending 1, 2, ... to the end of it
----@param half_flag boolean if true, the sprite to map to only has half of the number of images
-local function CreateColorToSpriteNameMap(sprite_name_prefix, half_flag)
-    -- typically there are NUM_COLOR_THEMES / 2 or NUM_COLOR_THEMES images for a bullet type, each has a different color
+---@param available_colors table an array of available colors for this type of bullet
+local function CreateColorToSpriteNameMap(sprite_name_prefix, available_colors)
     local color_to_sprite_name = {}
-    local available_colors
-    if half_flag then
-        for i = 1, NUM_COLOR_THEMES do
-            color_to_sprite_name[i] = sprite_name_prefix..math.ceil(i / 2)
-        end
-        available_colors = half_color_set
-    else
-        for i = 1, NUM_COLOR_THEMES do
-            color_to_sprite_name[i] = sprite_name_prefix..i
-        end
-        available_colors = ColorThemes.all_color_indices
+    for i = 1, #available_colors do
+        local color = available_colors[i]
+        color_to_sprite_name[color] = sprite_name_prefix..i
     end
-    return color_to_sprite_name, available_colors
+    return color_to_sprite_name
 end
 
----create a mapping that maps from bullet type & color to sprite name
-local function CreateColorToSpriteNameMapFromImageNum(sprite_name_prefix, total_image_num)
-    if total_image_num == NUM_COLOR_THEMES then
-        return CreateColorToSpriteNameMap(sprite_name_prefix, false)
-    elseif total_image_num == NUM_COLOR_THEMES / 2 then
-        return CreateColorToSpriteNameMap(sprite_name_prefix, true)
-    else
-        error("the grid for this bullet type contains unexpected number of images. \n"..
-                "The number needs to be 8 or 16. bullet type has sprite name prefix "..sprite_name_prefix)
+local function GenerateTypeColorCombinations(bullet_type_name, available_colors)
+    local ret = {}
+    for i = 1, #available_colors do
+        local color = available_colors[i]
+        ret[#ret + 1] = {bullet_type_name, color}
     end
+    return ret
 end
 
 local function LoadResources()
@@ -146,15 +202,12 @@ local function LoadResources()
     LoadTexture("tex:bullet_fireball", bullet_path.."bullet_water_drop.png")
 
     LoadTexture("tex:bullet_cancel", bullet_path.."etbreak.png")
-end
 
-local function GenerateTypeColorCombinations(bullet_type_name, available_colors)
-    local ret = {}
-    for i = 1, #available_colors do
-        local color = available_colors[i]
-        ret[#ret + 1] = {bullet_type_name, color}
-    end
-    return ret
+    LoadTexture("tex:mugenri_shot", "bullets\\Mugenri PC-98 Shot\\MugenriShot.png")
+
+    LoadTexture("tex:fire_bullet_1", "bullets\\FireBullet\\Part1x2.png")
+    LoadTexture("tex:fire_bullet_2", "bullets\\FireBullet\\Part2x2.png")
+    LoadTexture("tex:fire_bullet_3", "bullets\\FireBullet\\Part3x2.png")
 end
 
 function M.init()
@@ -175,23 +228,23 @@ function M.init()
             M.loadSpriteRowMajor(
                     image_array_name,
                     item[1], item[2], item[3], item[4], item[5],
-                    item[7], item[8], item[9], item[10], item[11],
-                    item[12], center_x, center_y)
+                    item[7], item[8], item[9], item[11], item[12],
+                    item[13], center_x, center_y)
         else
             M.loadSpriteColumnMajor(
                     image_array_name,
                     item[1], item[2], item[3], item[4], item[5],
-                    item[7], item[8], item[9], item[10], item[11],
-                    item[12], center_x, center_y)
+                    item[7], item[8], item[9], item[11], item[12],
+                    item[13], center_x, center_y)
         end
 
-        local total_image_num = item[7] * item[8]  -- nImg = nRow * nCol
-        local color_to_sprite_name, available_colors = CreateColorToSpriteNameMapFromImageNum(image_array_name, total_image_num)
+        local available_colors = item[10]
+        local color_to_sprite_name = CreateColorToSpriteNameMap(image_array_name, available_colors)
         local bullet_info = {
             color_to_sprite_name = color_to_sprite_name,
             sprite_array_name = image_array_name,
             available_colors = available_colors,
-            size = item[6]  -- visual effect size
+            size = item[6],  -- visual effect size
         }
         bullet_type_to_info[bullet_type_name] = bullet_info
 
@@ -202,17 +255,17 @@ function M.init()
     -- animated bullets
     for bullet_type_name, item in pairs(animated_bullets) do
         local ani_array_name = "ani_array:"..bullet_type_name
-        M.loadColumnAnimation(
+        M.loadAnimationGrid(
                 ani_array_name,
                 item[1], item[2], item[3], item[4], item[5],
-                item[7], item[8], item[9], item[10], item[11])
-        local total_image_num = item[8]
-        local color_to_sprite_name, available_colors = CreateColorToSpriteNameMapFromImageNum(ani_array_name, total_image_num)
+                item[7], item[8], item[9], item[10], item[12], item.is_row_major)
+        local available_colors = item[11]
+        local color_to_sprite_name = CreateColorToSpriteNameMap(ani_array_name, available_colors)
         local bullet_info = {
             color_to_sprite_name = color_to_sprite_name,
             sprite_array_name = ani_array_name,
             available_colors = available_colors,
-            size = item[6]  -- visual effect size
+            size = item[6],  -- visual effect size
         }
         bullet_type_to_info[bullet_type_name] = bullet_info
 
@@ -232,7 +285,8 @@ end
 function M.loadSprite(image_array_name, width, height,
                         x, y, collision_radius, i_num, j_num,
                         tex_name, dxi, dyi, dxj, dyj,
-                        blend_mode, set_center_x, set_center_y)
+                        blend_mode, set_center_x, set_center_y,
+                        scale)
     -- default values
     blend_mode = blend_mode or "mul+alpha"
 
@@ -325,27 +379,21 @@ function M.loadAnimationArray(animation_array_name, width, height,
     end
 end
 
----load a grid of images, each column represent a different animation
-function M.loadColumnAnimation(animation_array_name, width, height,
+function M.loadAnimationGrid(animation_array_name, width, height,
                             x, y, collision_radius, num_images_in_animation,
                             num_animations, interval, tex_name,
-                            blend_mode)
-    M.loadAnimationArray(
-            animation_array_name,
-            width,
-            height,
-            x,
-            y,
-            collision_radius,
-            num_images_in_animation,
-            1,
-            1,
-            0,
-            num_animations,
-            width,
-            interval,
-            tex_name,
-            blend_mode)
+                            blend_mode, is_row_major)
+    if is_row_major ~= true then
+        ---load a grid of images, each column represents a different animation
+        M.loadAnimationArray(animation_array_name, width, height, x, y,
+                collision_radius, num_images_in_animation, 1, 1,
+                0, num_animations, width, interval, tex_name, blend_mode)
+    else
+        ---load a grid of images, each row represents a different animation
+        M.loadAnimationArray(animation_array_name, width, height, x, y,
+                collision_radius, 1, num_images_in_animation, num_animations,
+                height, 1, 0, interval, tex_name, blend_mode)
+    end
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -357,51 +405,46 @@ function M.initBulletEffects()
             32, 32, 80, 0,
             nil, 1, 8,
             "tex:bullet_sprite_1")
-    for i = 1, NUM_COLOR_THEMES do
-        color_index_to_blink_effects[i] = "image_array:bullet_blink"..math.ceil(i / 2)
+    for i = 1, #_touhou_theme do
+        local color = _touhou_theme[i]
+        _color_index_to_blink_effects[color] = "image_array:bullet_blink"..math.ceil(i / 2)
     end
+    _color_index_to_blink_effects[COLOR_PINK] = _color_index_to_blink_effects[COLOR_RED]
 
     -- bullet cancel
     local bullet_cancel_color = {
-        Color(0xC0FF3030), --red
-        Color(0xC0FF30FF), --purple
-        Color(0xC03030FF), --blue
-        Color(0xC030FFFF), --cyan
-        Color(0xC030FF30), --green
-        Color(0xC0FFFF30), --yellow
-        Color(0xC0FF8030), --orange
-        Color(0xC0D0D0D0), --gray
+        [COLOR_RED] = Color(0xC0FF3030),
+        [COLOR_PURPLE] = Color(0xC0FF30FF),
+        [COLOR_BLUE] = Color(0xC03030FF),
+        [COLOR_CYAN] = Color(0xC030FFFF),
+        [COLOR_GREEN] = Color(0xC030FF30),
+        [COLOR_YELLOW] = Color(0xC0FFFF30),
+        [COLOR_ORANGE] = Color(0xC0FF8030),
+        [COLOR_GRAY] = Color(0xC0D0D0D0),
+        [COLOR_PINK] = Color(0xC0FFC0CB),
     }
+    for i = 1, #ColorThemes.touhou_theme_other_half do
+        local other_index = ColorThemes.touhou_theme_other_half[i]
+        local index = _touhou_theme_half[i]
+        bullet_cancel_color[other_index] = 0.5 * bullet_cancel_color[index] + Color(0x60000000)
+    end
 
-    ---load the bullet cancel effect as a separate animation for each color
-    for i = 1, NUM_COLOR_THEMES do
+    ---load the bullet cancel effect as a *separate animation for each color
+    for i = 1, #ColorThemes.all_color_indices do
         local ani_name = "ani_array:bullet_cancel"..i
 
         -- compute blend mode
         local blend_mode = "mul+add"
-        if i == 15 then
-            blend_mode = "mul+alpha"
-        end
+        --if i == 15 then
+        --    blend_mode = "mul+alpha"
+        --end
         LoadAnimation(
-                ani_name,
-                "tex:bullet_cancel",
-                0,
-                0,
-                64,
-                64,
-                4,
-                2,
-                3,
-                nil,
-                nil)
+                ani_name, "tex:bullet_cancel", 0, 0,
+                64, 64, 4, 2, 3,
+                nil, nil)
 
         -- compute color
-        local index = math.ceil(i / 2)
-        local color = bullet_cancel_color[index]
-        if i % 2 == 1 then
-            color = 0.5 * color + Color(0x60000000)
-        end
-
+        local color = bullet_cancel_color[i]
         SetAnimationState(ani_name, blend_mode, color)
         color_index_to_cancel_effects[i] = ani_name
     end

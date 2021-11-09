@@ -105,8 +105,13 @@ function M:ctor()
     la:setVisible(false)
 end
 
+local _font_inited = false
+
 function M:setupImguiFont()
-    local la = self.imgui_la
+    if _font_inited then
+        return  -- stop repeated loading of font which will cause memory leak
+    end
+    _font_inited = true
 
     local cfg = im.ImFontConfig()
     cfg.OversampleH = 2
@@ -148,7 +153,7 @@ function M:setupImguiFont()
     })
 
     local built
-    la:addChild(ImguiWidget.Widget(function()
+    self.imgui_la:addChild(ImguiWidget.Widget(function()
         if built then
             return
         end
