@@ -24,8 +24,15 @@ local ROT = ColumnScripts.ConstructRotation
 local RNORM = ColumnScripts.ConstructRandomNormal
 local S,SETI,SETJ,SETK = ColumnScripts.ConstructSet,ColumnScripts.SetI,ColumnScripts.SetJ,ColumnScripts.SetK
 
-local AIMP = ColumnScripts.ConstructAimFromPos("a","x","y")
 local ARA = ColumnScripts.ConstructAdd("a","ra")
 local F = ColumnScripts.ConstructFollow("x", "y")
 local PP = PO("x", "y", "r", "ra")
 local PV = PO("vx", "vy", "v", "a")
+
+local MakeMS = ColumnScripts.MakeMatrixScript
+local mR = MakeMS(R)
+local mS = MakeMS(S)
+local mAIM = MakeMS(AIM)
+local mADD = MakeMS(ADD)
+local mMIR = MakeMS(MIR)
+local mRNORM = MakeMS(RNORM)

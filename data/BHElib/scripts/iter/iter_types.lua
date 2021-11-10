@@ -44,8 +44,9 @@ local function AddLiveRegisterer(hot_iter, label, registerer)
     local bullets = registerer.bullet_list
 
     local listener = function(iter, broadcast_label, value)
-        registerer.value = value
         if hot_iter == iter and label == broadcast_label then
+
+            registerer.value = value
             for i = 1, #bullets do
                 local bullet = bullets[i]
                 if IsValid(bullet) then

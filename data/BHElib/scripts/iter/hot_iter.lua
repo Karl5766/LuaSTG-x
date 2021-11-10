@@ -24,7 +24,7 @@ end
 
 function M.__create()
     local self = {}
-    self.items = {}
+    self.item_map = {}
     self.index_history = {}
     self.listeners = {}
     return self
@@ -34,19 +34,28 @@ end
 ---adding items and accessing data
 
 function M:addItem(label, item)
-    local items = self.items
-    assert(items[label] == nil, "Error: Attempting to add the same label twice!")
-    items[label] = item
+    local item_map = self.item_map
+    assert(item_map[label] == nil, "Error: Attempting to add the same label twice!")
+    item_map[label] = item
     if self.index_history[label] then
         local index_history = self.index_history
         item.i = index_history[label].i or item.i
         item.j = index_history[label].j or item.j
+
+        -- the history index may not be valid; in that case, reset them to 1
+        local item_array = item.array or item.matrix
+        if item.i > #item_array or item.i < 1 then
+            item.i = 1
+        end
+        if item.j and (item.j > #item_array[item.i] or item.j < 1) then
+            item.j = 1
+        end
         index_history[label] = nil
     end
 end
 
 function M:addRegisterer(label, registerer)
-    self.items[label].registerer = registerer
+    self.item_map[label].registerer = registerer
 end
 
 ---@param label string an id identifying the array
@@ -90,11 +99,11 @@ function M:registerMatrix(label, matrix, init_col, init_row)
 end
 
 function M:removeItem(label)
-    self.items[label] = nil
+    self.item_map[label] = nil
 end
 
 function M:getValue(label)
-    local item = self.items[label]
+    local item = self.item_map[label]
     if item.dimension == 1 then
         return item.array[item.i]
     else
@@ -103,7 +112,7 @@ function M:getValue(label)
 end
 
 function M:get(label)
-    local item = self.items[label]
+    local item = self.item_map[label]
     if item.registerer then
         return item.registerer
     end
@@ -120,10 +129,10 @@ end
 
 ---copy the index information from the previous iter
 function M:inheritIndices(iter)
-    local prev_items = iter.items
-    local items = self.items
-    for label, prev_item in pairs(prev_items) do
-        local item = items[label]
+    local prev_item_map = iter.item_map
+    local item_map = self.item_map
+    for label, prev_item in pairs(prev_item_map) do
+        local item = item_map[label]
         if item and item.dimension == prev_item.dimension then
             item.i = prev_item.i
             item.j = prev_item.j
@@ -146,7 +155,7 @@ end
 
 ---increment the index for the given label; only works on 1d array
 function M:incIndex(label, inc_index)
-    local item = self.items[label]
+    local item = self.item_map[label]
     local size = #item.array
     item.i = (item.i + inc_index - 1) % size + 1
     self:broadcastChanges(label)
@@ -157,7 +166,7 @@ end
 ---if some rows have different lengths, then when switching from longer row to shorter row
 ---the j index will be bounded right if out of range
 function M:incIndexMatrix(label, inc_i, inc_j)
-    local item = self.items[label]
+    local item = self.item_map[label]
 
     if inc_i ~= 0 then
         local num_row = #item.matrix
@@ -181,7 +190,7 @@ end
 function M:getButtonCallbacks()
     -- order of access is not currently specified because there is no need
     local ret = {}
-    for label, item in pairs(self.items) do
+    for label, item in pairs(self.item_map) do
         local callbacks = {
             dimension = item.dimension,
             label = label,

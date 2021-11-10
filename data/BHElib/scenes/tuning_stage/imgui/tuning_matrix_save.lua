@@ -82,12 +82,9 @@ function M:readFromFile(file_reader)
     self.output_control_save:readFromFile(file_reader)
 end
 
-local function GetDefaultValue(col, row_label)
-    if row_label == "s_script" then
-        return "nil"
-    else
-        return "0"
-    end
+---@param str string the intermediate string field representation
+local function GetTableForCommaSeparatedField(str, row_label)
+
 end
 
 ---get string representation of the matrix in lua code
@@ -101,36 +98,52 @@ function M:getMatrixLuaString()
         local row = matrix[i]
         local row_label = row[1]
         local row_str = "{"
+        local is_incrementable = StringByte(row_label, 2) ~= 95
+        local is_script = row_label == "s_script"
 
         for j = 1, self.num_col do
             local str
-            if j == 1 then
-                str = "\""..row[j].."\""
-            elseif j == 2 and StringByte(row_label, 2) == 95 then
-                str = "nil"
-            else
-                str = row[j]
-                -- use default value for empty string
-                if str == "" then
-                    str = GetDefaultValue(j, row_label)
-                end
-            end
-            if row_label == "s_script" then
-                if j == self.num_col then
-                    local tail_script = self.tail_script
-                    if str == "nil" then
-                        row_str = row_str..("{"..tail_script.."},")
+
+            -- deal with default values first
+            -- default value is used only if a value is not provided
+            -- otherwise use the provided value
+            local input_str = row[j]
+            if input_str ~= "" and (is_incrementable or j ~= 2) then
+                -- use provided
+                str = input_str
+
+                -- now handle case by case:
+                -- label field - add quotes
+                -- second column - no need to do anything
+                -- s_script field - put in brackets; need to take tail script into consideration
+                -- other fields - put in brackets
+                if j == 1 then
+                    str = "\""..row[j].."\""
+                elseif j >= 3 then
+                    if j == self.num_col and is_script then
+                        -- dealt with in the code below
                     else
-                        row_str = row_str..("{"..str..","..tail_script.."},")
+                        str = "{"..str.."}"
                     end
-                elseif str ~= "nil" and j >= 2 then
-                    row_str = row_str..("{"..str.."},")
-                else
-                    row_str = row_str..(str..",")
                 end
             else
-                row_str = row_str..(str..",")
+                -- use default
+                str = "nil"
+                if (j == 2 and is_incrementable) or (j >= 3 and not is_script) then
+                    str = "0"
+                end
             end
+
+            if j == self.num_col and is_script then
+                local tail_script = self.tail_script
+                if str == "nil" then
+                    str = "{"..tail_script.."}"
+                else
+                    str = "{"..str..","..tail_script.."}"
+                end
+            end
+
+            row_str = row_str..(str..",")
         end
 
         row_str = row_str.."},\n"

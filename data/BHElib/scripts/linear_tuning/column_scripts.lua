@@ -94,6 +94,19 @@ local function GetGetter(var)
     end
 end
 
+---takes a column script constructor with first parameter as input parameter and return a matrix script
+---@param construct_column_script function a constructor that can construct a column script
+function M.MakeMatrixScript(construct_column_script)
+    local function MatrixEntryScript(...)
+        local params = {...}
+        local function Constructor(var_name)
+            return construct_column_script(var_name, unpack(params))
+        end
+        return Constructor
+    end
+    return MatrixEntryScript
+end
+
 ---------------------------------------------------------------------------------------------------
 
 ---center at master
@@ -170,6 +183,9 @@ function M.ConstructRandom(var, val1, val2)
         local v = var_getter(cur, next, i)
         local v1, v2 = val1_getter(cur, next, i), val2_getter(cur, next, i)
         v = v + ran:Float(v1, v2)
+        --print(v1)
+        --print(v2)
+        --print(tostring(var))
         var_setter(cur, next, v)
     end
     return Rand

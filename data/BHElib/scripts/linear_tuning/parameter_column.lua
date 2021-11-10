@@ -45,7 +45,8 @@ end
 ---modifiers
 
 ---add a script to be executed each spark
-function M:add_script(script)
+function M:addScript(script)
+    self.s_script = self.s_script or {}
     local scripts = self.s_script
     scripts[#scripts + 1] = script
 end

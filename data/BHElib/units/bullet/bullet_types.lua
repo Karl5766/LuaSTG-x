@@ -80,7 +80,7 @@ local bullets = {
     --
     ---- miscellaneous
     --ball_light =    {64, 64, 0, 0, 11.5, 2.0, 4, 2, "tex:bullet_ball_light", _touhou_theme_half, nil, nil, "mul+add"; is_row_major = true},  -- with 2 rows & 4 columns
-    --bubble =        {64, 64, 0, 0, 14.0, 2.0, 4, 2, "tex:bullet_bubble", _touhou_theme_half, nil, nil, "mul+add"; is_row_major = true},
+    bubble =        {64, 64, 0, 0, 14.0, 2.0, 4, 2, "tex:bullet_bubble", _touhou_theme_half, nil, nil, "mul+add"; is_row_major = true},
     --music_rest =    {32, 32, 192, 0, 4.5, 0.8, 1, 8, "tex:bullet_sprite_6", _touhou_theme_half},
 
     ---Mugenri Shots for experimentation
