@@ -183,9 +183,6 @@ function M.ConstructRandom(var, val1, val2)
         local v = var_getter(cur, next, i)
         local v1, v2 = val1_getter(cur, next, i), val2_getter(cur, next, i)
         v = v + ran:Float(v1, v2)
-        --print(v1)
-        --print(v2)
-        --print(tostring(var))
         var_setter(cur, next, v)
     end
     return Rand
@@ -262,6 +259,78 @@ function M.ConstructSet(replaced_name, value_name, add_name, mul_name)
     end
 
     return Replace
+end
+
+function M.ConstructRange(target_var, begin_var, end_var)
+    end_var = end_var or 0
+    local t_setter = GetSetter(target_var)
+    local b_getter = GetGetter(begin_var)
+    local e_getter = GetGetter(end_var)
+    local function Range(cur, next, i)
+        local v = b_getter(cur, next, i)
+        local d_v = e_getter(cur, next, i) - v
+        local n = cur.s_n
+        if n <= 1 then
+            t_setter(cur, next, v + d_v * 0.5)
+        else
+            t_setter(cur, next, v + d_v * i / (n - 1))
+        end
+    end
+    return Range
+end
+
+function M.ConstructRangeExcludeA(target_var, begin_var, end_var)
+    end_var = end_var or 0
+    local t_setter = GetSetter(target_var)
+    local b_getter = GetGetter(begin_var)
+    local e_getter = GetGetter(end_var)
+    local function Range(cur, next, i)
+        local v = b_getter(cur, next, i)
+        local d_v = e_getter(cur, next, i) - v
+        local n = cur.s_n
+        if n <= 1 then
+            t_setter(cur, next, v + d_v)
+        else
+            t_setter(cur, next, v + d_v * (i + 1) / n)
+        end
+    end
+    return Range
+end
+
+function M.ConstructRangeExcludeB(target_var, begin_var, end_var)
+    end_var = end_var or 0
+    local t_setter = GetSetter(target_var)
+    local b_getter = GetGetter(begin_var)
+    local e_getter = GetGetter(end_var)
+    local function Range(cur, next, i)
+        local v = b_getter(cur, next, i)
+        local d_v = e_getter(cur, next, i) - v
+        local n = cur.s_n
+        if n <= 1 then
+            t_setter(cur, next, v)
+        else
+            t_setter(cur, next, v + d_v * i / n)
+        end
+    end
+    return Range
+end
+
+function M.ConstructRangeExcludeAB(target_var, begin_var, end_var)
+    end_var = end_var or 0
+    local t_setter = GetSetter(target_var)
+    local b_getter = GetGetter(begin_var)
+    local e_getter = GetGetter(end_var)
+    local function Range(cur, next, i)
+        local v = b_getter(cur, next, i)
+        local d_v = e_getter(cur, next, i) - v
+        local n = cur.s_n
+        if n <= 1 then
+            t_setter(cur, next, v + d_v * 0.5)
+        else
+            t_setter(cur, next, v + d_v * (i + 1) / (n + 1))
+        end
+    end
+    return Range
 end
 
 ---@param var string

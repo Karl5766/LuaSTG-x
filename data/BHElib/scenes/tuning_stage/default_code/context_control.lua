@@ -23,6 +23,8 @@ local RCIRC = ColumnScripts.ConstructOffsetRandomOnCircle
 local ROT = ColumnScripts.ConstructRotation
 local RNORM = ColumnScripts.ConstructRandomNormal
 local S,SETI,SETJ,SETK = ColumnScripts.ConstructSet,ColumnScripts.SetI,ColumnScripts.SetJ,ColumnScripts.SetK
+local RANGE, RANGEEXA, RANGEEXB, RANGEEXAB = ColumnScripts.ConstructRange,
+ColumnScripts.ConstructRangeExcludeA, ColumnScripts.ConstructRangeExcludeB, ColumnScripts.ConstructRangeExcludeAB
 
 local ARA = ColumnScripts.ConstructAdd("a","ra")
 local F = ColumnScripts.ConstructFollow("x", "y")
@@ -36,3 +38,4 @@ local mAIM = MakeMS(AIM)
 local mADD = MakeMS(ADD)
 local mMIR = MakeMS(MIR)
 local mRNORM = MakeMS(RNORM)
+local mRANGE, mRANGEEXA, mRANGEEXB, mRANGEEXAB = MakeMS(RANGE),MakeMS(RANGEEXA),MakeMS(RANGEEXB),MakeMS(RANGEEXAB)

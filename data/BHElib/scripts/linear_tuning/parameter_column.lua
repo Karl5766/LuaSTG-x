@@ -124,7 +124,7 @@ function M:spark_to(s_next)
 end
 
 local function AsyncSpark(self, timer, j, pj, ij, s_next, dt_positive)
-    --timer:wait(0)
+    timer:wait(0)
     -- spark s_next n times
     while j ~= pj do
         local cp = s_next:copy()
