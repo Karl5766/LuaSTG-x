@@ -74,7 +74,7 @@ save.num_col = #save.matrix[1]
 save.num_row = #save.matrix
 save.matrix_title = "Bullet"
 save.output_control_save = GetDefaultSave(save.matrix_title)
-save.tail_script = "F,PP,ARA"
+save.tail_script = "F,PP"
 M[save.matrix_title] = save
 
 ---------------------------------------------------------------------------------------------------

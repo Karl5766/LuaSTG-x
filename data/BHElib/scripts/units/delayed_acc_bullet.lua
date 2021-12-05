@@ -112,7 +112,7 @@ function M:init(args)
                 if self.navi then
                     self.rot = angle
                 end
-				UnitMotion.PolarControllerMoveTo(self, alt_controller, controller, angle, start_time)
+				UnitMotion.PolarControllerMoveTo(self, controller, alt_controller, angle, start_time)
             else
                 -- standard mode
                 if self.navi then

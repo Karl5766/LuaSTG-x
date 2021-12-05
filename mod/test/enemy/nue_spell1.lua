@@ -83,6 +83,8 @@ end
 function M:initChain()
     local environment = setmetatable({}, {__index = _G})
     environment.external_objects = self.ui_init_params[1] or {}
+    local ScriptEnvironment = require("BHElib.scenes.tuning_stage.default_code.script_environment")
+    ScriptEnvironment.AddDefaultEnvironmentAliases(environment)
 
     local ui_init_params = self.tuning_ui:getChains(nil, environment)
     self.ui_init_params = ui_init_params

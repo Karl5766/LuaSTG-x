@@ -26,10 +26,15 @@ local function GetSetter(var)
     local prefix = string.sub(var, 1, 2)
 
     local var_name
-    if prefix == "p_" then
+    if prefix == "c_" then  -- "current"
         var_name = string.sub(var, 3, -1)
         return function(cur, next, value)
             cur[var_name] = value
+        end
+    elseif prefix == "p_" then
+        var_name = string.sub(var, 3, -1)
+        return function(cur, next, value)
+            player[var_name] = value
         end
     else
         var_name = var
@@ -101,6 +106,21 @@ function M.MakeMatrixScript(construct_column_script)
         local params = {...}
         local function Constructor(var_name)
             return construct_column_script(var_name, unpack(params))
+        end
+        return Constructor
+    end
+    return MatrixEntryScript
+end
+---takes a column script constructor with first parameter as input parameter and return a matrix script
+---@param construct_column_script function a constructor that can construct a column script
+M.MakeNextScript = M.MakeMatrixScript
+---takes a column script constructor with first parameter as input parameter and return a matrix script
+---@param construct_column_script function a constructor that can construct a column script
+function M.MakeCurScript(construct_column_script)
+    local function MatrixEntryScript(...)
+        local params = {...}
+        local function Constructor(var_name)
+            return construct_column_script("c_"..var_name, unpack(params))
         end
         return Constructor
     end
@@ -207,13 +227,21 @@ function M.ConstructRandomNormal(var, sigma)
     return RandNormal
 end
 
-function M.ConstructOffsetRandomOnCircle(x_name, y_name, radius)
-    local radius_getter = GetGetter(radius)
+function M.ConstructOffsetRandomOnCircle(x_name, y_name, x_radius, y_radius)
+    local radius_getter = GetGetter(x_radius)
+    local y_radius_getter
+    if y_radius then
+        y_radius_getter = GetGetter(y_radius)
+    else
+        y_radius_getter = radius_getter
+    end
+
     local function Rand(cur, next, i)
         local x, y = next[x_name] or 0, next[y_name] or 0
         local a = ran:Float(0, 360)
         local r = radius_getter(cur, next, i)
-        next[x_name], next[y_name] = x + cos(a) * r, y + sin(a) * r
+        local y_r = y_radius_getter(cur, next, i)
+        next[x_name], next[y_name] = x + cos(a) * r, y + sin(a) * y_r
     end
     return Rand
 end
@@ -264,16 +292,18 @@ end
 function M.ConstructRange(target_var, begin_var, end_var)
     end_var = end_var or 0
     local t_setter = GetSetter(target_var)
+    local t_getter = GetGetter(target_var)
     local b_getter = GetGetter(begin_var)
     local e_getter = GetGetter(end_var)
     local function Range(cur, next, i)
         local v = b_getter(cur, next, i)
         local d_v = e_getter(cur, next, i) - v
+        local t = t_getter(cur, next, i)
         local n = cur.s_n
         if n <= 1 then
-            t_setter(cur, next, v + d_v * 0.5)
+            t_setter(cur, next, t + v + d_v * 0.5)
         else
-            t_setter(cur, next, v + d_v * i / (n - 1))
+            t_setter(cur, next, t + v + d_v * i / (n - 1))
         end
     end
     return Range
@@ -282,16 +312,18 @@ end
 function M.ConstructRangeExcludeA(target_var, begin_var, end_var)
     end_var = end_var or 0
     local t_setter = GetSetter(target_var)
+    local t_getter = GetGetter(target_var)
     local b_getter = GetGetter(begin_var)
     local e_getter = GetGetter(end_var)
     local function Range(cur, next, i)
         local v = b_getter(cur, next, i)
         local d_v = e_getter(cur, next, i) - v
+        local t = t_getter(cur, next, i)
         local n = cur.s_n
         if n <= 1 then
-            t_setter(cur, next, v + d_v)
+            t_setter(cur, next, t + v + d_v)
         else
-            t_setter(cur, next, v + d_v * (i + 1) / n)
+            t_setter(cur, next, t + v + d_v * (i + 1) / n)
         end
     end
     return Range
@@ -300,16 +332,18 @@ end
 function M.ConstructRangeExcludeB(target_var, begin_var, end_var)
     end_var = end_var or 0
     local t_setter = GetSetter(target_var)
+    local t_getter = GetGetter(target_var)
     local b_getter = GetGetter(begin_var)
     local e_getter = GetGetter(end_var)
     local function Range(cur, next, i)
         local v = b_getter(cur, next, i)
         local d_v = e_getter(cur, next, i) - v
+        local t = t_getter(cur, next, i)
         local n = cur.s_n
         if n <= 1 then
-            t_setter(cur, next, v)
+            t_setter(cur, next, t + v)
         else
-            t_setter(cur, next, v + d_v * i / n)
+            t_setter(cur, next, t + v + d_v * i / n)
         end
     end
     return Range
@@ -318,16 +352,18 @@ end
 function M.ConstructRangeExcludeAB(target_var, begin_var, end_var)
     end_var = end_var or 0
     local t_setter = GetSetter(target_var)
+    local t_getter = GetGetter(target_var)
     local b_getter = GetGetter(begin_var)
     local e_getter = GetGetter(end_var)
     local function Range(cur, next, i)
         local v = b_getter(cur, next, i)
         local d_v = e_getter(cur, next, i) - v
+        local t = t_getter(cur, next, i)
         local n = cur.s_n
         if n <= 1 then
-            t_setter(cur, next, v + d_v * 0.5)
+            t_setter(cur, next, t + v + d_v * 0.5)
         else
-            t_setter(cur, next, v + d_v * (i + 1) / (n + 1))
+            t_setter(cur, next, t + v + d_v * (i + 1) / (n + 1))
         end
     end
     return Range
