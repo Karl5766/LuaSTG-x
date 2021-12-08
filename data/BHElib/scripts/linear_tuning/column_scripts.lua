@@ -227,6 +227,34 @@ function M.ConstructRandomNormal(var, sigma)
     return RandNormal
 end
 
+function M.ConstructRestrictedRandomNormal(var, sigma, minv, maxv)
+    local var_setter = GetSetter(var)
+    local var_getter = GetGetter(var)
+    local sigma_getter = GetGetter(sigma)
+    local minv_getter = GetGetter(minv)
+    local maxv_getter = GetGetter(maxv)
+
+    local function RandNormal(cur, next, i)
+        local u, v = ran:Float(-1, 1), ran:Float(-1, 1)
+        local s = u * u + v * v
+        while s == 0 or s >= 1 do
+            u, v = ran:Float(-1, 1), ran:Float(-1, 1)
+            s = u * u + v * v
+        end
+        s = sqrt(-2 * log(s) / s)
+        local f = var_getter(cur, next, i) + u * s * sigma_getter(cur, next, i)
+        local min_v = minv_getter(cur, next, i)
+        local max_v = maxv_getter(cur, next, i)
+        if f < min_v then
+            f = min_v * 2 - f
+        elseif f > max_v then
+            f = max_v * 2 - f
+        end
+        var_setter(cur, next, f)
+    end
+    return RandNormal
+end
+
 function M.ConstructOffsetRandomOnCircle(x_name, y_name, x_radius, y_radius)
     local radius_getter = GetGetter(x_radius)
     local y_radius_getter
@@ -235,13 +263,18 @@ function M.ConstructOffsetRandomOnCircle(x_name, y_name, x_radius, y_radius)
     else
         y_radius_getter = radius_getter
     end
+    local x_setter = GetSetter(x_name)
+    local y_setter = GetSetter(y_name)
+    local x_getter = GetGetter(x_name)
+    local y_getter = GetGetter(y_name)
 
     local function Rand(cur, next, i)
-        local x, y = next[x_name] or 0, next[y_name] or 0
+        local x, y = x_getter(cur, next, i), y_getter(cur, next, i)
         local a = ran:Float(0, 360)
         local r = radius_getter(cur, next, i)
         local y_r = y_radius_getter(cur, next, i)
-        next[x_name], next[y_name] = x + cos(a) * r, y + sin(a) * y_r
+        x_setter(cur, next, x + cos(a) * r)
+        y_setter(cur, next, y + sin(a) * y_r)
     end
     return Rand
 end
@@ -439,13 +472,19 @@ end
 
 ---rotate around O
 function M.ConstructRotation(x_name, y_name, angle)
-    local cos_a = cos(angle)
-    local sin_a = sin(angle)
+    local x_setter = GetSetter(x_name)
+    local y_setter = GetSetter(y_name)
+    local x_getter = GetGetter(x_name)
+    local y_getter = GetGetter(y_name)
+    local angle_getter = GetGetter(angle)
     local function Rot(cur, next, i)
-        local x = next[x_name] or 0
-        local y = next[y_name] or 0
-        next[x_name] = x * cos_a - y * sin_a
-        next[y_name] = x * sin_a + y * cos_a
+        local x = x_getter(cur, next, i)
+        local y = y_getter(cur, next, i)
+        local a = angle_getter(cur, next, i)
+        local cos_a = cos(a)
+        local sin_a = sin(a)
+        x_setter(cur, next, x * cos_a - y * sin_a)
+        y_setter(cur, next, x * sin_a + y * cos_a)
     end
     return Rot
 end

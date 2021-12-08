@@ -39,9 +39,9 @@ local function Script(self)
         task.Clear(boss)
         require("BHElib.scripts.units.unit_motion").RandomBossMove(
                 boss, -100, 100, -100, 200,
-                32, 48, 16, 32, 120)
+                32, 48, 16, 32, 60)
         require("BHElib.units.effects.boss_fight_effects").CreateBossDeathEffect(boss.x, boss.y, 255, 255, 255, boss)
-        task.Wait(120)
+        task.Wait(60)
     end)
     coroutine.yield()
 end
@@ -54,6 +54,11 @@ function M.__create(parent)
     local boss = _Animation()
     local self = SingleBossSession.__create(parent, boss, spell_class_array, Script)
     return self
+end
+
+function M:endSession()
+    SingleBossSession.endSession(self)
+    Del(self.boss)
 end
 
 return M

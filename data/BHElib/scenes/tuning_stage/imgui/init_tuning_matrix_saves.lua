@@ -69,6 +69,8 @@ save.matrix = {
     {"r", EPT, EPT},
     {"a", EPT, EPT},
     {"v", "3", EPT},
+    {"x", EPT, EPT},
+    {"y", EPT, EPT},
 }
 save.num_col = #save.matrix[1]
 save.num_row = #save.matrix

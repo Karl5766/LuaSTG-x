@@ -37,8 +37,9 @@ Prefab.Register(MouseFollower)
 function M.__create(parent, boss)
     local self = SpellSession.__create(parent, boss, 12000, "test_attack")
 
-    self.tuning_ui = self.game_scene.tuning_ui
-    self.ui_init_params = {}
+    local scene = self.game_scene
+    self.tuning_ui = scene.tuning_ui
+    scene.ui_init_params = scene.ui_init_params or {}
 
     return self
 end
@@ -82,12 +83,13 @@ end
 
 function M:initChain()
     local environment = setmetatable({}, {__index = _G})
-    environment.external_objects = self.ui_init_params[1] or {}
+    local scene = self.game_scene
+    environment.external_objects = scene.ui_init_params[1] or {}
     local ScriptEnvironment = require("BHElib.scenes.tuning_stage.default_code.script_environment")
     ScriptEnvironment.AddDefaultEnvironmentAliases(environment)
 
     local ui_init_params = self.tuning_ui:getChains(nil, environment)
-    self.ui_init_params = ui_init_params
+    scene.ui_init_params = ui_init_params
 
     self:initChainFromUIParams()
 end
@@ -99,16 +101,17 @@ function M:initChainFromUIParams()
     task.Clear(boss)  -- clear all matrices' tasks
     task.Clear(self.mouse_follower)
 
+    local scene = self.game_scene
     for _, object in ObjList(GROUP_ENEMY_BULLET) do
         local on_bullet_cancel = object.onBulletCancel
         if on_bullet_cancel then
-            on_bullet_cancel(object, self.game_scene)
+            on_bullet_cancel(object, scene)
         end
     end
     self:removeButtons()
 
     -- re-init everything
-    local external_objects, chains, references = unpack(self.ui_init_params)
+    local external_objects, chains, references = unpack(scene.ui_init_params)
 
     self.hot_iter = external_objects.hot_iter
 

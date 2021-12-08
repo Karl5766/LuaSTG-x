@@ -71,13 +71,15 @@ function M:createScene()
         WBG(0, 0, 10, 30)
         local Nue = require("enemy.nue_boss_fight")
 
-        local boss_fight = Nue(self)
-        self.boss_fight = boss_fight
-        while boss_fight:isContinuing() do
-            task.Wait(1)
+        while true do
+            local boss_fight = Nue(self)
+            self.boss_fight = boss_fight
+            while boss_fight:isContinuing() do
+                task.Wait(1)
+            end
         end
-        local callbacks = require("BHElib.scenes.stage.stage_transition_callbacks")
-        self:transitionWithCallback(callbacks.restartStageAndKeepRecording)
+        --local callbacks = require("BHElib.scenes.stage.stage_transition_callbacks")
+        --self:transitionWithCallback(callbacks.restartStageAndKeepRecording)
     end)
 
     self.player:getPlayerResource().num_power = 400
